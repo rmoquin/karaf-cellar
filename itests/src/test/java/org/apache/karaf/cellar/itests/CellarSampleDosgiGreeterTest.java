@@ -34,7 +34,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testDosgiGreeter() throws InterruptedException {
         installCellar();
         createCellarChild("child1");
@@ -43,12 +43,12 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.err.println(executeCommand("features:addurl mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        System.err.println(executeCommand("feature:addurl mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
 
         System.err.println(executeCommand("instance:list"));
 
         System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getNode();
+        Node localNode = clusterManager.getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
 

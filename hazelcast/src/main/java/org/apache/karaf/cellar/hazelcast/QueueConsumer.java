@@ -25,7 +25,6 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventConsumer;
-import org.apache.karaf.cellar.core.utils.CombinedClassLoader;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -34,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.osgi.framework.BundleContext;
 
 /**
  * Consumes cluster events from the Hazelcast {@code IQueue} and calls the {@code EventDispatcher}.
@@ -48,28 +48,24 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     private Boolean isConsuming = Boolean.TRUE;
-
+    private BundleContext bundleContext;
     private HazelcastInstance instance;
     private IQueue queue;
     private Dispatcher dispatcher;
     private Node node;
-    private CombinedClassLoader combinedClassLoader;
     private ConfigurationAdmin configurationAdmin;
+    private String listenerId;
 
     public QueueConsumer() {
         // nothing to do
     }
 
-    public QueueConsumer(CombinedClassLoader combinedClassLoader) {
-        this.combinedClassLoader = combinedClassLoader;
-    }
-
     public void init() {
         if (queue != null) {
-            queue.addItemListener(this, true);
+            listenerId = queue.addItemListener(this, true);
         } else {
             queue = instance.getQueue(Constants.QUEUE);
-            queue.addItemListener(this, true);
+            listenerId = queue.addItemListener(this, true);
         }
         executorService.execute(this);
     }
@@ -77,19 +73,15 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     public void destroy() {
         isConsuming = false;
         if (queue != null) {
-            queue.removeItemListener(this);
+            queue.removeItemListener(listenerId);
         }
         executorService.shutdown();
     }
 
     @Override
     public void run() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             while (isConsuming) {
-                if (combinedClassLoader != null) {
-                    Thread.currentThread().setContextClassLoader(combinedClassLoader);
-                } else Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 E e = null;
                 try {
                     e = getQueue().poll(10, TimeUnit.SECONDS);
@@ -102,8 +94,6 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
             }
         } catch (Exception ex) {
             LOGGER.error("CELLAR HAZELCAST: failed to consume from queue", ex);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
     }
 
@@ -191,7 +181,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
         }
         return eventSwitch;
     }
-
+    
     public Node getNode() {
         return node;
     }
@@ -208,4 +198,17 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
         this.configurationAdmin = configurationAdmin;
     }
 
+    /**
+     * @return the bundleContext
+     */
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
+     * @param bundleContext the bundleContext to set
+     */
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 }

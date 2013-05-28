@@ -29,14 +29,14 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarObrTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testCellarObrFeatureInstall() throws Exception {
         installCellar();
         Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.err.println(executeCommand("features:install cellar-obr"));
+        System.err.println(executeCommand("feature:install cellar-obr"));
     }
 
     @After

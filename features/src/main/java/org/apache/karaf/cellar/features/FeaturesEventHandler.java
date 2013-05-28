@@ -21,7 +21,6 @@ import org.apache.karaf.cellar.core.event.EventHandler;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,11 +30,9 @@ import java.util.EnumSet;
  * Handler for cluster features event.
  */
 public class FeaturesEventHandler extends FeaturesSupport implements EventHandler<ClusterFeaturesEvent> {
-
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSynchronizer.class);
-
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.features.handler";
-
+    private static final String SWITCH_HANDLER_NAME = Configurations.HANDLER + "." + FeaturesEventHandler.class.getName();
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
@@ -53,6 +50,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
      *
      * @param event the received cluster feature event.
      */
+    @Override
     public void handle(ClusterFeaturesEvent event) {
 
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
@@ -60,21 +58,9 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
             return;
         }
 
-        if (groupManager == null) {
-        	//in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR FEATURES: retrieved event {} while groupManager is not available yet!", event);
-        	return;
-        }
-
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR FEATURES: node is not part of the event cluster group {}", event.getSourceGroup().getName());
-            return;
-        }
-
         String name = event.getName();
         String version = event.getVersion();
-        if (isAllowed(event.getSourceGroup(), Constants.FEATURES_CATEGORY, name, EventType.INBOUND) || event.getForce()) {
+        if (isAllowed(event.getSourceCluster().getName(), Constants.FEATURES_CATEGORY, name, EventType.INBOUND) || event.getForce()) {
             FeatureEvent.EventType type = event.getType();
             Boolean isInstalled = isFeatureInstalledLocally(name, version);
             try {
@@ -107,7 +93,9 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
             } catch (Exception e) {
                 LOGGER.error("CELLAR FEATURES: failed to handle cluster feature event", e);
             }
-        } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, event.getSourceGroup().getName());
+        } else {
+            LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, event.getSourceCluster().getName());
+        }
     }
 
     /**
@@ -129,19 +117,15 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(SWITCH_HANDLER_NAME));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
         }
         return eventSwitch;
     }
-
 }

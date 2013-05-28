@@ -15,11 +15,11 @@ package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationManager;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.ExecutionContext;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
-import org.apache.karaf.cellar.core.control.ManageGroupCommand;
+import org.apache.karaf.cellar.core.control.ManageClusterAction;
+import org.apache.karaf.cellar.core.control.ManageClusterCommand;
 import org.apache.karaf.cellar.management.CellarGroupMBean;
 
 import javax.management.NotCompliantMBeanException;
@@ -37,7 +37,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
 
     private ClusterManager clusterManager;
     private ExecutionContext executionContext;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
 
     public ClusterManager getClusterManager() {
         return this.clusterManager;
@@ -55,11 +55,11 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         this.executionContext = executionContext;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return this.groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 
@@ -79,9 +79,6 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
 
     @Override
     public void delete(String name) throws Exception {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Group g = groupManager.findGroupByName(name);
             List<String> nodes = new LinkedList<String>();
 
@@ -89,8 +86,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
                 for (Node n : g.getNodes()) {
                     nodes.add(n.getId());
                 }
-                ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
-                command.setAction(ManageGroupAction.QUIT);
+                ManageClusterCommand command = new ManageClusterCommand(clusterManager.generateId());
+                command.setAction(ManageClusterAction.LEAVE);
                 command.setGroupName(name);
                 Set<Node> recipientList = clusterManager.listNodes(nodes);
                 command.setDestination(recipientList);
@@ -98,9 +95,6 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             }
 
             groupManager.deleteGroup(name);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     @Override
@@ -118,8 +112,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         Set<Node> nodes = new HashSet<Node>();
         nodes.add(node);
 
-        ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
-        command.setAction(ManageGroupAction.JOIN);
+        ManageClusterCommand command = new ManageClusterCommand(clusterManager.generateId());
+        command.setAction(ManageClusterAction.JOIN);
         command.setGroupName(groupName);
         command.setDestination(nodes);
 
@@ -141,8 +135,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         Set<Node> nodes = new HashSet<Node>();
         nodes.add(node);
 
-        ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
-        command.setAction(ManageGroupAction.QUIT);
+        ManageClusterCommand command = new ManageClusterCommand(clusterManager.generateId());
+        command.setAction(ManageClusterAction.LEAVE);
         command.setGroupName(groupName);
         command.setDestination(nodes);
         executionContext.execute(command);

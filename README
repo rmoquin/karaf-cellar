@@ -46,7 +46,7 @@ karaf@root> features:addurl mvn:org.apache.karaf.cellar/apache-karaf-cellar/3.0.
 
 Now, you can install the Cellar feature simply by typing:
 
-karaf@root> features:install cellar
+karaf@root> feature:install cellar
 
 The PDF manual is the right place to find any information about Karaf Cellar.
 

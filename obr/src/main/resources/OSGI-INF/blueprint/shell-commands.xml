@@ -18,65 +18,60 @@
         <command name="cluster/obr-list">
             <action class="org.apache.karaf.cellar.obr.shell.ObrListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <null/>
             </completers>
         </command>
         <command name="cluster/obr-deploy">
             <action class="org.apache.karaf.cellar.obr.shell.ObrDeployCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
                 <property name="eventProducer" ref="eventProducer"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <null/>
             </completers>
         </command>
         <command name="cluster/obr-list-url">
             <action class="org.apache.karaf.cellar.obr.shell.ObrListUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <null/>
             </completers>
         </command>
         <command name="cluster/obr-add-url">
             <action class="org.apache.karaf.cellar.obr.shell.ObrAddUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
                 <property name="eventProducer" ref="eventProducer"/>
                 <property name="obrService" ref="repositoryAdmin"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <null/>
             </completers>
         </command>
         <command name="cluster/obr-remove-url">
             <action class="org.apache.karaf.cellar.obr.shell.ObrRemoveUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
+\                <property name="eventProducer" ref="eventProducer"/>
                 <property name="obrService" ref="repositoryAdmin"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <null/>
             </completers>
         </command>
     </command-bundle>
 
-    <bean id="allGroupCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllGroupsCompleter">
-        <property name="groupManager" ref="groupManager"/>
+    <bean id="allClustersCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllClustersCompleter">
+        <property name="clusterManager" ref="clusterManager"/>
     </bean>
 
 </blueprint>

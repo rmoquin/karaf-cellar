@@ -45,8 +45,8 @@
             org.apache.karaf.shell.commands;version="[3,4)",
             org.apache.karaf.management;version="[3,4)",
             javax.management*,
-            org.osgi*,
-            org.slf4j;resolution:=optional
+            org.slf4j;resolution:=optional,
+            *
         </osgi.import>
         <osgi.dynamic.import>
             org.apache.felix.bundlerepository,

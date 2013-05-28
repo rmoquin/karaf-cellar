@@ -13,22 +13,24 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ITopic;
 import org.apache.karaf.cellar.core.Dispatcher;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
-import org.apache.karaf.cellar.core.utils.CombinedClassLoader;
 
 /**
  * An event transport factory powered by Hazelcast.
  */
-public class HazelcastEventTransportFactory extends HazelcastInstanceAware implements EventTransportFactory {
+public class HazelcastEventTransportFactory implements EventTransportFactory {
 
     private Dispatcher dispatcher;
-    private CombinedClassLoader combinedClassLoader;
-
+    private HazelcastInstance instance;
+    private Node node;
+    
     @Override
     public EventProducer getEventProducer(String name, Boolean pubsub) {
         if (pubsub) {
@@ -36,14 +38,14 @@ public class HazelcastEventTransportFactory extends HazelcastInstanceAware imple
             TopicProducer producer = new TopicProducer();
             producer.setInstance(instance);
             producer.setTopic(topic);
-            producer.setNode(getNode());
+            producer.setNode(node);
             producer.init();
             return producer;
         } else {
             IQueue queue = instance.getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
             QueueProducer producer = new QueueProducer();
             producer.setQueue(queue);
-            producer.setNode(getNode());
+            producer.setNode(node);
             producer.init();
             return producer;
         }
@@ -56,16 +58,16 @@ public class HazelcastEventTransportFactory extends HazelcastInstanceAware imple
             TopicConsumer consumer = new TopicConsumer();
             consumer.setTopic(topic);
             consumer.setInstance(instance);
-            consumer.setNode(getNode());
+            consumer.setNode(node);
             consumer.setDispatcher(dispatcher);
             consumer.init();
             return consumer;
         } else {
 
             IQueue queue = instance.getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
-            QueueConsumer consumer = new QueueConsumer(combinedClassLoader);
+            QueueConsumer consumer = new QueueConsumer();
             consumer.setQueue(queue);
-            consumer.setNode(getNode());
+            consumer.setNode(node);
             consumer.setDispatcher(dispatcher);
             consumer.init();
             return consumer;
@@ -80,12 +82,31 @@ public class HazelcastEventTransportFactory extends HazelcastInstanceAware imple
         this.dispatcher = dispatcher;
     }
 
-    public CombinedClassLoader getCombinedClassLoader() {
-        return combinedClassLoader;
+    /**
+     * @return the instance
+     */
+    public HazelcastInstance getInstance() {
+        return instance;
     }
 
-    public void setCombinedClassLoader(CombinedClassLoader combinedClassLoader) {
-        this.combinedClassLoader = combinedClassLoader;
+    /**
+     * @param instance the instance to set
+     */
+    public void setInstance(HazelcastInstance instance) {
+        this.instance = instance;
     }
 
+    /**
+     * @return the node
+     */
+    public Node getNode() {
+        return node;
+    }
+
+    /**
+     * @param node the node to set
+     */
+    public void setNode(Node node) {
+        this.node = node;
+    }
 }

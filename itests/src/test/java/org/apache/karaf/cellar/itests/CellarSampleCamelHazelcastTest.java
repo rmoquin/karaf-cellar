@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testCamelSampleApp() throws InterruptedException {
         installCellar();
         createCellarChild("child1");
@@ -47,7 +47,7 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("instance:list"));
 
         System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getNode();
+        Node localNode = clusterManager.getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
 

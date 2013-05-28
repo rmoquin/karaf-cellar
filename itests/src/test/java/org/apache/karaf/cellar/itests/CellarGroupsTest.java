@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
 import org.junit.Ignore;
@@ -36,7 +36,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarGroupsTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testGroupsWithChildNodes() throws InterruptedException {
         installCellar();
         createCellarChild("child1");
@@ -45,7 +45,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         assertNotNull(clusterManager);
 
         System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getNode();
+        Node localNode = clusterManager.getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
 
@@ -53,7 +53,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:group-set testgroup " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-list"));
 
-        GroupManager groupManager = getOsgiService(GroupManager.class);
+        SynchronizationManager groupManager = getOsgiService(SynchronizationManager.class);
         assertNotNull(groupManager);
 
         Set<Group> groups = groupManager.listAllGroups();

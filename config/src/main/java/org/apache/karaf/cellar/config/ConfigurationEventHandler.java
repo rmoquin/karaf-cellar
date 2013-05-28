@@ -65,7 +65,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
         Group group = event.getSourceGroup();
         String groupName = group.getName();
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
         String pid = event.getId();
 

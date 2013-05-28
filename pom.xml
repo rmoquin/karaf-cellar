@@ -40,18 +40,19 @@
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
         <felix.webconsole.version>4.0.0</felix.webconsole.version>
-        <hazelcast.version>2.5</hazelcast.version>
+        <hazelcast.version>3.0-SNAPSHOT</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
         <karaf.version>3.0.0-SNAPSHOT</karaf.version>
-        <osgi.version>4.3.1</osgi.version>
+        <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>4.3.1</osgi.compendium.version>
         <pax.exam.version>2.6.0</pax.exam.version>
-        <pax.exam.karaf.version>2.3.1</pax.exam.karaf.version>
+        <pax.exam.karaf.version>3.0.0-SNAPSHOT</pax.exam.karaf.version>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j.version>1.7.2</slf4j.version>
+        <xbean.version>3.14</xbean.version>
     </properties>
 
     <modules>
@@ -78,6 +79,19 @@
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/cellar/trunk</developerConnection>
         <url>http://svn.apache.org/repos/asf/karaf/cellar/trunk</url>
     </scm>
+    
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-releases</name>
+            <url>http://rmoquin-lin:8081/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>libs-snapshots</name>
+            <url>http://rmoquin-lin:8081/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <issueManagement>
         <system>jira</system>
@@ -246,11 +260,13 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
                 <version>${osgi.compendium.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>${osgi.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- Servlet API -->
@@ -292,6 +308,13 @@
                 <version>${jclouds.version}</version>
             </dependency>
 
+            <!-- Geronimo XBean -->
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-bundleutils</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            
             <!-- Joda Time -->
             <dependency>
                 <groupId>joda-time</groupId>

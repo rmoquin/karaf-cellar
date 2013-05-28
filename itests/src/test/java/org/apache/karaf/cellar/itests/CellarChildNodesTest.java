@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarChildNodesTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testClusterWithChildNodes() throws InterruptedException {
         installCellar();
         createCellarChild("child1");
@@ -41,7 +41,7 @@ public class CellarChildNodesTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        Node localNode = clusterManager.getNode();
+        Node localNode = clusterManager.getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         System.err.println(executeCommand("cluster:node-list"));
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());

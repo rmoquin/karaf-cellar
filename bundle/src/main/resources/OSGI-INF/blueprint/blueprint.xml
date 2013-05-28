@@ -20,9 +20,8 @@
     <!-- Local Bundle Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init"
           destroy-method="destroy">
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="groupManager" ref="groupManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="eventProducer" ref="eventProducer"/>
         <property name="featuresService" ref="featuresService"/>
@@ -31,21 +30,20 @@
     <!-- Bundle Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.bundle.BundleSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-        <property name="groupManager" ref="groupManager"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="eventProducer" ref="eventProducer"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Bundle Event Handler -->
     <bean id="eventHandler" class="org.apache.karaf.cellar.bundle.BundleEventHandler"
           init-method="init" destroy-method="destroy">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -55,9 +53,8 @@
     </service>
 
     <!-- Cluster Core Services -->
+    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.synchronizationConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager" />
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 

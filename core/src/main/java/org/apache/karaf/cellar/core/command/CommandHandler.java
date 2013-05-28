@@ -42,7 +42,7 @@ public abstract class CommandHandler<C extends Command<R>, R extends Result> ext
             Set<Node> destination = new HashSet<Node>();
             destination.add(command.getSourceNode());
 
-            result.setDestination(destination);
+            result.setDestinations(destination);
             producer.produce(result);
         }
     }

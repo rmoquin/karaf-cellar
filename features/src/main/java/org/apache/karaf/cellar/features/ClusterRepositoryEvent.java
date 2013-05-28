@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.features;
 
+import java.text.MessageFormat;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.features.RepositoryEvent.EventType;
 
@@ -34,10 +35,7 @@ public class ClusterRepositoryEvent extends Event {
 
 	@Override
 	public String toString() {
-		return "ClusterRepositoryEvent [type=" + type + ", id=" + id
-				+ ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
-				+ ", destination=" + destination + ", force=" + force
-				+ ", postPublish=" + postPublish + "]";
+		return MessageFormat.format("ClusterRepositoryEvent [type={0}, id={1}, sourceNode={2}, sourceGroup={3}, destination={4}, force={5}, postPublish={6}]", type, id, sourceNode, sourceGroup, destinations, force, postPublish);
 	}
     
 }

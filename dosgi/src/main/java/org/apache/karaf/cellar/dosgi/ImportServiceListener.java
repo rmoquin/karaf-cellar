@@ -86,9 +86,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
     @Override
     public void added(Collection listeners) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
 
                 if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
@@ -99,23 +96,17 @@ public class ImportServiceListener implements ListenerHook, Runnable {
                 // make sure we only import remote services
                 checkListener(listenerInfo);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     @Override
     public void removed(Collection listeners) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
                 if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
                     continue;
                 }
 
                 // make sure we only import remote services
-                String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getNode().getId() + ")))";
+                String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getLocalNode().getId() + ")))";
                 // iterate through known services and import them if needed
                 Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
                 for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
@@ -131,9 +122,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
                 pendingListeners.remove(listenerInfo);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**
@@ -142,14 +130,11 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      * @param listenerInfo the listener info.
      */
     private void checkListener(ListenerInfo listenerInfo) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             // iterate through known services and import them if needed
             Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
             for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
                 EndpointDescription endpointDescription = entry.getValue();
-                if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(clusterManager.getNode().getId())) {
+                if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(clusterManager.getLocalNode())) {
                     matches.add(endpointDescription);
                 }
             }
@@ -157,9 +142,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             for (EndpointDescription endpoint : matches) {
                 importService(endpoint, listenerInfo);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**
@@ -179,7 +161,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
         EventConsumer resultConsumer = consumers.get(endpoint.getId());
         if (resultConsumer == null) {
-            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getNode().getId() + endpoint.getId(), Boolean.FALSE);
+            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getLocalNode().getId() + endpoint.getId(), Boolean.FALSE);
             consumers.put(endpoint.getId(), resultConsumer);
         } else if (!resultConsumer.isConsuming()) {
             resultConsumer.start();

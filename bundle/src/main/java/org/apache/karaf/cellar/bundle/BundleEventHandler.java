@@ -22,7 +22,6 @@ import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +31,10 @@ import java.util.List;
  * The BundleEventHandler is responsible to process received cluster event for bundles.
  */
 public class BundleEventHandler extends BundleSupport implements EventHandler<ClusterBundleEvent> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleEventHandler.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.bundle.handler";
-
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    
+
     /**
      * Handle received bundle cluster events.
      *
@@ -52,30 +48,18 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
             LOGGER.warn("CELLAR BUNDLE: {} switch is OFF, cluster event is not handled", SWITCH_ID);
             return;
         }
-        
-        if (groupManager == null) {
-        	//in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR BUNDLE: retrieved event {} while groupManager is not available yet!", event);
-        	return;
-        }
-
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR BUNDLE: node is not part of the event cluster group {}", event.getSourceGroup().getName());
-            return;
-        }
 
         try {
             // check if the pid is marked as local.
-            if (isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getLocation(), EventType.INBOUND)) {
-            	// check the features first
-            	List<Feature> matchingFeatures = retrieveFeature(event.getLocation());
-            	for (Feature feature : matchingFeatures) {
-					if (!isAllowed(event.getSourceGroup(), "features", feature.getName(), EventType.INBOUND)) {
-						LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", event.getLocation(), feature.getName(), event.getSourceGroup().getName());
-						return;
-					}
-				}
+            if (isAllowed(event.getSourceCluster().getName(), Constants.CATEGORY, event.getLocation(), EventType.INBOUND)) {
+                // check the features first
+                List<Feature> matchingFeatures = retrieveFeature(event.getLocation());
+                for (Feature feature : matchingFeatures) {
+                    if (!isAllowed(event.getSourceCluster().getName(), "features", feature.getName(), EventType.INBOUND)) {
+                        LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", event.getLocation(), feature.getName(), event.getSourceCluster().getName());
+                        return;
+                    }
+                }
                 if (event.getType() == BundleEvent.INSTALLED) {
                     installBundleFromLocation(event.getLocation());
                     LOGGER.debug("CELLAR BUNDLE: installing {}/{}", event.getSymbolicName(), event.getVersion());
@@ -92,11 +76,13 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
                     updateBundle(event.getSymbolicName(), event.getVersion());
                     LOGGER.debug("CELLAR BUNDLE: updating {}/{}", event.getSymbolicName(), event.getVersion());
                 }
-            } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", event.getSymbolicName(), event.getSourceGroup().getName());
+            } else {
+                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", event.getSymbolicName(), event.getSourceCluster().getName());
+            }
         } catch (BundleException e) {
-            LOGGER.error("CELLAR BUNDLE: failed to install bundle {}/{}.", new Object[]{event.getSymbolicName(), event.getVersion()}, e);
+            LOGGER.error("CELLAR BUNDLE: failed to install bundle {}/{}.", new Object[] { event.getSymbolicName(), event.getVersion() }, e);
         } catch (Exception e) {
-        	LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", e);
+            LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", e);
         }
     }
 
@@ -117,14 +103,11 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            Boolean status = new Boolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
@@ -141,5 +124,4 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     public Class<ClusterBundleEvent> getType() {
         return ClusterBundleEvent.class;
     }
-
 }

@@ -47,7 +47,7 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        Group group = groupManager.findGroupByName(groupName);
+        Group group = synchronizationManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;

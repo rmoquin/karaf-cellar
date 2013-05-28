@@ -48,7 +48,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
     private BundleContext bundleContext;
     private ClusterManager clusterManager;
     private ExecutionContext executionContext;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
 
     public CellarMBeanImpl() throws NotCompliantMBeanException {
         super(CellarMBean.class);
@@ -78,11 +78,11 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         this.executionContext = executionContext;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 
@@ -133,7 +133,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
                 for (Map.Entry<String, String> handlerEntry : result.getHandlers().entrySet()) {
                     String handler = handlerEntry.getKey();
                     String status = handlerEntry.getValue();
-                    boolean local = (node.equals(clusterManager.getNode()));
+                    boolean local = (node.equals(clusterManager.getLocalNode()));
                     CompositeDataSupport data = new CompositeDataSupport(compositeType,
                             new String[]{"node", "handler", "status", "local"},
                             new Object[]{node.getId(), handler, status, local});
@@ -152,7 +152,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         Set<Node> nodes = new HashSet<Node>();
 
         if (nodeId == null || nodeId.isEmpty()) {
-            nodes.add(clusterManager.getNode());
+            nodes.add(clusterManager.getLocalNode());
         } else {
             Node node = clusterManager.findNodeById(nodeId);
             if (node == null) {
@@ -172,7 +172,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
         Set<Node> nodes = new HashSet<Node>();
         if (nodeId == null || nodeId.isEmpty()) {
-            nodes.add(clusterManager.getNode());
+            nodes.add(clusterManager.getLocalNode());
         } else {
             Node node = clusterManager.findNodeById(nodeId);
             if (node == null) {
@@ -202,7 +202,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         TabularDataSupport table = new TabularDataSupport(tableType);
 
         for (Node node : results.keySet()) {
-            boolean local = (node.equals(clusterManager.getNode()));
+            boolean local = (node.equals(clusterManager.getLocalNode()));
             ConsumerSwitchResult consumerSwitchResult = results.get(node);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
                     new String[]{"node", "status", "local"},
@@ -220,7 +220,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         Set<Node> nodes = new HashSet<Node>();
 
         if (nodeId == null || nodeId.isEmpty()) {
-            nodes.add(clusterManager.getNode());
+            nodes.add(clusterManager.getLocalNode());
         } else {
             Node node = clusterManager.findNodeById(nodeId);
             if (node == null) {
@@ -241,7 +241,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         Set<Node> nodes = new HashSet<Node>();
 
         if (nodeId == null || nodeId.isEmpty()) {
-            nodes.add(clusterManager.getNode());
+            nodes.add(clusterManager.getLocalNode());
         } else {
             Node node = clusterManager.findNodeById(nodeId);
             if (node == null) {
@@ -271,7 +271,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         TabularDataSupport table = new TabularDataSupport(tableType);
 
         for (Node node : results.keySet()) {
-            boolean local = (node.equals(clusterManager.getNode()));
+            boolean local = (node.equals(clusterManager.getLocalNode()));
             ProducerSwitchResult producerSwitchResult = results.get(node);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
                     new String[]{"node", "status", "local"},
@@ -289,7 +289,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         Set<Node> nodes = new HashSet<Node>();
 
         if (nodeId == null || nodeId.isEmpty()) {
-            nodes.add(clusterManager.getNode());
+            nodes.add(clusterManager.getLocalNode());
         } else {
             Node node = clusterManager.findNodeById(nodeId);
             if (node == null) {
@@ -310,7 +310,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         Set<Node> nodes = new HashSet<Node>();
 
         if (nodeId == null || nodeId.isEmpty()) {
-            nodes.add(clusterManager.getNode());
+            nodes.add(clusterManager.getLocalNode());
         } else {
             Node node = clusterManager.findNodeById(nodeId);
             if (node == null) {

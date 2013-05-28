@@ -14,19 +14,15 @@
 package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Consumer;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleReference;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
-import java.util.Dictionary;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Manage handlers command handler.
@@ -39,8 +35,6 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
 
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
 
-    private Consumer consumer;
-
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
      *
@@ -51,30 +45,30 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     public ManageHandlersResult execute(ManageHandlersCommand command) {
         ManageHandlersResult result = new ManageHandlersResult(command.getId());
 
-        BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
-        ServiceReference[] references = new ServiceReference[0];
+        BundleContext bundleContext = FrameworkUtil.getBundle(getClass()).getBundleContext();
+        ServiceReference[] references = null;
         try {
             references = bundleContext.getServiceReferences(EventHandler.class.getName(), EventHandler.MANAGED_FILTER);
             if (references != null && references.length > 0) {
                 for (ServiceReference ref : references) {
                     EventHandler handler = (EventHandler) bundleContext.getService(ref);
-
+                    String handlerClassName = handler.getClass().getName();
                     if (command.getHandlerName() == null) {
-                        result.getHandlers().put(handler.getClass().getName(), handler.getSwitch().getStatus().name());
+                        result.getHandlers().put(handlerClassName, handler.getSwitch().getStatus().name());
                     } else {
-                        if (command.getHandlerName().equals(handler.getClass().getName())) {
+                        if (command.getHandlerName().equals(handlerClassName)) {
                             if (command.getStatus() != null) {
                                 if (command.getStatus()) {
                                     // persist the handler switch status to configuration admin
-                                    persist(handler.getClass().getName(), SwitchStatus.ON);
+                                    persist(handlerClassName, SwitchStatus.ON);
                                     handler.getSwitch().turnOn();
                                 } else {
                                     // persist the handler switch status to configuration admin
-                                    persist(handler.getClass().getName(), SwitchStatus.OFF);
+                                    persist(handlerClassName, SwitchStatus.OFF);
                                     handler.getSwitch().turnOff();
                                 }
                             }
-                            result.getHandlers().put(handler.getClass().getName(), handler.getSwitch().getStatus().name());
+                            result.getHandlers().put(handlerClassName, handler.getSwitch().getStatus().name());
                             break;
                         }
                     }
@@ -100,13 +94,9 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Dictionary<String, Object> properties = configuration.getProperties();
-                if (properties != null) {
-                    properties.put(Configurations.HANDLER + "." + handler, switchStatus.getValue().toString());
-                    configuration.update(properties);
-                }
+            if (super.synchronizationConfiguration != null) {
+                super.synchronizationConfiguration.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
+                    
             }
         } catch (Exception e) {
             LOGGER.warn("Can't persist the handler " + handler + " status", e);

@@ -38,9 +38,6 @@ public class ObrListCommand extends CellarCommandSupport {
             return null;
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
             int maxPName = 4;
             int maxSName = 13;
@@ -56,10 +53,6 @@ public class ObrListCommand extends CellarCommandSupport {
             for (ObrBundleInfo bundle : clusterBundles) {
                 System.out.println(String.format(formatLine, emptyIfNull(bundle.getPresentationName()), emptyIfNull(bundle.getSymbolicName()), emptyIfNull(bundle.getVersion())));
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
-
         return null;
     }
 

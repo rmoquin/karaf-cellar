@@ -67,9 +67,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
         if (group != null) {
             String groupName = group.getName();
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
-            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 if (clusterUrls != null && !clusterUrls.isEmpty()) {
                     for (String url : clusterUrls) {
                         try {
@@ -80,9 +77,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
                         }
                     }
                 }
-            } finally {
-                Thread.currentThread().setContextClassLoader(originalClassLoader);
-            }
         }
     }
 
@@ -97,9 +91,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
             String groupName = group.getName();
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
 
-            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 Repository[] repositories = obrService.listRepositories();
                 for (Repository repository : repositories) {
                     if (isAllowed(group, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
@@ -116,9 +107,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
                         LOGGER.warn("CELLAR OBR: URL {} is blocked outbound for cluster group {}", repository.getURI().toString(), groupName);
                     }
                 }
-            } finally {
-                Thread.currentThread().setContextClassLoader(originalClassLoader);
-            }
         }
     }
 

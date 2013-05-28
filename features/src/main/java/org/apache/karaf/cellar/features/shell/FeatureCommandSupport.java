@@ -22,7 +22,6 @@ import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(FeatureCommandSupport.class);
 
     protected FeaturesService featuresService;
-    protected BundleContext bundleContext;
 
     /**
      * Force the features status for a specific group.
@@ -51,10 +49,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
 
         Boolean result = Boolean.FALSE;
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-            Group group = groupManager.findGroupByName(groupName);
+            Group group = synchronizationManager.findGroupByName(groupName);
             if (group == null || group.getNodes().isEmpty()) {
 
                 FeatureInfo info = new FeatureInfo(feature, version);
@@ -86,9 +81,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
                     result = Boolean.TRUE;
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
         return result;
     }
 
@@ -101,9 +93,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @return true if the feature exists in the cluster group, false else.
      */
     public boolean featureExists(String groupName, String feature, String version) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             if (clusterFeatures == null)
@@ -120,9 +109,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
             }
 
             return false;
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**
@@ -137,7 +123,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public boolean isAllowed(Group group, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        support.setGroupManager(this.groupManager);
+        support.setGroupManager(this.synchronizationManager);
         support.setConfigurationAdmin(this.configurationAdmin);
         return support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
     }

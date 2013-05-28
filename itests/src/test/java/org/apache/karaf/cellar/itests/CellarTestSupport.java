@@ -40,6 +40,7 @@ import javax.inject.Inject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
 import org.apache.karaf.tooling.exam.options.LogLevelOption;
 import org.ops4j.pax.exam.MavenUtils;
 import org.ops4j.pax.exam.Option;
@@ -56,20 +57,16 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
-
     static final Long COMMAND_TIMEOUT = 10000L;
-    static final Long DEFAULT_TIMEOUT = 20000L;
-    static final Long SERVICE_TIMEOUT = 30000L;
+    static final Long DEFAULT_TIMEOUT = 15000L;
+    static final Long SERVICE_TIMEOUT = 20000L;
     static final String GROUP_ID = "org.apache.karaf";
     static final String ARTIFACT_ID = "apache-karaf";
-
     static final String INSTANCE_STARTED = "Started";
     static final String INSTANCE_STARTING = "Starting";
-
     static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
 
     ExecutorService executor = Executors.newCachedThreadPool();
-
     @Inject
     protected BundleContext bundleContext;
 
@@ -159,7 +156,7 @@ public class CellarTestSupport {
      * Destroys the child node.
      */
     protected void destroyCellarChild(String name) {
-        System.err.println(executeCommand("instance:connect " + name + " feature:uninstall cellar"));
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf " + name + " feature:uninstall cellar"));
         System.err.println(executeCommand("instance:stop " + name));
     }
 
@@ -168,7 +165,7 @@ public class CellarTestSupport {
      */
     protected String getNodeIdOfChild(String name) {
         String node;
-        String nodesList = executeCommand("instance:connect " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, true);
+        String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, true);
         int stop = nodesList.indexOf(']');
         node = nodesList.substring(0, stop);
         int start = node.lastIndexOf('[');
@@ -179,17 +176,23 @@ public class CellarTestSupport {
 
     protected Option cellarDistributionConfiguration() {
         return karafDistributionConfiguration().frameworkUrl(
-                maven().groupId(GROUP_ID).artifactId(ARTIFACT_ID).versionAsInProject().type("tar.gz"))
+                maven().groupId(GROUP_ID).artifactId(ARTIFACT_ID).versionAsInProject().type("zip"))
                 .karafVersion(MavenUtils.getArtifactVersion(GROUP_ID, ARTIFACT_ID)).name("Apache Karaf").unpackDirectory(new File("target/paxexam/"));
     }
 
     @Configuration
     public Option[] config() {
-        return new Option[]{
-                cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
-                editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
-                editConfigurationFileExtend("etc/config.properties", "org.apache.aries.blueprint.synchronous", "true")
+        Option[] options = new Option[] {
+            cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
+            editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL())
         };
+        String debug = System.getProperty("debugMain");
+        if (debug != null) {
+            int l = options.length;
+            options = Arrays.copyOf(options, l + 1);
+            options[l] = KarafDistributionOption.debugConfiguration();
+        }
+        return options;
     }
 
     /**
@@ -209,7 +212,7 @@ public class CellarTestSupport {
      *
      * @param command The command to execute.
      * @param timeout The amount of time in millis to wait for the command to execute.
-     * @param silent  Specifies if the command should be displayed in the screen.
+     * @param silent Specifies if the command should be displayed in the screen.
      * @return
      */
     protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
@@ -220,19 +223,19 @@ public class CellarTestSupport {
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
         FutureTask<String> commandFuture = new FutureTask<String>(
                 new Callable<String>() {
-                    public String call() {
-                        try {
-                            if (!silent) {
-                                System.err.println(command);
-                            }
-                            commandSession.execute(command);
-                        } catch (Exception e) {
-                            e.printStackTrace(System.err);
-                        }
-                        printStream.flush();
-                        return byteArrayOutputStream.toString();
+            public String call() {
+                try {
+                    if (!silent) {
+                        System.err.println(command);
                     }
-                });
+                    commandSession.execute(command);
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+                printStream.flush();
+                return byteArrayOutputStream.toString();
+            }
+        });
 
         try {
             executor.submit(commandFuture);
@@ -260,18 +263,18 @@ public class CellarTestSupport {
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
         FutureTask<String> commandFuture = new FutureTask<String>(
                 new Callable<String>() {
-                    public String call() {
-                        try {
-                            for (String command : commands) {
-                                System.err.println(command);
-                                commandSession.execute(command);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace(System.err);
-                        }
-                        return byteArrayOutputStream.toString();
+            public String call() {
+                try {
+                    for (String command : commands) {
+                        System.err.println(command);
+                        commandSession.execute(command);
                     }
-                });
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+                return byteArrayOutputStream.toString();
+            }
+        });
 
         try {
             executor.submit(commandFuture);
@@ -411,5 +414,4 @@ public class CellarTestSupport {
     private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
         return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
     }
-
 }

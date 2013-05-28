@@ -17,22 +17,17 @@
            xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xmlns:cm="http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.0.0"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0"
            xsi:schemaLocation="
            http://www.osgi.org/xmlns/blueprint/v1.0.0
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
            http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
-           http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.0.0.xsd
-           http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0
-           http://aries.apache.org/schemas/blueprint-ext/blueprint-ext.xsd
-           ">
+           http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.0.0.xsd">
 
     <!-- Local Configuration Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.config.LocalConfigurationListener" init-method="init"
           destroy-method="destroy">
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="groupManager" ref="groupManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="eventProducer" ref="eventProducer"/>
     </bean>
     <service ref="localListener" interface="org.osgi.service.cm.ConfigurationListener"/>
@@ -40,20 +35,16 @@
     <!-- Configuration Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.config.ConfigurationSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-        <property name="groupManager" ref="groupManager"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="eventProducer" ref="eventProducer"/>
-        <property name="storage" value="${storage}"/>
     </bean>
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Event Handler -->
     <bean id="eventHandler" class="org.apache.karaf.cellar.config.ConfigurationEventHandler"
           init-method="init" destroy-method="destroy">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="storage" value="${storage}"/>
     </bean>
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
@@ -61,17 +52,7 @@
         </service-properties>
     </service>
 
+    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.synchronizationConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
-
-    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
-
-    <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
-        <cm:default-properties>
-            <cm:property name="storage" value="$[karaf.base]/etc/"/>
-        </cm:default-properties>
-    </cm:property-placeholder>
-
 </blueprint>

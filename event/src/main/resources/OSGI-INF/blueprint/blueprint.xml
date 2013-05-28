@@ -7,15 +7,15 @@
 
          http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-  -->
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
 <blueprint default-availability="mandatory"
-    xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Event Listener -->
@@ -42,6 +42,7 @@
     <bean id="clusterEventHandler" class="org.apache.karaf.cellar.event.ClusterEventHandler" init-method="init" destroy-method="destroy">
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="instance" ref="hazelcast"/>
         <property name="eventAdmin" ref="eventAdmin"/>
     </bean>
     <service ref="clusterEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -50,6 +51,7 @@
         </service-properties>
     </service>
 
+    <reference id="hazelcast" interface="com.hazelcast.core.HazelcastInstance"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>

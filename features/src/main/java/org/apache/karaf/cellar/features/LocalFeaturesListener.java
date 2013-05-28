@@ -31,9 +31,7 @@ import java.util.Set;
  * Local features listener.
  */
 public class LocalFeaturesListener extends FeaturesSupport implements org.apache.karaf.features.FeaturesListener {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
-
     private EventProducer eventProducer;
 
     @Override
@@ -84,7 +82,9 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
                         featureEvent.setSourceGroup(group);
                         eventProducer.produce(featureEvent);
-                    } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+                    } else {
+                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+                    }
                 }
             }
         }
@@ -104,9 +104,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
             return;
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             if (event != null && event.getRepository() != null) {
                 Set<Group> groups = groupManager.listLocalGroups();
 
@@ -120,7 +117,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
                             pushRepository(event.getRepository(), group);
                             // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = getClusterManager().getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     // check the feature in the distributed map
@@ -142,7 +139,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         } else {
                             removeRepository(event.getRepository(), group);
                             // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = getClusterManager().getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
@@ -157,9 +154,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                     }
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     public EventProducer getEventProducer() {
@@ -169,5 +163,4 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
     }
-
 }

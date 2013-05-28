@@ -42,15 +42,15 @@ public class ConfigurationSupport extends CellarSupport {
      */
     public Properties dictionaryToProperties(Dictionary dictionary) {
         Properties properties = new Properties();
-        if (dictionary != null && dictionary.keys() != null) {
+        //Dictionary seems to indicate that keys won't return null;
+        if (dictionary != null) {
 
             Enumeration keys = dictionary.keys();
             while (keys.hasMoreElements()) {
-                String key = (String) keys.nextElement();
-                if (key != null && dictionary.get(key) != null) {
-                    String value = (String) dictionary.get(key);
-                    properties.put(key, dictionary.get(key));
-                }
+                Object key = keys.nextElement();
+                //Dictionary values can't be null
+                Object value = dictionary.get(key);
+                properties.put(key, value);
             }
         }
         return properties;
@@ -73,21 +73,21 @@ public class ConfigurationSupport extends CellarSupport {
         if (source.isEmpty() && target.isEmpty())
             return true;
 
+        //Might as well check this first before comparing items.
+        if (source.size() != target.size())
+            return false;
+        
         Enumeration sourceKeys = source.keys();
         while (sourceKeys.hasMoreElements()) {
-            String key = (String) sourceKeys.nextElement();
-            String sourceValue = String.valueOf(source.get(key));
-            String targetValue = String.valueOf(target.get(key));
-            if (sourceValue != null && targetValue == null)
-                return false;
-            if (sourceValue == null && targetValue != null)
-                return false;
+            Object key = sourceKeys.nextElement();
+            
+            //No need to convert this to a string simply to compare the objects.
+            Object sourceValue = source.get(key);
+            Object targetValue = target.get(key);
+//          The Dictionary object says that neither keys or values can be null, so don't bother with a check
             if (!sourceValue.equals(targetValue))
                 return false;
         }
-
-        if (source.size() != target.size())
-            return false;
 
         return true;
     }
@@ -105,7 +105,8 @@ public class ConfigurationSupport extends CellarSupport {
             while (sourceKeys.hasMoreElements()) {
                 String key = (String) sourceKeys.nextElement();
                 if (!isExcludedProperty(key)) {
-                    String value = String.valueOf(dictionary.get(key));
+                    //No point in converting to string here.
+                    Object value = dictionary.get(key);
                     result.put(key, value);
                 }
             }
@@ -156,30 +157,37 @@ public class ConfigurationSupport extends CellarSupport {
                         storageFile = new File(new URL((String) val).toURI());
                     }
                 } catch (Exception e) {
-                    throw (IOException) new IOException(e.getMessage()).initCause(e);
+                    //No need to cast if you use a different constructor.
+                    throw new IOException(e.getMessage(), e);
                 }
             }
+            //The super class specified that this properties object uses Strings for keys and values...
             org.apache.felix.utils.properties.Properties p = new org.apache.felix.utils.properties.Properties(storageFile);
-            for (Enumeration keys = props.keys(); keys.hasMoreElements(); ) {
-                Object key = keys.nextElement();
+            
+            //but do this first, otherwise you are going to double check values added from
+            //the props arguement that was passed in and you'll already know they pass that test..
+            // remove "removed" properties from the file
+            List<String> propertiesToRemove = new ArrayList<String>();
+            Set<String> set = p.keySet();
+            for (String key : set) {
+                //The key can't be null so remove that check.
                 if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                         && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    p.put((String) key, (String) props.get(key));
-                }
-            }
-            // remove "removed" properties from the file
-            ArrayList<String> propertiesToRemove = new ArrayList<String>();
-            for (Object key : p.keySet()) {
-                if (props.get(key) == null
-                        && !org.osgi.framework.Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
-                    propertiesToRemove.add(key.toString());
+                    propertiesToRemove.add(key);
                 }
             }
             for (String key : propertiesToRemove) {
                 p.remove(key);
+            }
+            
+            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
+                String key = keys.nextElement();
+                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                    p.put(key, (String) props.get(key));
+                }
             }
             // save the cfg file
             storage.mkdirs();

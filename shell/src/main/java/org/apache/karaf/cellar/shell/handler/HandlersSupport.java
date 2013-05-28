@@ -52,7 +52,7 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
                 recipientList = clusterManager.listNodes();
             } else {
                 // in case of status change, select only the local node
-                recipientList.add(clusterManager.getNode());
+                recipientList.add(clusterManager.getLocalNode());
             }
         }
 
@@ -72,7 +72,7 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
             for (Map.Entry<Node,ManageHandlersResult> handlersResultEntry : results.entrySet()) {
                 Node node = handlersResultEntry.getKey();
                 String local = " ";
-                if (node.equals(clusterManager.getNode())) {
+                if (node.equals(clusterManager.getLocalNode())) {
                     local = "*";
                 }
                 ManageHandlersResult result = handlersResultEntry.getValue();

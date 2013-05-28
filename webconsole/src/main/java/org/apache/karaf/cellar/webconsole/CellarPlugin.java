@@ -16,7 +16,7 @@ package org.apache.karaf.cellar.webconsole;
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationManager;
 import org.apache.karaf.cellar.core.Node;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -46,7 +46,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     private String cellarJs = "/cellar/res/ui/cellar.js";
 
     private ClusterManager clusterManager;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
     private BundleContext bundleContext;
 
     public void start() {
@@ -243,7 +243,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         this.bundleContext = bundleContext;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 

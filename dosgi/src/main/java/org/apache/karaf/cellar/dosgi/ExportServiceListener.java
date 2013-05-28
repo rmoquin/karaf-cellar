@@ -49,15 +49,14 @@ public class ExportServiceListener implements ServiceListener {
     private Node node;
 
     public void init() {
-        node = clusterManager.getNode();
+        node = clusterManager.getLocalNode();
         remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
         bundleContext.addServiceListener(this);
 
         // lookup for already exported services
-        ServiceReference[] references = null;
         try {
             String filter = "(" + Constants.EXPORTED_INTERFACES + "=" + Constants.ALL_INTERFACES + ")";
-            references = bundleContext.getServiceReferences((String) null, filter);
+            ServiceReference[] references = bundleContext.getServiceReferences((String) null, filter);
 
             if (references != null) {
                 for (ServiceReference reference : references) {
@@ -107,10 +106,6 @@ public class ExportServiceListener implements ServiceListener {
      * @param serviceReference The reference of the service to be exported.
      */
     public void exportService(ServiceReference serviceReference) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
             String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
             if (exportedServices != null && exportedServices.length() > 0) {
                 LOGGER.debug("CELLAR DOSGI: registering services {} in the cluster", exportedServices);
@@ -145,9 +140,6 @@ public class ExportServiceListener implements ServiceListener {
                     }
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**
@@ -156,9 +148,6 @@ public class ExportServiceListener implements ServiceListener {
      * @param serviceReference the service to stop to expose on the cluster.
      */
     public void unExportService(ServiceReference serviceReference) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
             if (exportedServices != null && exportedServices.length() > 0) {
                 LOGGER.debug("CELLAR DOSGI: un-register service {} from the cluster", exportedServices);
@@ -183,9 +172,6 @@ public class ExportServiceListener implements ServiceListener {
                     eventConsumer.stop();
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**

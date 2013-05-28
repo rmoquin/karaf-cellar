@@ -16,17 +16,12 @@ package org.apache.karaf.cellar.core.control;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Producer;
 import org.apache.karaf.cellar.core.command.CommandHandler;
-import org.osgi.service.cm.Configuration;
-
-import java.util.Dictionary;
 
 /**
  * Producer switch command handler.
  */
 public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchCommand, ProducerSwitchResult> {
-
-    public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
-    private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
+    private final Switch commandSwitch = new BasicSwitch("org.apache.karaf.cellar.command.producer.switch");
 
     /**
      * Execute a producer switch command.
@@ -36,43 +31,27 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
      */
     @Override
     public ProducerSwitchResult execute(ProducerSwitchCommand command) {
-        // query
-        if (command.getStatus() == null) {
-            return new ProducerSwitchResult(command.getId(), Boolean.TRUE, producer.getSwitch().getStatus().getValue());
-        } else if (command.getStatus().equals(SwitchStatus.ON)) {
-            // turn on the switch
-            producer.getSwitch().turnOn();
-            // persist the change
-            persist(command.getStatus());
-            return new ProducerSwitchResult(command.getId(), Boolean.TRUE, Boolean.TRUE);
-        } else if (command.getStatus().equals(SwitchStatus.OFF)) {
-            // turn off the switch
-            producer.getSwitch().turnOff();
-            // persist the change
-            persist(command.getStatus());
-            return new ProducerSwitchResult(command.getId(), Boolean.TRUE, Boolean.FALSE);
+        SwitchStatus status = command.getStatus();
+        Boolean currentStatus = producer.getSwitch().getStatus().getValue();
+        if (status == null) {
+            return new ProducerSwitchResult(command.getId(), Boolean.TRUE, currentStatus);
         } else {
-            return new ProducerSwitchResult(command.getId(), Boolean.FALSE, producer.getSwitch().getStatus().getValue());
-        }
-    }
-
-    /**
-     * Store the producer current status in ConfigurationAdmin.
-     *
-     * @param switchStatus the producer switch status to store.
-     */
-    private void persist(SwitchStatus switchStatus) {
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Dictionary<String, Object> properties = configuration.getProperties();
-                if (properties != null) {
-                    properties.put(Configurations.PRODUCER, switchStatus.getValue().toString());
-                    configuration.update(properties);
-                }
+            Boolean statusValue = status.getValue();
+            if (statusValue) {
+                producer.getSwitch().turnOn();
+            } else {
+                producer.getSwitch().turnOff();
             }
-        } catch (Exception e) {
-            LOGGER.warn("Can't persist the producer status", e);
+            try {
+                if (this.synchronizationConfiguration != null) {
+                    super.synchronizationConfiguration.setProperty(Configurations.PRODUCER, statusValue);
+                    super.synchronizationConfiguration.save();
+                }
+            } catch (Exception ex) {
+                LOGGER.warn("Error setting producer switch.", ex);
+                return new ProducerSwitchResult(command.getId(), Boolean.FALSE, currentStatus);
+            }
+            return new ProducerSwitchResult(command.getId(), Boolean.TRUE, statusValue);
         }
     }
 
@@ -95,5 +74,4 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     public void setProducer(Producer producer) {
         this.producer = producer;
     }
-
 }

@@ -13,26 +13,22 @@
  */
 package org.apache.karaf.cellar.core.shell.completer;
 
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
 
 /**
- * Other groups completer.
+ * A completer which includes all nodes.
  */
-public class OtherGroupsCompleter extends GroupCompleterSupport {
+public class AllNodesCompleter extends NodeCompleterSupport {
 
     /**
-     * Accept the cluster groups which don't include the local node.
+     * Always returns true.
      *
-     * @param group the cluster group to check.
-     * @return true if the cluster group doesn't include the local node, false else.
+     * @param node the node.
+     * @return return true.
      */
     @Override
-    protected boolean acceptsGroup(Group group) {
-        Node node = groupManager.getNode();
-        if (group.getNodes().contains(node))
-            return false;
-        else return true;
+    protected boolean acceptsNode(Node node) {
+        return true;
     }
 
 }

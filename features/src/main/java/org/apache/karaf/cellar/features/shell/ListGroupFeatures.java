@@ -37,15 +37,11 @@ public class ListGroupFeatures extends FeatureCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Group group = groupManager.findGroupByName(groupName);
+        Group group = synchronizationManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             if (clusterFeatures != null && !clusterFeatures.isEmpty()) {
                 System.out.println(String.format("Features in cluster group " + groupName));
@@ -67,9 +63,6 @@ public class ListGroupFeatures extends FeatureCommandSupport {
                     }
                 }
             } else System.err.println("No features in cluster group " + groupName);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
         return null;
     }
 

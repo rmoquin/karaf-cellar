@@ -63,7 +63,7 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                 }
             }
         } else {
-            recipientList.add(clusterManager.getNode());
+            recipientList.add(clusterManager.getLocalNode());
         }
 
         if (recipientList.size() < 1) {
@@ -91,12 +91,12 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                     ManageGroupResult result = results.get(node);
                     if (result != null && result.getGroups() != null) {
                         for (Group g : result.getGroups()) {
-                            StringBuffer buffer = new StringBuffer();
+                            StringBuilder buffer = new StringBuilder();
                             if (g.getNodes() != null && !g.getNodes().isEmpty()) {
                                 String mark = " ";
                                 for (Node member : g.getNodes()) {
                                     buffer.append(member.getId());
-                                    if (member.equals(clusterManager.getNode())) {
+                                    if (member.equals(clusterManager.getLocalNode())) {
                                         mark = "*";
                                         buffer.append(mark);
                                     }

@@ -25,6 +25,7 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventConsumer;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -34,21 +35,18 @@ import org.slf4j.LoggerFactory;
  * Consumes messages from the Hazelcast {@code ITopic} and calls the {@code EventDispatcher}.
  */
 public class TopicConsumer<E extends Event> implements EventConsumer<E>, MessageListener<E> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(TopicConsumer.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.consumer";
-
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-
+    private BundleContext bundleContext;
     private HazelcastInstance instance;
     private ITopic topic;
     private Dispatcher dispatcher;
     private Node node;
     private ConfigurationAdmin configurationAdmin;
-
     private boolean isConsuming;
-
+    private String listenerId;
+    
     public void init() {
         if (topic == null) {
             topic = instance.getTopic(Constants.TOPIC);
@@ -63,7 +61,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     @Override
     public void consume(E event) {
         // check if event has a specified destination.
-        if ((event.getDestination() == null || event.getDestination().contains(node)) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
+        if ((event.getDestinations() == null || event.getDestinations().contains(node)) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
             dispatcher.dispatch(event);
         } else {
             if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
@@ -76,10 +74,10 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public void start() {
         isConsuming = true;
         if (topic != null) {
-            topic.addMessageListener(this);
+            listenerId = topic.addMessageListener(this);
         } else {
             topic = instance.getTopic(Constants.TOPIC);
-            topic.addMessageListener(this);
+            listenerId = topic.addMessageListener(this);
         }
 
     }
@@ -88,8 +86,9 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public void stop() {
         isConsuming = false;
         if (topic != null) {
-            topic.removeMessageListener(this);
+            topic.removeMessageListener(listenerId);
         }
+        listenerId = null;
     }
 
     @Override
@@ -161,4 +160,17 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         this.configurationAdmin = configurationAdmin;
     }
 
+    /**
+     * @return the bundleContext
+     */
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
+     * @param bundleContext the bundleContext to set
+     */
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 }

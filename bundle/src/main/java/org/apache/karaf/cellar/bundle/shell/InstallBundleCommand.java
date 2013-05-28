@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -33,12 +32,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "bundle-install", description = "Install bundles in a cluster group")
 public class InstallBundleCommand extends CellarCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    String clusterName;
 
     @Argument(index = 1, name = "urls", description = "Bundle URLs separated by whitespace", required = true, multiValued = true)
     List<String> urls;
@@ -51,9 +51,9 @@ public class InstallBundleCommand extends CellarCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
@@ -65,12 +65,10 @@ public class InstallBundleCommand extends CellarCommandSupport {
 
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        support.setGroupManager(this.groupManager);
-        support.setConfigurationAdmin(this.configurationAdmin);
 
         for (String url : urls) {
             // check if the bundle is allowed
-            if (support.isAllowed(group, Constants.CATEGORY, url, EventType.OUTBOUND)) {
+            if (support.isAllowed(cluster.getName(), Constants.CATEGORY, url, EventType.OUTBOUND)) {
 
                 // get the name and version in the location MANIFEST
                 JarInputStream jarInputStream = new JarInputStream(new URL(url).openStream());
@@ -86,12 +84,8 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 String version = manifest.getMainAttributes().getValue("Bundle-Version");
                 jarInputStream.close();
 
-                ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
-                try {
                     // update the cluster group
-                    Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+                    Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
                     BundleState state = new BundleState();
                     state.setName(name);
                     state.setLocation(url);
@@ -101,16 +95,13 @@ public class InstallBundleCommand extends CellarCommandSupport {
                         state.setStatus(BundleEvent.INSTALLED);
                     }
                     clusterBundles.put(symbolicName + "/" + version, state);
-                } finally {
-                    Thread.currentThread().setContextClassLoader(originalClassLoader);
-                }
 
                 // broadcast the cluster event
                 ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, url, BundleEvent.INSTALLED);
-                event.setSourceGroup(group);
+                event.setSourceCluster(cluster);
                 eventProducer.produce(event);
             } else {
-                System.err.println("Bundle location " + url + " is blocked outbound for cluster group " + groupName);
+                System.err.println("Bundle location " + url + " is blocked outbound for cluster group " + clusterName);
             }
         }
 

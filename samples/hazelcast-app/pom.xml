@@ -38,7 +38,8 @@
         <osgi.import>
             com.hazelcast.core,
             org.osgi*,
-            org.slf4j;resolution:=optional
+            org.slf4j;resolution:=optional,
+            *
         </osgi.import>
         <osgi.export>
             org.apache.karaf.cellar.samples.hazelcast*;version="${project.version}"

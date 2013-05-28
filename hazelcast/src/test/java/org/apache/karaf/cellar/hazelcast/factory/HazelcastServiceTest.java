@@ -13,29 +13,26 @@
  */
 package org.apache.karaf.cellar.hazelcast.factory;
 
-import org.apache.karaf.cellar.core.discovery.Discovery;
+import org.apache.karaf.cellar.hazelcast.HazelcastServiceImpl;
+import com.hazelcast.core.HazelcastInstance;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.Properties;
-
+/**
+ * Hazelcast service factory test.
+ */
 @RunWith(JUnit4.class)
-public class HazelcastConfigurationManagerTest {
+public class HazelcastServiceTest {
 
     @Test
-    public void testIsUpdatedWithNoProperties()  {
-        HazelcastConfigurationManager cm = new HazelcastConfigurationManager();
-        Assert.assertFalse(cm.isUpdated(new Properties()));
+    public void testDefaultInstance() throws InterruptedException {
+        HazelcastServiceImpl factory = new HazelcastServiceImpl();
+        factory.init();
+        HazelcastInstance factoryInstance = factory.getInstance();
+        
+        Assert.assertNotNull(factoryInstance);
+        factory.shutdown();
     }
-
-    @Test
-    public void testIsUpdatedWithEmptyTcpMembers()  {
-        HazelcastConfigurationManager cm = new HazelcastConfigurationManager();
-        Properties p = new Properties();
-        p.put(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME ,"");
-        Assert.assertFalse(cm.isUpdated(p));
-    }
-
 }
