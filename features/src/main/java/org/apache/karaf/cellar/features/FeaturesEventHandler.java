@@ -32,7 +32,7 @@ import java.util.EnumSet;
  */
 public class FeaturesEventHandler extends FeaturesSupport implements EventHandler<ClusterFeaturesEvent> {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSynchronizer.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventHandler.class);
 
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.features.handler";
 
@@ -53,6 +53,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
      *
      * @param event the received cluster feature event.
      */
+    @Override
     public void handle(ClusterFeaturesEvent event) {
 
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {

@@ -25,6 +25,8 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventConsumer;
+import org.apache.karaf.cellar.hazelcast.internal.HazelcastClassLoader;
+import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -34,23 +36,20 @@ import org.slf4j.LoggerFactory;
  * Consumes messages from the Hazelcast {@code ITopic} and calls the {@code EventDispatcher}.
  */
 public class TopicConsumer<E extends Event> implements EventConsumer<E>, MessageListener<E> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(TopicConsumer.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.consumer";
-
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-
+    private BundleContext bundleContext;
     private HazelcastInstance instance;
     private ITopic topic;
     private Dispatcher dispatcher;
     private Node node;
     private ConfigurationAdmin configurationAdmin;
-
     private boolean isConsuming;
 
     public void init() {
         if (topic == null) {
+            reinit(instance);
             topic = instance.getTopic(Constants.TOPIC);
         }
         start();
@@ -99,7 +98,12 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
 
     @Override
     public void onMessage(Message<E> message) {
+        reinit(instance);
         consume(message.getMessageObject());
+    }
+
+    private void reinit(HazelcastInstance instance) {
+        instance.getConfig().setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
     }
 
     public Dispatcher getDispatcher() {
@@ -161,4 +165,17 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         this.configurationAdmin = configurationAdmin;
     }
 
+    /**
+     * @return the bundleContext
+     */
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
+     * @param bundleContext the bundleContext to set
+     */
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 }

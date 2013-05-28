@@ -62,16 +62,19 @@
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Configuration Admin -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
+            <scope>provided</scope>
         </dependency>
         <!-- Logging Dependencies -->
         <dependency>

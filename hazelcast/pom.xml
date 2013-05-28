@@ -35,6 +35,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <osgi.bundle.activator>org.apache.karaf.cellar.hazelcast.internal.InitClassesActivator</osgi.bundle.activator>
         <osgi.ignore>com.hazelcast.merge</osgi.ignore>
         <osgi.import>
             com.hazelcast*,
@@ -48,6 +49,9 @@
         <osgi.export>
             org.apache.karaf.cellar.hazelcast*;version="${project.version}"
         </osgi.export>
+        <osgi.private>
+            org.apache.karaf.cellar.hazelcast.internal*;version="${project.version}"
+        </osgi.private>
     </properties>
 
     <dependencies>

@@ -31,9 +31,7 @@ import java.util.Set;
  * Local features listener.
  */
 public class LocalFeaturesListener extends FeaturesSupport implements org.apache.karaf.features.FeaturesListener {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
-
     private EventProducer eventProducer;
 
     @Override
@@ -84,7 +82,9 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
                         featureEvent.setSourceGroup(group);
                         eventProducer.produce(featureEvent);
-                    } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+                    } else {
+                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+                    }
                 }
             }
         }
@@ -104,9 +104,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
             return;
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             if (event != null && event.getRepository() != null) {
                 Set<Group> groups = groupManager.listLocalGroups();
 
@@ -157,9 +154,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                     }
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     public EventProducer getEventProducer() {
@@ -169,5 +163,4 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
     }
-
 }

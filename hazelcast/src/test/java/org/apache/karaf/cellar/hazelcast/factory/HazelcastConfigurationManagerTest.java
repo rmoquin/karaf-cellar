@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.hazelcast.factory;
 
+import org.apache.karaf.cellar.hazelcast.HazelcastConfigurationManager;
 import org.apache.karaf.cellar.core.discovery.Discovery;
 import org.junit.Assert;
 import org.junit.Test;

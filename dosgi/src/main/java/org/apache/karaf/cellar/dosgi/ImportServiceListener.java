@@ -86,9 +86,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
     @Override
     public void added(Collection listeners) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
 
                 if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
@@ -99,16 +96,10 @@ public class ImportServiceListener implements ListenerHook, Runnable {
                 // make sure we only import remote services
                 checkListener(listenerInfo);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     @Override
     public void removed(Collection listeners) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
                 if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
                     continue;
@@ -131,9 +122,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
                 pendingListeners.remove(listenerInfo);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**
@@ -142,9 +130,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      * @param listenerInfo the listener info.
      */
     private void checkListener(ListenerInfo listenerInfo) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             // iterate through known services and import them if needed
             Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
             for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
@@ -157,9 +142,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             for (EndpointDescription endpoint : matches) {
                 importService(endpoint, listenerInfo);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**

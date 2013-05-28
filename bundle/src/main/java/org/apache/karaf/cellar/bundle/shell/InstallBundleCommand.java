@@ -86,10 +86,6 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 String version = manifest.getMainAttributes().getValue("Bundle-Version");
                 jarInputStream.close();
 
-                ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
-                try {
                     // update the cluster group
                     Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
                     BundleState state = new BundleState();
@@ -101,9 +97,6 @@ public class InstallBundleCommand extends CellarCommandSupport {
                         state.setStatus(BundleEvent.INSTALLED);
                     }
                     clusterBundles.put(symbolicName + "/" + version, state);
-                } finally {
-                    Thread.currentThread().setContextClassLoader(originalClassLoader);
-                }
 
                 // broadcast the cluster event
                 ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, url, BundleEvent.INSTALLED);

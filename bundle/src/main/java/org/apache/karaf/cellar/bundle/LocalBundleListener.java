@@ -81,10 +81,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                     int type = event.getType();
 
                     if (isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
-
-                        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-                        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
                         try {
                             // update bundles in the cluster group
                             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + group.getName());
@@ -116,8 +112,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             eventProducer.produce(clusterBundleEvent);
                         } catch (Exception e) {
                         	LOGGER.error("CELLAR BUNDLE: failed to create bundle event", e);
-						} finally {
-                            Thread.currentThread().setContextClassLoader(originalClassLoader);
                         }
 
                     } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, group.getName());

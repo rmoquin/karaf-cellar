@@ -48,12 +48,8 @@ public class StartBundleCommand extends BundleCommandSupport {
         }
 
         // update the bundle in the cluster group
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
         String location;
         String key = null;
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             key = selector(clusterBundles);
@@ -81,9 +77,6 @@ public class StartBundleCommand extends BundleCommandSupport {
 
             state.setStatus(BundleEvent.STARTED);
             clusterBundles.put(key, state);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the cluster event
         String[] split = key.split("/");

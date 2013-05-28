@@ -30,7 +30,7 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
-import org.apache.karaf.cellar.core.utils.CombinedClassLoader;
+import org.apache.karaf.cellar.hazelcast.internal.HazelcastClassLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -47,29 +47,22 @@ import org.slf4j.Logger;
  * Keep in sync the distributed group configuration with the locally persisted.
  */
 public class HazelcastGroupManager implements GroupManager, EntryListener, ConfigurationListener {
-
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastGroupManager.class);
-
     private static final String GROUPS = "org.apache.karaf.cellar.groups";
     private static final String GROUPS_CONFIG = "org.apache.karaf.cellar.groups.config";
     private static final String DEFAULT_GROUP = "default";
-
     private Map<String, ServiceRegistration> producerRegistrations = new HashMap<String, ServiceRegistration>();
     private Map<String, ServiceRegistration> consumerRegistrations = new HashMap<String, ServiceRegistration>();
-
     private Map<String, EventProducer> groupProducers = new HashMap<String, EventProducer>();
     private Map<String, EventConsumer> groupConsumer = new HashMap<String, EventConsumer>();
-
     private BundleContext bundleContext;
-
     private HazelcastInstance instance;
     private ConfigurationAdmin configurationAdmin;
-
     private EventTransportFactory eventTransportFactory;
-    private CombinedClassLoader combinedClassLoader;
 
     public void init() {
         // create a listener for group configuration.
+        reinit(instance);
         IMap groupConfiguration = instance.getMap(GROUPS_CONFIG);
         groupConfiguration.addEntryListener(this, true);
         try {
@@ -113,87 +106,63 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
     }
 
     public void destroy() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            // update the group
-            Node local = this.getNode();
-            Set<Group> groups = this.listGroups(local);
-            for (Group group : groups) {
-                String groupName = group.getName();
-                group.getNodes().remove(local);
-                listGroups().put(groupName, group);
-            }
-            // shutdown the group consumer/producers
-            for (Map.Entry<String, EventConsumer> consumerEntry : groupConsumer.entrySet()) {
-                EventConsumer consumer = consumerEntry.getValue();
-                consumer.stop();
-            }
-            groupConsumer.clear();
-            groupProducers.clear();
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        // update the group
+        Node local = this.getNode();
+        Set<Group> groups = this.listGroups(local);
+        for (Group group : groups) {
+            String groupName = group.getName();
+            group.getNodes().remove(local);
+            listGroups().put(groupName, group);
         }
+        // shutdown the group consumer/producers
+        for (Map.Entry<String, EventConsumer> consumerEntry : groupConsumer.entrySet()) {
+            EventConsumer consumer = consumerEntry.getValue();
+            consumer.stop();
+        }
+        groupConsumer.clear();
+        groupProducers.clear();
     }
 
     @Override
     public Node getNode() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            Node node = null;
-            Cluster cluster = instance.getCluster();
-            if (cluster != null) {
-                Member member = cluster.getLocalMember();
-                node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
-            }
-            return node;
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        Node node = null;
+        Cluster cluster = instance.getCluster();
+        if (cluster != null) {
+            Member member = cluster.getLocalMember();
+            node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
         }
+        return node;
     }
 
     @Override
     public Group createGroup(String groupName) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            Group group = listGroups().get(groupName);
-            if (group == null) {
-                group = new Group(groupName);
-            }
-            if (!listGroups().containsKey(groupName)) {
-                copyGroupConfiguration(Configurations.DEFAULT_GROUP_NAME, groupName);
-                listGroups().put(groupName, group);
-                try {
-                    // store the group list to configuration admin
-                    persist(listGroups());
-                } catch (Exception e) {
-                    LOGGER.warn("CELLAR HAZELCAST: can't store cluster group list", e);
-                }
-            }
-            return group;
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        Group group = listGroups().get(groupName);
+        if (group == null) {
+            group = new Group(groupName);
         }
+        if (!listGroups().containsKey(groupName)) {
+            copyGroupConfiguration(Configurations.DEFAULT_GROUP_NAME, groupName);
+            listGroups().put(groupName, group);
+            try {
+                // store the group list to configuration admin
+                persist(listGroups());
+            } catch (Exception e) {
+                LOGGER.warn("CELLAR HAZELCAST: can't store cluster group list", e);
+            }
+        }
+        return group;
     }
 
     @Override
     public void deleteGroup(String groupName) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            if (!groupName.equals(Configurations.DEFAULT_GROUP_NAME)) {
-                listGroups().remove(groupName);
-                try {
-                    // store the group list to configuration admin
-                    persist(listGroups());
-                } catch (Exception e) {
-                    LOGGER.warn("CELLAR HAZELCAST: can't store cluster group list", e);
-                }
+        if (!groupName.equals(Configurations.DEFAULT_GROUP_NAME)) {
+            listGroups().remove(groupName);
+            try {
+                // store the group list to configuration admin
+                persist(listGroups());
+            } catch (Exception e) {
+                LOGGER.warn("CELLAR HAZELCAST: can't store cluster group list", e);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
     }
 
@@ -217,115 +186,68 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
 
     @Override
     public Set<Group> listLocalGroups() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            return listGroups(getNode());
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
+        return listGroups(getNode());
     }
 
     @Override
     public boolean isLocalGroup(String groupName) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            Set<Group> localGroups = this.listLocalGroups();
-            for (Group localGroup : localGroups) {
-                if (localGroup.getName().equals(groupName)) {
-                    return true;
-                }
+        Set<Group> localGroups = this.listLocalGroups();
+        for (Group localGroup : localGroups) {
+            if (localGroup.getName().equals(groupName)) {
+                return true;
             }
-            return false;
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
+        return false;
     }
 
     @Override
     public Set<Group> listAllGroups() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            return new HashSet<Group>(listGroups().values());
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
+        return new HashSet<Group>(listGroups().values());
     }
 
     @Override
     public Group findGroupByName(String groupName) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            return listGroups().get(groupName);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
+        return listGroups().get(groupName);
     }
 
     @Override
     public Map<String, Group> listGroups() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            return instance.getMap(GROUPS);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
+        reinit(instance);
+        return instance.getMap(GROUPS);
     }
 
     @Override
     public Set<Group> listGroups(Node node) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            Set<Group> result = new HashSet<Group>();
-
-            Map<String, Group> groupMap = instance.getMap(GROUPS);
-            Collection<Group> groupCollection = groupMap.values();
-            if (groupCollection != null && !groupCollection.isEmpty()) {
-                for (Group group : groupCollection) {
-                    if (group.getNodes().contains(node)) {
-                        result.add(group);
-                    }
+        Set<Group> result = new HashSet<Group>();
+        reinit(instance);
+        Map<String, Group> groupMap = instance.getMap(GROUPS);
+        Collection<Group> groupCollection = groupMap.values();
+        if (groupCollection != null && !groupCollection.isEmpty()) {
+            for (Group group : groupCollection) {
+                if (group.getNodes().contains(node)) {
+                    result.add(group);
                 }
             }
-            return result;
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
+        return result;
     }
 
     @Override
     public Set<String> listGroupNames() {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            return listGroupNames(getNode());
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
+        return listGroupNames(getNode());
     }
 
     @Override
     public Set<String> listGroupNames(Node node) {
         Set<String> names = new HashSet<String>();
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            Map<String, Group> groups = listGroups();
+        Map<String, Group> groups = listGroups();
 
-            if (groups != null && !groups.isEmpty()) {
-                for (Group group : groups.values()) {
-                    if (group.getNodes().contains(node)) {
-                        names.add(group.getName());
-                    }
+        if (groups != null && !groups.isEmpty()) {
+            for (Group group : groups.values()) {
+                if (group.getNodes().contains(node)) {
+                    names.add(group.getName());
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
         return names;
     }
@@ -337,170 +259,146 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
      */
     @Override
     public void registerGroup(Group group) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        String groupName = group.getName();
+        createGroup(groupName);
+
+        LOGGER.info("CELLAR HAZELCAST: registering cluster group {}.", groupName);
+        Properties serviceProperties = new Properties();
+        serviceProperties.put("type", "group");
+        serviceProperties.put("name", groupName);
+
+        if (!producerRegistrations.containsKey(groupName)) {
+            EventProducer producer = groupProducers.get(groupName);
+            if (producer == null) {
+                producer = eventTransportFactory.getEventProducer(groupName, Boolean.TRUE);
+                groupProducers.put(groupName, producer);
+            }
+
+            ServiceRegistration producerRegistration = bundleContext.registerService(EventProducer.class.getCanonicalName(), producer, (Dictionary) serviceProperties);
+            producerRegistrations.put(groupName, producerRegistration);
+        }
+
+        if (!consumerRegistrations.containsKey(groupName)) {
+            EventConsumer consumer = groupConsumer.get(groupName);
+            if (consumer == null) {
+                consumer = eventTransportFactory.getEventConsumer(groupName, true);
+                groupConsumer.put(groupName, consumer);
+            } else if (!consumer.isConsuming()) {
+                consumer.start();
+            }
+            ServiceRegistration consumerRegistration = bundleContext.registerService(EventConsumer.class.getCanonicalName(), consumer, (Dictionary) serviceProperties);
+            consumerRegistrations.put(groupName, consumerRegistration);
+        }
+
+        group.getNodes().add(getNode());
+        listGroups().put(groupName, group);
+
+        // add group to configuration
         try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            String groupName = group.getName();
-            createGroup(groupName);
-
-            LOGGER.info("CELLAR HAZELCAST: registering cluster group {}.", groupName);
-            Properties serviceProperties = new Properties();
-            serviceProperties.put("type", "group");
-            serviceProperties.put("name", groupName);
-
-            if (!producerRegistrations.containsKey(groupName)) {
-                EventProducer producer = groupProducers.get(groupName);
-                if (producer == null) {
-                    producer = eventTransportFactory.getEventProducer(groupName, Boolean.TRUE);
-                    groupProducers.put(groupName, producer);
-                }
-
-                ServiceRegistration producerRegistration = bundleContext.registerService(EventProducer.class.getCanonicalName(), producer, (Dictionary) serviceProperties);
-                producerRegistrations.put(groupName, producerRegistration);
-            }
-
-            if (!consumerRegistrations.containsKey(groupName)) {
-                EventConsumer consumer = groupConsumer.get(groupName);
-                if (consumer == null) {
-                    consumer = eventTransportFactory.getEventConsumer(groupName, true);
-                    groupConsumer.put(groupName, consumer);
-                } else if (!consumer.isConsuming()) {
-                    consumer.start();
-                }
-                ServiceRegistration consumerRegistration = bundleContext.registerService(EventConsumer.class.getCanonicalName(), consumer, (Dictionary) serviceProperties);
-                consumerRegistrations.put(groupName, consumerRegistration);
-            }
-
-            group.getNodes().add(getNode());
-            listGroups().put(groupName, group);
-
-            // add group to configuration
-            try {
-                Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-                if (configuration != null) {
-                    Dictionary<String, Object> properties = configuration.getProperties();
-                    if (properties != null) {
-                        String groups = (String) properties.get(Configurations.GROUPS_KEY);
-                        if (groups == null || groups.isEmpty()) {
-                            groups = groupName;
-                        } else {
-                            Set<String> groupNamesSet = convertStringToSet(groups);
-                            groupNamesSet.add(groupName);
-                            groups = convertSetToString(groupNamesSet);
-                        }
-
-                        if (groups == null || groups.isEmpty()) {
-                            groups = groupName;
-                        }
-                        properties.put(Configurations.GROUPS_KEY, groups);
-                        configuration.update(properties);
+            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
+            if (configuration != null) {
+                Dictionary<String, Object> properties = configuration.getProperties();
+                if (properties != null) {
+                    String groups = (String) properties.get(Configurations.GROUPS_KEY);
+                    if (groups == null || groups.isEmpty()) {
+                        groups = groupName;
+                    } else {
+                        Set<String> groupNamesSet = convertStringToSet(groups);
+                        groupNamesSet.add(groupName);
+                        groups = convertSetToString(groupNamesSet);
                     }
-                }
-            } catch (IOException e) {
-                LOGGER.error("CELLAR HAZELCAST: error reading cluster group configuration {}", group);
-            }
 
-            // launch the synchronization on the group
-            try {
-                ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
-                if (serviceReferences != null && serviceReferences.length > 0) {
-                    for (ServiceReference ref : serviceReferences) {
-                        Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                        if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
-                            synchronizer.pull(group);
-                            synchronizer.push(group);
-                        }
-                        bundleContext.ungetService(ref);
+                    if (groups == null || groups.isEmpty()) {
+                        groups = groupName;
                     }
+                    properties.put(Configurations.GROUPS_KEY, groups);
+                    configuration.update(properties);
                 }
-            } catch (InvalidSyntaxException e) {
-                LOGGER.error("CELLAR HAZELCAST: failed to look for synchronizers", e);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        } catch (IOException e) {
+            LOGGER.error("CELLAR HAZELCAST: error reading cluster group configuration {}", e);
+        }
+
+        // launch the synchronization on the group
+        try {
+            ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
+            if (serviceReferences != null && serviceReferences.length > 0) {
+                for (ServiceReference ref : serviceReferences) {
+                    Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
+                    if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
+                        synchronizer.pull(group);
+                        synchronizer.push(group);
+                    }
+                    bundleContext.ungetService(ref);
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error("CELLAR HAZELCAST: failed to look for synchronizers", e);
         }
     }
 
     @Override
     public void registerGroup(String groupName) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            Group group = listGroups().get(groupName);
-            if (group == null) {
-                group = new Group(groupName);
-            }
-            registerGroup(group);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        Group group = listGroups().get(groupName);
+        if (group == null) {
+            group = new Group(groupName);
         }
+        registerGroup(group);
     }
 
     @Override
     public void unRegisterGroup(String groupName) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            unRegisterGroup(listGroups().get(groupName));
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
+        unRegisterGroup(listGroups().get(groupName));
     }
 
     @Override
     public void unRegisterGroup(Group group) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        String groupName = group.getName();
+        // remove local node from cluster group
+        group.getNodes().remove(getNode());
+        listGroups().put(groupName, group);
+
+        // un-register cluster group consumers
+        if (consumerRegistrations != null && !consumerRegistrations.isEmpty()) {
+            ServiceRegistration consumerRegistration = consumerRegistrations.get(groupName);
+            if (consumerRegistration != null) {
+                consumerRegistration.unregister();
+                consumerRegistrations.remove(groupName);
+            }
+        }
+
+        // un-register cluster group producers
+        if (producerRegistrations != null && !producerRegistrations.isEmpty()) {
+            ServiceRegistration producerRegistration = producerRegistrations.get(groupName);
+            if (producerRegistration != null) {
+                producerRegistration.unregister();
+                producerRegistrations.remove(groupName);
+            }
+        }
+
+        // remove consumers & producers
+        groupProducers.remove(groupName);
+        EventConsumer consumer = groupConsumer.remove(groupName);
+        if (consumer != null) {
+            consumer.stop();
+        }
+
+        // remove cluster group from configuration
         try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            String groupName = group.getName();
-            // remove local node from cluster group
-            group.getNodes().remove(getNode());
-            listGroups().put(groupName, group);
-
-            // un-register cluster group consumers
-            if (consumerRegistrations != null && !consumerRegistrations.isEmpty()) {
-                ServiceRegistration consumerRegistration = consumerRegistrations.get(groupName);
-                if (consumerRegistration != null) {
-                    consumerRegistration.unregister();
-                    consumerRegistrations.remove(groupName);
-                }
+            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
+            Dictionary<String, Object> properties = configuration.getProperties();
+            String groups = (String) properties.get(Configurations.GROUPS_KEY);
+            if (groups == null || groups.isEmpty()) {
+                groups = "";
+            } else if (groups.contains(groupName)) {
+                Set<String> groupNamesSet = convertStringToSet(groups);
+                groupNamesSet.remove(groupName);
+                groups = convertSetToString(groupNamesSet);
             }
-
-            // un-register cluster group producers
-            if (producerRegistrations != null && !producerRegistrations.isEmpty()) {
-                ServiceRegistration producerRegistration = producerRegistrations.get(groupName);
-                if (producerRegistration != null) {
-                    producerRegistration.unregister();
-                    producerRegistrations.remove(groupName);
-                }
-            }
-
-            // remove consumers & producers
-            groupProducers.remove(groupName);
-            EventConsumer consumer = groupConsumer.remove(groupName);
-            if (consumer != null) {
-                consumer.stop();
-            }
-
-            // remove cluster group from configuration
-            try {
-                Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-                Dictionary<String, Object> properties = configuration.getProperties();
-                String groups = (String) properties.get(Configurations.GROUPS_KEY);
-                if (groups == null || groups.isEmpty()) {
-                    groups = "";
-                } else if (groups.contains(groupName)) {
-                    Set<String> groupNamesSet = convertStringToSet(groups);
-                    groupNamesSet.remove(groupName);
-                    groups = convertSetToString(groupNamesSet);
-                }
-                properties.put(Configurations.GROUPS_KEY, groups);
-                configuration.update(properties);
-            } catch (IOException e) {
-                LOGGER.error("CELLAR HAZELCAST: failed to read cluster group configuration", e);
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
+            properties.put(Configurations.GROUPS_KEY, groups);
+            configuration.update(properties);
+        } catch (IOException e) {
+            LOGGER.error("CELLAR HAZELCAST: failed to read cluster group configuration", e);
         }
     }
 
@@ -523,6 +421,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
                 if (configAdminProperties == null) {
                     configAdminProperties = new Properties();
                 }
+                reinit(instance);
                 // get configuration from Hazelcast
                 Map<String, String> sourceGropConfig = instance.getMap(GROUPS_CONFIG);
 
@@ -560,7 +459,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
      * @return the String corresponding to the Set.
      */
     protected String convertSetToString(Set<String> set) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         Iterator<String> groupIterator = set.iterator();
         while (groupIterator.hasNext()) {
             String name = groupIterator.next();
@@ -579,8 +478,9 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
      * @return the Set corresponding to the String.
      */
     protected Set<String> convertStringToSet(String string) {
-    	if (string == null)
-    		return Collections.EMPTY_SET;
+        if (string == null) {
+            return Collections.EMPTY_SET;
+        }
         Set<String> result = new HashSet<String>();
         String[] groupNames = string.split(",");
 
@@ -603,6 +503,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
     public void configurationEvent(ConfigurationEvent configurationEvent) {
         String pid = configurationEvent.getPid();
         if (pid.equals(GROUPS)) {
+            reinit(instance);
             Map groupConfiguration = instance.getMap(GROUPS_CONFIG);
 
             try {
@@ -622,6 +523,10 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
         }
     }
 
+    private void reinit(HazelcastInstance instance) {
+        instance.getConfig().setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
+    }
+    
     /**
      * Invoked when an entry is added.
      *
@@ -705,13 +610,4 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
     public void setEventTransportFactory(EventTransportFactory eventTransportFactory) {
         this.eventTransportFactory = eventTransportFactory;
     }
-
-    public CombinedClassLoader getCombinedClassLoader() {
-        return combinedClassLoader;
-    }
-
-    public void setCombinedClassLoader(CombinedClassLoader combinedClassLoader) {
-        this.combinedClassLoader = combinedClassLoader;
-    }
-
 }

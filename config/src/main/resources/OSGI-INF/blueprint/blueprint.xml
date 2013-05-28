@@ -24,9 +24,16 @@
            http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0
            http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.0.0.xsd
            http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0
-           http://aries.apache.org/schemas/blueprint-ext/blueprint-ext.xsd
-           ">
+           http://aries.apache.org/schemas/blueprint-ext/blueprint-ext.xsd">
 
+    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
+
+    <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
+        <cm:default-properties>
+            <cm:property name="storage" value="$[karaf.base]/etc/"/>
+        </cm:default-properties>
+    </cm:property-placeholder>
+    
     <!-- Local Configuration Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.config.LocalConfigurationListener" init-method="init"
           destroy-method="destroy">
@@ -65,13 +72,4 @@
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
-
-    <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
-
-    <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
-        <cm:default-properties>
-            <cm:property name="storage" value="$[karaf.base]/etc/"/>
-        </cm:default-properties>
-    </cm:property-placeholder>
-
 </blueprint>

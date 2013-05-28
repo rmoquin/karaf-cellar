@@ -17,12 +17,14 @@ import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import org.apache.karaf.cellar.core.Node;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Hazelcast instance aware.
  */
 public class HazelcastInstanceAware {
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastInstanceAware.class);
     protected HazelcastInstance instance;
 
     public void bind(HazelcastInstance instance) {
@@ -55,5 +57,4 @@ public class HazelcastInstanceAware {
     public void setInstance(HazelcastInstance instance) {
         this.instance = instance;
     }
-
 }

@@ -19,7 +19,6 @@ import com.hazelcast.core.Member;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.utils.CombinedClassLoader;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 import java.util.Collection;
@@ -38,7 +37,6 @@ public class HazelcastClusterManager extends HazelcastInstanceAware implements C
     private IdGenerator idgenerator;
 
     private ConfigurationAdmin configurationAdmin;
-    private CombinedClassLoader combinedClassLoader;
 
     /**
      * Get a Map in Hazelcast.
@@ -196,13 +194,4 @@ public class HazelcastClusterManager extends HazelcastInstanceAware implements C
     public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
-
-    public CombinedClassLoader getCombinedClassLoader() {
-        return combinedClassLoader;
-    }
-
-    public void setCombinedClassLoader(CombinedClassLoader combinedClassLoader) {
-        this.combinedClassLoader = combinedClassLoader;
-    }
-
 }

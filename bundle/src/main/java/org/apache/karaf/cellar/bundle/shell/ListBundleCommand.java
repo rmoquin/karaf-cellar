@@ -49,10 +49,6 @@ public class ListBundleCommand extends CellarCommandSupport {
             return null;
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
             if (clusterBundles != null && !clusterBundles.isEmpty()) {
                 System.out.println(String.format("Bundles in cluster group " + groupName));
@@ -112,10 +108,6 @@ public class ListBundleCommand extends CellarCommandSupport {
             } else {
                 System.err.println("No bundle found in cluster group " + groupName);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
-
         return null;
     }
 

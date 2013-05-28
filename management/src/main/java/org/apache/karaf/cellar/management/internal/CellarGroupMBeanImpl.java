@@ -79,9 +79,6 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
 
     @Override
     public void delete(String name) throws Exception {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Group g = groupManager.findGroupByName(name);
             List<String> nodes = new LinkedList<String>();
 
@@ -98,9 +95,6 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             }
 
             groupManager.deleteGroup(name);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     @Override

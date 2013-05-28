@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarChildNodesTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testClusterWithChildNodes() throws InterruptedException {
         installCellar();
         createCellarChild("child1");

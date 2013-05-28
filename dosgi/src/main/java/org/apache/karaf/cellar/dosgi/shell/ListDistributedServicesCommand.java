@@ -29,9 +29,6 @@ public class ListDistributedServicesCommand extends CellarCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Map<String, EndpointDescription> remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
             if (remoteEndpoints != null && !remoteEndpoints.isEmpty()) {
                 System.out.println(String.format(LIST_FORMAT, "Service Class", "Provider Node"));
@@ -48,9 +45,6 @@ public class ListDistributedServicesCommand extends CellarCommandSupport {
             } else {
                 System.out.println("No service available on the cluster");
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
         return null;
     }
 

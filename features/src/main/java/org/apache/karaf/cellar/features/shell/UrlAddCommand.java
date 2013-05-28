@@ -56,9 +56,6 @@ public class UrlAddCommand extends FeatureCommandSupport {
             return null;
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             // get the features repositories in the cluster group
             List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
             // get the features in the cluster group
@@ -124,9 +121,6 @@ public class UrlAddCommand extends FeatureCommandSupport {
                     System.err.println("Features repository URL " + url + " already registered");
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         return null;
     }

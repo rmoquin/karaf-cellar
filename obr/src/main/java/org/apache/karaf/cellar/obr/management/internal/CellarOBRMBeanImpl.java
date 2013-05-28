@@ -81,9 +81,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
                 new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
             for (ObrBundleInfo info : clusterBundles) {
                 CompositeData data = new CompositeDataSupport(compositeType,
@@ -91,10 +88,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
                         new Object[]{ info.getPresentationName(), info.getSymbolicName(), info.getVersion() });
                 table.put(data);
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
-
         return table;
     }
 

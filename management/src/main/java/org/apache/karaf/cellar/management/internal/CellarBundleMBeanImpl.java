@@ -115,9 +115,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         String version = manifest.getMainAttributes().getValue("Bundle-Version");
         jarInputStream.close();
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             // update the cluster group
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
             BundleState state = new BundleState();
@@ -125,9 +122,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             state.setLocation(location);
             state.setStatus(BundleEvent.INSTALLED);
             clusterBundles.put(name + "/" + version, state);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the event
         ClusterBundleEvent event = new ClusterBundleEvent(name, version, location, BundleEvent.INSTALLED);
@@ -149,12 +143,8 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // update the cluster group
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
         String key = null;
         String location = null;
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             key = selector(symbolicName, version, clusterBundles);
@@ -179,9 +169,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             }
 
             clusterBundles.remove(key);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the event
         String[] split = key.split("/");
@@ -204,11 +191,8 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // update the cluster group
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         String key = null;
         String location = null;
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             key = selector(symbolicName, version, clusterBundles);
@@ -234,9 +218,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
             state.setStatus(BundleEvent.STARTED);
             clusterBundles.put(key, state);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the cluster event
         String[] split = key.split("/");
@@ -259,11 +240,8 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // update the cluster group
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         String key = null;
         String location = null;
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             key = selector(symbolicName, version, clusterBundles);
@@ -289,9 +267,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
             state.setStatus(BundleEvent.STOPPED);
             clusterBundles.put(key, state);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the cluster event
         String[] split = key.split("/");
@@ -310,9 +285,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
                 new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
             int id = 0;
             for (String bundle : clusterBundles.keySet()) {
@@ -359,9 +331,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
                 table.put(data);
                 id++;
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
         return table;
     }
 

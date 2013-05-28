@@ -57,9 +57,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
 
-    static final Long COMMAND_TIMEOUT = 10000L;
-    static final Long DEFAULT_TIMEOUT = 20000L;
-    static final Long SERVICE_TIMEOUT = 30000L;
+    static final Long COMMAND_TIMEOUT = 5000L;
+    static final Long DEFAULT_TIMEOUT = 10000L;
+    static final Long SERVICE_TIMEOUT = 10000L;
     static final String GROUP_ID = "org.apache.karaf";
     static final String ARTIFACT_ID = "apache-karaf";
 
@@ -179,7 +179,7 @@ public class CellarTestSupport {
 
     protected Option cellarDistributionConfiguration() {
         return karafDistributionConfiguration().frameworkUrl(
-                maven().groupId(GROUP_ID).artifactId(ARTIFACT_ID).versionAsInProject().type("tar.gz"))
+                maven().groupId(GROUP_ID).artifactId(ARTIFACT_ID).versionAsInProject().type("zip"))
                 .karafVersion(MavenUtils.getArtifactVersion(GROUP_ID, ARTIFACT_ID)).name("Apache Karaf").unpackDirectory(new File("target/paxexam/"));
     }
 
@@ -188,7 +188,7 @@ public class CellarTestSupport {
         return new Option[]{
                 cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
                 editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
-                editConfigurationFileExtend("etc/config.properties", "org.apache.aries.blueprint.synchronous", "true")
+                editConfigurationFileExtend("etc/config.properties", "java.nio.channels.spi.SelectorProvider", "sun.nio.ch.PollSelectorProvider")
         };
     }
 

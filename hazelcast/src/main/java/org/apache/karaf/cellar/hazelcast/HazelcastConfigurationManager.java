@@ -11,7 +11,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.apache.karaf.cellar.hazelcast.factory;
+package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.TcpIpConfig;
@@ -31,7 +31,7 @@ import java.util.Set;
  */
 public class HazelcastConfigurationManager {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastServiceFactory.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastServiceImpl.class);
 
     private String xmlConfigLocation = System.getProperty("karaf.home") + "/etc/hazelcast.xml";
 

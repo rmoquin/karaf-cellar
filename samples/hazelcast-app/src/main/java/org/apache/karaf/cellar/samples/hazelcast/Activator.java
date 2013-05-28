@@ -34,8 +34,6 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         ServiceReference reference = context.getServiceReference("com.hazelcast.core.HazelcastInstance");
         HazelcastInstance instance = (HazelcastInstance) context.getService(reference);
         context.ungetService(reference);
@@ -48,7 +46,6 @@ public class Activator implements BundleActivator {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        Thread.currentThread().setContextClassLoader(classLoader);
     }
 
     @Override

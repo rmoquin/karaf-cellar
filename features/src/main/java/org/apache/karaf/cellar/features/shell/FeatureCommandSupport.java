@@ -51,9 +51,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
 
         Boolean result = Boolean.FALSE;
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Group group = groupManager.findGroupByName(groupName);
             if (group == null || group.getNodes().isEmpty()) {
 
@@ -86,9 +83,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
                     result = Boolean.TRUE;
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
         return result;
     }
 
@@ -101,9 +95,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @return true if the feature exists in the cluster group, false else.
      */
     public boolean featureExists(String groupName, String feature, String version) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             if (clusterFeatures == null)
@@ -120,9 +111,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
             }
 
             return false;
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     /**

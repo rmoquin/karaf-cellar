@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.hazelcast.factory;
 
-import com.hazelcast.core.Hazelcast;
+import org.apache.karaf.cellar.hazelcast.HazelcastServiceImpl;
 import com.hazelcast.core.HazelcastInstance;
 import org.junit.Assert;
 import org.junit.Test;
@@ -24,17 +24,15 @@ import org.junit.runners.JUnit4;
  * Hazelcast service factory test.
  */
 @RunWith(JUnit4.class)
-public class HazelcastServiceFactoryTest {
+public class HazelcastServiceTest {
 
     @Test
     public void testDefaultInstance() throws InterruptedException {
-        HazelcastServiceFactory factory = new HazelcastServiceFactory();
+        HazelcastServiceImpl factory = new HazelcastServiceImpl();
         factory.init();
-        factory.getInstance();
-        HazelcastInstance defaultInstance = Hazelcast.newHazelcastInstance(null);
-
         HazelcastInstance factoryInstance = factory.getInstance();
-        Assert.assertEquals(true, factoryInstance.getCluster().getMembers().size() >= 2);
+        
+        Assert.assertNotNull(factoryInstance);
+        factory.shutdown();
     }
-
 }

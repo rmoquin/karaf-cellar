@@ -112,10 +112,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
             // get the features in the cluster group
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
@@ -157,9 +153,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             } catch (Exception e) {
                 // ignore
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
@@ -204,10 +197,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-
             // get the features in the cluster group
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
@@ -236,9 +225,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
             // update the cluster group
             clusterFeatures.put(feature, false);
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, FeatureEvent.EventType.FeatureUninstalled);
@@ -262,9 +248,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
                 featuresType, new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tabularType);
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-        try {
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group);
             if (clusterFeatures != null && !clusterFeatures.isEmpty()) {
                 for (FeatureInfo feature : clusterFeatures.keySet()) {
@@ -275,9 +258,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
                     table.put(data);
                 }
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
 
         return table;
     }
@@ -314,9 +294,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             // get the features repositories in the cluster group
             List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
             // get the features in the cluster group
@@ -378,9 +355,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             } else {
                 throw new IllegalArgumentException("Features repository URL " + url + " already registered");
             }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
     }
 
     @Override

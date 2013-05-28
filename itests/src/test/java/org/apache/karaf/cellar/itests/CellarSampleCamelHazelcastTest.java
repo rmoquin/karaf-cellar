@@ -33,7 +33,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
     @Test
-    @Ignore
+    //@Ignore
     public void testCamelSampleApp() throws InterruptedException {
         installCellar();
         createCellarChild("child1");

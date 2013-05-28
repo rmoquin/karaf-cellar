@@ -19,6 +19,11 @@ package org.apache.karaf.cellar.core;
 public interface Synchronizer {
 
     /**
+     * Synchronize all local resources states for all cluster groups.
+     */
+//    public void synchronizeAll();
+    
+    /**
      * Push local resources states in a cluster group.
      *
      * @param group the cluster group where to push local resources states.

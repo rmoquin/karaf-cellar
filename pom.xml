@@ -40,16 +40,16 @@
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
         <felix.webconsole.version>4.0.0</felix.webconsole.version>
-        <hazelcast.version>2.5</hazelcast.version>
+        <hazelcast.version>2.6</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
         <junit.bundle.version>4.10_1</junit.bundle.version>
         <karaf.version>3.0.0-SNAPSHOT</karaf.version>
-        <osgi.version>4.3.1</osgi.version>
+        <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>4.3.1</osgi.compendium.version>
         <pax.exam.version>2.6.0</pax.exam.version>
-        <pax.exam.karaf.version>2.3.1</pax.exam.karaf.version>
+        <pax.exam.karaf.version>3.0.0-SNAPSHOT</pax.exam.karaf.version>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j.version>1.7.2</slf4j.version>
     </properties>

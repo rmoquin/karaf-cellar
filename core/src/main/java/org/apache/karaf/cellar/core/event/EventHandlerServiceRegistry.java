@@ -15,13 +15,15 @@ package org.apache.karaf.cellar.core.event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Event handler service registry.
  */
 public class EventHandlerServiceRegistry<E extends Event> implements EventHandlerRegistry<E> {
-
-    private Map<Class,EventHandler> eventHandlerMap = new ConcurrentHashMap<Class,EventHandler>();
+    private static transient final Logger LOGGER = LoggerFactory.getLogger(EventHandlerServiceRegistry.class);
+    private Map<Class, EventHandler> eventHandlerMap = new ConcurrentHashMap<Class, EventHandler>();
 
     /**
      * Return the appropriate cluster {@code EventHandler} found inside the cluster {@code HandlerRegistry}.
@@ -33,21 +35,24 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
     public EventHandler<E> getHandler(E event) {
         if (event != null) {
             Class clazz = event.getClass();
+            LOGGER.info("Getting eventhandler for event class: " + clazz.toString());
             return eventHandlerMap.get(clazz);
         }
+        LOGGER.info("Not event handler could be retrieved for event: " + event);
         return null;
     }
 
     public void bind(EventHandler handler) {
-        if(handler != null && handler.getType() != null) {
-            eventHandlerMap.put(handler.getType(),handler);
+        if (handler != null && handler.getType() != null) {
+            LOGGER.info("Binding event handler type: " + handler.getType());
+            eventHandlerMap.put(handler.getType(), handler);
         }
     }
 
     public void unbind(EventHandler handler) {
-         if(handler != null && handler.getType() != null) {
+        if (handler != null && handler.getType() != null) {
+            LOGGER.info("Unbinding event handler type: " + handler.getType());
             eventHandlerMap.remove(handler.getType());
         }
     }
-
 }
