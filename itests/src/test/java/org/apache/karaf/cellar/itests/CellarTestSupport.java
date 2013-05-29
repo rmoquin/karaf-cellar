@@ -159,7 +159,7 @@ public class CellarTestSupport {
      * Destroys the child node.
      */
     protected void destroyCellarChild(String name) {
-        System.err.println(executeCommand("instance:connect " + name + " feature:uninstall cellar"));
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf " + name + " feature:uninstall cellar"));
         System.err.println(executeCommand("instance:stop " + name));
     }
 
@@ -168,7 +168,7 @@ public class CellarTestSupport {
      */
     protected String getNodeIdOfChild(String name) {
         String node;
-        String nodesList = executeCommand("instance:connect " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, true);
+        String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, true);
         int stop = nodesList.indexOf(']');
         node = nodesList.substring(0, stop);
         int start = node.lastIndexOf('[');

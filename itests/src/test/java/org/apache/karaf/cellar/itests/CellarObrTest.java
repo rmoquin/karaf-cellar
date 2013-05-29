@@ -36,7 +36,7 @@ public class CellarObrTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.err.println(executeCommand("features:install cellar-obr"));
+        System.err.println(executeCommand("feature:install cellar-obr"));
     }
 
     @After
