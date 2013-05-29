@@ -35,10 +35,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.bundle.activator>org.apache.karaf.cellar.hazelcast.internal.InitClassesActivator</osgi.bundle.activator>
         <osgi.ignore>com.hazelcast.merge</osgi.ignore>
         <osgi.import>
             com.hazelcast*,
+            org.apache.karaf.cellar.bundle;version="${project.version}",
+            org.apache.karaf.cellar.core;version="${project.version}",
             org.apache.karaf.cellar.core*;version="${project.version}",
             org.apache.karaf.cellar.utils.ping;version="${project.version}",
             org.apache.karaf.features;version="[3,4)",
@@ -63,6 +64,10 @@
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.bundle</artifactId>
         </dependency>
 
         <!-- Logging Dependencies -->

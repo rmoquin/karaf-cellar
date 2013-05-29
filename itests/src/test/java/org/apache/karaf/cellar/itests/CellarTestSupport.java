@@ -57,9 +57,9 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
 
-    static final Long COMMAND_TIMEOUT = 5000L;
-    static final Long DEFAULT_TIMEOUT = 10000L;
-    static final Long SERVICE_TIMEOUT = 10000L;
+    static final Long COMMAND_TIMEOUT = 10000L;
+    static final Long DEFAULT_TIMEOUT = 15000L;
+    static final Long SERVICE_TIMEOUT = 20000L;
     static final String GROUP_ID = "org.apache.karaf";
     static final String ARTIFACT_ID = "apache-karaf";
 
@@ -186,7 +186,7 @@ public class CellarTestSupport {
     @Configuration
     public Option[] config() {
         return new Option[]{
-                cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
+                cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.WARN),
                 editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
                 editConfigurationFileExtend("etc/config.properties", "java.nio.channels.spi.SelectorProvider", "sun.nio.ch.PollSelectorProvider")
         };

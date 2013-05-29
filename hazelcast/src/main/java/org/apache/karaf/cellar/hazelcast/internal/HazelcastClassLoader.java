@@ -23,40 +23,26 @@ import org.osgi.framework.Bundle;
  * @author rmoquin
  */
 public class HazelcastClassLoader extends ClassLoader {
-    private transient Bundle bundle;
-
-    public HazelcastClassLoader() {
-    }
+    private Bundle bundle;
 
     public HazelcastClassLoader(Bundle bundle) {
         super();
+        this.bundle = bundle;
     }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {
-        if (bundle == null) {
-            return super.findClass(name);
-        } else {
-            return bundle.loadClass(name);
-        }
+        return bundle.loadClass(name);
     }
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
-        if (bundle == null) {
-            return super.loadClass(name);
-        } else {
-            return bundle.loadClass(name);
-        }
+        return bundle.loadClass(name);
     }
 
     @Override
     public URL getResource(String name) {
-        if (bundle == null) {
-            return super.getResource(name);
-        } else {
-            return bundle.getEntry(name);
-        }
+        return bundle.getEntry(name);
     }
 
     @Override

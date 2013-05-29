@@ -36,18 +36,10 @@ import java.util.Set;
  */
 public class FeaturesSynchronizer extends FeaturesSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSynchronizer.class);
-//    private final transient ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
     public void init() {
         super.init();
-//        try {
-//            Set<Group> groups = executor.submit(new Callable<Set<Group>>() {
-//                @Override
-//                public Set<Group> call() throws Exception {
-//                    return groupManager.listLocalGroups();
-//                }
-//            }).get();
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
@@ -59,9 +51,6 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 }
             }
         }
-//        } catch (Exception ex) {
-//            LOGGER.error("Error retrieving the initial cluster groups.", ex);
-//    }
     }
 
     @Override

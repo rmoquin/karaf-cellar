@@ -64,7 +64,6 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
         if (queue != null) {
             queue.addItemListener(this, true);
         } else {
-            reinit(instance);
             queue = instance.getQueue(Constants.QUEUE);
             queue.addItemListener(this, true);
         }
@@ -183,10 +182,6 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
         return eventSwitch;
     }
     
-    private void reinit(HazelcastInstance instance) {
-        instance.getConfig().setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
-    }
-
     public Node getNode() {
         return node;
     }

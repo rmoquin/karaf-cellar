@@ -30,7 +30,6 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
-import org.apache.karaf.cellar.hazelcast.internal.HazelcastClassLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -62,7 +61,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
 
     public void init() {
         // create a listener for group configuration.
-        reinit(instance);
         IMap groupConfiguration = instance.getMap(GROUPS_CONFIG);
         groupConfiguration.addEntryListener(this, true);
         try {
@@ -212,14 +210,12 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
 
     @Override
     public Map<String, Group> listGroups() {
-        reinit(instance);
         return instance.getMap(GROUPS);
     }
 
     @Override
     public Set<Group> listGroups(Node node) {
         Set<Group> result = new HashSet<Group>();
-        reinit(instance);
         Map<String, Group> groupMap = instance.getMap(GROUPS);
         Collection<Group> groupCollection = groupMap.values();
         if (groupCollection != null && !groupCollection.isEmpty()) {
@@ -421,7 +417,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
                 if (configAdminProperties == null) {
                     configAdminProperties = new Properties();
                 }
-                reinit(instance);
                 // get configuration from Hazelcast
                 Map<String, String> sourceGropConfig = instance.getMap(GROUPS_CONFIG);
 
@@ -503,7 +498,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
     public void configurationEvent(ConfigurationEvent configurationEvent) {
         String pid = configurationEvent.getPid();
         if (pid.equals(GROUPS)) {
-            reinit(instance);
             Map groupConfiguration = instance.getMap(GROUPS_CONFIG);
 
             try {
@@ -523,10 +517,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
         }
     }
 
-    private void reinit(HazelcastInstance instance) {
-        instance.getConfig().setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
-    }
-    
     /**
      * Invoked when an entry is added.
      *

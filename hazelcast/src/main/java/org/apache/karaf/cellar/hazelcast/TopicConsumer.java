@@ -49,7 +49,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
 
     public void init() {
         if (topic == null) {
-            reinit(instance);
             topic = instance.getTopic(Constants.TOPIC);
         }
         start();
@@ -98,12 +97,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
 
     @Override
     public void onMessage(Message<E> message) {
-        reinit(instance);
         consume(message.getMessageObject());
-    }
-
-    private void reinit(HazelcastInstance instance) {
-        instance.getConfig().setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
     }
 
     public Dispatcher getDispatcher() {

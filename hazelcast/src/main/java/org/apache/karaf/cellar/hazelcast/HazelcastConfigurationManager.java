@@ -36,7 +36,8 @@ public class HazelcastConfigurationManager {
     private String xmlConfigLocation = System.getProperty("karaf.home") + "/etc/hazelcast.xml";
 
     private Set<String> discoveredMemberSet = new LinkedHashSet<String>();
-
+    private Config config;
+    
     /**
      * Build a Hazelcast {@link com.hazelcast.config.Config}.
      *
@@ -44,7 +45,9 @@ public class HazelcastConfigurationManager {
      */
     public Config getHazelcastConfig() {
         System.setProperty("hazelcast.config", xmlConfigLocation);
-        Config config = new XmlConfigBuilder().build();
+        if(config == null) {
+            config = new XmlConfigBuilder().build();
+        }
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = config.getNetworkConfig().getJoin().getTcpIpConfig();
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);
