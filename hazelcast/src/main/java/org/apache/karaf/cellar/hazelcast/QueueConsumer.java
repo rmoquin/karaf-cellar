@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.apache.karaf.cellar.hazelcast.internal.HazelcastClassLoader;
 import org.osgi.framework.BundleContext;
 
 /**

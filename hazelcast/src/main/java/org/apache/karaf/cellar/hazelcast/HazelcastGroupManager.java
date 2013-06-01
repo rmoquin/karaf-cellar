@@ -49,7 +49,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastGroupManager.class);
     private static final String GROUPS = "org.apache.karaf.cellar.groups";
     private static final String GROUPS_CONFIG = "org.apache.karaf.cellar.groups.config";
-    private static final String DEFAULT_GROUP = "default";
     private Map<String, ServiceRegistration> producerRegistrations = new HashMap<String, ServiceRegistration>();
     private Map<String, ServiceRegistration> consumerRegistrations = new HashMap<String, ServiceRegistration>();
     private Map<String, EventProducer> groupProducers = new HashMap<String, EventProducer>();

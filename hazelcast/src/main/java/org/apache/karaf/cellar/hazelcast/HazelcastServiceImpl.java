@@ -32,7 +32,7 @@ public class HazelcastServiceImpl implements HazelcastService {
     public void init() {
         Config config = configurationManager.getHazelcastConfig();
         if (bundleContext != null) {
-            config.setClassLoader(this.getClass().getClassLoader());
+            config.setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
         }
         instance = Hazelcast.newHazelcastInstance(config);
     }

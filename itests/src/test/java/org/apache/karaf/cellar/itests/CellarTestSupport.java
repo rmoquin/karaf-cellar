@@ -186,9 +186,10 @@ public class CellarTestSupport {
     @Configuration
     public Option[] config() {
         return new Option[]{
-                cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.WARN),
+                cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
                 editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
-                editConfigurationFileExtend("etc/config.properties", "java.nio.channels.spi.SelectorProvider", "sun.nio.ch.PollSelectorProvider")
+                editConfigurationFileExtend("etc/config.properties", "org.apache.aries.blueprint.synchronous", "false")
+//                editConfigurationFileExtend("etc/config.properties", "java.nio.channels.spi.SelectorProvider", "sun.nio.ch.PollSelectorProvider")
         };
     }
 

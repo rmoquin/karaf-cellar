@@ -36,6 +36,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.import>
+            org.apache.karaf.cellar.hazelcast*;version="${project.version}",
             org.apache.karaf.cellar.core*;version="${project.version}",
             org.apache.felix.service.command,
             org.apache.felix.gogo.commands,
@@ -54,6 +55,15 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+        
         <!-- Internal Dependencies -->
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>

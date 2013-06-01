@@ -78,6 +78,19 @@
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/cellar/trunk</developerConnection>
         <url>http://svn.apache.org/repos/asf/karaf/cellar/trunk</url>
     </scm>
+    
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>libs-releases</name>
+            <url>http://rmoquin-lin:8081/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <name>libs-snapshots</name>
+            <url>http://rmoquin-lin:8081/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <issueManagement>
         <system>jira</system>
@@ -246,11 +259,13 @@
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.compendium</artifactId>
                 <version>${osgi.compendium.version}</version>
+                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
                 <version>${osgi.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- Servlet API -->

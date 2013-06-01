@@ -22,7 +22,6 @@ import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,6 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(FeatureCommandSupport.class);
 
     protected FeaturesService featuresService;
-    protected BundleContext bundleContext;
 
     /**
      * Force the features status for a specific group.
