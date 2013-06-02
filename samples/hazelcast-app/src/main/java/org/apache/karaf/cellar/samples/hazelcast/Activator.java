@@ -31,6 +31,7 @@ public class Activator implements BundleActivator {
 
     private ITopic topic;
     private MessageListener messageListener = new MessageListener();
+    private String listenerId;
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -41,7 +42,7 @@ public class Activator implements BundleActivator {
             IdGenerator idGenerator = instance.getIdGenerator("cellar-sample-generator");
             Long id = idGenerator.newId();
             topic = instance.getTopic("cellar-sample-topic");
-            topic.addMessageListener(messageListener);
+            listenerId = topic.addMessageListener(messageListener);
             topic.publish(new Message("id="+id));
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -50,7 +51,7 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        topic.removeMessageListener(messageListener);
+        topic.removeMessageListener(listenerId);
     }
 
 }

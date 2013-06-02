@@ -45,7 +45,8 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private Node node;
     private ConfigurationAdmin configurationAdmin;
     private boolean isConsuming;
-
+    private String listenerId;
+    
     public void init() {
         if (topic == null) {
             topic = instance.getTopic(Constants.TOPIC);
@@ -73,10 +74,10 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public void start() {
         isConsuming = true;
         if (topic != null) {
-            topic.addMessageListener(this);
+            listenerId = topic.addMessageListener(this);
         } else {
             topic = instance.getTopic(Constants.TOPIC);
-            topic.addMessageListener(this);
+            listenerId = topic.addMessageListener(this);
         }
 
     }
@@ -85,8 +86,9 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public void stop() {
         isConsuming = false;
         if (topic != null) {
-            topic.removeMessageListener(this);
+            topic.removeMessageListener(listenerId);
         }
+        listenerId = null;
     }
 
     @Override

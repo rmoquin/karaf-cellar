@@ -34,7 +34,7 @@
 
     <!-- Members Listener -->
     <bean id="membershipListener" class="org.apache.karaf.cellar.hazelcast.CellarMembershipListener">
-        <argument index="0" ref="hazelcast"/>
+        <property name="instance" ref="hazelcast"/>
         <property name="synchronizers" ref="synchronizers"/>
         <property name="groupManager" ref="groupManager"/>
     </bean>
@@ -42,17 +42,25 @@
     <!-- Cluster Manager -->
     <bean id="clusterManager" class="org.apache.karaf.cellar.hazelcast.HazelcastClusterManager">
         <property name="instance" ref="hazelcast"/>
+        <property name="localNode" ref="node"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
+    
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
 
+    <bean id="node" class="org.apache.karaf.cellar.hazelcast.HazelcastNode" init-method="init" destroy-method="destroy">
+        <property name="instance" ref="hazelcast"/>
+    </bean>
+    
     <!-- Cluster Group Manager -->
     <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
         <property name="instance" ref="hazelcast"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="localNode" ref="node"/>
     </bean>
+    
     <service ref="groupManager">
         <interfaces>
             <value>org.apache.karaf.cellar.core.GroupManager</value>
@@ -64,11 +72,10 @@
     <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">
         <property name="dispatcher"  ref="dispatcher"/>
         <property name="instance" ref="hazelcast"/>
+        <property name="node" ref="node"/>
     </bean>
-    <service ref="eventTransportFactory" interface="org.apache.karaf.cellar.core.event.EventTransportFactory"/>
 
-    <!-- Local Node -->
-    <bean id="node" factory-ref="clusterManager" factory-method="getNode"/>
+    <service ref="eventTransportFactory" interface="org.apache.karaf.cellar.core.event.EventTransportFactory"/>
 
     <!-- Cluster Event Topic -->
     <bean id="eventTopic" factory-ref="hazelcast" factory-method="getTopic">
@@ -77,7 +84,7 @@
 
     <!-- Cluster Event Consumer -->
     <bean id="consumer" class="org.apache.karaf.cellar.hazelcast.TopicConsumer" init-method="init"
-              destroy-method="destroy">
+          destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="instance" ref="hazelcast"/>
         <property name="dispatcher" ref="dispatcher"/>
@@ -167,11 +174,11 @@
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
     <reference-list id="discoveryServices" availability="optional"
-                        interface="org.apache.karaf.cellar.core.discovery.DiscoveryService"/>
+                    interface="org.apache.karaf.cellar.core.discovery.DiscoveryService"/>
     <reference-list id="groupEventProducers" availability="optional" interface="org.apache.karaf.cellar.core.event.EventProducer"
-                        filter="(type = group)"/>
+                    filter="(type = group)"/>
     <reference-list id="groupEventConsumers" availability="optional" interface="org.apache.karaf.cellar.core.event.EventConsumer"
-                        filter="(type = group)"/>
+                    filter="(type = group)"/>
     <reference-list id="synchronizers" availability="optional" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
 </blueprint>

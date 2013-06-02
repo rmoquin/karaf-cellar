@@ -40,7 +40,7 @@
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
         <felix.webconsole.version>4.0.0</felix.webconsole.version>
-        <hazelcast.version>2.6</hazelcast.version>
+        <hazelcast.version>3.0-SNAPSHOT</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
@@ -52,6 +52,7 @@
         <pax.exam.karaf.version>3.0.0-SNAPSHOT</pax.exam.karaf.version>
         <servlet.api.version>2.5</servlet.api.version>
         <slf4j.version>1.7.2</slf4j.version>
+        <xbean.version>3.14</xbean.version>
     </properties>
 
     <modules>
@@ -307,6 +308,13 @@
                 <version>${jclouds.version}</version>
             </dependency>
 
+            <!-- Geronimo XBean -->
+            <dependency>
+                <groupId>org.apache.xbean</groupId>
+                <artifactId>xbean-bundleutils</artifactId>
+                <version>${xbean.version}</version>
+            </dependency>
+            
             <!-- Joda Time -->
             <dependency>
                 <groupId>joda-time</groupId>

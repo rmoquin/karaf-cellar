@@ -29,16 +29,20 @@ import java.util.Set;
 /**
  * Cellar membership listener.
  */
-public class CellarMembershipListener extends HazelcastInstanceAware implements MembershipListener {
-
+public class CellarMembershipListener implements MembershipListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarMembershipListener.class);
-
     private GroupManager groupManager;
     private List<? extends Synchronizer> synchronizers;
+    private HazelcastInstance instance;
+    private String listenerId;
+    
+    public void init() {
+        listenerId = instance.getCluster().addMembershipListener(this);
+    }
 
-    public CellarMembershipListener(HazelcastInstance instance) {
-        this.instance = instance;
-        instance.getCluster().addMembershipListener(this);
+    public void destroy() {
+        instance.getCluster().removeMembershipListener(listenerId);
+        synchronizers.clear();
     }
 
     @Override
@@ -86,4 +90,17 @@ public class CellarMembershipListener extends HazelcastInstanceAware implements 
         this.synchronizers = synchronizers;
     }
 
+    /**
+     * @return the instance
+     */
+    public HazelcastInstance getInstance() {
+        return instance;
+    }
+
+    /**
+     * @param instance the instance to set
+     */
+    public void setInstance(HazelcastInstance instance) {
+        this.instance = instance;
+    }
 }

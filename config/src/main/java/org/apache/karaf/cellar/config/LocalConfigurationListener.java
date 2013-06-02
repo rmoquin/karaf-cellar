@@ -79,7 +79,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             // broadcast the cluster event
                             ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                             clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
-                            clusterConfigurationEvent.setSourceNode(clusterManager.getNode());
+                            clusterConfigurationEvent.setSourceNode(clusterManager.getLocalNode());
                             clusterConfigurationEvent.setSourceGroup(group);
                             eventProducer.produce(clusterConfigurationEvent);
                         } else {
@@ -93,7 +93,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                                 clusterConfigurationEvent.setSourceGroup(group);
-                                clusterConfigurationEvent.setSourceNode(clusterManager.getNode());
+                                clusterConfigurationEvent.setSourceNode(clusterManager.getLocalNode());
                                 eventProducer.produce(clusterConfigurationEvent);
                             }
                         }

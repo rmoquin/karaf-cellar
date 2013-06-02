@@ -13,17 +13,21 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Cellar cluster group.
  */
-public class Group implements MultiNode {
+public class Group implements MultiNode, Serializable {
 
     private String name;
     private Set<Node> nodes = new HashSet<Node>();
 
+    public Group() {    
+    }
+    
     public Group(String name) {
         this.name = name;
     }

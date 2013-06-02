@@ -132,7 +132,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
         try {
             Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
             if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
+                boolean status = Boolean.parseBoolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
                 if (status) {
                     eventSwitch.turnOn();
                 } else {

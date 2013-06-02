@@ -18,7 +18,7 @@ import com.hazelcast.core.Hazelcast;
 import java.util.Map;
 
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.karaf.cellar.hazelcast.internal.HazelcastClassLoader;
+import org.apache.xbean.osgi.bundle.util.BundleClassLoader;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -32,7 +32,7 @@ public class HazelcastServiceImpl implements HazelcastService {
     public void init() {
         Config config = configurationManager.getHazelcastConfig();
         if (bundleContext != null) {
-            config.setClassLoader(new HazelcastClassLoader(bundleContext.getBundle()));
+            config.setClassLoader(new BundleClassLoader(bundleContext.getBundle(), true));
         }
         instance = Hazelcast.newHazelcastInstance(config);
     }

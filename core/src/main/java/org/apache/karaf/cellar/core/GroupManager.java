@@ -26,8 +26,7 @@ public interface GroupManager {
      *
      * @return the local node.
      */
-    public Node getNode();
-
+    public Node getLocalNode();
     /**
      * Create a new cluster group.
      *

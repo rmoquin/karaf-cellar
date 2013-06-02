@@ -25,7 +25,6 @@ import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 import java.util.Dictionary;
 
 /**

@@ -54,6 +54,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private Dispatcher dispatcher;
     private Node node;
     private ConfigurationAdmin configurationAdmin;
+    private String listenerId;
 
     public QueueConsumer() {
         // nothing to do
@@ -61,10 +62,10 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
 
     public void init() {
         if (queue != null) {
-            queue.addItemListener(this, true);
+            listenerId = queue.addItemListener(this, true);
         } else {
             queue = instance.getQueue(Constants.QUEUE);
-            queue.addItemListener(this, true);
+            listenerId = queue.addItemListener(this, true);
         }
         executorService.execute(this);
     }
@@ -72,7 +73,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     public void destroy() {
         isConsuming = false;
         if (queue != null) {
-            queue.removeItemListener(this);
+            queue.removeItemListener(listenerId);
         }
         executorService.shutdown();
     }

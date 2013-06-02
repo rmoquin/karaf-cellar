@@ -39,10 +39,10 @@
             org.joda.time;version="${joda-time.version}",
             org.joda.time.chrono;version="${joda-time.version}",
             org.apache.karaf.cellar.core*;version="${project.version}",
-            org.osgi*,
-            org.slf4j;resolution:=optional
+            org.slf4j;resolution:=optional,
+            *
         </osgi.import>
-        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,org.jclouds.*</osgi.dynamic.import>
+        <osgi.dynamic.import>org.jclouds.*</osgi.dynamic.import>
         <osgi.export>
             org.apache.karaf.cellar.cloud*;version="${project.version}"
         </osgi.export>

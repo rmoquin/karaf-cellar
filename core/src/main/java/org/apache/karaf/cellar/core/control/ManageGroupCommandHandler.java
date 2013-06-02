@@ -36,7 +36,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
         ManageGroupAction action = command.getAction();
 
         String targetGroupName = command.getGroupName();
-        Node node = clusterManager.getNode();
+        Node node = clusterManager.getLocalNode();
 
         if (ManageGroupAction.JOIN.equals(action)) {
             joinGroup(targetGroupName);
@@ -80,7 +80,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the target group name where to add the node.
      */
     public void joinGroup(String targetGroupName) {
-        Node node = clusterManager.getNode();
+        Node node = clusterManager.getLocalNode();
         Map<String, Group> groups = groupManager.listGroups();
         if (groups != null && !groups.isEmpty()) {
             Group targetGroup = groups.get(targetGroupName);
@@ -100,7 +100,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the target group name where to remove the node.
      */
     public void quitGroup(String targetGroupName) {
-        Node node = clusterManager.getNode();
+        Node node = clusterManager.getLocalNode();
         Map<String, Group> groups = groupManager.listGroups();
         if (groups != null && !groups.isEmpty()) {
             Group targetGroup = groups.get(targetGroupName);
@@ -115,7 +115,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * Remove {@link Node} from all {@link Group}s.
      */
     public void purgeGroups() {
-        Node node = clusterManager.getNode();
+        Node node = clusterManager.getLocalNode();
         Set<String> groupNames = groupManager.listGroupNames(node);
         if (groupNames != null && !groupNames.isEmpty()) {
             for (String targetGroupName : groupNames) {

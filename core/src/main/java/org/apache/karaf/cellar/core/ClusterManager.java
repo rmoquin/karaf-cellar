@@ -83,7 +83,7 @@ public interface ClusterManager {
      *
      * @return the local node.
      */
-    public Node getNode();
+    public Node getLocalNode();
 
     /**
      * Generate an unique ID across the cluster.
@@ -101,10 +101,4 @@ public interface ClusterManager {
      * Stop the local node.
      */
     public void stop();
-
-    /**
-     * Restart the local node.
-     */
-    public void restart();
-
 }

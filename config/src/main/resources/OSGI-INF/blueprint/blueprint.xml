@@ -58,8 +58,9 @@
     <!-- Cluster Event Handler -->
     <bean id="eventHandler" class="org.apache.karaf.cellar.config.ConfigurationEventHandler"
           init-method="init" destroy-method="destroy">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="storage" value="${storage}"/>
     </bean>
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">

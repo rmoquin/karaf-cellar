@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.Cluster;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import org.apache.karaf.cellar.core.ClusterManager;
@@ -30,13 +31,12 @@ import java.util.Set;
 /**
  * Cluster manager implementation powered by Hazelcast.
  */
-public class HazelcastClusterManager extends HazelcastInstanceAware implements ClusterManager {
-
+public class HazelcastClusterManager implements ClusterManager {
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
-
     private IdGenerator idgenerator;
-
     private ConfigurationAdmin configurationAdmin;
+    private HazelcastInstance instance;
+    private HazelcastNode localNode;
 
     /**
      * Get a Map in Hazelcast.
@@ -85,7 +85,7 @@ public class HazelcastClusterManager extends HazelcastInstanceAware implements C
             Set<Member> members = cluster.getMembers();
             if (members != null && !members.isEmpty()) {
                 for (Member member : members) {
-                    HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
+                    HazelcastNode node = new HazelcastNode(member);
                     nodes.add(node);
                 }
             }
@@ -106,10 +106,10 @@ public class HazelcastClusterManager extends HazelcastInstanceAware implements C
             Cluster cluster = instance.getCluster();
             if (cluster != null) {
                 Set<Member> members = cluster.getMembers();
-                if (members != null && !members.isEmpty()) {
+                if (members != null) {
                     for (Member member : members) {
-                        HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
-                        if (ids.contains(node.getId())) {
+                        if (ids.contains(member.getUuid())) {
+                            HazelcastNode node = new HazelcastNode(member);
                             nodes.add(node);
                         }
                     }
@@ -133,9 +133,8 @@ public class HazelcastClusterManager extends HazelcastInstanceAware implements C
                 Set<Member> members = cluster.getMembers();
                 if (members != null && !members.isEmpty()) {
                     for (Member member : members) {
-                        HazelcastNode node = new HazelcastNode(member.getInetSocketAddress().getHostName(), member.getInetSocketAddress().getPort());
-                        if (id.equals(node.getId())) {
-                            return node;
+                        if (id.equals(member.getUuid())) {
+                            return new HazelcastNode(member);
                         }
                     }
                 }
@@ -180,18 +179,39 @@ public class HazelcastClusterManager extends HazelcastInstanceAware implements C
         }
     }
 
-    @Override
-    public void restart() {
-        if (instance != null && instance.getLifecycleService().isRunning()) {
-            instance.getLifecycleService().restart();
-        }
-    }
-
     public ConfigurationAdmin getConfigurationAdmin() {
         return configurationAdmin;
     }
 
     public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
+    }
+
+    /**
+     * @return the instance
+     */
+    public HazelcastInstance getInstance() {
+        return instance;
+    }
+
+    /**
+     * @param instance the instance to set
+     */
+    public void setInstance(HazelcastInstance instance) {
+        this.instance = instance;
+    }
+
+    /**
+     * @return the localNode
+     */
+    public HazelcastNode getLocalNode() {
+        return localNode;
+    }
+
+    /**
+     * @param localNode the localNode to set
+     */
+    public void setLocalNode(HazelcastNode localNode) {
+        this.localNode = localNode;
     }
 }

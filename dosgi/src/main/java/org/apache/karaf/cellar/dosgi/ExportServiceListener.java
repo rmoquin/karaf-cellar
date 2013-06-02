@@ -49,15 +49,14 @@ public class ExportServiceListener implements ServiceListener {
     private Node node;
 
     public void init() {
-        node = clusterManager.getNode();
+        node = clusterManager.getLocalNode();
         remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
         bundleContext.addServiceListener(this);
 
         // lookup for already exported services
-        ServiceReference[] references = null;
         try {
             String filter = "(" + Constants.EXPORTED_INTERFACES + "=" + Constants.ALL_INTERFACES + ")";
-            references = bundleContext.getServiceReferences((String) null, filter);
+            ServiceReference[] references = bundleContext.getServiceReferences((String) null, filter);
 
             if (references != null) {
                 for (ServiceReference reference : references) {
