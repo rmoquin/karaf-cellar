@@ -204,6 +204,7 @@ public class HazelcastClusterManager implements ClusterManager {
     /**
      * @return the localNode
      */
+    @Override
     public HazelcastNode getLocalNode() {
         return localNode;
     }

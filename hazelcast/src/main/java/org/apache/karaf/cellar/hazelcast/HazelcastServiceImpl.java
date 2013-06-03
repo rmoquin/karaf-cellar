@@ -18,8 +18,10 @@ import com.hazelcast.core.Hazelcast;
 import java.util.Map;
 
 import com.hazelcast.core.HazelcastInstance;
-import org.apache.xbean.osgi.bundle.util.BundleClassLoader;
+import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 
 /**
  * Factory for Hazelcast instance, including integration with OSGi ServiceRegistry and ConfigAdmin.
@@ -30,11 +32,17 @@ public class HazelcastServiceImpl implements HazelcastService {
     private HazelcastInstance instance;
 
     public void init() {
+        //Just because I'm tired of dealing with the cp stuff right now, temporarily use the TTCL workaround here.
         Config config = configurationManager.getHazelcastConfig();
-        if (bundleContext != null) {
-            config.setClassLoader(new BundleClassLoader(bundleContext.getBundle(), true));
-        }
-        instance = Hazelcast.newHazelcastInstance(config);
+        Bundle b = FrameworkUtil.getBundle(com.hazelcast.config.Config.class);
+        ClassLoader priorClassLoader = Thread.currentThread().getContextClassLoader();
+
+		try {
+			Thread.currentThread().setContextClassLoader(new BundleClassLoader(b));
+			instance = Hazelcast.newHazelcastInstance(config);
+		} finally {
+			Thread.currentThread().setContextClassLoader(priorClassLoader);
+		}
     }
 
     public void shutdown() {

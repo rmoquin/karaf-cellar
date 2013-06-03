@@ -70,7 +70,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
                 Set<String> groupNames = convertStringToSet(groups);
                 if (groupNames != null && !groupNames.isEmpty()) {
                     for (String groupName : groupNames) {
-                        createGroup(groupName);
+                        registerGroup(groupName);
                     }
                 }
             }
@@ -105,11 +105,10 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
 
     public void destroy() {
         // update the group
-        Node local = this.localNode;
-        Set<Group> groups = this.listGroups(local);
+        Set<Group> groups = this.listGroups(this.localNode);
         for (Group group : groups) {
             String groupName = group.getName();
-            group.getNodes().remove(local);
+            group.getNodes().remove(this.localNode);
             listGroups().put(groupName, group);
         }
         // shutdown the group consumer/producers
