@@ -18,12 +18,12 @@
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
     
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-        <configfile finalname="/etc/org.apache.karaf.cellar.groups.cfg">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/groups
-        </configfile>
-        <configfile finalname="/etc/org.apache.karaf.cellar.node.cfg">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/node
-        </configfile>
+        <config name="cellar.synchronization.management">
+            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/synchronization
+        </config>
+        <config name="karaf.cellar.cluster-cluster.event.management">
+            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/cluster
+        </config>
         <bundle dependency="true">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.config/${project.version}</bundle>

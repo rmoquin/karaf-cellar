@@ -16,63 +16,42 @@ package org.apache.karaf.cellar.core.control;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Consumer;
 import org.apache.karaf.cellar.core.command.CommandHandler;
-import org.osgi.service.cm.Configuration;
-
-import java.util.Dictionary;
 
 /**
  * Consumer switch command handler.
  */
 public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchCommand, ConsumerSwitchResult> {
-
-    public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
-    private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-
+    private final Switch commandSwitch = new BasicSwitch("org.apache.karaf.cellar.command.producer.switch");
     private Consumer consumer;
 
     /**
-     * Handle the {@code ProducerSwitchCommand} command.
+     * Handle the {@code ConsumeSwitchCommand} command.
      *
      * @param command
      */
+    @Override
     public ConsumerSwitchResult execute(ConsumerSwitchCommand command) {
-        // query
-        if (command.getStatus() == null) {
-            return new ConsumerSwitchResult(command.getId(), Boolean.TRUE, consumer.getSwitch().getStatus().getValue());
-        } else if (command.getStatus().equals(SwitchStatus.ON)) {
-            // turn on the switch
-            consumer.getSwitch().turnOn();
-            // persist the change
-            persist(command.getStatus());
-            return new ConsumerSwitchResult(command.getId(), Boolean.TRUE, Boolean.TRUE);
-        } else if (command.getStatus().equals(SwitchStatus.OFF)) {
-            // turn on the switch
-            consumer.getSwitch().turnOff();
-            // persist the change
-            persist(command.getStatus());
-            return new ConsumerSwitchResult(command.getId(), Boolean.TRUE, Boolean.FALSE);
+        SwitchStatus status = command.getStatus();
+        Boolean currentStatus = consumer.getSwitch().getStatus().getValue();
+        if (status == null) {
+            return new ConsumerSwitchResult(command.getId(), Boolean.TRUE, currentStatus);
         } else {
-            return new ConsumerSwitchResult(command.getId(), Boolean.FALSE, consumer.getSwitch().getStatus().getValue());
-        }
-    }
-
-    /**
-     * Store the consumer current status in ConfigurationAdmin.
-     *
-     * @param switchStatus the producer switch status to store.
-     */
-    private void persist(SwitchStatus switchStatus) {
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Dictionary<String, Object> properties = configuration.getProperties();
-                if (properties != null) {
-                    properties.put(Configurations.CONSUMER, switchStatus.getValue().toString());
-                    configuration.update(properties);
-                }
+            Boolean statusValue = status.getValue();
+            if (statusValue) {
+                consumer.getSwitch().turnOn();
+            } else {
+                consumer.getSwitch().turnOff();
             }
-        } catch (Exception e) {
-            LOGGER.warn("Can't persist the consumer status", e);
+            try {
+                if (this.synchronizationConfiguration != null) {
+                    super.synchronizationConfiguration.setProperty(Configurations.CONSUMER, statusValue);
+                    super.synchronizationConfiguration.save();
+                }
+            } catch (Exception ex) {
+                LOGGER.warn("Error setting consumer switch.", ex);
+                return new ConsumerSwitchResult(command.getId(), Boolean.FALSE, currentStatus);
+            }
+            return new ConsumerSwitchResult(command.getId(), Boolean.TRUE, statusValue);
         }
     }
 
@@ -93,5 +72,4 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     public void setConsumer(Consumer consumer) {
         this.consumer = consumer;
     }
-
 }

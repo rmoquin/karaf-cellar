@@ -38,7 +38,7 @@ public class ClusterConfigurationEvent extends Event {
 	public String toString() {
 		return "ClusterConfigurationEvent [type=" + type + ", id=" + id
 				+ ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
-				+ ", destination=" + destination + ", force=" + force
+				+ ", destination=" + destinations + ", force=" + force
 				+ ", postPublish=" + postPublish + "]";
 	}
 

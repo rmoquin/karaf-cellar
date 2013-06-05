@@ -81,14 +81,14 @@
                                     <classifier>features</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>target/classes/groups.cfg</file>
+                                    <file>target/classes/synchronization.cfg</file>
                                     <type>cfg</type>
-                                    <classifier>groups</classifier>
+                                    <classifier>synchronization</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>target/classes/node.cfg</file>
+                                    <file>target/classes/cluster-default.cfg</file>
                                     <type>cfg</type>
-                                    <classifier>node</classifier>
+                                    <classifier>cluster</classifier>
                                 </artifact>
                                 <artifact>
                                     <file>target/classes/hazelcast.xml</file>

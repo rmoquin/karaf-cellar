@@ -117,7 +117,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
                             pushRepository(event.getRepository(), group);
                             // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = getClusterManager().getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     // check the feature in the distributed map
@@ -139,7 +139,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         } else {
                             removeRepository(event.getRepository(), group);
                             // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = getClusterManager().getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());

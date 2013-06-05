@@ -18,32 +18,29 @@
         <command name="cluster/bundle-list">
             <action class="org.apache.karaf.cellar.bundle.shell.ListBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
             </completers>
         </command>
         <command name="cluster/bundle-install">
             <action class="org.apache.karaf.cellar.bundle.shell.InstallBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
                 <property name="eventProducer" ref="eventProducer"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
             </completers>
         </command>
         <command name="cluster/bundle-uninstall">
             <action class="org.apache.karaf.cellar.bundle.shell.UninstallBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
                 <property name="eventProducer" ref="eventProducer"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <ref component-id="allBundlesNameCompleter"/>
                 <ref component-id="allBundlesVersionCompleter"/>
             </completers>
@@ -51,12 +48,11 @@
         <command name="cluster/bundle-start">
             <action class="org.apache.karaf.cellar.bundle.shell.StartBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
                 <property name="eventProducer" ref="eventProducer"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <ref component-id="allBundlesNameCompleter"/>
                 <ref component-id="allBundlesVersionCompleter"/>
             </completers>
@@ -64,20 +60,19 @@
         <command name="cluster/bundle-stop">
             <action class="org.apache.karaf.cellar.bundle.shell.StopBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
                 <property name="eventProducer" ref="eventProducer"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <ref component-id="allBundlesNameCompleter"/>
                 <ref component-id="allBundlesVersionCompleter"/>
             </completers>
         </command>
     </command-bundle>
 
-    <bean id="allGroupCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllGroupsCompleter">
-        <property name="groupManager" ref="groupManager"/>
+    <bean id="allClustersCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllClustersCompleter">
+        <property name="clusterManager" ref="clusterManager"/>
     </bean>
 
     <bean id="allBundlesNameCompleter" class="org.apache.karaf.cellar.bundle.shell.completers.AllBundlesNameCompleter">

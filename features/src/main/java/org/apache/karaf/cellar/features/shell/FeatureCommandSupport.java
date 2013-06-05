@@ -49,7 +49,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
 
         Boolean result = Boolean.FALSE;
-            Group group = groupManager.findGroupByName(groupName);
+            Group group = synchronizationManager.findGroupByName(groupName);
             if (group == null || group.getNodes().isEmpty()) {
 
                 FeatureInfo info = new FeatureInfo(feature, version);
@@ -123,7 +123,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public boolean isAllowed(Group group, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        support.setGroupManager(this.groupManager);
+        support.setGroupManager(this.synchronizationManager);
         support.setConfigurationAdmin(this.configurationAdmin);
         return support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
     }

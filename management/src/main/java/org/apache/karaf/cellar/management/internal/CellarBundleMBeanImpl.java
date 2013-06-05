@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundleMBean {
 
     private ClusterManager clusterManager;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
     private ConfigurationAdmin configurationAdmin;
     private EventProducer eventProducer;
 
@@ -56,11 +56,11 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         this.clusterManager = clusterManager;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return this.groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 

@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -26,6 +25,7 @@ import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
 
 import java.util.Map;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "bundle-stop", description = "Stop a bundle in a cluster group")
 public class StopBundleCommand extends BundleCommandSupport {
@@ -34,9 +34,9 @@ public class StopBundleCommand extends BundleCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster group " + clusterName + " doesn't exist");
             return null;
         }
 
@@ -49,18 +49,18 @@ public class StopBundleCommand extends BundleCommandSupport {
         // update the bundle in the cluster group
         String location;
         String key = null;
-            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
             key = selector(clusterBundles);
 
             if (key == null) {
-                System.err.println("Bundle " + key + " not found in cluster group " + groupName);
+                System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
                 return null;
             }
 
             BundleState state = clusterBundles.get(key);
             if (state == null) {
-                System.err.println("Bundle " + key + " not found in cluster group " + groupName);
+                System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
                 return null;
             }
             state.setStatus(BundleEvent.STOPPED);
@@ -69,10 +69,8 @@ public class StopBundleCommand extends BundleCommandSupport {
             // check if the bundle is allowed
             CellarSupport support = new CellarSupport();
             support.setClusterManager(this.clusterManager);
-            support.setGroupManager(this.groupManager);
-            support.setConfigurationAdmin(this.configurationAdmin);
-            if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
-                System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
+            if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, location, EventType.OUTBOUND)) {
+                System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + clusterName);
                 return null;
             }
 
@@ -81,7 +79,7 @@ public class StopBundleCommand extends BundleCommandSupport {
         // broadcast the cluster event
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STOPPED);
-        event.setSourceGroup(group);
+        event.setSourceCluster(cluster);
         eventProducer.produce(event);
 
         return null;

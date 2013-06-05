@@ -13,10 +13,8 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Cluster manager interface.
@@ -24,81 +22,32 @@ import java.util.Set;
 public interface ClusterManager {
 
     /**
-     * Get a map in the cluster.
+     * @return the clusters
+     */
+    List<CellarCluster> getClusters();
+
+    /**
+     * Create a new cluster.
      *
-     * @param mapName the map name in the cluster.
-     * @return the map in the cluster.
+     * @param clusterName the new cluster name.
+     * @return the created cluster.
      */
-    public Map getMap(String mapName);
+    public CellarCluster joinCluster(String clusterName);
 
     /**
-     * Get a list in the cluster.
+     * Delete an existing cluster.
      *
-     * @param listName the list name in the cluster.
-     * @return the list in the cluster.
+     * @param clusterName the cluster name to delete.
      */
-    public List getList(String listName);
+    public void leaveCluster(String clusterName);
 
     /**
-     * Get a set in the cluster.
+     * Look for a cluster  with a given name.
      *
-     * @param setName the set name in the cluster.
-     * @return the set in the cluster.
+     * @param clusterName the cluster name to look for.
+     * @return the cluster found, or null if no cluster found.
      */
-    public Set getSet(String setName);
+    public CellarCluster findClusterByName(String clusterName);
 
-    /**
-     * Get the nodes in the cluster.
-     *
-     * @return the set of nodes in the cluster.
-     */
-    public Set<Node> listNodes();
-
-    /**
-     * Get the nodes with a given ID.
-     *
-     * @param ids the collection of ID to look for.
-     * @return the set of nodes.
-     */
-    public Set<Node> listNodes(Collection<String> ids);
-
-    /**
-     * Get the nodes in a given cluster group.
-     *
-     * @param group the cluster group.
-     * @return the set of nodes in the cluster group.
-     */
-    public Set<Node> listNodesByGroup(Group group);
-
-    /**
-     * Get a node identified by a given ID.
-     *
-     * @param id the id of the node to look for.
-     * @return the node.
-     */
-    public Node findNodeById(String id);
-
-    /**
-     * Get the local node.
-     *
-     * @return the local node.
-     */
-    public Node getLocalNode();
-
-    /**
-     * Generate an unique ID across the cluster.
-     *
-     * @return a unique ID across the cluster.
-     */
-    public String generateId();
-
-    /**
-     * Start the local node.
-     */
-    public void start();
-
-    /**
-     * Stop the local node.
-     */
-    public void stop();
+    public CellarCluster findNode(Node node);
 }

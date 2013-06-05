@@ -13,35 +13,35 @@
  */
 package org.apache.karaf.cellar.core.shell.completer;
 
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 import java.util.List;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.ClusterManager;
 
 /**
  * Abstract cluster group completer.
  */
-public abstract class GroupCompleterSupport implements Completer {
+public abstract class ClusterCompleterSupport implements Completer {
 
-    protected GroupManager groupManager;
+    private ClusterManager clusterManager;
 
     /**
-     * Check if a cluster group should be accepted for completion.
+     * Check if a cluster should be accepted for completion.
      *
-     * @param group the cluster group to check.
-     * @return true if the cluster group has been accepted, false else.
+     * @param cluster the cluster to check.
+     * @return true if the cluster has been accepted, false else.
      */
-    protected abstract boolean acceptsGroup(Group group);
+    protected abstract boolean acceptsCluster(CellarCluster cluster);
 
     @Override
     public int complete(String buffer, int cursor, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            for (Group group : groupManager.listAllGroups()) {
-                if (acceptsGroup(group)) {
-                    String name = group.getName();
+            for (CellarCluster cluster : clusterManager.getClusters()) {
+                if (acceptsCluster(cluster)) {
+                    String name = cluster.getName();
                     if (delegate.getStrings() != null && !delegate.getStrings().contains(name)) {
                         delegate.getStrings().add(name);
                     }
@@ -53,12 +53,17 @@ public abstract class GroupCompleterSupport implements Completer {
         return delegate.complete(buffer, cursor, candidates);
     }
 
-    public GroupManager getGroupManager() {
-        return groupManager;
+    /**
+     * @return the clusterManager
+     */
+    public ClusterManager getClusterManager() {
+        return clusterManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
+    /**
+     * @param clusterManager the clusterManager to set
+     */
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
     }
-
 }

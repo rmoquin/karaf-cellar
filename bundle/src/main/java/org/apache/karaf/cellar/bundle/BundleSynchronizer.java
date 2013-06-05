@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.bundle;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -24,14 +23,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Dictionary;
 import java.util.Map;
-import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group.
@@ -42,76 +38,73 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private EventProducer eventProducer;
 
     public void init() {
-    /*}
-
-    @Override
-    public void synchronizeAll() {*/
-        Set<Group> groups = groupManager.listLocalGroups();
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
-                } else {
-                    LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
-                }
-            }
-        }
     }
 
     public void destroy() {
         // nothing to do
     }
 
+    @Override
+    public boolean synchronize(CellarCluster cluster) {
+        if (isSyncEnabled(cluster)) {
+            pull(cluster);
+            push(cluster);
+            return true;
+        } else {
+            LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", cluster.getName());
+        }
+        return false;
+    }
+
     /**
      * Pull the bundles states from a cluster group.
      *
-     * @param group the cluster group where to get the bundles states.
+     * @param cluster the cluster group where to get the bundles states.
      */
     @Override
-    public void pull(Group group) {
-        if (group != null) {
-            String groupName = group.getName();
+    public void pull(CellarCluster cluster) {
+        if (cluster != null) {
+            String groupName = cluster.getName();
             LOGGER.debug("CELLAR BUNDLE: pulling bundles from cluster group {}", groupName);
-            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-                for (Map.Entry<String, BundleState> entry : clusterBundles.entrySet()) {
-                    String id = entry.getKey();
-                    BundleState state = entry.getValue();
+            for (Map.Entry<String, BundleState> entry : clusterBundles.entrySet()) {
+                String id = entry.getKey();
+                BundleState state = entry.getValue();
 
-                    String[] tokens = id.split("/");
-                    String symbolicName = tokens[0];
-                    String version = tokens[1];
-                    if (tokens != null && tokens.length == 2) {
-                        if (state != null) {
-                            String bundleLocation = state.getLocation();
-                            if (isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.INBOUND)) {
-                                try {
-                                    if (state.getStatus() == BundleEvent.INSTALLED) {
-                                        installBundleFromLocation(state.getLocation());
-                                    } else if (state.getStatus() == BundleEvent.STARTED) {
-                                        installBundleFromLocation(state.getLocation());
-                                        startBundle(symbolicName, version);
-                                    }
-                                } catch (BundleException e) {
-                                    LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
+                String[] tokens = id.split("/");
+                String symbolicName = tokens[0];
+                String version = tokens[1];
+                if (tokens != null && tokens.length == 2) {
+                    if (state != null) {
+                        String bundleLocation = state.getLocation();
+                        if (isAllowed(cluster.getName(), Constants.CATEGORY, bundleLocation, EventType.INBOUND)) {
+                            try {
+                                if (state.getStatus() == BundleEvent.INSTALLED) {
+                                    installBundleFromLocation(state.getLocation());
+                                } else if (state.getStatus() == BundleEvent.STARTED) {
+                                    installBundleFromLocation(state.getLocation());
+                                    startBundle(symbolicName, version);
                                 }
-                            } else {
-                                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
+                            } catch (BundleException e) {
+                                LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
                             }
+                        } else {
+                            LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
                         }
                     }
                 }
+            }
         }
     }
 
     /**
      * Push local bundles states to a cluster group.
      *
-     * @param group the cluster group where to update the bundles states.
+     * @param cluster the cluster where to update the bundles states.
      */
     @Override
-    public void push(Group group) {
+    public void push(CellarCluster cluster) {
 
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
@@ -119,97 +112,93 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
             return;
         }
 
-        if (group != null) {
-            String groupName = group.getName();
+        if (cluster != null) {
+            String groupName = cluster.getName();
             LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
-            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-                Bundle[] bundles;
-                BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
+            Bundle[] bundles;
+            BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
 
-                bundles = bundleContext.getBundles();
-                for (Bundle bundle : bundles) {
-                    String symbolicName = bundle.getSymbolicName();
-                    String version = bundle.getVersion().toString();
-                    String bundleLocation = bundle.getLocation();
-                    int status = bundle.getState();
-                    String id = symbolicName + "/" + version;
+            bundles = bundleContext.getBundles();
+            for (Bundle bundle : bundles) {
+                String symbolicName = bundle.getSymbolicName();
+                String version = bundle.getVersion().toString();
+                String bundleLocation = bundle.getLocation();
+                int status = bundle.getState();
+                String id = symbolicName + "/" + version;
 
-                    // check if the pid is marked as local.
-                    if (isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
+                // check if the pid is marked as local.
+                if (isAllowed(cluster.getName(), Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
 
-                        BundleState bundleState = new BundleState();
-                        // get the bundle name or location.
-                        String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
-                        // if there is no name, then default to symbolic name.
-                        name = (name == null) ? bundle.getSymbolicName() : name;
-                        // if there is no symbolic name, resort to location.
-                        name = (name == null) ? bundle.getLocation() : name;
-                        bundleState.setName(name);
-                        bundleState.setLocation(bundleLocation);
+                    BundleState bundleState = new BundleState();
+                    // get the bundle name or location.
+                    String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
+                    // if there is no name, then default to symbolic name.
+                    name = (name == null) ? bundle.getSymbolicName() : name;
+                    // if there is no symbolic name, resort to location.
+                    name = (name == null) ? bundle.getLocation() : name;
+                    bundleState.setName(name);
+                    bundleState.setLocation(bundleLocation);
 
-                        if (status == Bundle.ACTIVE) {
-                            status = BundleEvent.STARTED;
-                        }
-                        if (status == Bundle.INSTALLED) {
-                            status = BundleEvent.INSTALLED;
-                        }
-                        if (status == Bundle.RESOLVED) {
-                            status = BundleEvent.RESOLVED;
-                        }
-                        if (status == Bundle.STARTING) {
-                            status = BundleEvent.STARTING;
-                        }
-                        if (status == Bundle.UNINSTALLED) {
-                            status = BundleEvent.UNINSTALLED;
-                        }
-                        if (status == Bundle.STOPPING) {
-                            status = BundleEvent.STARTED;
-                        }
-
-                        bundleState.setStatus(status);
-
-                        BundleState existingState = clusterBundles.get(id);
-
-                        if (existingState == null ||
-                                !existingState.getLocation().equals(bundleState.getLocation()) ||
-                                existingState.getStatus() != bundleState.getStatus()) {
-                            // update the distributed map
-                            clusterBundles.put(id, bundleState);
-
-                            // broadcast the event
-                            ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
-                            event.setSourceGroup(group);
-                            eventProducer.produce(event);
-                        }
-
-                    } else {
-                        LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
+                    if (status == Bundle.ACTIVE) {
+                        status = BundleEvent.STARTED;
                     }
+                    if (status == Bundle.INSTALLED) {
+                        status = BundleEvent.INSTALLED;
+                    }
+                    if (status == Bundle.RESOLVED) {
+                        status = BundleEvent.RESOLVED;
+                    }
+                    if (status == Bundle.STARTING) {
+                        status = BundleEvent.STARTING;
+                    }
+                    if (status == Bundle.UNINSTALLED) {
+                        status = BundleEvent.UNINSTALLED;
+                    }
+                    if (status == Bundle.STOPPING) {
+                        status = BundleEvent.STARTED;
+                    }
+
+                    bundleState.setStatus(status);
+
+                    BundleState existingState = clusterBundles.get(id);
+
+                    if (existingState == null ||
+                            !existingState.getLocation().equals(bundleState.getLocation()) ||
+                            existingState.getStatus() != bundleState.getStatus()) {
+                        // update the distributed map
+                        clusterBundles.put(id, bundleState);
+
+                        // broadcast the event
+                        ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
+                        event.setSourceCluster(cluster);
+                        eventProducer.produce(event);
+                    }
+
+                } else {
+                    LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
                 }
+            }
         }
     }
 
     /**
      * Check if the bundle sync flag is enabled for a cluster group.
      *
-     * @param group the cluster group to check.
+     * @param cluster the cluster group to check.
      * @return true if the sync flag is enabled, false else.
      */
     @Override
-    public Boolean isSyncEnabled(Group group) {
+    public Boolean isSyncEnabled(CellarCluster cluster) {
         Boolean result = Boolean.FALSE;
-        String groupName = group.getName();
+        String groupName = cluster.getName();
 
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP);
-            Dictionary<String, Object> properties = configuration.getProperties();
-            if (properties != null) {
-                String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-                String propertyValue = (String) properties.get(propertyKey);
-                result = Boolean.parseBoolean(propertyValue);
-            }
-        } catch (IOException e) {
+            String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+            String propertyValue = (String) super.synchronizationConfiguration.getProperty(propertyKey);
+            result = Boolean.parseBoolean(propertyValue);
+        } catch (Exception e) {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
         }
         return result;

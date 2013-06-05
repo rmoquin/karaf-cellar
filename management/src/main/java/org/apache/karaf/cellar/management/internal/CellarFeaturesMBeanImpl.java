@@ -41,7 +41,7 @@ import java.util.Map;
 public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeaturesMBean {
 
     private ClusterManager clusterManager;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
     private EventProducer eventProducer;
     private FeaturesService featuresService;
     private ConfigurationAdmin configurationAdmin;
@@ -58,11 +58,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         this.clusterManager = clusterManager;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return this.groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 

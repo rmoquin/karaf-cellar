@@ -71,7 +71,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", groupName);
 
-            Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
             for (String clusterConfiguration : clusterConfigurations.keySet()) {
                 if (isAllowed(group, Constants.CATEGORY, clusterConfiguration, EventType.INBOUND)) {
@@ -116,7 +116,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);
-            Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
             Configuration[] localConfigurations;
             try {

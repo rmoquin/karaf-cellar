@@ -48,7 +48,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
     private BundleContext bundleContext;
     private ClusterManager clusterManager;
     private ExecutionContext executionContext;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
 
     public CellarMBeanImpl() throws NotCompliantMBeanException {
         super(CellarMBean.class);
@@ -78,11 +78,11 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         this.executionContext = executionContext;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 

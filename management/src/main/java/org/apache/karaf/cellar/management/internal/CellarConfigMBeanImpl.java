@@ -34,7 +34,7 @@ import java.util.*;
 public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfigMBean {
 
     private ClusterManager clusterManager;
-    private GroupManager groupManager;
+    private SynchronizationManager groupManager;
     private ConfigurationAdmin configurationAdmin;
     private EventProducer eventProducer;
 
@@ -260,11 +260,11 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         this.clusterManager = clusterManager;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 

@@ -13,34 +13,14 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import org.apache.karaf.cellar.core.command.Command;
-
 /**
- * Manager group command.
+ * Manage cluster action enum state.
  */
-public class ManageGroupCommand extends Command<ManageGroupResult> {
+public enum ManageClusterAction {
 
-    private ManageGroupAction action;
-    private String groupName;
-
-    public ManageGroupCommand(String id) {
-        super(id);
-    }
-
-    public ManageGroupAction getAction() {
-        return action;
-    }
-
-    public void setAction(ManageGroupAction action) {
-        this.action = action;
-    }
-
-    public String getGroupName() {
-        return groupName;
-    }
-
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
+    JOIN,
+    LEAVE,
+    LEAVE_ALL,
+    LIST;
 
 }

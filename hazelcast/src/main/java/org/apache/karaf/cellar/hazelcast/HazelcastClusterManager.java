@@ -13,206 +13,55 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.hazelcast.core.Cluster;
-import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.IdGenerator;
-import com.hazelcast.core.Member;
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.Node;
-import org.osgi.service.cm.ConfigurationAdmin;
-
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.Node;
 
 /**
  * Cluster manager implementation powered by Hazelcast.
  */
 public class HazelcastClusterManager implements ClusterManager {
-    private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
-    private IdGenerator idgenerator;
-    private ConfigurationAdmin configurationAdmin;
-    private HazelcastInstance instance;
-    private HazelcastNode localNode;
+    private List<CellarCluster> clusters;
 
-    /**
-     * Get a Map in Hazelcast.
-     *
-     * @param mapName the Map name.
-     * @return the Map in Hazelcast.
-     */
-    @Override
-    public Map getMap(String mapName) {
-        return instance.getMap(mapName);
+    public void init() {
+        
+    }
+
+    public void destroy() {
     }
 
     /**
-     * Get a List in Hazelcast.
-     *
-     * @param listName the List name.
-     * @return the List in Hazelcast.
+     * @return the clusters
      */
     @Override
-    public List getList(String listName) {
-        return instance.getList(listName);
+    public List<CellarCluster> getClusters() {
+        return clusters;
     }
 
     /**
-     * Get a Set in Hazelcast.
-     *
-     * @param setName the Set name.
-     * @return the Set in Hazelcast.
+     * @param clusters the clusters to set
      */
-    @Override
-    public Set getSet(String setName) {
-        return instance.getSet(setName);
+    public void setClusters(List<CellarCluster> clusters) {
+        this.clusters = clusters;
     }
 
-    /**
-     * Get the list of Hazelcast nodes.
-     *
-     * @return a Set containing the Hazelcast nodes.
-     */
     @Override
-    public Set<Node> listNodes() {
-        Set<Node> nodes = new HashSet<Node>();
-
-        Cluster cluster = instance.getCluster();
-        if (cluster != null) {
-            Set<Member> members = cluster.getMembers();
-            if (members != null && !members.isEmpty()) {
-                for (Member member : members) {
-                    HazelcastNode node = new HazelcastNode(member);
-                    nodes.add(node);
-                }
-            }
-        }
-        return nodes;
-    }
-
-    /**
-     * Get the nodes with given IDs.
-     *
-     * @param ids a collection of IDs to look for.
-     * @return a Set containing the nodes.
-     */
-    @Override
-    public Set<Node> listNodes(Collection<String> ids) {
-        Set<Node> nodes = new HashSet<Node>();
-        if (ids != null && !ids.isEmpty()) {
-            Cluster cluster = instance.getCluster();
-            if (cluster != null) {
-                Set<Member> members = cluster.getMembers();
-                if (members != null) {
-                    for (Member member : members) {
-                        if (ids.contains(member.getUuid())) {
-                            HazelcastNode node = new HazelcastNode(member);
-                            nodes.add(node);
-                        }
-                    }
-                }
-            }
-        }
-        return nodes;
-    }
-
-    /**
-     * Get a node with a given ID.
-     *
-     * @param id the node ID.
-     * @return the node.
-     */
-    @Override
-    public Node findNodeById(String id) {
-        if (id != null) {
-            Cluster cluster = instance.getCluster();
-            if (cluster != null) {
-                Set<Member> members = cluster.getMembers();
-                if (members != null && !members.isEmpty()) {
-                    for (Member member : members) {
-                        if (id.equals(member.getUuid())) {
-                            return new HazelcastNode(member);
-                        }
-                    }
-                }
-            }
-        }
+    public CellarCluster joinCluster(String clusterName) {
         return null;
     }
 
-    /**
-     * List the nodes in a given cluster group.
-     *
-     * @param group the cluster group.
-     * @return a Set with the nodes.
-     */
     @Override
-    public Set<Node> listNodesByGroup(Group group) {
-        return group.getNodes();
-    }
-
-    /**
-     * Generate an unique ID.
-     *
-     * @return the generated unique ID.
-     */
-    @Override
-    public synchronized String generateId() {
-        if (idgenerator == null) {
-            idgenerator = instance.getIdGenerator(GENERATOR_ID);
-        }
-        return String.valueOf(idgenerator.newId());
+    public void leaveCluster(String clusterName) {
     }
 
     @Override
-    public void start() {
-        // nothing to do
+    public CellarCluster findClusterByName(String clusterName) {
+        return null;
     }
 
     @Override
-    public void stop() {
-        if (instance != null && instance.getLifecycleService().isRunning()) {
-            instance.getLifecycleService().shutdown();
-        }
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    /**
-     * @return the instance
-     */
-    public HazelcastInstance getInstance() {
-        return instance;
-    }
-
-    /**
-     * @param instance the instance to set
-     */
-    public void setInstance(HazelcastInstance instance) {
-        this.instance = instance;
-    }
-
-    /**
-     * @return the localNode
-     */
-    @Override
-    public HazelcastNode getLocalNode() {
-        return localNode;
-    }
-
-    /**
-     * @param localNode the localNode to set
-     */
-    public void setLocalNode(HazelcastNode localNode) {
-        this.localNode = localNode;
+    public CellarCluster findNode(Node node) {
+        return null;
     }
 }

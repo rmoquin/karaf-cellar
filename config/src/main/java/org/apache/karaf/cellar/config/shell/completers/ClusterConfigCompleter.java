@@ -17,7 +17,7 @@ import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationManager;
 import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 
@@ -31,7 +31,7 @@ import java.util.Properties;
 public class ClusterConfigCompleter implements Completer {
 
     protected ClusterManager clusterManager;
-    protected GroupManager groupManager;
+    protected SynchronizationManager groupManager;
 
     @Override
     public int complete(String buffer, int cursor, List<String> candidates) {
@@ -65,11 +65,11 @@ public class ClusterConfigCompleter implements Completer {
         this.clusterManager = clusterManager;
     }
 
-    public GroupManager getGroupManager() {
+    public SynchronizationManager getGroupManager() {
         return groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(SynchronizationManager groupManager) {
         this.groupManager = groupManager;
     }
 

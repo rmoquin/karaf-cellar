@@ -70,7 +70,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                 // check if the pid is allowed for outbound.
                 if (isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
 
-                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
+                    Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
 
                     try {
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
@@ -79,7 +79,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             // broadcast the cluster event
                             ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                             clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
-                            clusterConfigurationEvent.setSourceNode(clusterManager.getLocalNode());
+                            clusterConfigurationEvent.setSourceNode(getClusterManager().getLocalNode());
                             clusterConfigurationEvent.setSourceGroup(group);
                             eventProducer.produce(clusterConfigurationEvent);
                         } else {
@@ -93,7 +93,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                                 clusterConfigurationEvent.setSourceGroup(group);
-                                clusterConfigurationEvent.setSourceNode(clusterManager.getLocalNode());
+                                clusterConfigurationEvent.setSourceNode(getClusterManager().getLocalNode());
                                 eventProducer.produce(clusterConfigurationEvent);
                             }
                         }
