@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 public class CellarSupport {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
     protected SynchronizationConfiguration synchronizationConfiguration;
-    protected ClusterManager clusterManager;
 
     /**
      * Get a set of resources in the Cellar cluster groups configuration.
@@ -159,19 +158,5 @@ public class CellarSupport {
      */
     public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
-    }
-
-    /**
-     * @return the clusterManager
-     */
-    public ClusterManager getClusterManager() {
-        return clusterManager;
-    }
-
-    /**
-     * @param clusterManager the clusterManager to set
-     */
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
     }
 }

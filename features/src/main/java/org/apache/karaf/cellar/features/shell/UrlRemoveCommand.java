@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.features.Constants;
@@ -29,24 +28,25 @@ import org.apache.karaf.shell.commands.Command;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "feature-url-remove", description = "Remove features repository URLs from a cluster group")
 public class UrlRemoveCommand extends FeatureCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    String clusterName;
 
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
     private EventProducer eventProducer;
-
+    
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        Group group = synchronizationManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
@@ -57,9 +57,9 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
         }
 
         // get the features repositories in the cluster group
-        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
+        List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
         // get the features in the cluster group
-        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+        Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
 
         for (String url : urls) {
             // looking for the URL in the list
@@ -115,10 +115,10 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
 
                 // broadcast a cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
-                event.setSourceGroup(group);
+                event.setSourceCluster(cluster);
                 eventProducer.produce(event);
             } else {
-                System.err.println("Features repository URL " + url + " not found in cluster group " + groupName);
+                System.err.println("Features repository URL " + url + " not found in cluster group " + clusterName);
             }
         }
 
@@ -132,5 +132,4 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
     }
-
 }

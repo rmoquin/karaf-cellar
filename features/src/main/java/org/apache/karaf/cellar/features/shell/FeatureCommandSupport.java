@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.features.Constants;
@@ -26,14 +25,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Abstract cluster feature shell command.
  */
 public abstract class FeatureCommandSupport extends CellarCommandSupport {
-
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(FeatureCommandSupport.class);
-
     protected FeaturesService featuresService;
 
     /**
@@ -41,91 +39,93 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * Why? Its required if no group member currently in the cluster.
      * If a member of the group joins later, it won't find the change, unless we force it.
      *
-     * @param groupName the cluster group name.
+     * @param clusterName the cluster group name.
      * @param feature the feature name.
      * @param version the feature version.
      * @param status the feature status (installed, uninstalled).
      */
-    public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
+    public Boolean updateFeatureStatus(String clusterName, String feature, String version, Boolean status) {
 
         Boolean result = Boolean.FALSE;
-            Group group = synchronizationManager.findGroupByName(groupName);
-            if (group == null || group.getNodes().isEmpty()) {
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        //I don't think it's possible for a cluster to be empty, but I'll do with it.
+        if (cluster == null || cluster.listNodes().isEmpty()) {
 
-                FeatureInfo info = new FeatureInfo(feature, version);
-                Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
-                // check the existing configuration
-                if (version == null || (version.trim().length() < 1)) {
-                    for (FeatureInfo f : clusterFeatures.keySet()) {
-                        if (f.getName().equals(feature)) {
-                            version = f.getVersion();
-                            info.setVersion(version);
-                        }
+            FeatureInfo info = new FeatureInfo(feature, version);
+            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            // check the existing configuration
+            if (version == null || (version.trim().length() < 1)) {
+                for (FeatureInfo f : clusterFeatures.keySet()) {
+                    if (f.getName().equals(feature)) {
+                        version = f.getVersion();
+                        info.setVersion(version);
                     }
-                }
-
-                // check the features service
-                try {
-                    for (Feature f : featuresService.listFeatures()) {
-                        if (f.getName().equals(feature)) {
-                            version = f.getVersion();
-                            info.setVersion(version);
-                        }
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("Error while browsing features", e);
-                }
-
-                if (info.getVersion() != null && (info.getVersion().trim().length() > 0)) {
-                    clusterFeatures.put(info, status);
-                    result = Boolean.TRUE;
                 }
             }
+
+            // check the features service
+            try {
+                for (Feature f : featuresService.listFeatures()) {
+                    if (f.getName().equals(feature)) {
+                        version = f.getVersion();
+                        info.setVersion(version);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error while browsing features", e);
+            }
+
+            if (info.getVersion() != null && (info.getVersion().trim().length() > 0)) {
+                clusterFeatures.put(info, status);
+                result = Boolean.TRUE;
+            }
+        }
         return result;
     }
 
     /**
      * Check if a feature is present in the cluster group.
      *
-     * @param groupName the cluster group.
+     * @param clusterName the cluster group.
      * @param feature the feature name.
      * @param version the feature version.
      * @return true if the feature exists in the cluster group, false else.
      */
-    public boolean featureExists(String groupName, String feature, String version) {
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+    public boolean featureExists(String clusterName, String feature, String version) {
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
 
-            if (clusterFeatures == null)
-                return false;
+        if (clusterFeatures == null) {
+            return false;
+        }
 
-            for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
-                if (version == null) {
-                    if (distributedFeature.getName().equals(feature))
-                        return true;
-                } else {
-                    if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version))
-                        return true;
+        for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
+            if (version == null) {
+                if (distributedFeature.getName().equals(feature)) {
+                    return true;
+                }
+            } else {
+                if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version)) {
+                    return true;
                 }
             }
+        }
 
-            return false;
+        return false;
     }
 
     /**
      * Check if a cluster features event is allowed.
      *
-     * @param group the cluster group.
+     * @param cluster the cluster.
      * @param category the features category name.
      * @param name the feature name.
      * @param type the event type (inbound, outbound).
      * @return true if the cluster features event is allowed, false else.
      */
-    public boolean isAllowed(Group group, String category, String name, EventType type) {
+    public boolean isAllowed(CellarCluster cluster, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        support.setGroupManager(this.synchronizationManager);
-        support.setConfigurationAdmin(this.configurationAdmin);
-        return support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
+        return support.isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
     }
 
     public FeaturesService getFeaturesService() {
@@ -135,5 +135,4 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
     }
-
 }

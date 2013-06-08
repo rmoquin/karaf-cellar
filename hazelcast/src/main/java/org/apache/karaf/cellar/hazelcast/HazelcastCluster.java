@@ -88,20 +88,6 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
          }
          }*/
     }
-    
-    @Override
-    public void start() {
-        //This didn't do anything previously and probably doesn't now.
-    }
-
-    @Override
-    public void stop() {
-        //TODO I forget what this was supposed to do.
-    }
-
-    public void update(Map<String, Object> props) {
-        LOGGER.warn("Hazelcast cluster: " + name + " update method was called with properties: " + props);
-    }
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
@@ -123,7 +109,13 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        // nothing to do
+        String uuid = membershipEvent.getMember().getUuid();
+        this.memberNodes.remove(uuid);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Cluster " + this.name + ", member " + uuid + " left the cluster.");
+        }
+        memberNodes.clear();
+        memberNodes = null;
     }
 
     public void shutdown() {

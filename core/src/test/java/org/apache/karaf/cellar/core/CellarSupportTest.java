@@ -14,7 +14,7 @@
 package org.apache.karaf.cellar.core;
 
 import java.io.InputStream;
-import java.util.Map;
+import java.util.Dictionary;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.junit.After;
@@ -40,7 +40,7 @@ public class CellarSupportTest {
         InputStream is = getClass().getResourceAsStream("synchronization.cfg");
         props.load(is);
         is.close();
-        Map propsDictionary = props;
+        Dictionary propsDictionary = props;
         expect(configuration.getProperties()).andReturn(propsDictionary).anyTimes();
         replay(configuration);
         replay(configurationAdmin);

@@ -27,21 +27,27 @@
         <property name="discoveryServices" ref="discoveryServices"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
+    
+    <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>
+    
+    <bean id="synchronizationConfig" class="org.apache.karaf.cellar.core.HazelcastSynchronizationConfiguration">
+        <property name="pid" value="cellar.synchronization.management"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+    
+    <service ref="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration">
+        <service-properties>>
+            <entry key="service.id">cellar.synchronization.management</entry>
+        </service-properties>
+    </service>
 
     <reference-list id="clusters" interface="org.apache.karaf.cellar.core.CellarCluster" member-type="service-object">
         <reference-listener bind-method="bind" unbind-method="unbind">
             <ref component-id="clusterManager"/>
         </reference-listener>
     </reference-list>
-    
-    <bean id="synchronizationConfig" class="org.apache.karaf.cellar.core.HazelcastSynchronizationConfiguration">
-        <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>        
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    
-    <service ref="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
-    
-    <cm:managed-service-factory factory-pid="karaf.cellar.cluster"
+            
+    <cm:managed-service-factory factory-pid="karaf.cellar.cluster" ref="clusterManager"
                                 interface="org.apache.karaf.cellar.core.CellarCluster">
         <cm:managed-component class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="destroy">
             <cm:managed-properties persistent-id="cluster.event.management" update-method="updated" 
@@ -66,12 +72,7 @@
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
     
-    <service ref="clusterManager">
-        <interfaces>
-            <value>org.apache.karaf.cellar.core.ClusterManager</value>
-            <value>org.osgi.service.cm.ConfigurationListener</value>
-        </interfaces>
-    </service>
+    <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
 
     <!-- Cluster Event Transport Factory -->
     <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">

@@ -88,16 +88,6 @@ public interface CellarCluster {
     public String generateId();
 
     /**
-     * Start the local node.
-     */
-    public void start();
-
-    /**
-     * Stop the local node.
-     */
-    public void stop();
-
-    /**
      * @return the cluster Name
      */
     String getName();

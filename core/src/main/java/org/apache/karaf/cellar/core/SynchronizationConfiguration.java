@@ -15,19 +15,36 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.util.Dictionary;
+import java.util.Map;
+
 /**
  *
  * @author rmoquin
  */
 public interface SynchronizationConfiguration {
+    /**
+     * Saves any changes made to this configuration object.
+     */
+    public void save();
+
+    /**
+     * @param name the name of the property to set.
+     */
+    public Object getProperty(String name);
+
+    /**
+     * @return a single property
+     */
+    public void setProperty(String name, Object value);
 
     /**
      * @return the properties
      */
-    public Object getProperty(String name);
-    
-    public void setProperty(String name, Object value);
+    public Dictionary<String, Object> getProperties();
 
-    public void save();
-    
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(Dictionary<String, Object> properties);
 }

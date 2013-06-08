@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.features;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Local features listener.
@@ -59,16 +59,16 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
         }
 
         if (event != null) {
-            Set<Group> groups = groupManager.listLocalGroups();
+            Set<CellarCluster> clusters = super.clust.list();
 
-            if (groups != null && !groups.isEmpty()) {
-                for (Group group : groups) {
+            if (clusters != null && !clusters.isEmpty()) {
+                for (CellarCluster group : clusters) {
 
                     Feature feature = event.getFeature();
                     String name = feature.getName();
                     String version = feature.getVersion();
 
-                    if (isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+                    if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
                         FeatureEvent.EventType type = event.getType();
 
                         // update the features in the cluster group
@@ -80,7 +80,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
 
                         // broadcast the event
                         ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
-                        featureEvent.setSourceGroup(group);
+                        featureEvent.setSourceCluster(group);
                         eventProducer.produce(featureEvent);
                     } else {
                         LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
