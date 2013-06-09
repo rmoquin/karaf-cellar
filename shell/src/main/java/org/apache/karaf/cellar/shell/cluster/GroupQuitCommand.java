@@ -13,30 +13,30 @@
  */
 package org.apache.karaf.cellar.shell.cluster;
 
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageClusterAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "group-quit", description = "Quit node(s) from a cluster group")
 public class GroupQuitCommand extends GroupSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    String clusterName;
 
     @Argument(index = 1, name = "node", description = "The node(s) ID", required = false, multiValued = true)
     List<String> nodes;
 
     @Override
     protected Object doExecute() throws Exception {
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster group " + clusterName + " doesn't exist");
             return null;
         }
-        return doExecute(ManageGroupAction.QUIT, groupName, null, nodes, false);
+        return doExecute(ManageClusterAction.LEAVE, clusterName, null, nodes, false);
     }
 
 }

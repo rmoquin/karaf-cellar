@@ -13,31 +13,31 @@
  */
 package org.apache.karaf.cellar.shell;
 
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "sync", description = "Force the call of all cluster synchronizers available")
 public class SyncCommand extends ClusterCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Set<Group> localGroups = groupManager.listLocalGroups();
-        for (Group group : localGroups) {
-            System.out.println("Synchronizing cluster group " + group.getName());
+        Set<CellarCluster> localClusters = clusterManager.getClusters();
+        for (CellarCluster cluster : localClusters) {
+            System.out.println("Synchronizing cluster group " + cluster.getName());
             try {
                 ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
                 if (serviceReferences != null && serviceReferences.length > 0) {
                     for (ServiceReference ref : serviceReferences) {
                         Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                        if (synchronizer.isSyncEnabled(group)) {
+                        if (synchronizer.isSyncEnabled(cluster)) {
                             System.out.print("    sync " + synchronizer.getClass() + " ...");
-                            synchronizer.pull(group);
-                            synchronizer.push(group);
+                            synchronizer.pull(cluster);
+                            synchronizer.push(cluster);
                             System.out.println("OK");
                         }
                         bundleContext.ungetService(ref);

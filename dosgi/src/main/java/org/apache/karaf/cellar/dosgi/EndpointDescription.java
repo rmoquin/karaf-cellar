@@ -19,7 +19,6 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
-import java.io.Serializable;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -66,9 +65,7 @@ public class EndpointDescription implements MultiNode {
         try {
             f = FrameworkUtil.createFilter(filter);
         } catch (InvalidSyntaxException e) {
-            IllegalArgumentException iae = new IllegalArgumentException(e.getMessage());
-            iae.initCause(e);
-            throw iae;
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
 
         Dictionary dictionary = new Properties();
@@ -88,10 +85,12 @@ public class EndpointDescription implements MultiNode {
         return id;
     }
 
+    @Override
     public Set<Node> getNodes() {
         return nodes;
     }
 
+    @Override
      public void setNodes(Set<Node> nodes) {
          if(nodes != null) {
              for(Node node:nodes) {

@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.ITopic;
-import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
@@ -24,7 +23,6 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +36,9 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     private ITopic topic;
     private Node node;
     private SynchronizationConfiguration synchronizationConfig;
-    private ConfigurationAdmin configurationAdmin;
 
-    public void init(CellarCluster cluster) {
-        this.node = cluster.getLocalNode();
+    public void init(Node node) {
+        this.node = node;
     }
 
     public void destroy() {
@@ -82,14 +79,6 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
 
     public void setTopic(ITopic<Event> topic) {
         this.topic = topic;
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 
     /**

@@ -17,10 +17,11 @@ package org.apache.karaf.cellar.core.control;
  * Manage cluster action enum state.
  */
 public enum ManageClusterAction {
-
+	SET,
     JOIN,
     LEAVE,
     LEAVE_ALL,
-    LIST;
+    LIST,
+	PURGE;
 
 }

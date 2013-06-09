@@ -24,7 +24,6 @@ import org.apache.karaf.cellar.core.event.EventTransportFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +95,7 @@ public class RemoteServiceCallHandler extends CellarSupport implements EventHand
                     RemoteServiceResult result = new RemoteServiceResult(event.getId());
                     result.setResult(obj);
 
-                    EventProducer producer = eventTransportFactory.getEventProducer(Constants.RESULT_PREFIX + Constants.SEPARATOR + event.getSourceNode().getId() + event.getEndpointId(), false);
+                    EventProducer producer = eventTransportFactory.getEventProducer(event.getSourceCluster(), Constants.RESULT_PREFIX + Constants.SEPARATOR + event.getSourceNode().getId() + event.getEndpointId(), false);
                     producer.produce(result);
 
                 } catch (NoSuchMethodException e) {

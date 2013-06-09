@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.hazelcast;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
-import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Dispatcher;
 import org.apache.karaf.cellar.core.Node;
@@ -26,7 +25,6 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventConsumer;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private static final transient Logger LOGGER = LoggerFactory.getLogger(TopicConsumer.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.consumer";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private BundleContext bundleContext;
     private ITopic topic;
     private Dispatcher dispatcher;
     private SynchronizationConfiguration synchronizationConfig;
@@ -45,8 +42,8 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private boolean isConsuming;
     private String listenerId;
 
-    public void init(CellarCluster cluster) {
-        this.node = cluster.getLocalNode();
+    public void init(Node node) {
+        this.node = node;
         start();
     }
 
@@ -121,20 +118,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
             // ignore
         }
         return eventSwitch;
-    }
-
-    /**
-     * @return the bundleContext
-     */
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    /**
-     * @param bundleContext the bundleContext to set
-     */
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 
     /**

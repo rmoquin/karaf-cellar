@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.IQueue;
-import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
@@ -24,7 +23,6 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +37,9 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     private SynchronizationConfiguration synchronizationConfig;
     private IQueue<E> queue;
     private Node node;
-    private ConfigurationAdmin configurationAdmin;
 
-    public void init(CellarCluster cluster) {
-        this.node = cluster.getLocalNode();
+    public void init(Node node) {
+        this.node = node;
     }
 
     public void destroy() {
@@ -87,14 +84,6 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
 
     public void setQueue(IQueue<E> queue) {
         this.queue = queue;
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return this.configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 
     /**

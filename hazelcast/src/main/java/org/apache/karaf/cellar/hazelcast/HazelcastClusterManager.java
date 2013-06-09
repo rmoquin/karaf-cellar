@@ -16,6 +16,7 @@ package org.apache.karaf.cellar.hazelcast;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import org.apache.karaf.cellar.core.ClusterManager;
 import java.util.Map;
 import java.util.Properties;
@@ -138,6 +139,15 @@ public class HazelcastClusterManager implements ClusterManager {
             ServiceRegistration<CellarCluster> serviceReference = this.bundleContext.registerService(CellarCluster.class, cellarCluster, properties);
             LOGGER.info("CELLAR HAZELCAST: registering cluster {}.", clusterName);
         }*/
+    }
+    
+    @Override
+    public Set<Node> listNodesAllClusters() {
+        Set<Node> nodes = new HashSet<Node>();
+        for (CellarCluster cellarCluster : this.clusters) {
+            nodes.addAll(cellarCluster.listNodes());
+        }
+        return nodes;
     }
 
     /**

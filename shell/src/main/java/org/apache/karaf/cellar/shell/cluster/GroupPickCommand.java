@@ -13,9 +13,9 @@
  */
 package org.apache.karaf.cellar.shell.cluster;
 
-import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageClusterAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -27,29 +27,29 @@ import java.util.Set;
 @Command(scope = "cluster", name = "group-pick", description = "Picks a number of nodes from one cluster group and moves them into another")
 public class GroupPickCommand extends GroupSupport {
 
-    @Argument(index = 0, name = "sourceGroupName", description = "The source cluster group name", required = true, multiValued = false)
-    String sourceGroupName;
+    @Argument(index = 0, name = "sourceClusterName", description = "The source cluster name", required = true, multiValued = false)
+    String sourceClusterName;
 
-    @Argument(index = 1, name = "targetGroupName", description = "The destination cluster group name", required = true, multiValued = false)
-    String targetGroupName;
+    @Argument(index = 1, name = "targetClusterName", description = "The destination cluster name", required = true, multiValued = false)
+    String targetClusterName;
 
     @Argument(index = 2, name = "count", description = "The number of nodes to transfer", required = false, multiValued = false)
     int count = 1;
 
     @Override
     protected Object doExecute() throws Exception {
-        Group sourceGroup = groupManager.findGroupByName(sourceGroupName);
-        if (sourceGroup == null) {
-            System.err.println("Source cluster group " + sourceGroupName + " doesn't exist");
+        CellarCluster sourceCluster = clusterManager.findClusterByName(sourceClusterName);
+        if (sourceCluster == null) {
+            System.err.println("Source cluster " + sourceClusterName + " doesn't exist");
             return null;
         }
-        Group targetGroup = groupManager.findGroupByName(targetGroupName);
-        if (targetGroup == null) {
-            System.err.println("Target cluster group " + targetGroupName + " doesn't exist");
+        CellarCluster targetCluster = clusterManager.findClusterByName(targetClusterName);
+        if (targetCluster == null) {
+            System.err.println("Target cluster group " + targetClusterName + " doesn't exist");
             return null;
         }
 
-        Set<Node> groupMembers = sourceGroup.getNodes();
+        Set<Node> groupMembers = sourceCluster.listNodes();
 
         if (count > groupMembers.size())
             count = groupMembers.size();
@@ -60,11 +60,11 @@ public class GroupPickCommand extends GroupSupport {
                 break;
             List<String> recipients = new LinkedList<String>();
             recipients.add(node.getId());
-            doExecute(ManageGroupAction.SET, targetGroupName, sourceGroup, recipients);
+            doExecute(ManageClusterAction.SET, targetClusterName, sourceCluster, recipients);
             i++;
         }
 
-        return doExecute(ManageGroupAction.LIST, null, null, new ArrayList(), false);
+        return doExecute(ManageClusterAction.LIST, null, null, new ArrayList(), false);
     }
 
 }

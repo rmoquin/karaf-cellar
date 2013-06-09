@@ -47,8 +47,8 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("instance:list"));
 
         System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getLocalNode();
-        Set<Node> nodes = clusterManager.listNodes();
+        Node localNode = clusterManager.getFirstCluster().getLocalNode();
+        Set<Node> nodes = clusterManager.listNodesAllClusters();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
 
         Thread.sleep(DEFAULT_TIMEOUT);

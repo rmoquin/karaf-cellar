@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Generic cluster event producer shell command support.
@@ -50,10 +51,13 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                recipientList = clusterManager.listNodes();
+                Set<CellarCluster> clusters = clusterManager.getClusters();
+                for (CellarCluster cellarCluster : clusters) {
+                    recipientList.add(cellarCluster.getLocalNode());
+                }
             } else {
                 // in case of status change, select only the local node
-                recipientList.add(clusterManager.getLocalNode());
+                recipientList.add(clusterManager.getFirstCluster().getLocalNode());
             }
         }
 
@@ -61,7 +65,7 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
             return null;
         }
 
-        command.setDestination(recipientList);
+        command.setDestinations(recipientList);
         command.setStatus(status);
 
         Map<Node, ProducerSwitchResult> results = executionContext.execute(command);
@@ -70,16 +74,12 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
         } else {
             System.out.println(String.format(HEADER_FORMAT, "Node", "Status"));
             for (Node node : results.keySet()) {
-                String local = " ";
-                if (node.equals(clusterManager.getLocalNode())) {
-                    local = "*";
-                }
                 ProducerSwitchResult result = results.get(node);
                 String statusString = "OFF";
                 if (result.getStatus()) {
                     statusString = "ON";
                 }
-                System.out.println(String.format(OUTPUT_FORMAT, local, node.getId(), statusString));
+                System.out.println(String.format(OUTPUT_FORMAT, false, node.getId(), statusString));
             }
         }
         return null;

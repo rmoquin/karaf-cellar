@@ -13,31 +13,31 @@
  */
 package org.apache.karaf.cellar.shell.cluster;
 
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.control.ManageClusterAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
 
-@Command(scope = "cluster", name = "group-set", description = "Set the target nodes to a cluster group")
+@Command(scope = "cluster", name = "cluster-set", description = "Set the target nodes to a cluster")
 public class GroupSetCommand extends GroupSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    String clusterName;
 
     @Argument(index = 1, name = "node", description = "The node(s) ID", required = false, multiValued = true)
     List<String> nodes;
 
     @Override
     protected Object doExecute() throws Exception {
-        Group group = groupManager.findGroupByName(groupName);
+        CellarCluster group = clusterManager.findClusterByName(clusterName);
         if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
-        return doExecute(ManageGroupAction.SET, groupName, null, nodes, false);
+        return doExecute(ManageClusterAction.SET, clusterName, null, nodes, false);
     }
 
 }

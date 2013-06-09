@@ -13,13 +13,13 @@
  */
 package org.apache.karaf.cellar.shell.cluster;
 
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageClusterAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
 
-@Command(scope = "cluster", name = "group-list", description = "List the cluster groups")
+@Command(scope = "cluster", name = "group-list", description = "List the clusters")
 public class GroupListCommand extends GroupSupport {
 
     @Argument(index = 0, name = "node", description = "The node(s) ID", required = false, multiValued = true)
@@ -27,7 +27,7 @@ public class GroupListCommand extends GroupSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        return doExecute(ManageGroupAction.LIST, null, null, nodes,false);
+        return doExecute(ManageClusterAction.LIST, null, null, nodes,false);
     }
 
 }

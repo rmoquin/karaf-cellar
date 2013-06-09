@@ -29,9 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
-import org.osgi.framework.BundleContext;
 
 /**
  * Consumes cluster events from the Hazelcast {@code IQueue} and calls the {@code EventDispatcher}.
@@ -47,7 +45,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private Dispatcher dispatcher;
     private String listenerId;
 
-    public void init(CellarCluster cluster) {
+    public void init() {
         listenerId = queue.addItemListener(this, true);
         executorService.execute(this);
     }

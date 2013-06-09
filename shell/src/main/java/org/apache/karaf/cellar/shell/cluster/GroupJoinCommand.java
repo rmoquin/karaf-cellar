@@ -13,31 +13,31 @@
  */
 package org.apache.karaf.cellar.shell.cluster;
 
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.control.ManageClusterAction;
 
-@Command(scope = "cluster", name = "group-join", description = "Join node(s) to a cluster group")
+@Command(scope = "cluster", name = "group-join", description = "Join serveral node(s) to a cluster")
 public class GroupJoinCommand extends GroupSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    String clusterName;
 
     @Argument(index = 1, name = "node", description = "The node(s) ID", required = true, multiValued = true)
     List<String> nodes;
 
     @Override
     protected Object doExecute() throws Exception {
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster group " + clusterName + " doesn't exist");
             return null;
         }
 
-        return doExecute(ManageGroupAction.JOIN, groupName, null, nodes,false);
+        return doExecute(ManageClusterAction.JOIN, clusterName, null, nodes,false);
     }
 
 }

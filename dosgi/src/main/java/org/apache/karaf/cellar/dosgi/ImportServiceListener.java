@@ -35,27 +35,22 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Listener for the service import.
  */
 public class ImportServiceListener implements ListenerHook, Runnable {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ImportServiceListener.class);
-
     private BundleContext bundleContext;
     private ClusterManager clusterManager;
     private CommandStore commandStore;
     private EventTransportFactory eventTransportFactory;
     private Map<String, EndpointDescription> remoteEndpoints;
-
     private Set<ListenerInfo> pendingListeners = new LinkedHashSet<ListenerInfo>();
-
     private final Map<EndpointDescription, ServiceRegistration> registrations = new HashMap<EndpointDescription, ServiceRegistration>();
-
     private final Map<String, EventProducer> producers = new HashMap<String, EventProducer>();
     private final Map<String, EventConsumer> consumers = new HashMap<String, EventConsumer>();
-
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
@@ -86,42 +81,42 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
     @Override
     public void added(Collection listeners) {
-            for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
+        for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
 
-                if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
-                    continue;
-                }
-
-                pendingListeners.add(listenerInfo);
-                // make sure we only import remote services
-                checkListener(listenerInfo);
+            if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
+                continue;
             }
+
+            pendingListeners.add(listenerInfo);
+            // make sure we only import remote services
+            checkListener(listenerInfo);
+        }
     }
 
     @Override
     public void removed(Collection listeners) {
-            for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
-                if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
-                    continue;
-                }
-
-                // make sure we only import remote services
-                String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getLocalNode().getId() + ")))";
-                // iterate through known services and import them if needed
-                Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
-                for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
-                    EndpointDescription endpointDescription = entry.getValue();
-                    if (endpointDescription.matches(filter)) {
-                        matches.add(endpointDescription);
-                    }
-                }
-
-                for (EndpointDescription endpoint : matches) {
-                    unImportService(endpoint);
-                }
-
-                pendingListeners.remove(listenerInfo);
+        for (ListenerInfo listenerInfo : (Collection<ListenerInfo>) listeners) {
+            if (listenerInfo.getBundleContext() == bundleContext || listenerInfo.getFilter() == null) {
+                continue;
             }
+
+            // make sure we only import remote services
+            String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getFirstCluster().getLocalNode().getId() + ")))";
+            // iterate through known services and import them if needed
+            Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
+            for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
+                EndpointDescription endpointDescription = entry.getValue();
+                if (endpointDescription.matches(filter)) {
+                    matches.add(endpointDescription);
+                }
+            }
+
+            for (EndpointDescription endpoint : matches) {
+                unImportService(endpoint);
+            }
+
+            pendingListeners.remove(listenerInfo);
+        }
     }
 
     /**
@@ -130,18 +125,19 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      * @param listenerInfo the listener info.
      */
     private void checkListener(ListenerInfo listenerInfo) {
-            // iterate through known services and import them if needed
-            Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
-            for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
-                EndpointDescription endpointDescription = entry.getValue();
-                if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(clusterManager.getLocalNode())) {
-                    matches.add(endpointDescription);
-                }
+        // iterate through known services and import them if needed
+        CellarCluster cluster = clusterManager.getFirstCluster();
+        Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
+        for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
+            EndpointDescription endpointDescription = entry.getValue();
+            if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(cluster.getLocalNode())) {
+                matches.add(endpointDescription);
             }
+        }
 
-            for (EndpointDescription endpoint : matches) {
-                importService(endpoint, listenerInfo);
-            }
+        for (EndpointDescription endpoint : matches) {
+            importService(cluster, endpoint, listenerInfo);
+        }
     }
 
     /**
@@ -150,18 +146,18 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      * @param endpoint the endpoint to import.
      * @param listenerInfo the associated listener info.
      */
-    private void importService(EndpointDescription endpoint, ListenerInfo listenerInfo) {
+    private void importService(CellarCluster cluster, EndpointDescription endpoint, ListenerInfo listenerInfo) {
         LOGGER.debug("CELLAR DOSGI: importing remote service");
 
         EventProducer requestProducer = producers.get(endpoint.getId());
         if (requestProducer == null) {
-            requestProducer = eventTransportFactory.getEventProducer(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId(), Boolean.FALSE);
+            requestProducer = eventTransportFactory.getEventProducer(cluster, Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId(), Boolean.FALSE);
             producers.put(endpoint.getId(), requestProducer);
         }
 
         EventConsumer resultConsumer = consumers.get(endpoint.getId());
         if (resultConsumer == null) {
-            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getLocalNode().getId() + endpoint.getId(), Boolean.FALSE);
+            resultConsumer = eventTransportFactory.getEventConsumer(cluster, Constants.RESULT_PREFIX + Constants.SEPARATOR + cluster.getLocalNode().getId() + endpoint.getId(), Boolean.FALSE);
             consumers.put(endpoint.getId(), resultConsumer);
         } else if (!resultConsumer.isConsuming()) {
             resultConsumer.start();
@@ -227,5 +223,4 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     public void setEventTransportFactory(EventTransportFactory eventTransportFactory) {
         this.eventTransportFactory = eventTransportFactory;
     }
-
 }

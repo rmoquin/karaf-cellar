@@ -18,13 +18,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.SynchronizationManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
@@ -45,24 +43,21 @@ public class CellarGroupsTest extends CellarTestSupport {
         assertNotNull(clusterManager);
 
         System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getLocalNode();
-        Set<Node> nodes = clusterManager.listNodes();
+        Node localNode = clusterManager.getFirstCluster().getLocalNode();
+        Set<Node> nodes = clusterManager.listNodesAllClusters();
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
 
         System.err.println(executeCommand("cluster:group-list"));
         System.err.println(executeCommand("cluster:group-set testgroup " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-list"));
 
-        SynchronizationManager groupManager = getOsgiService(SynchronizationManager.class);
-        assertNotNull(groupManager);
-
-        Set<Group> groups = groupManager.listAllGroups();
-        assertEquals("There should be 2 cellar groups", 2, groups.size());
+        Set<CellarCluster> clusters = clusterManager.getClusters();
+        assertEquals("There should be 2 cellar groups", 2, clusters.size());
 
         System.err.println(executeCommand("cluster:group-delete testgroup "));
         System.err.println(executeCommand("cluster:group-list"));
-        groups = groupManager.listAllGroups();
-        assertEquals("There should be a single cellar group", 1, groups.size());
+        clusters = clusterManager.getClusters();
+        assertEquals("There should be a single cellar group", 1, clusters.size());
     }
 
     @After

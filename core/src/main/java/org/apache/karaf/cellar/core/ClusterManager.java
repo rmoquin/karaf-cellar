@@ -26,6 +26,13 @@ public interface ClusterManager {
     public Set<CellarCluster> getClusters();
 
     /**
+     * Retrieves all nodes from all clusters.
+     * 
+     * @return all nodes from all known clusters.
+     */
+    public Set<Node> listNodesAllClusters();
+    
+    /**
      * Create a new cluster.
      *
      * @param clusterName the new cluster name.
