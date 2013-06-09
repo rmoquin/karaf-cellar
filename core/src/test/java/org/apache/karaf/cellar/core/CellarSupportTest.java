@@ -24,15 +24,38 @@ import org.osgi.service.cm.ConfigurationAdmin;
 
 
 import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.replay;
-import static org.easymock.EasyMock.verify;
 import static org.junit.Assert.assertEquals;
 
 public class CellarSupportTest {
-
     ConfigurationAdmin configurationAdmin = createMock(ConfigurationAdmin.class);
-    SynchronizationConfiguration configuration = createMock(SynchronizationConfiguration.class);
+    SynchronizationConfiguration configuration = new SynchronizationConfiguration() {
+        Dictionary<String, Object> properties;
+
+        @Override
+        public void save() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+        @Override
+        public void setProperties(Dictionary<String, Object> properties) {
+            this.properties = properties;
+        }
+
+        @Override
+        public Object getProperty(String name) {
+            return properties.get(name);
+        }
+
+        @Override
+        public void setProperty(String name, Object value) {
+            this.properties.put(name, value);
+        }
+
+        @Override
+        public Dictionary<String, Object> getProperties() {
+            return properties;
+        }
+    };
     Properties props = new Properties();
 
     @Before
@@ -41,15 +64,11 @@ public class CellarSupportTest {
         props.load(is);
         is.close();
         Dictionary propsDictionary = props;
-        expect(configuration.getProperties()).andReturn(propsDictionary).anyTimes();
-        replay(configuration);
-        replay(configurationAdmin);
+        configuration.setProperties(propsDictionary);
     }
 
     @After
     public void tearDown() throws Exception {
-        verify(configuration);
-        verify(configurationAdmin);
     }
 
     @Test
@@ -58,20 +77,19 @@ public class CellarSupportTest {
         support.setSynchronizationConfiguration(configuration);
 
         Boolean expectedResult = false;
-        Boolean result = support.isAllowed("default","config","org.apache.karaf.shell", EventType.INBOUND);
-        assertEquals("Shell should not be allowed",expectedResult,result);
+        Boolean result = support.isAllowed("default", "config", "org.apache.karaf.shell", EventType.INBOUND);
+        assertEquals("Shell should not be allowed", expectedResult, result);
 
         expectedResult = true;
-        result = support.isAllowed("default","config","org.apache.karaf.cellar.group", EventType.INBOUND);
-        assertEquals("Group config should be allowed",expectedResult,result);
+        result = support.isAllowed("default", "config", "org.apache.karaf.cellar.group", EventType.INBOUND);
+        assertEquals("Group config should be allowed", expectedResult, result);
 
         expectedResult = false;
-        result = support.isAllowed("default","config","org.apache.karaf.cellar.node", EventType.INBOUND);
-        assertEquals("Node config should be allowed",expectedResult,result);
+        result = support.isAllowed("default", "config", "org.apache.karaf.cellar.node", EventType.INBOUND);
+        assertEquals("Node config should be allowed", expectedResult, result);
 
         expectedResult = false;
-        result = support.isAllowed("default","config","org.apache.karaf.cellar.instance", EventType.INBOUND);
-        assertEquals("Instance config should be allowed",expectedResult,result);
+        result = support.isAllowed("default", "config", "org.apache.karaf.cellar.instance", EventType.INBOUND);
+        assertEquals("Instance config should be allowed", expectedResult, result);
     }
-
 }
