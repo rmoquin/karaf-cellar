@@ -59,7 +59,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
-        remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
+        remoteEndpoints = clusterManager.getFirstCluster().getMap(Constants.REMOTE_ENDPOINTS);
         service.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
     }
 

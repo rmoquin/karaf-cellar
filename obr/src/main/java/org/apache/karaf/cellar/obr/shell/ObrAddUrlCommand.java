@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.obr.shell;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -27,12 +26,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "obr-add-url", description = "Add an OBR URL in a cluster group")
 public class ObrAddUrlCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    String clusterName;
 
     @Argument(index = 1, name = "url", description = "The OBR URL.", required = true, multiValued = false)
     String url;
@@ -42,9 +42,9 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
     @Override
     public Object doExecute() throws Exception {
         // check if the group exists
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster group " + clusterName + " doesn't exist");
             return null;
         }
 
@@ -55,16 +55,16 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         }
 
         // check if the URL is allowed
-        if (!isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
-            System.err.println("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
+        if (!isAllowed(cluster, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+            System.err.println("OBR URL " + url + " is blocked outbound for cluster " + clusterName);
             return null;
         }
 
         // update the OBR URLs in the cluster group
-        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+        Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         clusterUrls.add(url);
         // update the OBR bundles in the cluster group
-        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+        Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         synchronized(obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
@@ -77,7 +77,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
-        event.setSourceGroup(group);
+        event.setSourceCluster(cluster);
         eventProducer.produce(event);
 
         return null;

@@ -13,12 +13,11 @@
    limitations under the License.
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
-           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.0.0">
+           xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0">
 
     <ext:property-placeholder/>
     
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
@@ -28,7 +27,6 @@
     <bean id="cellarMBean" class="org.apache.karaf.cellar.management.internal.CellarMBeanImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
     <service ref="cellarMBean" auto-export="interfaces">
@@ -51,7 +49,6 @@
     <!-- Cellar Config MBean -->
     <bean id="cellarConfigMBean" class="org.apache.karaf.cellar.management.internal.CellarConfigMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="eventProducer" ref="eventProducer"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
@@ -65,7 +62,6 @@
     <bean id="cellarFeaturesMBean" class="org.apache.karaf.cellar.management.internal.CellarFeaturesMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="eventProducer" ref="eventProducer"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
@@ -75,22 +71,20 @@
         </service-properties>
     </service>
 
-    <!-- Cellar Cluster Group MBean -->
-    <bean id="cellarGroupMBean" class="org.apache.karaf.cellar.management.internal.CellarGroupMBeanImpl">
+    <!-- Cellar Cluster Cluster MBean -->
+    <bean id="cellarClusterMBean" class="org.apache.karaf.cellar.management.internal.CellarClusterMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="executionContext" ref="executionContext"/>
-        <property name="groupManager" ref="groupManager"/>
     </bean>
-    <service ref="cellarGroupMBean" auto-export="interfaces">
+    <service ref="cellarClusterMBean" auto-export="interfaces">
         <service-properties>
-            <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=group,name=${karaf.name}"/>
+            <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=cluster,name=${karaf.name}"/>
         </service-properties>
     </service>
 
     <!-- Cellar Bundle MBean -->
     <bean id="cellarBundleMBean" class="org.apache.karaf.cellar.management.internal.CellarBundleMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="eventProducer" ref="eventProducer"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>

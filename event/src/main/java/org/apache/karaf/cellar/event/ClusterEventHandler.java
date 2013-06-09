@@ -19,22 +19,21 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.apache.karaf.cellar.core.event.EventType;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Map;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
  * Handler for cluster event.
  */
 public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
+    private SynchronizationConfiguration synchronizationConfig;
 
     @Override
     public void handle(ClusterEvent event) {
@@ -44,27 +43,23 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
             LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
             return;
         }
-        
-        if (groupManager == null) {
-        	// in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
-        	return;
-        }
 
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR EVENT: node is not part of the event cluster group");
+        if (clusterManager == null) {
+            // in rare cases for example right after installation this happens!
+            LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
             return;
         }
 
         try {
-            if (isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
+            if (isAllowed(event.getSourceCluster().getName(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
                 Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
-                properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
+                properties.put(Constants.EVENT_SOURCE_CLUSTER_KEY, event.getSourceCluster().getName());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
                 postEvent(event.getTopicName(), properties);
-            } else LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+            } else {
+                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceCluster().getName());
+            }
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }
@@ -87,14 +82,11 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            Boolean status = Boolean.parseBoolean((String) synchronizationConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
@@ -112,4 +104,17 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
         return ClusterEvent.class;
     }
 
+    /**
+     * @return the synchronizationConfig
+     */
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
+    }
+
+    /**
+     * @param synchronizationConfig the synchronizationConfig to set
+     */
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
+    }
 }

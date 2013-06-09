@@ -13,60 +13,42 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ItemEvent;
 import com.hazelcast.core.ItemListener;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Dispatcher;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventConsumer;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.osgi.framework.BundleContext;
 
 /**
  * Consumes cluster events from the Hazelcast {@code IQueue} and calls the {@code EventDispatcher}.
  */
 public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemListener<E>, Runnable {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(QueueConsumer.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.queue.consumer";
-
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
-
     private Boolean isConsuming = Boolean.TRUE;
-    private BundleContext bundleContext;
-    private HazelcastInstance instance;
+    private SynchronizationConfiguration synchronizationConfig;
     private IQueue queue;
     private Dispatcher dispatcher;
-    private Node node;
-    private ConfigurationAdmin configurationAdmin;
     private String listenerId;
 
-    public QueueConsumer() {
-        // nothing to do
-    }
-
-    public void init() {
-        if (queue != null) {
-            listenerId = queue.addItemListener(this, true);
-        } else {
-            queue = instance.getQueue(Constants.QUEUE);
-            listenerId = queue.addItemListener(this, true);
-        }
+    public void init(CellarCluster cluster) {
+        listenerId = queue.addItemListener(this, true);
         executorService.execute(this);
     }
 
@@ -84,7 +66,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
             while (isConsuming) {
                 E e = null;
                 try {
-                    e = getQueue().poll(10, TimeUnit.SECONDS);
+                    e = getQueue().poll(5, TimeUnit.SECONDS);
                 } catch (InterruptedException e1) {
                     LOGGER.warn("CELLAR HAZELCAST: consume task interrupted");
                 }
@@ -131,12 +113,12 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
 
     @Override
     public void itemAdded(ItemEvent<E> event) {
-        // nothing to do
+        LOGGER.info("An item was added: " + event.toString());
     }
 
     @Override
     public void itemRemoved(ItemEvent<E> event) {
-        // nothing to do
+        LOGGER.info("An item was removed: " + event.toString());
     }
 
     public Dispatcher getDispatcher() {
@@ -145,14 +127,6 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
 
     public void setDispatcher(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
-    }
-
-    public HazelcastInstance getInstance() {
-        return instance;
-    }
-
-    public void setInstance(HazelcastInstance instance) {
-        this.instance = instance;
     }
 
     public IQueue<E> getQueue() {
@@ -167,48 +141,29 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.CONSUMER));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            Boolean status = Boolean.parseBoolean((String) synchronizationConfig.getProperty(Configurations.CONSUMER));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
         }
         return eventSwitch;
     }
-    
-    public Node getNode() {
-        return node;
-    }
 
-    public void setNode(Node node) {
-        this.node = node;
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    /**
+     * @return the synchronizationConfig
+     */
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
     }
 
     /**
-     * @return the bundleContext
+     * @param synchronizationConfig the synchronizationConfig to set
      */
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    /**
-     * @param bundleContext the bundleContext to set
-     */
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
     }
 }

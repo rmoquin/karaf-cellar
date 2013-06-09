@@ -17,9 +17,10 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
-import com.hazelcast.core.Cluster;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ITopic;
 import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
@@ -48,10 +49,10 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     private transient HazelcastInstance instance;
     private String hazelcastConfig;
     private String name;
-    private String listenerId;
+    private transient String listenerId;
     private HazelcastNode localNode;
-    private ConcurrentHashMap<String, HazelcastNode> memberNodes;
-    private List<? extends Synchronizer> synchronizers;
+    private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
+    private transient List<? extends Synchronizer> synchronizers;
     private boolean producer = true;
     private boolean consumer = true;
     private boolean enableBundleEvents = true;
@@ -89,6 +90,65 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
          }*/
     }
 
+    /**
+     * Get the list of Hazelcast nodes.
+     *
+     * @return a Set containing the Hazelcast nodes.
+     */
+    @Override
+    public Set<Node> listNodes() {
+        Set<Node> nodes = new HashSet<Node>();
+        nodes.addAll(this.memberNodes.values());
+        return nodes;
+    }
+
+    /**
+     * Get the nodes with given IDs.
+     *
+     * @param ids a collection of IDs to look for.
+     * @return a Set containing the nodes.
+     */
+    @Override
+    public Set<Node> listNodes(Collection<String> ids) {
+        Set<Node> nodes = new HashSet<Node>();
+        if (ids != null && !ids.isEmpty()) {
+            for (String id : ids) {
+                Node node = this.memberNodes.get(id);
+                if (node != null) {
+                    nodes.add(node);
+                }
+            }
+        }
+        return nodes;
+    }
+
+    /**
+     * Get a node with a given ID.
+     *
+     * @param id the node ID.
+     * @return the node.
+     */
+    @Override
+    public Node findNodeById(String id) {
+        if (id != null) {
+            return this.memberNodes.get(id);
+        }
+        return null;
+    }
+
+    /**
+     * Generate an unique ID.
+     *
+     * @return the generated unique ID.
+     */
+    @Override
+    public synchronized String generateId() {
+        if (idgenerator == null) {
+            idgenerator = instance.getIdGenerator(GENERATOR_ID);
+        }
+        return String.valueOf(idgenerator.newId());
+    }
+
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
@@ -110,12 +170,11 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         String uuid = membershipEvent.getMember().getUuid();
-        this.memberNodes.remove(uuid);
+        HazelcastNode node = this.memberNodes.remove(uuid);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Cluster " + this.name + ", member " + uuid + " left the cluster.");
+            LOGGER.info("Node , " + uuid + ", left cluster, " + this.name + ".");
         }
-        memberNodes.clear();
-        memberNodes = null;
+        node.destroy();
     }
 
     public void shutdown() {
@@ -125,6 +184,26 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
         }
     }
 
+    /**
+     * Get a topic in Hazelcast.
+     *
+     * @param name the topic name.
+     * @return the topic in Hazelcast.
+     */
+    public ITopic getTopic(String name) {
+        return instance.getTopic(name);
+    }
+    
+        /**
+     * Get a queue in Hazelcast.
+     *
+     * @param name the queue name.
+     * @return the queue in Hazelcast.
+     */
+    public IQueue getQueue(String name) {
+        return instance.getQueue(name);
+    }
+    
     /**
      * Get a Map in Hazelcast.
      *
@@ -156,91 +235,6 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     @Override
     public Set getSet(String setName) {
         return instance.getSet(setName);
-    }
-
-    /**
-     * Get the list of Hazelcast nodes.
-     *
-     * @return a Set containing the Hazelcast nodes.
-     */
-    @Override
-    public Set<Node> listNodes() {
-        Set<Node> nodes = new HashSet<Node>();
-
-        Cluster cluster = instance.getCluster();
-        if (cluster != null) {
-            Set<Member> members = cluster.getMembers();
-            if (members != null && !members.isEmpty()) {
-                for (Member member : members) {
-                    HazelcastNode node = new HazelcastNode(member);
-                    nodes.add(node);
-                }
-            }
-        }
-        return nodes;
-    }
-
-    /**
-     * Get the nodes with given IDs.
-     *
-     * @param ids a collection of IDs to look for.
-     * @return a Set containing the nodes.
-     */
-    @Override
-    public Set<Node> listNodes(Collection<String> ids) {
-        Set<Node> nodes = new HashSet<Node>();
-        if (ids != null && !ids.isEmpty()) {
-            Cluster cluster = instance.getCluster();
-            if (cluster != null) {
-                Set<Member> members = cluster.getMembers();
-                if (members != null) {
-                    for (Member member : members) {
-                        if (ids.contains(member.getUuid())) {
-                            HazelcastNode node = new HazelcastNode(member);
-                            nodes.add(node);
-                        }
-                    }
-                }
-            }
-        }
-        return nodes;
-    }
-
-    /**
-     * Get a node with a given ID.
-     *
-     * @param id the node ID.
-     * @return the node.
-     */
-    @Override
-    public Node findNodeById(String id) {
-        if (id != null) {
-            Cluster cluster = instance.getCluster();
-            if (cluster != null) {
-                Set<Member> members = cluster.getMembers();
-                if (members != null && !members.isEmpty()) {
-                    for (Member member : members) {
-                        if (id.equals(member.getUuid())) {
-                            return new HazelcastNode(member);
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Generate an unique ID.
-     *
-     * @return the generated unique ID.
-     */
-    @Override
-    public synchronized String generateId() {
-        if (idgenerator == null) {
-            idgenerator = instance.getIdGenerator(GENERATOR_ID);
-        }
-        return String.valueOf(idgenerator.newId());
     }
 
     /**

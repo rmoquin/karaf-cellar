@@ -14,31 +14,31 @@
 package org.apache.karaf.cellar.obr.shell;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "obr-list-url", description = "List the OBR URLs in a cluster group")
+@Command(scope = "cluster", name = "obr-list-url", description = "List the OBR URLs in a cluster")
 public class ObrListUrlCommand extends CellarCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    String clusterName;
 
     @Override
     public Object doExecute() throws Exception {
         // check if the group exists
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
         // get the OBR URLs in a cluster group
-        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+        Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         if (clusterUrls != null) {
             for (String url : clusterUrls) {
                 System.out.println(url);

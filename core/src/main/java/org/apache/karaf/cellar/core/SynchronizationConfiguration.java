@@ -16,7 +16,6 @@
 package org.apache.karaf.cellar.core;
 
 import java.util.Dictionary;
-import java.util.Map;
 
 /**
  *

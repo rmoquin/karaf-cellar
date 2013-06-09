@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.obr.shell;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -27,23 +26,25 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "obr-remove-url", description = "Remove a repository URL from the distributed OBR service.")
 public class ObrRemoveUrlCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name.", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name.", required = true, multiValued = false)
+    String clusterName;
 
     @Argument(index = 1, name = "url", description = "The repository URL to remove from the OBR service.", required = true, multiValued = false)
     String url;
 
     private EventProducer eventProducer;
 
+    @Override
     public Object doExecute() throws Exception {
         // check if the group exists
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist.");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster group " + clusterName + " doesn't exist.");
             return null;
         }
 
@@ -54,16 +55,16 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
         }
 
         // check if the URL is allowed
-        if (!isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+        if (!isAllowed(cluster, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
             System.err.println("OBR URL " + url + " is blocked outbound");
             return null;
         }
 
         // remove URL from the distributed map
-        Set<String> urls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+        Set<String> urls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         urls.remove(url);
         // remove bundles from the distributed map
-        Set<ObrBundleInfo> bundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+        Set<ObrBundleInfo> bundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         synchronized(obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
@@ -76,7 +77,7 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
 
         // create an event and produce it
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_REMOVE_EVENT_TYPE);
-        event.setSourceGroup(group);
+        event.setSourceCluster(cluster);
         eventProducer.produce(event);
 
         return null;

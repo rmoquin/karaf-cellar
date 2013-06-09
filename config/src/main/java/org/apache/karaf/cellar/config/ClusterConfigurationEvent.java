@@ -37,7 +37,7 @@ public class ClusterConfigurationEvent extends Event {
 	@Override
 	public String toString() {
 		return "ClusterConfigurationEvent [type=" + type + ", id=" + id
-				+ ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
+				+ ", sourceNode=" + sourceNode + ", sourceCluster=" + sourceCluster
 				+ ", destination=" + destinations + ", force=" + force
 				+ ", postPublish=" + postPublish + "]";
 	}

@@ -13,24 +13,24 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
+import java.util.Map;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.core.event.EventType;
 
-import java.util.Map;
 import java.util.Properties;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "config-propset", description = "Set a property value for a configuration in a cluster group")
 public class PropSetCommand extends ConfigCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    String clusterName;
 
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
@@ -46,12 +46,7 @@ public class PropSetCommand extends ConfigCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        Group group = synchronizationManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
-            return null;
-        }
-
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
@@ -59,12 +54,12 @@ public class PropSetCommand extends ConfigCommandSupport {
         }
 
         // check if the config pid is allowed
-        if (!isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
+        if (!isAllowed(cluster, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the configurations in the cluster group
             Properties properties = clusterConfigurations.get(pid);
@@ -76,10 +71,10 @@ public class PropSetCommand extends ConfigCommandSupport {
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-            event.setSourceGroup(group);
+            event.setSourceCluster(cluster);
             eventProducer.produce(event);
         } else {
-            System.out.println("No configuration found in cluster group " + groupName);
+            System.out.println("No configuration found in cluster group " + clusterName);
         }
         return null;
     }

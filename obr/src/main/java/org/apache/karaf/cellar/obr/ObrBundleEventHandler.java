@@ -25,21 +25,16 @@ import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *  Handler for cluster OBR bundle event.
+ * Handler for cluster OBR bundle event.
  */
 public class ObrBundleEventHandler extends ObrSupport implements EventHandler<ClusterObrBundleEvent> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrBundleEventHandler.class);
-
     protected static final char VERSION_DELIM = ',';
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.bundles.handler";
-
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
@@ -56,9 +51,9 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {
-            target = new String[]{ bundle.substring(0, idx), bundle.substring(idx+1) };
+            target = new String[] { bundle.substring(0, idx), bundle.substring(idx + 1) };
         } else {
-            target = new String[]{ bundle, null };
+            target = new String[] { bundle, null };
         }
         return target;
     }
@@ -91,7 +86,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
 
         // the target ID may be a bundle name or a bundle symbolic name,
         // so create
-        StringBuffer sb = new StringBuffer("(|(presentationname=");
+        StringBuilder sb = new StringBuilder("(|(presentationname=");
         sb.append(targetId);
         sb.append(")(symbolicname=");
         sb.append(targetId);
@@ -119,21 +114,9 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
             return;
         }
 
-        if (groupManager == null) {
-        	//in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR OBR: retrieved cluster event {} while groupManager is not available yet!", event);
-        	return;
-        }
-
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR OBR: node is not part of the event cluster group {}", event.getSourceGroup().getName());
-            return;
-        }
-
         String bundleId = event.getBundleId();
         try {
-            if (isAllowed(event.getSourceGroup(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.INBOUND)) {
+            if (isAllowed(event.getSourceCluster().getName(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.INBOUND)) {
                 Resolver resolver = obrService.resolver();
                 String[] target = getTarget(bundleId);
                 Resource resource = selectNewestVersion(searchRepository(target[0], target[1]));
@@ -145,9 +128,11 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
                 if ((resolver.getAddedResources() != null) &&
                         (resolver.getAddedResources().length > 0)) {
                     if (resolver.resolve()) {
-                        if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE)
+                        if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE) {
                             resolver.deploy(Resolver.START);
-                        else resolver.deploy(0);
+                        } else {
+                            resolver.deploy(0);
+                        }
                     }
                 } else {
                     Reason[] reqs = resolver.getUnsatisfiedRequirements();
@@ -157,9 +142,13 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
                             LOGGER.warn("  {}", reqs[reqIdx].getRequirement().getFilter());
                             LOGGER.warn("    {}", reqs[reqIdx].getResource().getPresentationName());
                         }
-                    } else LOGGER.warn("CELLAR OBR: could not resolve targets");
+                    } else {
+                        LOGGER.warn("CELLAR OBR: could not resolve targets");
+                    }
                 }
-            } else LOGGER.warn("CELLAR OBR: bundle {} is marked as BLOCKED INBOUND", bundleId);
+            } else {
+                LOGGER.warn("CELLAR OBR: bundle {} is marked as BLOCKED INBOUND", bundleId);
+            }
         } catch (Exception e) {
             LOGGER.error("CELLAR OBR: failed to handle bundle event {}", bundleId, e);
         }
@@ -174,19 +163,15 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
         }
         return this.eventSwitch;
     }
-
 }

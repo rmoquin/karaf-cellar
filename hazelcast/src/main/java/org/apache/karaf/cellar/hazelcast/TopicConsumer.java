@@ -13,21 +13,20 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
+import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Dispatcher;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.osgi.framework.BundleContext;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +38,15 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.consumer";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private BundleContext bundleContext;
-    private HazelcastInstance instance;
     private ITopic topic;
     private Dispatcher dispatcher;
+    private SynchronizationConfiguration synchronizationConfig;
     private Node node;
-    private ConfigurationAdmin configurationAdmin;
     private boolean isConsuming;
     private String listenerId;
-    
-    public void init() {
-        if (topic == null) {
-            topic = instance.getTopic(Constants.TOPIC);
-        }
+
+    public void init(CellarCluster cluster) {
+        this.node = cluster.getLocalNode();
         start();
     }
 
@@ -73,13 +69,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     @Override
     public void start() {
         isConsuming = true;
-        if (topic != null) {
-            listenerId = topic.addMessageListener(this);
-        } else {
-            topic = instance.getTopic(Constants.TOPIC);
-            listenerId = topic.addMessageListener(this);
-        }
-
+        listenerId = topic.addMessageListener(this);
     }
 
     @Override
@@ -109,14 +99,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         this.dispatcher = dispatcher;
     }
 
-    public HazelcastInstance getInstance() {
-        return instance;
-    }
-
-    public void setInstance(HazelcastInstance instance) {
-        this.instance = instance;
-    }
-
     public ITopic getTopic() {
         return topic;
     }
@@ -129,35 +111,16 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.CONSUMER));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            Boolean status = Boolean.parseBoolean((String) synchronizationConfig.getProperty(Configurations.CONSUMER));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
         }
         return eventSwitch;
-    }
-
-    public Node getNode() {
-        return node;
-    }
-
-    public void setNode(Node node) {
-        this.node = node;
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 
     /**
@@ -172,5 +135,19 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    /**
+     * @return the synchronizationConfig
+     */
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
+    }
+
+    /**
+     * @param synchronizationConfig the synchronizationConfig to set
+     */
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
     }
 }

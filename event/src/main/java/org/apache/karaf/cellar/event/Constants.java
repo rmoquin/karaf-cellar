@@ -21,7 +21,7 @@ public class Constants {
     public static final String CATEGORY = "event";
     public static final String EVENT_PROCESSED_KEY = "org.apache.karaf.cellar.event.processed";
     public static final String EVENT_PROCESSED_VALUE = "true";
-    public static final String EVENT_SOURCE_GROUP_KEY = "org.apache.karaf.cellar.event.source.group";
+    public static final String EVENT_SOURCE_CLUSTER_KEY = "org.apache.karaf.cellar.event.source.group";
     public static final String EVENT_SOURCE_NODE_KEY = "org.apache.karaf.cellar.event.source.node";
 
 }

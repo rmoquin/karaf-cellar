@@ -58,12 +58,6 @@ public class RepositoryEventHandler extends FeaturesSupport implements EventHand
             return;
         }
         
-        // check if the group is local
-        if (!clusterManager.isLocalGroup(event.getSourceCluster())) {
-            LOGGER.debug("CELLAR FEATURES: node is not part of the event cluster group");
-            return;
-        }
-
         String uri = event.getId();
         RepositoryEvent.EventType type = event.getType();
         try {

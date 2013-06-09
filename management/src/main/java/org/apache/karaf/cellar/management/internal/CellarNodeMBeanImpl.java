@@ -23,12 +23,12 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Implementation of the Cellar Node MBean.
  */
 public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBean {
-
     private ClusterManager clusterManager;
     private ExecutionContext executionContext;
 
@@ -60,7 +60,7 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
         }
         Long start = System.currentTimeMillis();
         Ping ping = new Ping(clusterManager.generateId());
-        ping.setDestination(new HashSet(Arrays.asList(node)));
+        ping.setDestinations(new HashSet(Arrays.asList(node)));
         executionContext.execute(ping);
         Long stop = System.currentTimeMillis();
         return (stop - start);
@@ -70,25 +70,26 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
     public TabularData getNodes() throws Exception {
 
         CompositeType nodeType = new CompositeType("Node", "Karaf Cellar cluster node",
-                new String[]{ "id", "hostname", "port", "local" },
-                new String[]{ "ID of the node", "Hostname of the node", "Port number of the node", "Flag defining if the node is local" },
-                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER });
+                new String[] { "id", "hostname", "port", "local" },
+                new String[] { "ID of the node", "Hostname of the node", "Port number of the node", "Flag defining if the node is local" },
+                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER });
 
-        TabularType tableType = new TabularType("Nodes", "Table of all Karaf Cellar nodes", nodeType, new String[]{ "id" });
+        TabularType tableType = new TabularType("Nodes", "Table of all Karaf Cellar nodes", nodeType, new String[] { "id" });
 
         TabularData table = new TabularDataSupport(tableType);
 
-        Set<Node> nodes = clusterManager.listNodes();
+        Set<CellarCluster> cluster = clusterManager.getClusters();
 
-        for (Node node : nodes) {
-            boolean local = (nodes.equals(clusterManager.getLocalNode()));
-            CompositeData data = new CompositeDataSupport(nodeType,
-                    new String[]{ "id", "hostname", "port", "local" },
-                    new Object[]{ node.getId(), node.getHost(), node.getPort(), local });
-            table.put(data);
+        for (CellarCluster cellarCluster : cluster) {
+            Set<Node> nodes = cellarCluster.listNodes();
+            for (Node node : nodes) {
+                CompositeData data = new CompositeDataSupport(nodeType,
+                        new String[] { "id", "hostname", "port" },
+                        new Object[] { node.getId(), node.getHost(), node.getPort() });
+                table.put(data);
+            }
         }
 
         return table;
     }
-
 }

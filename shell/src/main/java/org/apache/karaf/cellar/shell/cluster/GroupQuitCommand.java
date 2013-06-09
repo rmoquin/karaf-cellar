@@ -11,7 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.group;
+package org.apache.karaf.cellar.shell.cluster;
 
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.ManageGroupAction;
@@ -20,8 +20,8 @@ import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
 
-@Command(scope = "cluster", name = "group-set", description = "Set the target nodes to a cluster group")
-public class GroupSetCommand extends GroupSupport {
+@Command(scope = "cluster", name = "group-quit", description = "Quit node(s) from a cluster group")
+public class GroupQuitCommand extends GroupSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
     String groupName;
@@ -36,8 +36,7 @@ public class GroupSetCommand extends GroupSupport {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
-
-        return doExecute(ManageGroupAction.SET, groupName, null, nodes, false);
+        return doExecute(ManageGroupAction.QUIT, groupName, null, nodes, false);
     }
 
 }

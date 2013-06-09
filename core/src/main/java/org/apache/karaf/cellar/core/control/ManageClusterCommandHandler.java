@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import java.util.List;
+import java.util.Set;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 
@@ -92,7 +92,7 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
      */
     public void leaveCluster(String targetClusterName) {
         //TODO Figure out out how to remove the cluster config
-        CellarCluster cluster = clusterManager.findClusterByName(targetClusterName);
+        CellarCluster cluster = getClusterManager().findClusterByName(targetClusterName);
         
     }
 
@@ -100,7 +100,7 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
      * Remove {@link Node} from all {@link CellarCluster}s.
      */
     public void leaveAllClusters() {
-        List<CellarCluster> clusters = getClusterManager().getClusters();
+        Set<CellarCluster> clusters = getClusterManager().getClusters();
         //TODO Figure out out how to remove the cluster configs.
     }
 

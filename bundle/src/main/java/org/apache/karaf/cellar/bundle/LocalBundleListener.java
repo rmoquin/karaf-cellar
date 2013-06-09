@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
@@ -60,9 +61,9 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
         }
 
         if (event.getBundle() != null) {
-            List<CellarCluster> clusters = null;
+            Set<CellarCluster> clusters = null;
             try {
-                clusters = clusterManager.getClusters();
+                clusters = getClusterManager().getClusters();
             } catch (Exception ex) {
                 LOGGER.warn("Failed to list local groups. Is Cellar uninstalling ?", ex);
             }

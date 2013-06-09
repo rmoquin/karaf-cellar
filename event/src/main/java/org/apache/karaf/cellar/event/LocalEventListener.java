@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.event;
 
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -25,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 public class LocalEventListener extends EventSupport implements EventHandler {
 
@@ -43,9 +43,9 @@ public class LocalEventListener extends EventSupport implements EventHandler {
 
         try {
             if (event != null && event.getTopic() != null) {
-                Set<Group> groups = null;
+                Set<CellarCluster> clusters = null;
                 try {
-                    groups = groupManager.listLocalGroups();
+                    clusters = clusterManager.getClusters();
                 } catch (Exception e) {
                     LOGGER.warn("Failed to list local groups. Is Cellar uninstalling ?");
                     return;
@@ -59,14 +59,14 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                     }
                 }
 
-                if (groups != null && !groups.isEmpty()) {
-                    for (Group group : groups) {
+                if (clusters != null && !clusters.isEmpty()) {
+                    for (CellarCluster cluster : clusters) {
                         String topicName = event.getTopic();
                         Map<String, Serializable> properties = getEventProperties(event);
-                        if (isAllowed(group, Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
+                        if (isAllowed(cluster.getName(), Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
-                            clusterEvent.setSourceGroup(group);
+                            clusterEvent.setSourceCluster(cluster);
                             eventProducer.produce(clusterEvent);
                         } else if (!topicName.startsWith("org/osgi/service/log/LogEntry/"))
                                 LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);

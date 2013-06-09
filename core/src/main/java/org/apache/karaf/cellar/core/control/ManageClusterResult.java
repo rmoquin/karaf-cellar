@@ -39,12 +39,12 @@ public class ManageClusterResult extends Result {
         this.success = success;
     }
 
-    public Set<CellarCluster> getGroups() {
+    public Set<CellarCluster> getClusters() {
         return clusters;
     }
 
-    public void setGroups(Set<CellarCluster> groups) {
-        this.clusters = groups;
+    public void setClusters(Set<CellarCluster> clusters) {
+        this.clusters = clusters;
     }
 
 }

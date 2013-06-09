@@ -48,7 +48,7 @@ public class NodePingCommand extends ClusterCommandSupport {
             for (int i = 1; i <= iterations; i++) {
                 Long start = System.currentTimeMillis();
                 Ping ping = new Ping(clusterManager.generateId());
-                ping.setDestination(new HashSet(Arrays.asList(node)));
+                ping.setDestinations(new HashSet(Arrays.asList(node)));
                 executionContext.execute(ping);
                 Long stop = System.currentTimeMillis();
                 Long delay = stop - start;

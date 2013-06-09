@@ -131,11 +131,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // update the cluster group
-        String key = null;
-        String location = null;
             Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
-            key = selector(symbolicName, version, clusterBundles);
+            String key = selector(symbolicName, version, clusterBundles);
 
             if (key == null) {
                 throw new IllegalArgumentException("Bundle " + key + " is not found in cluster group " + clusterName);
@@ -145,7 +143,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             if (state == null) {
                 throw new IllegalArgumentException("Bundle " + key + " is not found in cluster group " + clusterName);
             }
-            location = state.getLocation();
+            String location = state.getLocation();
 
             // check if the bundle location is allowed outbound
             CellarSupport support = new CellarSupport();
@@ -176,11 +174,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // update the cluster group
-        String key = null;
-        String location = null;
             Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
-            key = selector(symbolicName, version, clusterBundles);
+            String key = selector(symbolicName, version, clusterBundles);
 
             if (key == null) {
                 throw new IllegalStateException("Bundle " + key + " not found in cluster group " + clusterName);
@@ -190,7 +186,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             if (state == null) {
                 throw new IllegalStateException("Bundle " + key + " not found in cluster group " + clusterName);
             }
-            location = state.getLocation();
+            String location = state.getLocation();
 
             // check if the bundle location is allowed
             CellarSupport support = new CellarSupport();
@@ -222,11 +218,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // update the cluster group
-        String key = null;
-        String location = null;
             Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
-            key = selector(symbolicName, version, clusterBundles);
+            String key = selector(symbolicName, version, clusterBundles);
 
             if (key == null) {
                 throw new IllegalStateException("Bundle " + key + " not found in cluster group " + clusterName);
@@ -236,7 +230,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             if (state == null) {
                 throw new IllegalStateException("Bundle " + key + " not found in cluster group " + clusterName);
             }
-            location = state.getLocation();
+            String location = state.getLocation();
 
             // check if the bundle location is allowed outbound
             CellarSupport support = new CellarSupport();

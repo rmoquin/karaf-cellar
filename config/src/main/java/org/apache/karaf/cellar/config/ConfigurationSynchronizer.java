@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -29,6 +28,7 @@ import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * The ConfigurationSynchronizer is called when Cellar starts or when a node joins a cluster group.
@@ -43,14 +43,14 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     }
 
     public void init() {
-        Set<Group> groups = groupManager.listLocalGroups();
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
+        Set<CellarCluster> clusters = clusterManager.getClusters();
+        if (clusters != null && !clusters.isEmpty()) {
+            for (CellarCluster cluster : clusters) {
+                if (isSyncEnabled(cluster)) {
+                    pull(cluster);
+                    push(cluster);
                 } else {
-                    LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
+                    LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", cluster.getName());
                 }
             }
         }
@@ -60,25 +60,32 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         // nothing to do
     }
 
+    @Override
+    public boolean synchronize(CellarCluster cluster) {
+        this.pull(cluster);
+        this.push(cluster);
+        return true;
+    }
+    
     /**
      * Pull the configuration from a cluster group to update the local ones.
      *
-     * @param group the cluster group where to get the configurations.
+     * @param cluster the cluster group where to get the configurations.
      */
     @Override
-    public void pull(Group group) {
-        if (group != null) {
-            String groupName = group.getName();
-            LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", groupName);
+    public void pull(CellarCluster cluster) {
+        if (cluster != null) {
+            String clusterName = cluster.getName();
+            LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", clusterName);
 
-            Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
 
             for (String clusterConfiguration : clusterConfigurations.keySet()) {
-                if (isAllowed(group, Constants.CATEGORY, clusterConfiguration, EventType.INBOUND)) {
+                if (isAllowed(cluster.getName(), Constants.CATEGORY, clusterConfiguration, EventType.INBOUND)) {
                     Dictionary clusterDictionary = clusterConfigurations.get(clusterConfiguration);
                     try {
                         // update the local configuration if needed
-                        Configuration localConfiguration = configurationAdmin.getConfiguration(clusterConfiguration, null);
+                        Configuration localConfiguration = getConfigurationAdmin().getConfiguration(clusterConfiguration, null);
                         Dictionary localDictionary = localConfiguration.getProperties();
                         if (localDictionary == null) {
                             localDictionary = new Properties();
@@ -87,13 +94,13 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         localDictionary = filter(localDictionary);
                         if (!equals(localDictionary, clusterDictionary)) {
                             localConfiguration.update(localDictionary);
-                            persistConfiguration(configurationAdmin, clusterConfiguration, localDictionary);
+                            persistConfiguration(getConfigurationAdmin(), clusterConfiguration, localDictionary);
                         }
                     } catch (IOException ex) {
                         LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
                     }
                 } else {
-                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", clusterConfiguration, groupName);
+                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", clusterConfiguration, clusterName);
                 }
             }
         }
@@ -105,7 +112,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      * @param group the cluster group where to update the configurations.
      */
     @Override
-    public void push(Group group) {
+    public void push(CellarCluster cluster) {
 
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
@@ -113,28 +120,28 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             return;
         }
 
-        if (group != null) {
-            String groupName = group.getName();
-            LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);
-            Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        if (cluster != null) {
+            String clusterName = cluster.getName();
+            LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", clusterName);
+            Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
 
             Configuration[] localConfigurations;
             try {
-                localConfigurations = configurationAdmin.listConfigurations(null);
+                localConfigurations = getConfigurationAdmin().listConfigurations(null);
                 for (Configuration localConfiguration : localConfigurations) {
                     String pid = localConfiguration.getPid();
                     // check if the pid is marked as local.
-                    if (isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                    if (isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
                         Dictionary localDictionary = localConfiguration.getProperties();
                         localDictionary = filter(localDictionary);
                         // update the configurations in the cluster group
                         clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
                         // broadcast the cluster event
                         ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-                        event.setSourceGroup(group);
+                        event.setSourceCluster(cluster);
                         eventProducer.produce(event);
                     } else {
-                        LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
+                        LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, clusterName);
                     }
                 }
             } catch (IOException ex) {
@@ -148,25 +155,17 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     /**
      * Check if configuration sync flag is enabled for a cluster group.
      *
-     * @param group the cluster group.
+     * @param cluster the cluster group.
      * @return true if the configuration sync flag is enabled for the cluster group, false else.
      */
     @Override
-    public Boolean isSyncEnabled(Group group) {
+    public Boolean isSyncEnabled(CellarCluster cluster) {
         Boolean result = Boolean.FALSE;
-        String groupName = group.getName();
+        String clusterName = cluster.getName();
 
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP);
-            Dictionary<String, Object> properties = configuration.getProperties();
-            if (properties != null) {
-                String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-                String propertyValue = (String) properties.get(propertyKey);
-                result = Boolean.parseBoolean(propertyValue);
-            }
-        } catch (IOException e) {
-            LOGGER.error("CELLAR CONFIG: error while checking if sync is enabled", e);
-        }
+        String propertyKey = clusterName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+        String propertyValue = (String) super.synchronizationConfiguration.getProperty(propertyKey);
+        result = Boolean.parseBoolean(propertyValue);
         return result;
     }
 

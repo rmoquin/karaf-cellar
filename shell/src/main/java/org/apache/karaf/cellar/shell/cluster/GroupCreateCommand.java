@@ -11,14 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.group;
+package org.apache.karaf.cellar.shell.cluster;
 
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "cluster", name = "group-delete", description = "Delete a cluster group")
-public class GroupDeleteCommand extends GroupSupport {
+@Command(scope = "cluster", name = "group-create", description = "Create a cluster group")
+public class GroupCreateCommand extends GroupSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
     String groupName;
@@ -27,19 +27,12 @@ public class GroupDeleteCommand extends GroupSupport {
     protected Object doExecute() throws Exception {
         // check if the group exists
         Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        if (group != null) {
+            System.err.println("Cluster group " + groupName + " already exists");
             return null;
         }
 
-        // check if the group doesn't contain nodes
-        if (group.getNodes() != null && !group.getNodes().isEmpty()) {
-            System.err.println("Cluster group " + groupName  + " is not empty");
-            return null;
-        }
-
-        groupManager.deleteGroup(groupName);
-
+        groupManager.createGroup(groupName);
         return null;
     }
 

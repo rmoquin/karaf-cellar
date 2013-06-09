@@ -129,15 +129,12 @@ public class RemoteServiceCallHandler extends CellarSupport implements EventHand
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
+                Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
                 if (status) {
                     dosgiSwitch.turnOn();
                 } else {
                     dosgiSwitch.turnOff();
                 }
-            }
         } catch (Exception e) {
             // ignore
         }

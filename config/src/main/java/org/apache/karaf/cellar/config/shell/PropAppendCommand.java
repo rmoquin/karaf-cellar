@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.config.shell;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
@@ -25,12 +24,13 @@ import org.apache.karaf.cellar.core.event.EventType;
 
 import java.util.Map;
 import java.util.Properties;
+import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
+@Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster")
 public class PropAppendCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    String clusterName;
 
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
@@ -46,9 +46,9 @@ public class PropAppendCommand extends ConfigCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        Group group = synchronizationManager.findGroupByName(groupName);
-        if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
@@ -59,12 +59,12 @@ public class PropAppendCommand extends ConfigCommandSupport {
         }
 
         // check if the config pid is allowed
-        if (!isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
+        if (!isAllowed(cluster, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the configurations in the cluster group
             Properties properties = clusterConfigurations.get(pid);
@@ -84,10 +84,10 @@ public class PropAppendCommand extends ConfigCommandSupport {
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-            event.setSourceGroup(group);
+            event.setSourceCluster(cluster);
             eventProducer.produce(event);
         } else {
-            System.out.println("No configuration found in cluster group " + groupName);
+            System.out.println("No configuration found in cluster group " + clusterName);
         }
         return null;
     }

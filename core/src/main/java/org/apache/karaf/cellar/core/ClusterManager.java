@@ -13,8 +13,7 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 /**
  * Cluster manager interface.
@@ -24,7 +23,7 @@ public interface ClusterManager {
     /**
      * @return the clusters
      */
-    List<CellarCluster> getClusters();
+    public Set<CellarCluster> getClusters();
 
     /**
      * Create a new cluster.
@@ -32,7 +31,7 @@ public interface ClusterManager {
      * @param clusterName the new cluster name.
      * @return the created cluster.
      */
-    public CellarCluster joinCluster(String clusterName);
+    public void joinCluster(String clusterName);
 
     /**
      * Delete an existing cluster.
@@ -49,5 +48,9 @@ public interface ClusterManager {
      */
     public CellarCluster findClusterByName(String clusterName);
 
-    public CellarCluster findNode(Node node);
+    public Node findNodeById(String nodeId);
+
+    String generateId();
+
+    CellarCluster getFirstCluster();
 }

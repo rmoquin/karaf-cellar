@@ -19,7 +19,6 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.apache.karaf.cellar.core.event.EventType;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +26,8 @@ import org.slf4j.LoggerFactory;
  * Handler for cluster OBR URL event.
  */
 public class ObrUrlEventHandler extends ObrSupport implements EventHandler<ClusterObrUrlEvent> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlEventHandler.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.urls.handler";
-
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
@@ -58,21 +54,9 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
             return;
         }
 
-        if (groupManager == null) {
-        	//in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR OBR: retrieved event {} while groupManager is not available yet!", event);
-        	return;
-        }
-
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR OBR: node is not part of the event cluster group {}", event.getSourceGroup().getName());
-            return;
-        }
-
         String url = event.getUrl();
         try {
-            if (isAllowed(event.getSourceGroup(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
+            if (isAllowed(event.getSourceCluster().getName(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
                 if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
                     obrService.addRepository(url);
@@ -99,19 +83,15 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
+            Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            if (status) {
+                eventSwitch.turnOn();
+            } else {
+                eventSwitch.turnOff();
             }
         } catch (Exception e) {
             // ignore
         }
         return this.eventSwitch;
     }
-
 }

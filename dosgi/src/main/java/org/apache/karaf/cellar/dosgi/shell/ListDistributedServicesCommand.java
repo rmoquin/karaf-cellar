@@ -24,28 +24,26 @@ import java.util.Set;
 
 @Command(scope = "cluster", name = "service-list", description = "List the services available on the cluster")
 public class ListDistributedServicesCommand extends CellarCommandSupport {
-
     private static final String LIST_FORMAT = "%-80s %-20s";
 
     @Override
     protected Object doExecute() throws Exception {
-            Map<String, EndpointDescription> remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
-            if (remoteEndpoints != null && !remoteEndpoints.isEmpty()) {
-                System.out.println(String.format(LIST_FORMAT, "Service Class", "Provider Node"));
-                for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
-                    EndpointDescription endpointDescription = entry.getValue();
-                    String serviceClass = endpointDescription.getServiceClass();
-                    Set<Node> nodes = endpointDescription.getNodes();
-                    for (Node node : nodes) {
-                        System.out.println(String.format(LIST_FORMAT, serviceClass, node.getId()));
-                        serviceClass = "";
-                    }
+        Map<String, EndpointDescription> remoteEndpoints = clusterManager.getFirstCluster().getMap(Constants.REMOTE_ENDPOINTS);
+        if (remoteEndpoints != null && !remoteEndpoints.isEmpty()) {
+            System.out.println(String.format(LIST_FORMAT, "Service Class", "Provider Node"));
+            for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
+                EndpointDescription endpointDescription = entry.getValue();
+                String serviceClass = endpointDescription.getServiceClass();
+                Set<Node> nodes = endpointDescription.getNodes();
+                for (Node node : nodes) {
+                    System.out.println(String.format(LIST_FORMAT, serviceClass, node.getId()));
+                    serviceClass = "";
                 }
-
-            } else {
-                System.out.println("No service available on the cluster");
             }
+
+        } else {
+            System.out.println("No service available on the cluster");
+        }
         return null;
     }
-
 }

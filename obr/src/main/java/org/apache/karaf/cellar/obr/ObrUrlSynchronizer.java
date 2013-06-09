@@ -16,40 +16,44 @@ package org.apache.karaf.cellar.obr;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
-import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Dictionary;
 import java.util.List;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * OBR URL Synchronizer.
  */
 public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
-
     private List<EventProducer> producerList;
 
     @Override
     public void init() {
         super.init();
-        Set<Group> groups = groupManager.listLocalGroups();
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
-                } else LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
+        Set<CellarCluster> clusters = clusterManager.getClusters();
+        if (clusters != null && !clusters.isEmpty()) {
+            for (CellarCluster cluster : clusters) {
+                if (isSyncEnabled(cluster)) {
+                    pull(cluster);
+                    push(cluster);
+                } else {
+                    LOGGER.debug("CELLAR OBR: sync is disabled for group {}", cluster.getName());
+                }
             }
         }
+    }
+    
+    @Override
+    public boolean synchronize(CellarCluster cluster) {
+        this.pull(cluster);
+        this.push(cluster);
+        return true;
     }
 
     @Override
@@ -58,72 +62,66 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     }
 
     /**
-     * Pull the OBR URLs from a cluster group to update the local state.
+     * Pull the OBR URLs from a cluster to update the local state.
      *
-     * @param group the cluster group.
+     * @param cluster the cluster.
      */
     @Override
-    public void pull(Group group) {
-        if (group != null) {
-            String groupName = group.getName();
-            Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
-                if (clusterUrls != null && !clusterUrls.isEmpty()) {
-                    for (String url : clusterUrls) {
-                        try {
-                            LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
-                            obrService.addRepository(url);
-                        } catch (Exception e) {
-                            LOGGER.error("CELLAR OBR: failed to add repository URL {}", url, e);
-                        }
+    public void pull(CellarCluster cluster) {
+        if (cluster != null) {
+            String clusterName = cluster.getName();
+            Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+            if (clusterUrls != null && !clusterUrls.isEmpty()) {
+                for (String url : clusterUrls) {
+                    try {
+                        LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
+                        obrService.addRepository(url);
+                    } catch (Exception e) {
+                        LOGGER.error("CELLAR OBR: failed to add repository URL {}", url, e);
                     }
                 }
+            }
         }
     }
 
     /**
-     * Push the local OBR URLs to a cluster group.
+     * Push the local OBR URLs to a cluster.
      *
-     * @param group the cluster group.
+     * @param cluster the cluster.
      */
     @Override
-    public void push(Group group) {
-        if (group != null) {
-            String groupName = group.getName();
-            Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+    public void push(CellarCluster cluster) {
+        if (cluster != null) {
+            String clusterName = cluster.getName();
+            Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
 
-                Repository[] repositories = obrService.listRepositories();
-                for (Repository repository : repositories) {
-                    if (isAllowed(group, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
-                        clusterUrls.add(repository.getURI().toString());
-                        // update OBR bundles in the cluster group
-                        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
-                        Resource[] resources = repository.getResources();
-                        for (Resource resource : resources) {
-                            ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());
-                            clusterBundles.add(info);
-                            // TODO fire event to the other nodes ?
-                        }
-                    } else {
-                        LOGGER.warn("CELLAR OBR: URL {} is blocked outbound for cluster group {}", repository.getURI().toString(), groupName);
+            Repository[] repositories = obrService.listRepositories();
+            for (Repository repository : repositories) {
+                if (isAllowed(cluster.getName(), Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
+                    clusterUrls.add(repository.getURI().toString());
+                    // update OBR bundles in the cluster group
+                    Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+                    Resource[] resources = repository.getResources();
+                    for (Resource resource : resources) {
+                        ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());
+                        clusterBundles.add(info);
+                        // TODO fire event to the other nodes ?
                     }
+                } else {
+                    LOGGER.warn("CELLAR OBR: URL {} is blocked outbound for cluster group {}", repository.getURI().toString(), clusterName);
                 }
+            }
         }
     }
 
     @Override
-    public Boolean isSyncEnabled(Group group) {
+    public Boolean isSyncEnabled(CellarCluster cluster) {
         Boolean result = Boolean.FALSE;
-        String groupName = group.getName();
+        String clusterName = cluster.getName();
 
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP);
-            Dictionary<String, Object> properties = configuration.getProperties();
-            String propertyKey = groupName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) properties.get(propertyKey);
-            result = Boolean.parseBoolean(propertyValue);
-        } catch (IOException e) {
-            LOGGER.error("CELLAR OBR: error while checking if sync is enabled", e);
-        }
+        String propertyKey = clusterName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+        String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
+        result = Boolean.parseBoolean(propertyValue);
         return result;
     }
 
@@ -134,5 +132,4 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     public void setProducerList(List<EventProducer> producerList) {
         this.producerList = producerList;
     }
-
 }

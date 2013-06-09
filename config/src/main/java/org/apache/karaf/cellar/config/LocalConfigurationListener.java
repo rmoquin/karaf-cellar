@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -25,10 +24,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * LocalConfigurationListener is listening for local configuration changes.
- * When a local configuration change occurs, this listener updates the cluster group and broadcasts a cluster config event.
+ * When a local configuration change occurs, this listener updates the cluster and broadcasts a cluster config event.
  */
 public class LocalConfigurationListener extends ConfigurationSupport implements ConfigurationListener {
 
@@ -55,7 +55,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Dictionary localDictionary = null;
         if (event.getType() != ConfigurationEvent.CM_DELETED) {
             try {
-                Configuration conf = configurationAdmin.getConfiguration(pid, null);
+                Configuration conf = getConfigurationAdmin().getConfiguration(pid, null);
                 localDictionary = conf.getProperties();
             } catch (Exception e) {
                 LOGGER.error("CELLAR CONFIG: can't retrieve configuration with PID {}", pid, e);
@@ -63,14 +63,14 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
             }
         }
 
-        Set<Group> groups = groupManager.listLocalGroups();
+        Set<CellarCluster> clusters = clusterManager.getClusters();
 
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups) {
+        if (clusters != null && !clusters.isEmpty()) {
+            for (CellarCluster cluster : clusters) {
                 // check if the pid is allowed for outbound.
-                if (isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                if (isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
 
-                    Map<String, Properties> clusterConfigurations = getClusterManager().getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
+                    Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + cluster.getName());
 
                     try {
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
@@ -79,8 +79,8 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             // broadcast the cluster event
                             ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                             clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
-                            clusterConfigurationEvent.setSourceNode(getClusterManager().getLocalNode());
-                            clusterConfigurationEvent.setSourceGroup(group);
+                            clusterConfigurationEvent.setSourceNode(cluster.getLocalNode());
+                            clusterConfigurationEvent.setSourceCluster(cluster);
                             eventProducer.produce(clusterConfigurationEvent);
                         } else {
                             localDictionary = filter(localDictionary);
@@ -92,15 +92,15 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                                clusterConfigurationEvent.setSourceGroup(group);
-                                clusterConfigurationEvent.setSourceNode(getClusterManager().getLocalNode());
+                                clusterConfigurationEvent.setSourceCluster(cluster);
+                                clusterConfigurationEvent.setSourceNode(cluster.getLocalNode());
                                 eventProducer.produce(clusterConfigurationEvent);
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {}", pid, group.getName(), e);
+                        LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {}", pid, cluster.getName(), e);
                     }
-                } else LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, group.getName());
+                } else LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, cluster.getName());
             }
         }
     }

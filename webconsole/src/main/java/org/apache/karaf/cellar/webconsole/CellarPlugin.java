@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.webconsole;
 
 import org.apache.felix.webconsole.AbstractWebConsolePlugin;
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.SynchronizationManager;
 import org.apache.karaf.cellar.core.Node;
 import org.json.JSONException;
 import org.json.JSONWriter;
@@ -31,22 +29,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
- * WebConsole plugin for Cellar cluster groups.
+ * WebConsole plugin for Cellar cluster.
  */
 public class CellarPlugin extends AbstractWebConsolePlugin {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarPlugin.class);
-
     public static final String NAME = "cellar";
     public static final String LABEL = "Cellar";
     private ClassLoader classLoader;
     private String cellarJs = "/cellar/res/ui/cellar.js";
-
     private ClusterManager clusterManager;
-    private SynchronizationManager groupManager;
     private BundleContext bundleContext;
 
     public void start() {
@@ -76,16 +72,16 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
 
         final String action = req.getParameter("action");
         final String node = req.getParameter("node");
-        final String group = req.getParameter("group");
+        final String cluster = req.getParameter("cluster");
         final String id = req.getParameter("id");
 
         if (action == null) {
             success = true;
-        } else if (action.equals("createGroup")) {
-            groupManager.createGroup(group);
+        } else if (action.equals("createCluster")) {
+            clusterManager.joinCluster(cluster);
             success = true;
-        } else if (action.equals("deleteGroup")) {
-            groupManager.deleteGroup(group);
+        } else if (action.equals("deleteCluster")) {
+            clusterManager.leaveCluster(cluster);
             success = true;
         }
 
@@ -109,8 +105,8 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         final PrintWriter pw = response.getWriter();
 
         String appRoot = (String) request.getAttribute("org.apache.felix.webconsole.internal.servlet.OsgiManager.appRoot");
-        final String featuresScriptTag = "<script src='" + appRoot + this.cellarJs
-                + "' language='JavaScript'></script>";
+        final String featuresScriptTag = "<script src='" + appRoot + this.cellarJs +
+                 "' language='JavaScript'></script>";
         pw.println(featuresScriptTag);
 
         pw.println("<script type='text/javascript'>");
@@ -123,7 +119,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
 
         pw.println("<script type='text/javascript'>");
         pw.println("// <![CDATA[");
-        pw.print("renderGroups( ");
+        pw.print("renderClusters( ");
         writeJSON(pw);
         pw.println(" )");
         pw.println("// ]]>");
@@ -169,32 +165,33 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     }
 
     private void writeJSON(final PrintWriter pw) throws IOException {
-        final Set<Group> groups = groupManager.listAllGroups();
-        final Set<Node> nodes = clusterManager.listNodes();
+        final Set<CellarCluster> clusters = clusterManager.getClusters();
+        final Set<Node> nodes = new HashSet<Node>();
+        for (CellarCluster cluster : clusters) {
+            nodes.addAll(cluster.listNodes());
+        }
 
         final JSONWriter jw = new JSONWriter(pw);
 
         try {
             jw.object();
             jw.key("status");
-            jw.value(getStatusLine(groups, nodes));
-            jw.key("groups");
+            jw.value(getStatusLine(clusters, nodes));
+            jw.key("clusters");
             jw.array();
-            for (Group g : groups) {
+            for (CellarCluster g : clusters) {
                 jw.object();
                 jw.key("name");
                 jw.value(g.getName());
 
-                Set<Node> members = g.getNodes();
+                Set<Node> members = g.listNodes();
                 jw.key("members");
                 jw.array();
-                if (nodes != null) {
-                    for (Node n : members) {
-                        jw.object();
-                        jw.key("id");
-                        jw.value(n.getId());
-                        jw.endObject();
-                    }
+                for (Node n : members) {
+                    jw.object();
+                    jw.key("id");
+                    jw.value(n.getId());
+                    jw.endObject();
                 }
 
                 jw.endArray();
@@ -202,7 +199,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
                 jw.array();
                 boolean enable = true;
                 action(jw, enable, "removeNode", "Remove Node", "update");
-                action(jw, enable, "deleteGroup", "Delete Group", "delete");
+                action(jw, enable, "deleteCluster", "Delete Cluster", "delete");
                 jw.endArray();
                 jw.endObject();
             }
@@ -222,12 +219,12 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         jw.endObject();
     }
 
-    private String getStatusLine(final Set<Group> groups, Set<Node> members) {
-        int groupCount = 0;
+    private String getStatusLine(final Set<CellarCluster> clusters, Set<Node> members) {
+        int clusterCount = 0;
         int memberCount = 0;
 
-        if (groups != null) {
-            groupCount = groups.size();
+        if (clusters != null) {
+            clusterCount = clusters.size();
         }
 
         if (members != null) {
@@ -235,7 +232,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(String.format("Found %s members in %s groups", memberCount, groupCount));
+        builder.append(String.format("Found %s members in %s clusters", memberCount, clusterCount));
         return builder.toString();
     }
 
@@ -243,12 +240,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         this.bundleContext = bundleContext;
     }
 
-    public void setGroupManager(SynchronizationManager groupManager) {
-        this.groupManager = groupManager;
-    }
-
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
     }
-
 }

@@ -27,7 +27,7 @@ public class Event implements Serializable {
 
     protected String id;
     protected Node sourceNode;
-    private CellarCluster sourceCluster;
+    protected CellarCluster sourceCluster;
     protected Set<Node> destinations;
     protected Boolean force = Boolean.FALSE;
     protected Boolean postPublish = Boolean.FALSE;
