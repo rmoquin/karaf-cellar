@@ -59,14 +59,6 @@ public class HazelcastClusterManager implements ClusterManager {
     public void destroy() {
     }
     
-     public void register(CellarCluster service, java.util.Map serviceProperties) {
-        LOGGER.info("A cluster was registered." + serviceProperties);
-    }
-
-    public void unregister(CellarCluster service, java.util.Map serviceProperties) {
-        LOGGER.info("A cluster was unregistered." + serviceProperties);
-    }
-
     public void bind(CellarCluster cluster) {
         LOGGER.info("Cellar cluster with name: " + cluster.getName() + " in now bound as a service.");
         String clusterName = cluster.getName();

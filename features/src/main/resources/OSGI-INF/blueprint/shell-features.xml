@@ -79,9 +79,7 @@
         </command>
     </command-bundle>
 
-    <bean id="allClustersCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllClustersCompleter">
-        <property name="groupManager" ref="groupManager"/>
-    </bean>
+    <bean id="allClustersCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllClustersCompleter"/>
 
     <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
         <property name="featuresService" ref="featuresService"/>

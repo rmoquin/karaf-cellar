@@ -82,5 +82,7 @@
     <bean id="allBundlesVersionCompleter" class="org.apache.karaf.cellar.bundle.shell.completers.AllBundlesVersionCompleter">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
+    
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
 </blueprint>

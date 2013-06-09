@@ -30,7 +30,6 @@
         <command name="cluster/sync">
             <action class="org.apache.karaf.cellar.shell.SyncCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="groupManager" ref="groupManager"/>
             </action>
         </command>
         <command name="cluster/consumer-start">
@@ -115,17 +114,17 @@
             </completers>
         </command>
         <command name="cluster/join">
-            <action class="org.apache.karaf.cellar.shell.group.GroupJoinCommand">
+            <action class="org.apache.karaf.cellar.shell.cluster.GroupJoinCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
-                <ref component-id="allGroupCompleter"/>
+                <ref component-id="allClustersCompleter"/>
                 <ref component-id="allNodesCompleter"/>
             </completers>
         </command>
         <command name="cluster/leave">
-            <action class="org.apache.karaf.cellar.shell.group.GroupQuitCommand">
+            <action class="org.apache.karaf.cellar.shell.cluster.GroupQuitCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="executionContext" ref="executionContext"/>
             </action>
@@ -135,7 +134,7 @@
             </completers>
         </command>
         <command name="cluster/list">
-            <action class="org.apache.karaf.cellar.shell.group.GroupListCommand">
+            <action class="org.apache.karaf.cellar.shell.cluster.GroupListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="executionContext" ref="executionContext"/>
             </action>

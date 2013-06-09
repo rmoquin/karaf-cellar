@@ -27,10 +27,9 @@
         <property name="discoveryServices" ref="discoveryServices"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
-    
-    <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>
-    
+        
     <bean id="synchronizationConfig" class="org.apache.karaf.cellar.core.HazelcastSynchronizationConfiguration">
+        <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>
         <property name="pid" value="cellar.synchronization.management"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
@@ -43,7 +42,6 @@
         
     <cm:managed-service-factory factory-pid="karaf.cellar.cluster" ref="clusterManager"
                                 interface="org.apache.karaf.cellar.core.CellarCluster">
-        <registration-listener ref="clusterManager" registration-method="register" unregistration-method="unregister"/>
         <cm:managed-component class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="destroy">
             <cm:managed-properties persistent-id="hazelcast.cluster" update-method="updated" 
                                    update-strategy="container-managed"/>
