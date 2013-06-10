@@ -21,19 +21,15 @@
         <config name="cellar.synchronization.management">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/synchronization
         </config>
-        <config name="karaf.cellar.cluster-cluster.event.management">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/cluster
+        <config name="karaf.cellar.cluster-hazelcast.cluster">
+            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/cluster-default
         </config>
         <bundle dependency="true">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle dependency="true">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.config/${project.version}</bundle>
-    </feature>
-
-    <feature name="cellar-hazelcast" description="Cellar implementation based on Hazelcast" version="${project.version}" resolver="(obr)">
-		<configfile finalname="/etc/hazelcast.xml">
+        <bundle dependency="true">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.config/${project.version}</bundle>
+<configfile finalname="/etc/hazelcast.xml">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast
         </configfile>
-        <feature version="${project.version}">cellar-core</feature>
 		<bundle dependency="true">mvn:com.hazelcast/hazelcast/${hazelcast.version}</bundle>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
     </feature>
@@ -59,7 +55,7 @@
     </feature>
 
     <feature name="cellar" description="Karaf clustering" version="${project.version}" resolver="(obr)">
-        <feature version="${project.version}">cellar-hazelcast</feature>
+        <feature version="${project.version}">cellar-core</feature>
         <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-bundle</feature>
         <feature version="${project.version}">cellar-features</feature>

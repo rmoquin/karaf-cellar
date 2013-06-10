@@ -12,8 +12,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
-
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd"
+           default-activation="lazy">
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="cluster/obr-list">
             <action class="org.apache.karaf.cellar.obr.shell.ObrListCommand">
@@ -59,7 +60,7 @@
         <command name="cluster/obr-remove-url">
             <action class="org.apache.karaf.cellar.obr.shell.ObrRemoveUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-\                <property name="eventProducer" ref="eventProducer"/>
+                <property name="eventProducer" ref="eventProducer"/>
                 <property name="obrService" ref="repositoryAdmin"/>
                 <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
