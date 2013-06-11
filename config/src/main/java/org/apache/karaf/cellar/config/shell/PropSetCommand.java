@@ -26,10 +26,10 @@ import org.apache.karaf.cellar.core.event.EventType;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "config-propset", description = "Set a property value for a configuration in a cluster group")
+@Command(scope = "cluster", name = "config-propset", description = "Set a property value for a configuration in a cluster.")
 public class PropSetCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
     String clusterName;
 
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)

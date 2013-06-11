@@ -40,21 +40,12 @@
         </service-properties>
     </service>
         
-    <cm:managed-service-factory factory-pid="karaf.cellar.cluster" ref="clusterManager"
+    <cm:managed-service-factory factory-pid="karaf.cellar.cluster"
                                 interface="org.apache.karaf.cellar.core.CellarCluster">
         <cm:managed-component class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="destroy">
             <cm:managed-properties persistent-id="hazelcast.cluster" update-method="updated" 
                                    update-strategy="container-managed"/>
             <property name="hazelcastConfig" value="${karaf.home}/etc/hazelcast.xml"/>
-            <property name="producer" value="true"/>
-            <property name="consumer" value="true"/>
-            <property name="enableBundleEvents" value="true"/>
-            <property name="enableConfigurationEvents" value="true"/>
-            <property name="enableFeatureEvents" value="true"/>
-            <property name="enableDOSGIEvents" value="true"/>
-            <property name="enableClusterEvents" value="true"/>
-            <property name="enableOBRBundleEvents" value="true"/>
-            <property name="enableObrEvents" value="true"/>
         </cm:managed-component >
     </cm:managed-service-factory>
 

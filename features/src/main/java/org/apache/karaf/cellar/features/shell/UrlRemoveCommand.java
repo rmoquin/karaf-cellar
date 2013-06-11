@@ -33,7 +33,7 @@ import org.apache.karaf.cellar.core.CellarCluster;
 @Command(scope = "cluster", name = "feature-url-remove", description = "Remove features repository URLs from a cluster group")
 public class UrlRemoveCommand extends FeatureCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster group name", required = true, multiValued = false)
     String clusterName;
 
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)

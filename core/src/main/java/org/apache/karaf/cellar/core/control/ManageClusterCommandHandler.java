@@ -24,7 +24,6 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * Manager cluster command handler.
  */
 public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCommand, ManageClusterResult> {
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.managecluster.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private ConfigurationAdmin configAdmin;
@@ -57,32 +56,29 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
      */
     public void addClusterListToResult(ManageClusterResult result) {
         //TODO Figure out what this means.
-/*        Set<CellarCluster> clusters = clusterManager.listAllClusters();
+        Set<CellarCluster> clusters = clusterManager.getClusters();
 
         for (CellarCluster c : clusters) {
-            result.getGroups().add(c);
-        }*/
+            result.getClusters().add(c);
+        }
     }
 
     /**
-     * Add {@link Node} to the target {@link Group}.
+     * Add {@link Node} to the target {@link CellarCluster}.
      *
-     * @param targetGroupName the target group name where to add the node.
+     * @param targetClusterName the target cluster name where to add the node.
      */
-    public void joinCluster(String targetGroupName) {
+    public void joinCluster(String targetClusterName) {
         //TODO Figure out what this means.
-        /*Node node = getClusterManager().getLocalNode();
-        Map<String, Group> groups = clusterManager.listGroups();
-        if (groups != null && !groups.isEmpty()) {
-            Group targetGroup = groups.get(targetGroupName);
-            if (targetGroup == null) {
-                clusterManager.registerGroup(targetGroupName);
-            } else if (!targetGroup.getNodes().contains(node)) {
-                targetGroup.getNodes().add(node);
-                clusterManager.listGroups().put(targetGroupName, targetGroup);
-                clusterManager.registerGroup(targetGroup);
-            }
-        }*/
+        Node node = getClusterManager().getFirstCluster().getLocalNode();
+        CellarCluster targetCluster = clusterManager.findClusterByName(targetClusterName);
+        if (targetCluster == null) {
+            clusterManager.joinCluster(targetClusterName);
+        } else if (!targetCluster.listNodes().contains(node)) {
+            targetCluster.listNodes().add(node);
+            clusterManager.getClusters().add(targetCluster);
+            clusterManager.joinCluster(targetClusterName);
+        }
     }
 
     /**
@@ -93,7 +89,7 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
     public void leaveCluster(String targetClusterName) {
         //TODO Figure out out how to remove the cluster config
         CellarCluster cluster = getClusterManager().findClusterByName(targetClusterName);
-        
+
     }
 
     /**

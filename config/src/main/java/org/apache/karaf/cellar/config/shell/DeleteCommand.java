@@ -27,11 +27,11 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster group")
+@Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster")
 public class DeleteCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
-    String groupName;
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    String clusterName;
 
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
@@ -41,9 +41,9 @@ public class DeleteCommand extends ConfigCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(groupName);
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
         if (cluster == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+            System.err.println("Cluster group " + clusterName + " doesn't exist");
             return null;
         }
 
@@ -55,11 +55,11 @@ public class DeleteCommand extends ConfigCommandSupport {
 
         // check if the config pid is allowed
         if (!isAllowed(cluster, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
+            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update configurations in the cluster group
             clusterConfigurations.remove(pid);
@@ -71,7 +71,7 @@ public class DeleteCommand extends ConfigCommandSupport {
             eventProducer.produce(event);
 
         } else {
-            System.out.println("Configuration distributed map not found for cluster group " + groupName);
+            System.out.println("Configuration distributed map not found for cluster group " + clusterName);
         }
 
         return null;

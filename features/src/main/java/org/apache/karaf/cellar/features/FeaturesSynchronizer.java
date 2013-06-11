@@ -62,11 +62,11 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     @Override
     public void pull(CellarCluster cluster) {
         if (cluster != null) {
-            String groupName = cluster.getName();
-            LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster {}", groupName);
-            List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
-            cluster.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+            String clusterName = cluster.getName();
+            LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster {}", clusterName);
+            List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            cluster.getList(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
             // get the features repositories URLs from the cluster group
             if (clusterRepositories != null && !clusterRepositories.isEmpty()) {
                 for (String url : clusterRepositories) {
@@ -118,7 +118,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                             }
                         }
                     } else {
-                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, groupName);
+                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, clusterName);
                     }
                 }
             }

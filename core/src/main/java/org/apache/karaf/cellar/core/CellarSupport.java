@@ -77,16 +77,16 @@ public class CellarSupport {
      * Get the resources in the Cellar cluster groups configuration.
      *
      * @param listType the comma separated string of resources.
-     * @param groups the cluster groups names.
+     * @param clusters the cluster groups names.
      * @param category the resource category name.
      * @param type the event type (inbound, outbound).
      * @return the set of resources.
      */
-    public Set<String> getListEntries(String listType, Collection<String> groups, String category, EventType type) {
+    public Set<String> getListEntries(String listType, Collection<String> clusters, String category, EventType type) {
         Set<String> result = null;
-        if (groups != null && !groups.isEmpty()) {
-            for (String group : groups) {
-                Set<String> items = getListEntries(listType, group, category, type);
+        if (clusters != null && !clusters.isEmpty()) {
+            for (String cluster : clusters) {
+                Set<String> items = getListEntries(listType, cluster, category, type);
                 if (items != null && !items.isEmpty()) {
                     if (result == null) {
                         result = new HashSet<String>();

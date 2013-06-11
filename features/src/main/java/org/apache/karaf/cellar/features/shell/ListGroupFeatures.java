@@ -29,7 +29,7 @@ public class ListGroupFeatures extends FeatureCommandSupport {
     protected static final String HEADER_FORMAT = " %-11s   %-15s   %s";
     protected static final String OUTPUT_FORMAT = "[%-11s] [%-15s] %s";
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster group name", required = true, multiValued = false)
     String clusterName;
 
     @Option(name = "-i", aliases = { "--installed" }, description = "Display only installed features", required = false, multiValued = false)

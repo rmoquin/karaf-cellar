@@ -25,13 +25,13 @@ import org.osgi.framework.BundleEvent;
 import java.util.Map;
 import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "bundle-list", description = "List the bundles in a cluster group")
+@Command(scope = "cluster", name = "bundle-list", description = "List the bundles in a cluster")
 public class ListBundleCommand extends CellarCommandSupport {
 
     protected static final String HEADER_FORMAT = " %-4s   %-11s  %s";
     protected static final String OUTPUT_FORMAT = "[%-4s] [%-11s] %s";
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
     String clusterName;
 
     @Option(name = "-s", aliases = {}, description = "Shows the symbolic name", required = false, multiValued = false)

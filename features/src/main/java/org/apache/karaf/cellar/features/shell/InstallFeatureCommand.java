@@ -33,7 +33,7 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
     @Option(name = "-r", aliases = { "--no-auto-refresh" }, description = "Do not automatically refresh bundles", required = false, multiValued = false)
     boolean noRefresh;
 
-    @Argument(index = 0, name = "group", description = "The cluster name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
     String clusterName;
 
     @Argument(index = 1, name = "feature", description = "The feature name", required = true, multiValued = false)

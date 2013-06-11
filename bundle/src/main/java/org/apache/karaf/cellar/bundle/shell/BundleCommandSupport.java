@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 public abstract class BundleCommandSupport extends CellarCommandSupport {
 
-    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
     String clusterName;
 
     @Argument(index = 1, name = "id", description = "The bundle ID or name", required = true, multiValued = false)
