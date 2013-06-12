@@ -34,6 +34,7 @@ public class HazelcastSynchronizationConfiguration implements SynchronizationCon
     private String pid;
 
     public void updated(Dictionary<String, Object> newProperties) {
+        LOGGER.info("Hazelcase synchronization configuration was updated!!!!!!!!!!!!!!1");
         this.properties = newProperties;
     }
 

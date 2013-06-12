@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
@@ -48,11 +49,11 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     public void start() {
         super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
-        this.LOGGER.info("{} plugin activated", LABEL);
+        LOGGER.info("{} plugin activated", LABEL);
     }
 
     public void stop() {
-        this.LOGGER.info("{} plugin deactivated", LABEL);
+        LOGGER.info("{} plugin deactivated", LABEL);
         super.deactivate();
     }
 
@@ -137,18 +138,18 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
             try {
                 ins = url.openStream();
                 if (ins == null) {
-                    this.LOGGER.error("failed to open {}", url);
+                    LOGGER.error("failed to open {}", url);
                     url = null;
                 }
             } catch (IOException e) {
-                this.LOGGER.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
                 url = null;
             } finally {
                 if (ins != null) {
                     try {
                         ins.close();
                     } catch (IOException e) {
-                        this.LOGGER.error(e.getMessage(), e);
+                        LOGGER.error(e.getMessage(), e);
                     }
                 }
             }
@@ -165,7 +166,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     }
 
     private void writeJSON(final PrintWriter pw) throws IOException {
-        final Set<CellarCluster> clusters = clusterManager.getClusters();
+        final List<CellarCluster> clusters = clusterManager.getClusters();
         final Set<Node> nodes = new HashSet<Node>();
         for (CellarCluster cluster : clusters) {
             nodes.addAll(cluster.listNodes());
@@ -219,7 +220,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         jw.endObject();
     }
 
-    private String getStatusLine(final Set<CellarCluster> clusters, Set<Node> members) {
+    private String getStatusLine(final List<CellarCluster> clusters, Set<Node> members) {
         int clusterCount = 0;
         int memberCount = 0;
 

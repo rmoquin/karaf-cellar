@@ -25,9 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
@@ -43,7 +43,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     }
 
     public void init() {
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
         if (clusters != null && !clusters.isEmpty()) {
             for (CellarCluster cluster : clusters) {
                 if (isSyncEnabled(cluster)) {

@@ -13,12 +13,12 @@
  */
 package org.apache.karaf.cellar.shell;
 
+import java.util.List;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
-import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "sync", description = "Force the call of all cluster synchronizers available")
@@ -26,7 +26,7 @@ public class SyncCommand extends ClusterCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Set<CellarCluster> localClusters = clusterManager.getClusters();
+        List<CellarCluster> localClusters = clusterManager.getClusters();
         for (CellarCluster cluster : localClusters) {
             System.out.println("Synchronizing cluster group " + cluster.getName());
             try {

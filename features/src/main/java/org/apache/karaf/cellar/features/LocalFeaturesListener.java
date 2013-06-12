@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.features;
 
+import java.util.List;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -24,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
@@ -59,7 +59,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
         }
 
         if (event != null) {
-            Set<CellarCluster> clusters = super.clusterManager.getClusters();
+            List<CellarCluster> clusters = super.clusterManager.getClusters();
 
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
@@ -105,7 +105,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
         }
 
             if (event != null && event.getRepository() != null) {
-                Set<CellarCluster> clusters = clusterManager.getClusters();
+                List<CellarCluster> clusters = clusterManager.getClusters();
 
                 if (clusters != null && !clusters.isEmpty()) {
                     for (CellarCluster cluster : clusters) {

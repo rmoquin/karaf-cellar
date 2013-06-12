@@ -1,3 +1,4 @@
+
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +51,7 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                Set<CellarCluster> clusters = clusterManager.getClusters();
+                List<CellarCluster> clusters = clusterManager.getClusters();
                 for (CellarCluster cellarCluster : clusters) {
                     recipientList.add(cellarCluster.getLocalNode());
                 }

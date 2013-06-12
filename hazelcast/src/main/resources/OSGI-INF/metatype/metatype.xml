@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.1.0"
+<MetaData xmlns="http://www.osgi.org/xmlns/metatype/v1.2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://www.osgi.org/xmlns/metatype/v1.1.0 http://www.osgi.org/xmlns/metatype/v1.1.0/metatype.xsd">
+          xsi:schemaLocation="http://www.osgi.org/xmlns/metatype/v1.1.0 http://www.osgi.org/xmlns/metatype/v1.2.0/metatype.xsd">
     <OCD id="cellar.synchronization.management" name="Cellar Synchronization" description="Cellar Synchronization Configuration">
         <AD name="Synchronize Configuration" id="default.config.sync" required="true" type="Boolean" default="true"
             description="Enable synchronizing configuration to and from other clustered hosts."/>
@@ -27,24 +27,14 @@
         <AD name="Whitelisted Outbound Packages" id="default.config.whitelist.outbound" type="String" default="*" cardinality="-2147483648"
             description="The list of packages that should be synced to other hosts."/>
         
-        <AD name="Blacklist Inbound Config" id="default.config.blacklist.inbound" type="String" default="true" cardinality="-2147483648"
+        <AD name="Blacklist Inbound Config" id="default.config.blacklist.inbound" type="String" cardinality="-2147483648"
+            default="org.apache.felix.fileinstall*,org.apache.karaf.cellar*,org.apache.karaf.management,org.apache.karaf.shell,org.ops4j.pax.logging,org.ops4j.pax.web"
             description="The list of packages that can be synced inbound to this host.">
-            <Option label="Felix FileInstall" value="org.apache.felix.fileinstall*"/>
-            <Option label="Cellar" value="org.apache.karaf.cellar*"/>
-            <Option label="Karaf Management" value="org.apache.karaf.management"/>
-            <Option label="Karaf Shell" value="org.apache.karaf.shell"/>
-            <Option label="Pax Logging" value="org.ops4j.pax.logging"/>
-            <Option label="Pax Web" value="org.ops4j.pax.web"/>
         </AD>
         
-        <AD name="Blacklisted Outbound Config" id="default.config.blacklist.outbound" type="String" default="true" cardinality="-2147483648"
+        <AD name="Blacklisted Outbound Config" id="default.config.blacklist.outbound" type="String" cardinality="-2147483648"
+            default="org.apache.felix.fileinstall*,org.apache.karaf.cellar*,org.apache.karaf.management,org.apache.karaf.shell,org.ops4j.pax.logging,org.ops4j.pax.web"
             description="The list of packages that won't be sent to be synced with other hosts.">
-            <Option label="Felix FileInstall" value="org.apache.felix.fileinstall*"/>
-            <Option label="Cellar" value="org.apache.karaf.cellar*"/>
-            <Option label="Karaf Management" value="org.apache.karaf.management"/>
-            <Option label="Karaf Shell" value="org.apache.karaf.shell"/>
-            <Option label="Pax Logging" value="org.ops4j.pax.logging"/>
-            <Option label="Pax Web" value="org.ops4j.pax.web"/>
         </AD>
         
         <AD name="Whitelisted Inbound Features" id="default.features.whitelist.inbound" type="String" default="*" cardinality="-2147483648"
@@ -54,17 +44,13 @@
             description="The list of features that will be synchronized to other hosts."/>
 
         <AD name="Blacklisted Inbound Features" id="default.features.blacklist.inbound" type="String" default="true" cardinality="-2147483648"
+            default="config,management,hazelcast,cellar*"
             description="The list of features that won't be synchronized from other hosts.">
-            <Option label="config,management" value="org.apache.felix.fileinstall*"/>
-            <Option label="hazelcast" value="org.apache.karaf.cellar*"/>
-            <Option label="cellar*" value="org.apache.karaf.management"/>
         </AD>
         
         <AD name="Blacklisted Outbound Features" id="default.features.blacklist.outbound" type="String" default="true" cardinality="-2147483648"
+            default="config,management,hazelcast,cellar*"
             description="The list of features that won't be be synchronized to other hosts.">
-            <Option label="config,management" value="org.apache.felix.fileinstall*"/>
-            <Option label="hazelcast" value="org.apache.karaf.cellar*"/>
-            <Option label="cellar*" value="org.apache.karaf.management"/>
         </AD>
 
         <AD name="Whitelisted Inbound Bundles" id="default.bundle.whitelist.inbound" type="String" default="*" cardinality="-2147483648"
@@ -83,13 +69,13 @@
     </OCD>
     
     <OCD id="hazelcast.cluster" name="Cluster List" description="The list of clusters this host is participation in.">
-        <AD name="Cluster Name" id="clusterName" required="true" type="String" description="The cluster name."/>
+        <AD name="Cluster Name" id="name" required="true" type="String" description="The cluster name."/>
         
         <AD name="Produce Events" id="producer" required="true" type="Boolean" default="true" 
             description="Whether to produce events to other clusters."/>
         
         <AD name="Consume Events" id="consumer" required="true" type="Boolean" default="true" 
-                description="Whether to consume events to other clusters."/>
+            description="Whether to consume events to other clusters."/>
 
         <AD name="Enable Bundle Events" id="enableBundleEvents" required="true" type="Boolean" default="true" 
             description="Whether to enable bundle events."/>
@@ -112,10 +98,10 @@
         <AD name="Enable OBR Events" id="enableObrEvents" required="true" type="Boolean" default="true" 
             description="Whether to enable cluster events."/>
     </OCD>
-    <Designate pid="cellar.synchronization.management">
+    <Designate pid="cellar.synchronization.management" bundle="*">
         <Object ocdref="cellar.synchronization.management"/>
     </Designate>
-    <Designate factoryPid="karaf.cellar.cluster">
+    <Designate factoryPid="karaf.cellar.cluster" bundle="*">
         <Object ocdref="hazelcast.cluster"/>
     </Designate>
 </MetaData>

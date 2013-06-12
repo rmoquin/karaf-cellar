@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import org.apache.karaf.cellar.core.ClusterManager;
 import java.util.Map;
 import java.util.Properties;
@@ -32,7 +33,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class HazelcastClusterManager implements ClusterManager {
     private static transient Logger LOGGER = LoggerFactory.getLogger(HazelcastClusterManager.class);
     private String clusterPid;
-    private Set<CellarCluster> clusters;
+    private List<CellarCluster> clusters;
     private Map<String, CellarCluster> clustersByName = new ConcurrentHashMap<String, CellarCluster>();
     private Map<String, ServiceRegistration> producerRegistrations = new HashMap<String, ServiceRegistration>();
     private Map<String, ServiceRegistration> consumerRegistrations = new HashMap<String, ServiceRegistration>();
@@ -118,21 +118,6 @@ public class HazelcastClusterManager implements ClusterManager {
         }
     }
     
-    public void updated(String pid, Dictionary<String, ?> properties) throws ConfigurationException {
-        LOGGER.info("Cluster config factory was called with properties: " + properties);
-        /*CellarCluster cellarCluster = clustersByPid.get(pid);
-        if (cellarCluster == null) {
-            clustersByPid.put(pid, cellarCluster);
-            String clusterName = properties.get("name").toString();
-            Properties serviceProperties = new Properties();
-            serviceProperties.put("type", "cluster");
-            serviceProperties.put("name", clusterName);
-            serviceProperties.put(org.osgi.framework.Constants.SERVICE_PID, clusterPid + clusterName);
-            ServiceRegistration<CellarCluster> serviceReference = this.bundleContext.registerService(CellarCluster.class, cellarCluster, properties);
-            LOGGER.info("CELLAR HAZELCAST: registering cluster {}.", clusterName);
-        }*/
-    }
-    
     @Override
     public Set<Node> listNodesAllClusters() {
         Set<Node> nodes = new HashSet<Node>();
@@ -146,7 +131,7 @@ public class HazelcastClusterManager implements ClusterManager {
      * @return the clusters
      */
     @Override
-    public Set<CellarCluster> getClusters() {
+    public List<CellarCluster> getClusters() {
         return clusters;
     }
     
@@ -227,7 +212,7 @@ public class HazelcastClusterManager implements ClusterManager {
     /**
      * @param clusters the clusters to set
      */
-    public void setClusters(Set<CellarCluster> clusters) {
+    public void setClusters(List<CellarCluster> clusters) {
         this.clusters = clusters;
     }
 
@@ -257,5 +242,19 @@ public class HazelcastClusterManager implements ClusterManager {
      */
     public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the bundleContext
+     */
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
+     * @param bundleContext the bundleContext to set
+     */
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }

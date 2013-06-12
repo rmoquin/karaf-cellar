@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -23,7 +24,7 @@ public interface ClusterManager {
     /**
      * @return the clusters
      */
-    public Set<CellarCluster> getClusters();
+    public List<CellarCluster> getClusters();
 
     /**
      * Retrieves all nodes from all clusters.

@@ -18,12 +18,9 @@
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
     
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-        <config name="cellar.synchronization.management">
+        <configfile finalname="/etc/cellar.synchronization.management.cfg">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/synchronization
-        </config>
-        <config name="karaf.cellar.cluster">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/cluster-default
-        </config>
+        </configfile>
         <bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
@@ -31,7 +28,10 @@
         <configfile finalname="/etc/hazelcast.xml">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast
         </configfile>
-        <bundle start-level="32" dependency="true">mvn:com.hazelcast/hazelcast/${hazelcast.version}</bundle>
+        <config name="karaf.cellar.cluster_1">
+            name=default
+        </config>
+        <bundle start-level="32">mvn:com.hazelcast/hazelcast/${hazelcast.version}</bundle>
     </feature>
     <feature name="cellar-hazelcast" description="Cellar implementation based on Hazelcast" version="${project.version}" resolver="(obr)">
         <feature version="${hazelcast.version}">hazelcast</feature>

@@ -37,8 +37,7 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     private Node node;
     private SynchronizationConfiguration synchronizationConfig;
 
-    public void init(Node node) {
-        this.node = node;
+    public void init() {
     }
 
     public void destroy() {
@@ -93,5 +92,19 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
      */
     public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the node
+     */
+    public Node getNode() {
+        return node;
+    }
+
+    /**
+     * @param node the node to set
+     */
+    public void setNode(Node node) {
+        this.node = node;
     }
 }

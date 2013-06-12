@@ -36,7 +36,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     @Override
     public void init() {
         super.init();
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
         if (clusters != null && !clusters.isEmpty()) {
             for (CellarCluster cluster : clusters) {
                 if (isSyncEnabled(cluster)) {

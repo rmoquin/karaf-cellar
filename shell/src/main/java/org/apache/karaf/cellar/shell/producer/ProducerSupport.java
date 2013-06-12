@@ -51,7 +51,7 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                Set<CellarCluster> clusters = clusterManager.getClusters();
+                List<CellarCluster> clusters = clusterManager.getClusters();
                 for (CellarCluster cellarCluster : clusters) {
                     recipientList.add(cellarCluster.getLocalNode());
                 }

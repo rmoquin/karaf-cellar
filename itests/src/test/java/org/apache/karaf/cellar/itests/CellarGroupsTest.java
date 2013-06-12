@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +52,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:group-set testgroup " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-list"));
 
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
         assertEquals("There should be 2 cellar groups", 2, clusters.size());
 
         System.err.println(executeCommand("cluster:group-delete testgroup "));

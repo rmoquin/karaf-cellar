@@ -42,11 +42,10 @@
         
     <cm:managed-service-factory factory-pid="karaf.cellar.cluster"
                                 interface="org.apache.karaf.cellar.core.CellarCluster">
-        <cm:managed-component class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="destroy">
-            <cm:managed-properties persistent-id="hazelcast.cluster" update-method="updated" 
-                                   update-strategy="container-managed"/>
-            <property name="hazelcastConfig" value="${karaf.home}/etc/hazelcast.xml"/>
-        </cm:managed-component >
+        <service-properties>
+            <entry key="hazelcastConfig" value="${karaf.home}/etc/hazelcast.xml"/>
+        </service-properties>
+        <cm:managed-component class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="destroy"/>
     </cm:managed-service-factory>
 
     <!-- Cluster Manager -->
@@ -60,7 +59,7 @@
     
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     
-    <reference-list id="clusters" interface="org.apache.karaf.cellar.core.CellarCluster" member-type="service-object">
+    <reference-list id="clusters" availability="optional" interface="org.apache.karaf.cellar.core.CellarCluster" member-type="service-object">
         <reference-listener bind-method="bind" unbind-method="unbind">
             <ref component-id="clusterManager"/>
         </reference-listener>
@@ -76,14 +75,11 @@
     <!-- Cluster Event Consumer -->
     <bean id="consumer" class="org.apache.karaf.cellar.hazelcast.TopicConsumer" init-method="init"
           destroy-method="destroy">
-        <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="dispatcher" ref="dispatcher"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
     <!-- Cluster Event Producer -->
     <bean id="producer" class="org.apache.karaf.cellar.hazelcast.TopicProducer" init-method="init">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="producer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
 

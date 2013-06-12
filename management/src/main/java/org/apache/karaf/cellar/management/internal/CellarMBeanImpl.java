@@ -78,7 +78,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void sync() throws Exception {
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
         for (CellarCluster cluster : clusters) {
             try {
                 ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
@@ -100,7 +100,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public TabularData handlerStatus() throws Exception {
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
         Map<Node, ManageHandlersResult> results = new HashMap<Node, ManageHandlersResult>();
         for (CellarCluster cluster : clusters) {
             ManageHandlersCommand command = new ManageHandlersCommand(cluster.generateId());

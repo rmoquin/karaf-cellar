@@ -22,7 +22,6 @@ import org.apache.karaf.shell.console.completer.StringsCompleter;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
@@ -36,7 +35,7 @@ public class ClusterConfigCompleter implements Completer {
     public int complete(String buffer, int cursor, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
         try {
-            Set<CellarCluster> clusters = clusterManager.getClusters();
+            List<CellarCluster> clusters = clusterManager.getClusters();
             if (!clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
                     Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + cluster);

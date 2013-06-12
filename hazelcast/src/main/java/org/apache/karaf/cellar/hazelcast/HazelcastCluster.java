@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.Synchronizer;
+import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 
 /**
@@ -88,6 +89,21 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
          Thread.currentThread().setContextClassLoader(priorClassLoader);
          }
          }*/
+    }
+    
+    public void updated(Map<String,Object> props) throws ConfigurationException {
+        LOGGER.info("Cluster config factory probably called this clude with properties: " + props);
+        /*CellarCluster cellarCluster = clustersByPid.get(pid);
+        if (cellarCluster == null) {
+            clustersByPid.put(pid, cellarCluster);
+            String clusterName = properties.get("name").toString();
+            Properties serviceProperties = new Properties();
+            serviceProperties.put("type", "cluster");
+            serviceProperties.put("name", clusterName);
+            serviceProperties.put(org.osgi.framework.Constants.SERVICE_PID, clusterPid + clusterName);
+            ServiceRegistration<CellarCluster> serviceReference = this.bundleContext.registerService(CellarCluster.class, cellarCluster, properties);
+            LOGGER.info("CELLAR HAZELCAST: registering cluster {}.", clusterName);
+        }*/
     }
 
     /**

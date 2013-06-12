@@ -63,7 +63,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
             }
         }
 
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
 
         if (clusters != null && !clusters.isEmpty()) {
             for (CellarCluster cluster : clusters) {

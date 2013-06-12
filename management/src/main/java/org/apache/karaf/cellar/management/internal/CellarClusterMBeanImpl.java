@@ -24,6 +24,7 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
@@ -99,7 +100,7 @@ public class CellarClusterMBeanImpl extends StandardMBean implements CellarClust
 
     @Override
     public TabularData getClusters() throws Exception {
-        Set<CellarCluster> allClusters = clusterManager.getClusters();
+        List<CellarCluster> allClusters = clusterManager.getClusters();
 
         CompositeType groupType = new CompositeType("Group", "Karaf Cellar cluster group",
                 new String[] { "name", "members" },

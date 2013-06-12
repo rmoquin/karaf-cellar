@@ -23,7 +23,6 @@ import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +37,7 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     private IQueue<E> queue;
     private Node node;
 
-    public void init(Node node) {
-        this.node = node;
+    public void init() {
     }
 
     public void destroy() {
@@ -98,5 +96,19 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
      */
     public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the node
+     */
+    public Node getNode() {
+        return node;
+    }
+
+    /**
+     * @param node the node to set
+     */
+    public void setNode(Node node) {
+        this.node = node;
     }
 }

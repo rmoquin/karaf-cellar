@@ -42,8 +42,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private boolean isConsuming;
     private String listenerId;
 
-    public void init(Node node) {
-        this.node = node;
+    public void init() {
         start();
     }
 
@@ -132,5 +131,19 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
      */
     public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the node
+     */
+    public Node getNode() {
+        return node;
+    }
+
+    /**
+     * @param node the node to set
+     */
+    public void setNode(Node node) {
+        this.node = node;
     }
 }

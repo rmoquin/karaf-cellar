@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.shell;
 
+import java.util.List;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.shell.commands.Command;
 
@@ -26,7 +27,7 @@ public class NodesListCommand extends ClusterCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Set<CellarCluster> clusters = clusterManager.getClusters();
+        List<CellarCluster> clusters = clusterManager.getClusters();
         if (clusters != null && !clusters.isEmpty()) {
             for (CellarCluster cluster : clusters) {
                 Set<Node> nodes = cluster.listNodes();
