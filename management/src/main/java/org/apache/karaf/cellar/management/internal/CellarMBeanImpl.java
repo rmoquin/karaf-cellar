@@ -78,7 +78,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void sync() throws Exception {
-        List<CellarCluster> clusters = clusterManager.getClusters();
+        Collection<CellarCluster> clusters = clusterManager.getClusters();
         for (CellarCluster cluster : clusters) {
             try {
                 ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
@@ -100,7 +100,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public TabularData handlerStatus() throws Exception {
-        List<CellarCluster> clusters = clusterManager.getClusters();
+        Collection<CellarCluster> clusters = clusterManager.getClusters();
         Map<Node, ManageHandlersResult> results = new HashMap<Node, ManageHandlersResult>();
         for (CellarCluster cluster : clusters) {
             ManageHandlersCommand command = new ManageHandlersCommand(cluster.generateId());
@@ -140,7 +140,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void handlerStart(String handlerId, String nodeId) throws Exception {
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         Set<Node> nodes = new HashSet<Node>();
         ManageHandlersCommand command = new ManageHandlersCommand(cluster.generateId());
         if (nodeId == null || nodeId.isEmpty()) {
@@ -159,7 +159,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void handlerStop(String handlerId, String nodeId) throws Exception {
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         ManageHandlersCommand command = new ManageHandlersCommand(clusterManager.generateId());
 
         Set<Node> nodes = new HashSet<Node>();
@@ -206,7 +206,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void consumerStart(String nodeId) throws Exception {
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         ConsumerSwitchCommand command = new ConsumerSwitchCommand(clusterManager.generateId());
 
         Set<Node> nodes = new HashSet<Node>();
@@ -228,7 +228,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void consumerStop(String nodeId) throws Exception {
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         ConsumerSwitchCommand command = new ConsumerSwitchCommand(clusterManager.generateId());
 
         Set<Node> nodes = new HashSet<Node>();
@@ -276,7 +276,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void producerStop(String nodeId) throws Exception {
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
 
         Set<Node> nodes = new HashSet<Node>();
@@ -298,7 +298,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void producerStart(String nodeId) throws Exception {
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
 
         Set<Node> nodes = new HashSet<Node>();

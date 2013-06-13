@@ -78,7 +78,7 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
 
         TabularData table = new TabularDataSupport(tableType);
 
-        List<CellarCluster> cluster = clusterManager.getClusters();
+        Collection<CellarCluster> cluster = clusterManager.getClusters();
 
         for (CellarCluster cellarCluster : cluster) {
             Set<Node> nodes = cellarCluster.listNodes();

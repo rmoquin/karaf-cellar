@@ -15,7 +15,7 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Dictionary;
+import java.util.Map;
 
 /**
  *
@@ -40,10 +40,10 @@ public interface SynchronizationConfiguration {
     /**
      * @return the properties
      */
-    public Dictionary<String, Object> getProperties();
+    public Map<String, Object> getProperties();
 
     /**
      * @param properties the properties to set
      */
-    public void setProperties(Dictionary<String, Object> properties);
+    public void setProperties(Map<String, Object> properties);
 }

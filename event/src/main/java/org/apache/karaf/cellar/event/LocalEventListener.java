@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import org.apache.karaf.cellar.core.CellarCluster;
 
@@ -43,7 +43,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
 
         try {
             if (event != null && event.getTopic() != null) {
-                List<CellarCluster> clusters = null;
+                Collection<CellarCluster> clusters = null;
                 try {
                     clusters = clusterManager.getClusters();
                 } catch (Exception e) {

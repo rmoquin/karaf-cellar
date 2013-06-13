@@ -54,7 +54,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
-        remoteEndpoints = clusterManager.getFirstCluster().getMap(Constants.REMOTE_ENDPOINTS);
+        remoteEndpoints = clusterManager.getMasterCluster().getMap(Constants.REMOTE_ENDPOINTS);
         service.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
     }
 
@@ -101,7 +101,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             }
 
             // make sure we only import remote services
-            String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getFirstCluster().getLocalNode().getId() + ")))";
+            String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getMasterCluster().getLocalNode().getId() + ")))";
             // iterate through known services and import them if needed
             Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
             for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
@@ -126,7 +126,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      */
     private void checkListener(ListenerInfo listenerInfo) {
         // iterate through known services and import them if needed
-        CellarCluster cluster = clusterManager.getFirstCluster();
+        CellarCluster cluster = clusterManager.getMasterCluster();
         Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
         for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
             EndpointDescription endpointDescription = entry.getValue();

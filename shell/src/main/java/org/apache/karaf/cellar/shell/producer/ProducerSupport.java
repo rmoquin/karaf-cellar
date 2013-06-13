@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.shell.producer;
 
+import java.util.Collection;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.control.ProducerSwitchCommand;
 import org.apache.karaf.cellar.core.control.ProducerSwitchResult;
@@ -51,13 +52,13 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                List<CellarCluster> clusters = clusterManager.getClusters();
+                Collection<CellarCluster> clusters = clusterManager.getClusters();
                 for (CellarCluster cellarCluster : clusters) {
                     recipientList.add(cellarCluster.getLocalNode());
                 }
             } else {
                 // in case of status change, select only the local node
-                recipientList.add(clusterManager.getFirstCluster().getLocalNode());
+                recipientList.add(clusterManager.getMasterCluster().getLocalNode());
             }
         }
 

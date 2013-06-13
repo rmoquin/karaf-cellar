@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.shell.consumer;
 
+import java.util.Collection;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.control.ConsumerSwitchCommand;
 import org.apache.karaf.cellar.core.control.ConsumerSwitchResult;
@@ -51,13 +52,13 @@ public abstract class ConsumerSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                List<CellarCluster> clusters = clusterManager.getClusters();
+                Collection<CellarCluster> clusters = clusterManager.getClusters();
                 for (CellarCluster cellarCluster : clusters) {
                     recipientList.addAll(cellarCluster.listNodes());
                 }
             } else {
                 // in case of status change, select only the local node
-                recipientList.add(clusterManager.getFirstCluster().getLocalNode());
+                recipientList.add(clusterManager.getMasterCluster().getLocalNode());
             }
         }
 
@@ -75,8 +76,7 @@ public abstract class ConsumerSupport extends ClusterCommandSupport {
             System.out.println(String.format(HEADER_FORMAT, "Node", "Status"));
             for (Node node : results.keySet()) {
                 String local = " ";
-                //TODO This is probably always wrong, to deal with multiple clusters this logic will need some rework.
-                if (node.equals(clusterManager.getFirstCluster().getLocalNode())) {
+                if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
                     local = "*";
                 }
                 ConsumerSwitchResult result = results.get(node);

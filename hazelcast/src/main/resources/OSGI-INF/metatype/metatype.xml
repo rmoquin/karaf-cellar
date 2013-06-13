@@ -21,55 +21,56 @@
         <AD name="Synchronize OBR Bundles" id="default.obr.bundles.sync" required="true" type="Boolean" default="true"
             description="Enable synchronizing obr bundles to and from other clustered hosts."/>
         
-        <AD name="Whitelisted Inbound Packages" id="default.config.whitelist.inbound" type="String" default="*" cardinality="-2147483648"
+        <AD name="Whitelisted Inbound Packages" id="default.config.whitelist.inbound" type="String" default="*" cardinality="2147483648"
             description="The list of packages that should be synced inbound to this host."/>
         
-        <AD name="Whitelisted Outbound Packages" id="default.config.whitelist.outbound" type="String" default="*" cardinality="-2147483648"
+        <AD name="Whitelisted Outbound Packages" id="default.config.whitelist.outbound" type="String" default="*" cardinality="2147483648"
             description="The list of packages that should be synced to other hosts."/>
         
-        <AD name="Blacklist Inbound Config" id="default.config.blacklist.inbound" type="String" cardinality="-2147483648"
+        <AD name="Blacklist Inbound Config" id="default.config.blacklist.inbound" type="String" cardinality="2147483648"
             default="org.apache.felix.fileinstall*,org.apache.karaf.cellar*,org.apache.karaf.management,org.apache.karaf.shell,org.ops4j.pax.logging,org.ops4j.pax.web"
             description="The list of packages that can be synced inbound to this host.">
         </AD>
         
-        <AD name="Blacklisted Outbound Config" id="default.config.blacklist.outbound" type="String" cardinality="-2147483648"
+        <AD name="Blacklisted Outbound Config" id="default.config.blacklist.outbound" type="String" cardinality="2147483648"
             default="org.apache.felix.fileinstall*,org.apache.karaf.cellar*,org.apache.karaf.management,org.apache.karaf.shell,org.ops4j.pax.logging,org.ops4j.pax.web"
             description="The list of packages that won't be sent to be synced with other hosts.">
         </AD>
         
-        <AD name="Whitelisted Inbound Features" id="default.features.whitelist.inbound" type="String" default="*" cardinality="-2147483648"
+        <AD name="Whitelisted Inbound Features" id="default.features.whitelist.inbound" type="String" default="*" cardinality="2147483648"
             description="The list of features that will be accepted for synchronization from other hosts."/>
         
-        <AD name="Whitelisted Outbound Features" id="default.config.whiteliadlist.outbound" type="String" default="*" cardinality="-2147483648"
+        <AD name="Whitelisted Outbound Features" id="default.config.whiteliadlist.outbound" type="String" default="*" cardinality="2147483648"
             description="The list of features that will be synchronized to other hosts."/>
 
-        <AD name="Blacklisted Inbound Features" id="default.features.blacklist.inbound" type="String" default="true" cardinality="-2147483648"
+        <AD name="Blacklisted Inbound Features" id="default.features.blacklist.inbound" type="String" default="true" cardinality="2147483648"
             default="config,management,hazelcast,cellar*"
             description="The list of features that won't be synchronized from other hosts.">
         </AD>
         
-        <AD name="Blacklisted Outbound Features" id="default.features.blacklist.outbound" type="String" default="true" cardinality="-2147483648"
+        <AD name="Blacklisted Outbound Features" id="default.features.blacklist.outbound" type="String" default="true" cardinality="2147483648"
             default="config,management,hazelcast,cellar*"
             description="The list of features that won't be be synchronized to other hosts.">
         </AD>
 
-        <AD name="Whitelisted Inbound Bundles" id="default.bundle.whitelist.inbound" type="String" default="*" cardinality="-2147483648"
+        <AD name="Whitelisted Inbound Bundles" id="default.bundle.whitelist.inbound" type="String" default="*" cardinality="2147483648"
             description="The list of features that will be accepted for synchronization from other hosts."/>
         
-        <AD name="Whitelisted Outbound Bundles" id="default.bundle.whitelist.outbound" type="String" default="*" default="true" cardinality="-2147483648"
+        <AD name="Whitelisted Outbound Bundles" id="default.bundle.whitelist.outbound" type="String" default="*" default="true" cardinality="2147483648"
             description="The list of features that will be synchronized to other hosts."/>
 
-        <AD name="Blacklisted Inbound Bundles" id="default.bundle.blacklist.inbound" type="String" default="true" cardinality="-2147483648"
+        <AD name="Blacklisted Inbound Bundles" id="default.bundle.blacklist.inbound" type="String" default="true" cardinality="2147483648"
             description="The list of bundles that won't be synchronized from other hosts.">
         </AD>
         
-        <AD name="Blacklisted Outbound Bundles" id="default.bundle.blacklist.outbound" type="String" default="true" cardinality="-2147483648"
+        <AD name="Blacklisted Outbound Bundles" id="default.bundle.blacklist.outbound" type="String" default="true" cardinality="2147483648"
             description="The list of bundles that won't be be synchronized to other hosts.">
         </AD>        
     </OCD>
     
-    <OCD id="hazelcast.cluster" name="Cluster List" description="The list of clusters this host is participation in.">
-        <AD name="Cluster Name" id="name" required="true" type="String" description="The cluster name."/>
+    <OCD id="hazelcast.clusters" name="Cluster List" description="The list of clusters this host is participation in.">
+        <AD name="Cluster Name" id="clusterNames" required="true" type="String" min="1" cardinality="2147483648"
+            description="The names of the clusters this node is a member of."/>
         
         <AD name="Produce Events" id="producer" required="true" type="Boolean" default="true" 
             description="Whether to produce events to other clusters."/>
@@ -101,7 +102,7 @@
     <Designate pid="cellar.synchronization.management" bundle="*">
         <Object ocdref="cellar.synchronization.management"/>
     </Designate>
-    <Designate factoryPid="karaf.cellar.cluster" bundle="*">
-        <Object ocdref="hazelcast.cluster"/>
+    <Designate pid="cellar.cluster.management" bundle="*">
+        <Object ocdref="hazelcast.clusters"/>
     </Designate>
 </MetaData>

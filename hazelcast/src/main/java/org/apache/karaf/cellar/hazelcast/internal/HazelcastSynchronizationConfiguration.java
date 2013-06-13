@@ -17,6 +17,7 @@ package org.apache.karaf.cellar.hazelcast.internal;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Map;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -29,20 +30,19 @@ import org.slf4j.LoggerFactory;
  */
 public class HazelcastSynchronizationConfiguration implements SynchronizationConfiguration {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSynchronizationConfiguration.class);
-    private Dictionary<String, Object> properties;
+    private Map<String, Object> properties;
     private ConfigurationAdmin configurationAdmin;
     private String pid;
 
-    public void updated(Dictionary<String, Object> newProperties) {
-        LOGGER.info("Hazelcase synchronization configuration was updated!!!!!!!!!!!!!!1");
-        this.properties = newProperties;
+    public void updated(Map<String, Object> properties) {
+        this.properties = properties;
     }
 
     /**
      * @return the properties
      */
     @Override
-    public Dictionary<String, Object> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
@@ -50,7 +50,7 @@ public class HazelcastSynchronizationConfiguration implements SynchronizationCon
      * @param properties the properties to set
      */
     @Override
-    public void setProperties(Dictionary<String, Object> properties) {
+    public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
 
@@ -66,10 +66,14 @@ public class HazelcastSynchronizationConfiguration implements SynchronizationCon
 
     @Override
     public void save() {
-        Configuration configuration;
         try {
-            configuration = this.configurationAdmin.getConfiguration(pid, "?");
-            configuration.update(this.properties);
+            LOGGER.info("Saving the synchronization configuration.");
+            Configuration configuration = this.configurationAdmin.getConfiguration(pid, "?");
+            Dictionary<String, Object> dictionary = configuration.getProperties();
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                dictionary.put(entry.getKey(), entry.getValue());
+            }
+            configuration.update(dictionary);
         } catch (IOException ex) {
             LOGGER.error("Error saving configuration " + pid, ex);
         }

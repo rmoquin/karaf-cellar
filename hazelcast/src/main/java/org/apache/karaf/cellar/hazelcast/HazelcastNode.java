@@ -41,7 +41,7 @@ public class HazelcastNode implements Node {
             Cluster cluster = instance.getCluster();
             hzMember = cluster.getLocalMember();
         }
-        this.host = this.hzMember.getInetSocketAddress().getHostName();
+        this.host = this.hzMember.getInetSocketAddress().getHostString();
         this.port = this.hzMember.getInetSocketAddress().getPort();
     }
 

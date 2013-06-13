@@ -40,7 +40,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private SynchronizationConfiguration synchronizationConfig;
     private Node node;
     private boolean isConsuming;
-    private String listenerId;
+//    private String listenerId;
 
     public void init() {
         start();
@@ -65,16 +65,18 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     @Override
     public void start() {
         isConsuming = true;
-        listenerId = topic.addMessageListener(this);
+//        listenerId = topic.addMessageListener(this);
+        topic.addMessageListener(this);
     }
 
     @Override
     public void stop() {
         isConsuming = false;
         if (topic != null) {
-            topic.removeMessageListener(listenerId);
+//            topic.removeMessageListener(listenerId);
+            topic.removeMessageListener(this);
         }
-        listenerId = null;
+//        listenerId = null;
     }
 
     @Override

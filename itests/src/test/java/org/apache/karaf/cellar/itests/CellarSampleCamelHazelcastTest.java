@@ -47,7 +47,7 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("instance:list"));
 
         System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getFirstCluster().getLocalNode();
+        Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodesAllClusters();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
 
@@ -68,10 +68,10 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
         Thread.sleep(10000);
         System.err.println(executeCommand("feature:list"));
-        System.err.println(executeCommand("osgi:list"));
+        System.err.println(executeCommand("bundle:list"));
 
         System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("instance:connect child2  osgi:list -t 0"));
+        System.err.println(executeCommand("instance:connect child2 bundle:list -t 0"));
 
         Thread.sleep(20000);
         String output1 = executeCommand("instance:connect child1  log:display | grep \"Hallo Cellar\"");

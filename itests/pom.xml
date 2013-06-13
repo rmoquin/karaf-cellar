@@ -90,7 +90,7 @@
                 <version>2.9</version>
                 <configuration>
                     <useFile>false</useFile>
-                    <test>CellarBundleTest</test>
+                    <test>CellarInstallationTest</test>
                 </configuration>
             </plugin>
             <plugin>

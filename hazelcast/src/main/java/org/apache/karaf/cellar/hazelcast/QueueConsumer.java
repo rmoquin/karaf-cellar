@@ -43,17 +43,19 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private SynchronizationConfiguration synchronizationConfig;
     private IQueue queue;
     private Dispatcher dispatcher;
-    private String listenerId;
+//    private String listenerId;
 
     public void init() {
-        listenerId = queue.addItemListener(this, true);
+//        listenerId = queue.addItemListener(this, true);
+        queue.addItemListener(this, true);
         executorService.execute(this);
     }
 
     public void destroy() {
         isConsuming = false;
         if (queue != null) {
-            queue.removeItemListener(listenerId);
+//            queue.removeItemListener(listenerId);
+            queue.removeItemListener(this);
         }
         executorService.shutdown();
     }

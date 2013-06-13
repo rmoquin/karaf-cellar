@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.bundle;
 
+import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -60,7 +61,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
         }
 
         if (event.getBundle() != null) {
-            List<CellarCluster> clusters = null;
+            Collection<CellarCluster> clusters = null;
             try {
                 clusters = getClusterManager().getClusters();
             } catch (Exception ex) {

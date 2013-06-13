@@ -86,6 +86,11 @@
                                     <classifier>synchronization</classifier>
                                 </artifact>
                                 <artifact>
+                                    <file>target/classes/cluster.cfg</file>
+                                    <type>cfg</type>
+                                    <classifier>cluster</classifier>
+                                </artifact>
+                                <artifact>
                                     <file>target/classes/hazelcast.xml</file>
                                     <type>xml</type>
                                     <classifier>hazelcast</classifier>

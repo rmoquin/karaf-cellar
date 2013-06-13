@@ -51,7 +51,7 @@ public class ExportServiceListener implements ServiceListener {
     private CellarCluster cluster;
 
     public void init() {
-        cluster = clusterManager.getFirstCluster();
+        cluster = clusterManager.getMasterCluster();
         node = cluster.getLocalNode();
         remoteEndpoints = cluster.getMap(Constants.REMOTE_ENDPOINTS);
         bundleContext.addServiceListener(this);

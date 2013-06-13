@@ -90,50 +90,12 @@ public interface CellarCluster {
     /**
      * @return the cluster Name
      */
-    String getName();
-
+    public String getName();
+    
     /**
-     * @return the consumer
+     * @return the local cluster chosen to handle sending and receiving synchronization events.
      */
-    boolean isConsumer();
+    public boolean isSychronizer();
 
-    /**
-     * @return the enableBundleEvents
-     */
-    boolean isEnableBundleEvents();
-
-    /**
-     * @return the enableClusterEvents
-     */
-    boolean isEnableClusterEvents();
-
-    /**
-     * @return the enableConfigurationEvents
-     */
-    boolean isEnableConfigurationEvents();
-
-    /**
-     * @return the enableDOSGIEvents
-     */
-    boolean isEnableDOSGIEvents();
-
-    /**
-     * @return the enableFeatureEvents
-     */
-    boolean isEnableFeatureEvents();
-
-    /**
-     * @return the enableOBRBundleEvents
-     */
-    boolean isEnableOBRBundleEvents();
-
-    /**
-     * @return the enableObrEvents
-     */
-    boolean isEnableObrEvents();
-
-    /**
-     * @return the producer
-     */
-    boolean isProducer();
+    void shutdown();
 }

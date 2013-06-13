@@ -14,7 +14,7 @@
 package org.apache.karaf.cellar.core;
 
 import java.io.InputStream;
-import java.util.Dictionary;
+import java.util.Map;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.junit.After;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
 public class CellarSupportTest {
     ConfigurationAdmin configurationAdmin = createMock(ConfigurationAdmin.class);
     SynchronizationConfiguration configuration = new SynchronizationConfiguration() {
-        Dictionary<String, Object> properties;
+        Map<String, Object> properties;
 
         @Override
         public void save() {
@@ -37,7 +37,7 @@ public class CellarSupportTest {
         }
 
         @Override
-        public void setProperties(Dictionary<String, Object> properties) {
+        public void setProperties(Map<String, Object> properties) {
             this.properties = properties;
         }
 
@@ -52,7 +52,7 @@ public class CellarSupportTest {
         }
 
         @Override
-        public Dictionary<String, Object> getProperties() {
+        public Map<String, Object> getProperties() {
             return properties;
         }
     };
@@ -63,7 +63,7 @@ public class CellarSupportTest {
         InputStream is = getClass().getResourceAsStream("synchronization.cfg");
         props.load(is);
         is.close();
-        Dictionary propsDictionary = props;
+        Map propsDictionary = props;
         configuration.setProperties(propsDictionary);
     }
 

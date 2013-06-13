@@ -13,26 +13,28 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * Cluster manager interface.
  */
 public interface ClusterManager {
-
     /**
      * @return the clusters
      */
-    public List<CellarCluster> getClusters();
+    Collection<CellarCluster> getClusters();
+    
+    Map<String, CellarCluster> getClusterMap();
 
     /**
      * Retrieves all nodes from all clusters.
-     * 
+     *
      * @return all nodes from all known clusters.
      */
     public Set<Node> listNodesAllClusters();
-    
+
     /**
      * Create a new cluster.
      *
@@ -49,7 +51,7 @@ public interface ClusterManager {
     public void leaveCluster(String clusterName);
 
     /**
-     * Look for a cluster  with a given name.
+     * Look for a cluster with a given name.
      *
      * @param clusterName the cluster name to look for.
      * @return the cluster found, or null if no cluster found.
@@ -60,5 +62,50 @@ public interface ClusterManager {
 
     String generateId();
 
-    CellarCluster getFirstCluster();
+    CellarCluster getMasterCluster();
+
+    /**
+     * @return the consumer
+     */
+    boolean isConsumer();
+
+    /**
+     * @return the enableBundleEvents
+     */
+    boolean isEnableBundleEvents();
+
+    /**
+     * @return the enableClusterEvents
+     */
+    boolean isEnableClusterEvents();
+
+    /**
+     * @return the enableConfigurationEvents
+     */
+    boolean isEnableConfigurationEvents();
+
+    /**
+     * @return the enableDOSGIEvents
+     */
+    boolean isEnableDOSGIEvents();
+
+    /**
+     * @return the enableFeatureEvents
+     */
+    boolean isEnableFeatureEvents();
+
+    /**
+     * @return the enableOBRBundleEvents
+     */
+    boolean isEnableOBRBundleEvents();
+
+    /**
+     * @return the enableObrEvents
+     */
+    boolean isEnableObrEvents();
+
+    /**
+     * @return the producer
+     */
+    boolean isProducer();
 }

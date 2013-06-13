@@ -86,7 +86,7 @@ public class CellarFeaturesTest extends CellarTestSupport {
         System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
 
-        Node localNode = clusterManager.getFirstCluster().getLocalNode();
+        Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodesAllClusters();
         System.err.println(executeCommand("cluster:node-list"));
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());

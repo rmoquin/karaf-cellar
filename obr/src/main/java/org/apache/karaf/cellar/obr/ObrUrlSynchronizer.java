@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import java.util.Collection;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
@@ -36,7 +37,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     @Override
     public void init() {
         super.init();
-        List<CellarCluster> clusters = clusterManager.getClusters();
+        Collection<CellarCluster> clusters = clusterManager.getClusters();
         if (clusters != null && !clusters.isEmpty()) {
             for (CellarCluster cluster : clusters) {
                 if (isSyncEnabled(cluster)) {

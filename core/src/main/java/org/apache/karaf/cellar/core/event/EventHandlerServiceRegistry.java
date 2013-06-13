@@ -35,23 +35,26 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
     public EventHandler<E> getHandler(E event) {
         if (event != null) {
             Class clazz = event.getClass();
-            LOGGER.info("Getting eventhandler for event class: " + clazz.toString());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Getting eventhandler for event class: " + clazz.toString());
+            }
             return eventHandlerMap.get(clazz);
         }
-        LOGGER.info("Not event handler could be retrieved for event: " + event);
+        LOGGER.info("No event handler could be retrieved for event: " + event);
         return null;
     }
 
     public void bind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            LOGGER.info("Binding event handler type: " + handler.getType());
             eventHandlerMap.put(handler.getType(), handler);
         }
     }
 
     public void unbind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            LOGGER.info("Unbinding event handler type: " + handler.getType());
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Unbinding event handler type: " + handler.getType());
+            }
             eventHandlerMap.remove(handler.getType());
         }
     }

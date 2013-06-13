@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.features;
 
-import java.util.List;
+import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -59,7 +59,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
         }
 
         if (event != null) {
-            List<CellarCluster> clusters = super.clusterManager.getClusters();
+            Collection<CellarCluster> clusters = super.clusterManager.getClusters();
 
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
@@ -104,19 +104,23 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
             return;
         }
 
-            if (event != null && event.getRepository() != null) {
-                List<CellarCluster> clusters = clusterManager.getClusters();
+        if (event != null && event.getRepository() != null) {
+            Collection<CellarCluster> clusters = clusterManager.getClusters();
 
-                if (clusters != null && !clusters.isEmpty()) {
-                    for (CellarCluster cluster : clusters) {
-                        ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
-                        clusterRepositoryEvent.setSourceCluster(cluster);
-                        RepositoryEvent.EventType type = event.getType();
+            if (clusters != null && !clusters.isEmpty()) {
+                for (CellarCluster cluster : clusters) {
+                    ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
+                    clusterRepositoryEvent.setSourceCluster(cluster);
+                    RepositoryEvent.EventType type = event.getType();
+                    ClassLoader priorClassLoader = Thread.currentThread().getContextClassLoader();
 
+                    try {
+                        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
                         // update the features repositories in the cluster group
                         if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
                             pushRepository(event.getRepository(), cluster);
                             // update the features in the cluster group
+
                             Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
@@ -149,11 +153,14 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                                 LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
                             }
                         }
-                        // broadcast the cluster event
-                        eventProducer.produce(clusterRepositoryEvent);
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(priorClassLoader);
                     }
+                    // broadcast the cluster event
+                    eventProducer.produce(clusterRepositoryEvent);
                 }
             }
+        }
     }
 
     public EventProducer getEventProducer() {

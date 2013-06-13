@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -166,7 +167,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     }
 
     private void writeJSON(final PrintWriter pw) throws IOException {
-        final List<CellarCluster> clusters = clusterManager.getClusters();
+        final Collection<CellarCluster> clusters = clusterManager.getClusters();
         final Set<Node> nodes = new HashSet<Node>();
         for (CellarCluster cluster : clusters) {
             nodes.addAll(cluster.listNodes());
@@ -220,7 +221,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         jw.endObject();
     }
 
-    private String getStatusLine(final List<CellarCluster> clusters, Set<Node> members) {
+    private String getStatusLine(final Collection<CellarCluster> clusters, Set<Node> members) {
         int clusterCount = 0;
         int memberCount = 0;
 
