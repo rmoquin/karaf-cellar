@@ -24,6 +24,7 @@ import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.hazelcast.nio.serialization.HazelcastSerializationException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,27 +36,37 @@ import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
 public class HazelcastCluster implements CellarCluster, Serializable, MembershipListener {
-    private static transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastCluster.class);
+    private static transient Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
     private IdGenerator idgenerator;
     private transient HazelcastInstance instance;
     private String name;
     private boolean sychronizer;
-//    private transient String listenerId;
+    private transient String listenerId;
     private HazelcastNode localNode;
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
     private transient List<? extends Synchronizer> synchronizers;
 
     public void init(Config config, boolean synchronizer) {
         this.sychronizer = synchronizer;
-        instance = Hazelcast.newHazelcastInstance(config);
-//        listenerId = instance.getCluster().addMembershipListener(this);
+        try {
+            instance = Hazelcast.newHazelcastInstance(config);
+        } catch (HazelcastSerializationException ex) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Couldn't load default serializaers..." + ex.getLocalizedMessage());
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Couldn't load default serializers, detailed exception:", ex);
+            }
+        }
+        listenerId = instance.getCluster().addMembershipListener(this);
         instance.getCluster().addMembershipListener(this);
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
         memberNodes.put(this.localNode.getId(), this.localNode);
@@ -150,8 +161,8 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
 
     @Override
     public void shutdown() {
-//        instance.getCluster().removeMembershipListener(listenerId);
-        instance.getCluster().removeMembershipListener(this);
+        instance.getCluster().removeMembershipListener(listenerId);
+//        instance.getCluster().removeMembershipListener(this);
         if (instance != null) {
             instance.getLifecycleService().shutdown();
         }

@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-2.5.xsd"
+<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.0.xsd"
            xmlns="http://www.hazelcast.com/schema/config"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-    <properties>
-        <property name="hazelcast.logging.type">slf4j</property>
-    </properties>
     <group>
         <name>cellar</name>
         <password>pass</password>
@@ -33,7 +30,7 @@
                 <!--optional, default is us-east-1 -->
                 <region>us-west-1</region>
                 <!--optional, default is ec2.amazonaws.com. If set, region shouldn't be set as it will override this property -->
-                <hostHeader>ec2.amazonaws.com</hostHeader>
+                <host-header>ec2.amazonaws.com</host-header>
                 <!-- optional, only instances belonging to this group will be discovered, default will try all running instances -->
                 <security-group-name>hazelcast-sg</security-group-name>
                 <tag-key>type</tag-key>
@@ -64,10 +61,9 @@
         </symmetric-encryption>
     </network>
     <partition-group enabled="false"/>
-    <executor-service>
-        <core-pool-size>16</core-pool-size>
-        <max-pool-size>64</max-pool-size>
-        <keep-alive-seconds>60</keep-alive-seconds>
+    <executor-service name="default">
+        <pool-size>16</pool-size>
+        <queue-capacity>100</queue-capacity>
     </executor-service>
     <queue name="default">
         <!--
@@ -77,15 +73,29 @@
             Any integer between 0 and Integer.MAX_VALUE. 0 means
             Integer.MAX_VALUE. Default is 0.
         -->
-        <max-size-per-jvm>0</max-size-per-jvm>
+        <max-size>0</max-size>
         <!--
             Number of backups. If 1 is set as the backup-count for example,
             then all entries of the map will be copied to another JVM for
             fail-safety. 0 means no backup.
         -->
-        <backing-map-ref>default</backing-map-ref>
+        <backup-count>1</backup-count>
+
+        <!--
+            Number of async backups. 0 means no backup.
+        -->
+        <async-backup-count>0</async-backup-count>
     </queue>
     <map name="default">
+        <!--
+           Data type that will be used for storing recordMap.
+           Possible values:
+           BINARY (default): keys and values will be stored as binary data
+           OBJECT : values will be stored in their object forms
+           CACHED: object form of values will be cached
+        -->
+        <in-memory-format>BINARY</in-memory-format>
+
         <!--
             Number of backups. If 1 is set as the backup-count for example,
             then all entries of the map will be copied to another JVM for
@@ -124,7 +134,7 @@
             Any integer between 0 and Integer.MAX_VALUE. 0 means
             Integer.MAX_VALUE. Default is 0.
         -->
-        <max-size policy="cluster_wide_map_size">0</max-size>
+        <max-size policy="PER_NODE">0</max-size>
         <!--
             When max. size is reached, specified percentage of
             the map will be evicted. Any integer between 0 and 100.
@@ -147,16 +157,19 @@
             com.hazelcast.map.merge.HigherHitsMapMergePolicy ; entry with the higher hits wins.
             com.hazelcast.map.merge.LatestUpdateMapMergePolicy ; entry with the latest update wins.
         -->
-        <merge-policy>hz.ADD_NEW_ENTRY</merge-policy>
+        <merge-policy>com.hazelcast.map.merge.PassThroughMergePolicy</merge-policy>
     </map>
+    <semaphore name="def">
+        <initial-permits>100</initial-permits>
+        <backup-count>1</backup-count>
+        <async-backup-count>0</async-backup-count>
+    </semaphore>
             
     <!-- Add your own semaphore configurations here:
         <semaphore name="default">
             <initial-permits>10</initial-permits>
-            <semaphore-factory enabled="true">
-                <class-name>com.acme.MySemaphoreFactory</class-name>
-            </semaphore-factory>
         </semaphore>
     -->
 
+    <services enable-defaults="true" />
 </hazelcast>

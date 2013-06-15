@@ -53,21 +53,6 @@
             org.apache.karaf.cellar.hazelcast.internal*;version="${project.version}"
         </osgi.private>
     </properties>
-    <build>
-<!--        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <inherited>true</inherited>
-                <configuration>
-                    <instructions>
-                        <SPI-Consumer>com.hazelcast.util.ServiceLoader#load(java.lang.Class)</SPI-Consumer>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>-->
-    </build>
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>

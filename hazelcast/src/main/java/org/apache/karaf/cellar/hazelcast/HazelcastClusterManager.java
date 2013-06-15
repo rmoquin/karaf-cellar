@@ -35,6 +35,7 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
+import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
@@ -79,11 +80,11 @@ public class HazelcastClusterManager implements ClusterManager {
 
     public void updated(Map<String, ?> properties) {
         String clusterName = properties.get("clusterNames").toString();
-        if(!clusterNames.contains(clusterName)) {
+        if (!clusterNames.contains(clusterName)) {
             clusterNames.add(clusterName);
             try {
-            this.createCluster(clusterName);
-            } catch(Exception ex) {
+                this.createCluster(clusterName);
+            } catch (Exception ex) {
                 LOGGER.error("Error creating cluster, might be able to ignore it.", ex);
             }
         }
@@ -149,8 +150,8 @@ public class HazelcastClusterManager implements ClusterManager {
         if (this.clustersByName.containsKey(clusterName)) {
             throw new IllegalArgumentException("This node is already a member of the cluster named: " + clusterName);
         }
-        Config cfg = createNewConfig(clusterName);
         HazelcastCluster cluster = new HazelcastCluster();
+        Config cfg = createNewConfig(clusterName);
         if (mainCluster == null) {
             mainCluster = cluster;
             cluster.init(cfg, true);

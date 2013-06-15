@@ -138,7 +138,7 @@ public class CellarTestSupport {
             instances = Integer.parseInt(response.trim());
             System.err.print(".");
             try {
-                Thread.sleep(3000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 //Ignore
             }

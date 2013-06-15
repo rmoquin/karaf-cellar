@@ -40,7 +40,7 @@
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
         <felix.webconsole.version>4.0.0</felix.webconsole.version>
-        <hazelcast.version>2.6</hazelcast.version>
+        <hazelcast.version>3.0-SNAPSHOT</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
@@ -249,12 +249,6 @@
                 <version>${karaf.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.apache.karaf.tooling</groupId>
-                <artifactId>org.apache.karaf.tooling.testing</artifactId>
-                <version>${karaf.version}</version>
-            </dependency>
-
             <!-- OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
@@ -281,6 +275,7 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.junit</artifactId>
                 <version>${junit.bundle.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!-- SLF4J -->
@@ -308,13 +303,6 @@
                 <version>${jclouds.version}</version>
             </dependency>
 
-            <!-- Geronimo XBean -->
-            <dependency>
-                <groupId>org.apache.xbean</groupId>
-                <artifactId>xbean-bundleutils</artifactId>
-                <version>${xbean.version}</version>
-            </dependency>
-            
             <!-- Joda Time -->
             <dependency>
                 <groupId>joda-time</groupId>
@@ -327,6 +315,7 @@
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
+<scope>test</scope>
             </dependency>
 
             <!-- Easymock -->
@@ -341,6 +330,7 @@
                 <groupId>org.ops4j.pax.exam</groupId>
                 <artifactId>pax-exam-junit4</artifactId>
                 <version>${pax.exam.version}</version>
+<scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.karaf.tooling.exam</groupId>
