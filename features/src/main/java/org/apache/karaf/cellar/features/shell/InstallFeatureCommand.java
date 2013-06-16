@@ -14,8 +14,6 @@
 package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.cellar.features.Constants;
@@ -42,8 +40,6 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
     @Argument(index = 2, name = "version", description = "The feature version", required = false, multiValued = false)
     String version;
 
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -54,7 +50,7 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -79,17 +75,8 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(feature, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

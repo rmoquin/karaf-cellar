@@ -31,7 +31,7 @@ public class ListBundleCommand extends CellarCommandSupport {
     protected static final String HEADER_FORMAT = " %-4s   %-11s  %s";
     protected static final String OUTPUT_FORMAT = "[%-4s] [%-11s] %s";
 
-    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The cluster name", required = true, multiValued = false)
     String clusterName;
 
     @Option(name = "-s", aliases = {}, description = "Shows the symbolic name", required = false, multiValued = false)

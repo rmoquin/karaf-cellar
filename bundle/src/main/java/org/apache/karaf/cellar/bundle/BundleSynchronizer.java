@@ -15,14 +15,10 @@ package org.apache.karaf.cellar.bundle;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +31,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
-    private EventProducer eventProducer;
 
     public void init() {
     }
@@ -107,78 +102,75 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     public void push(CellarCluster cluster) {
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
             return;
         }
 
-        if (cluster != null) {
-            String groupName = cluster.getName();
-            LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+        String groupName = cluster.getName();
+        LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
+        Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-            Bundle[] bundles;
-            BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
+        Bundle[] bundles;
 
-            bundles = bundleContext.getBundles();
-            for (Bundle bundle : bundles) {
-                String symbolicName = bundle.getSymbolicName();
-                String version = bundle.getVersion().toString();
-                String bundleLocation = bundle.getLocation();
-                int status = bundle.getState();
-                String id = symbolicName + "/" + version;
+        bundles = bundleContext.getBundles();
+        for (Bundle bundle : bundles) {
+            String symbolicName = bundle.getSymbolicName();
+            String version = bundle.getVersion().toString();
+            String bundleLocation = bundle.getLocation();
+            int status = bundle.getState();
+            String id = symbolicName + "/" + version;
 
-                // check if the pid is marked as local.
-                if (isAllowed(cluster.getName(), Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
+            // check if the pid is marked as local.
+            if (isAllowed(cluster.getName(), Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
 
-                    BundleState bundleState = new BundleState();
-                    // get the bundle name or location.
-                    String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
-                    // if there is no name, then default to symbolic name.
-                    name = (name == null) ? bundle.getSymbolicName() : name;
-                    // if there is no symbolic name, resort to location.
-                    name = (name == null) ? bundle.getLocation() : name;
-                    bundleState.setName(name);
-                    bundleState.setLocation(bundleLocation);
+                BundleState bundleState = new BundleState();
+                // get the bundle name or location.
+                String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
+                // if there is no name, then default to symbolic name.
+                name = (name == null) ? bundle.getSymbolicName() : name;
+                // if there is no symbolic name, resort to location.
+                name = (name == null) ? bundle.getLocation() : name;
+                bundleState.setName(name);
+                bundleState.setLocation(bundleLocation);
 
-                    if (status == Bundle.ACTIVE) {
-                        status = BundleEvent.STARTED;
-                    }
-                    if (status == Bundle.INSTALLED) {
-                        status = BundleEvent.INSTALLED;
-                    }
-                    if (status == Bundle.RESOLVED) {
-                        status = BundleEvent.RESOLVED;
-                    }
-                    if (status == Bundle.STARTING) {
-                        status = BundleEvent.STARTING;
-                    }
-                    if (status == Bundle.UNINSTALLED) {
-                        status = BundleEvent.UNINSTALLED;
-                    }
-                    if (status == Bundle.STOPPING) {
-                        status = BundleEvent.STARTED;
-                    }
-
-                    bundleState.setStatus(status);
-
-                    BundleState existingState = clusterBundles.get(id);
-
-                    if (existingState == null ||
-                            !existingState.getLocation().equals(bundleState.getLocation()) ||
-                            existingState.getStatus() != bundleState.getStatus()) {
-                        // update the distributed map
-                        clusterBundles.put(id, bundleState);
-
-                        // broadcast the event
-                        ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
-                        event.setSourceCluster(cluster);
-                        eventProducer.produce(event);
-                    }
-
-                } else {
-                    LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
+                if (status == Bundle.ACTIVE) {
+                    status = BundleEvent.STARTED;
                 }
+                if (status == Bundle.INSTALLED) {
+                    status = BundleEvent.INSTALLED;
+                }
+                if (status == Bundle.RESOLVED) {
+                    status = BundleEvent.RESOLVED;
+                }
+                if (status == Bundle.STARTING) {
+                    status = BundleEvent.STARTING;
+                }
+                if (status == Bundle.UNINSTALLED) {
+                    status = BundleEvent.UNINSTALLED;
+                }
+                if (status == Bundle.STOPPING) {
+                    status = BundleEvent.STARTED;
+                }
+
+                bundleState.setStatus(status);
+
+                BundleState existingState = clusterBundles.get(id);
+
+                if (existingState == null ||
+                        !existingState.getLocation().equals(bundleState.getLocation()) ||
+                        existingState.getStatus() != bundleState.getStatus()) {
+                    // update the distributed map
+                    clusterBundles.put(id, bundleState);
+
+                    // broadcast the event
+                    ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
+                    event.setSourceCluster(cluster);
+                    cluster.produce(event);
+                }
+
+            } else {
+                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
             }
         }
     }
@@ -202,13 +194,5 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
         }
         return result;
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 }

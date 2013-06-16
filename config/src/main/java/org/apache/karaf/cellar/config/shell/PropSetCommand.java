@@ -17,8 +17,6 @@ import java.util.Map;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -41,14 +39,12 @@ public class PropSetCommand extends ConfigCommandSupport {
     @Argument(index = 3, name = "value", description = "The property value", required = true, multiValued = false)
     String value;
 
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
         CellarCluster cluster = clusterManager.findClusterByName(clusterName);
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -72,19 +68,10 @@ public class PropSetCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceCluster(cluster);
-            eventProducer.produce(event);
+            cluster.produce(event);
         } else {
             System.out.println("No configuration found in cluster group " + clusterName);
         }
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

@@ -15,6 +15,7 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
+import com.hazelcast.config.GlobalSerializerConfig;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
-import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
@@ -173,6 +173,7 @@ public class HazelcastClusterManager implements ClusterManager {
                 }
                 ServiceRegistration producerRegistration = bundleContext.registerService(EventProducer.class.getCanonicalName(), eventProducer, (Dictionary) serviceProperties);
                 producerRegistrations.put(clusterName, producerRegistration);
+                cluster.setEventProducer(eventProducer);
             }
 
             if (!consumerRegistrations.containsKey(clusterName)) {
@@ -237,6 +238,10 @@ public class HazelcastClusterManager implements ClusterManager {
         }
         cfg.getGroupConfig().setName(name);
         cfg.setClassLoader(this.getClass().getClassLoader());
+        GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
+        globalConfig.setClassName("java.lang.Object");
+        globalConfig.setImplementation(new GenericCellarSerializer());
+        cfg.getSerializationConfig().setGlobalSerializer(globalConfig);
         return cfg;
     }
 

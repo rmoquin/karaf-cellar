@@ -17,15 +17,12 @@ import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.cellar.obr.ObrBundleInfo;
 import org.apache.karaf.cellar.obr.management.CellarOBRMBean;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -40,8 +37,6 @@ import java.util.Set;
 public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean {
 
     private ClusterManager clusterManager;
-    private EventProducer eventProducer;
-    private ConfigurationAdmin configurationAdmin;
     private RepositoryAdmin obrService;
 
     public CellarOBRMBeanImpl() throws NotCompliantMBeanException {
@@ -99,7 +94,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -129,7 +124,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
         event.setForce(true);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -141,7 +136,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -170,7 +165,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_REMOVE_EVENT_TYPE);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -182,7 +177,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -198,7 +193,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
         event.setForce(true);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     public ClusterManager getClusterManager() {
@@ -209,14 +204,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         this.clusterManager = clusterManager;
     }
 
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
     public RepositoryAdmin getObrService() {
         return obrService;
     }
@@ -224,13 +211,4 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
     public void setObrService(RepositoryAdmin obrService) {
         this.obrService = obrService;
     }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
 }

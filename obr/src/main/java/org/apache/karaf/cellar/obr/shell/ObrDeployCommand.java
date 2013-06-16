@@ -14,8 +14,6 @@
 package org.apache.karaf.cellar.obr.shell;
 
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.Constants;
@@ -35,8 +33,6 @@ public class ObrDeployCommand extends ObrCommandSupport {
     @Option(name = "-s", aliases = { "--start" }, description = "Start the deployed bundles.", required = false, multiValued = false)
     boolean start = false;
 
-    private EventProducer eventProducer;
-
     @Override
     public Object doExecute() throws Exception {
         // check if the group exists
@@ -47,7 +43,7 @@ public class ObrDeployCommand extends ObrCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -63,17 +59,8 @@ public class ObrDeployCommand extends ObrCommandSupport {
         if (start) type = Constants.BUNDLE_START_EVENT_TYPE;
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

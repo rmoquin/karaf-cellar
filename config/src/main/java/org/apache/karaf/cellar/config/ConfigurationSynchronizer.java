@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -36,7 +34,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class ConfigurationSynchronizer extends ConfigurationSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationSynchronizer.class);
-    private EventProducer eventProducer;
 
     public ConfigurationSynchronizer() {
         // nothing to do
@@ -66,7 +63,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         this.push(cluster);
         return true;
     }
-    
+
     /**
      * Pull the configuration from a cluster group to update the local ones.
      *
@@ -115,40 +112,38 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     public void push(CellarCluster cluster) {
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             LOGGER.warn("CELLAR CONFIG: cluster event producer is OFF");
             return;
         }
 
-        if (cluster != null) {
-            String clusterName = cluster.getName();
-            LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", clusterName);
-            Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        String clusterName = cluster.getName();
+        LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", clusterName);
+        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
 
-            Configuration[] localConfigurations;
-            try {
-                localConfigurations = getConfigurationAdmin().listConfigurations(null);
-                for (Configuration localConfiguration : localConfigurations) {
-                    String pid = localConfiguration.getPid();
-                    // check if the pid is marked as local.
-                    if (isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-                        Dictionary localDictionary = localConfiguration.getProperties();
-                        localDictionary = filter(localDictionary);
-                        // update the configurations in the cluster group
-                        clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
-                        // broadcast the cluster event
-                        ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-                        event.setSourceCluster(cluster);
-                        eventProducer.produce(event);
-                    } else {
-                        LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, clusterName);
-                    }
+        Configuration[] localConfigurations;
+        try {
+            localConfigurations = getConfigurationAdmin().listConfigurations(null);
+            for (Configuration localConfiguration : localConfigurations) {
+                String pid = localConfiguration.getPid();
+                // check if the pid is marked as local.
+                if (isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                    Dictionary localDictionary = localConfiguration.getProperties();
+                    localDictionary = filter(localDictionary);
+                    // update the configurations in the cluster group
+                    clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
+                    // broadcast the cluster event
+                    ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+                    event.setSourceCluster(cluster);
+                    cluster.produce(event);
+                } else {
+                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, clusterName);
                 }
-            } catch (IOException ex) {
-                LOGGER.error("CELLAR CONFIG: failed to read configuration (IO error)", ex);
-            } catch (InvalidSyntaxException ex) {
-                LOGGER.error("CELLAR CONFIG: failed to read configuration (invalid filter syntax)", ex);
             }
+        } catch (IOException ex) {
+            LOGGER.error("CELLAR CONFIG: failed to read configuration (IO error)", ex);
+        } catch (InvalidSyntaxException ex) {
+            LOGGER.error("CELLAR CONFIG: failed to read configuration (invalid filter syntax)", ex);
         }
     }
 
@@ -160,20 +155,10 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     @Override
     public Boolean isSyncEnabled(CellarCluster cluster) {
-        Boolean result = Boolean.FALSE;
         String clusterName = cluster.getName();
 
         String propertyKey = clusterName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
         String propertyValue = (String) super.synchronizationConfiguration.getProperty(propertyKey);
-        result = Boolean.parseBoolean(propertyValue);
-        return result;
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+        return Boolean.parseBoolean(propertyValue);
     }
 }

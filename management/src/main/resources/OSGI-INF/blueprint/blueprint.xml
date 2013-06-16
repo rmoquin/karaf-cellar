@@ -19,7 +19,6 @@
     
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 
@@ -49,8 +48,6 @@
     <!-- Cellar Config MBean -->
     <bean id="cellarConfigMBean" class="org.apache.karaf.cellar.management.internal.CellarConfigMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="cellarConfigMBean" auto-export="interfaces">
         <service-properties>
@@ -61,8 +58,6 @@
     <!-- Cellar Features MBean -->
     <bean id="cellarFeaturesMBean" class="org.apache.karaf.cellar.management.internal.CellarFeaturesMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="cellarFeaturesMBean" auto-export="interfaces">
@@ -85,8 +80,6 @@
     <!-- Cellar Bundle MBean -->
     <bean id="cellarBundleMBean" class="org.apache.karaf.cellar.management.internal.CellarBundleMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="cellarBundleMBean" auto-export="interfaces">
         <service-properties>

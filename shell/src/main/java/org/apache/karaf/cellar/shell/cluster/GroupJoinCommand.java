@@ -20,7 +20,7 @@ import java.util.List;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.control.ManageClusterAction;
 
-@Command(scope = "cluster", name = "group-join", description = "Join serveral node(s) to a cluster")
+@Command(scope = "cluster", name = "join", description = "Join serveral node(s) to a cluster")
 public class GroupJoinCommand extends GroupSupport {
 
     @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)

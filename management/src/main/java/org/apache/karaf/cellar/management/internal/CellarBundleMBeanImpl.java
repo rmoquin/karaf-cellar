@@ -17,12 +17,9 @@ import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.management.CellarBundleMBean;
 import org.osgi.framework.BundleEvent;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -40,8 +37,6 @@ import java.util.regex.Pattern;
 public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundleMBean {
 
     private ClusterManager clusterManager;
-    private ConfigurationAdmin configurationAdmin;
-    private EventProducer eventProducer;
 
     public CellarBundleMBeanImpl() throws NotCompliantMBeanException {
         super(CellarBundleMBean.class);
@@ -55,22 +50,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         this.clusterManager = clusterManager;
     }
 
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
     @Override
     public void install(String clusterName, String location) throws Exception {
         // check if cluster group exists
@@ -80,7 +59,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
@@ -114,7 +93,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         // broadcast the event
         ClusterBundleEvent event = new ClusterBundleEvent(name, version, location, BundleEvent.INSTALLED);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -126,7 +105,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
@@ -157,7 +136,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.UNINSTALLED);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -169,7 +148,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
@@ -201,7 +180,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STARTED);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -213,7 +192,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
@@ -245,7 +224,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STOPPED);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override

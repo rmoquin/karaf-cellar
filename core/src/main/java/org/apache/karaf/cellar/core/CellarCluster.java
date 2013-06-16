@@ -19,6 +19,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.event.Event;
 
 /**
  *
@@ -98,4 +99,8 @@ public interface CellarCluster {
     public boolean isSychronizer();
 
     void shutdown();
+
+    void produce(Event event);
+
+    boolean emitsEvents();
 }

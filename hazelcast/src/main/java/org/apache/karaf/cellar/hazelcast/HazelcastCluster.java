@@ -24,7 +24,6 @@ import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
-import com.hazelcast.nio.serialization.HazelcastSerializationException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
@@ -35,6 +34,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.Synchronizer;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,25 +55,32 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     private HazelcastNode localNode;
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
     private transient List<? extends Synchronizer> synchronizers;
+    private EventProducer eventProducer;
 
     public void init(Config config, boolean synchronizer) {
         this.sychronizer = synchronizer;
-        try {
-            instance = Hazelcast.newHazelcastInstance(config);
-        } catch (HazelcastSerializationException ex) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Couldn't load default serializaers..." + ex.getLocalizedMessage());
-            }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Couldn't load default serializers, detailed exception:", ex);
-            }
-        }
+        instance = Hazelcast.newHazelcastInstance(config);
         listenerId = instance.getCluster().addMembershipListener(this);
         instance.getCluster().addMembershipListener(this);
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
         memberNodes.put(this.localNode.getId(), this.localNode);
     }
+    
+    /**
+     * Sends a cluster event from this cluster as the source of the event.
+     * 
+     * @param event to send
+     */
+    @Override
+    public void produce(Event event) {
+        this.eventProducer.produce(event);
+    }
 
+    @Override
+    public boolean emitsEvents() {
+        return eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF);
+    }
+    
     /**
      * Get the list of Hazelcast nodes.
      *
@@ -292,5 +301,19 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
      */
     public void setSychronizer(boolean sychronizer) {
         this.sychronizer = sychronizer;
+    }
+
+    /**
+     * @return the eventProducer
+     */
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    /**
+     * @param eventProducer the eventProducer to set
+     */
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }

@@ -38,17 +38,16 @@
         <osgi.import>
             org.apache.karaf.cellar.core*;version="${project.version}",
             org.apache.felix.service.command,
-            org.apache.felix.gogo.commands,
-            org.apache.karaf.shell.console;version="[3,4)",
-            org.apache.karaf.shell.console.commands;version="[3,4)",
-            org.apache.karaf.shell.console.completer;version="[3,4)",
-            org.apache.karaf.shell.commands;version="[3,4)",
-            org.apache.karaf.features;version="[3,4)",
+            org.apache.karaf.shell.commands,
+            org.apache.karaf.shell.console,
+            org.apache.karaf.features,
             org.slf4j;resolution:=optional,
             *
         </osgi.import>
         <osgi.export>
-            org.apache.karaf.cellar.bundle*;version="${project.version}"
+            org.apache.karaf.cellar.bundle;version="${project.version}",
+            org.apache.karaf.cellar.bundle.shell;version="${project.version}",
+            org.apache.karaf.cellar.bundle.shell.completers;version="${project.version}"
         </osgi.export>
     </properties>
 
@@ -67,19 +66,15 @@
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>
         </dependency>
-
-        <!-- Configuration Admin -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.configadmin</artifactId>
-        </dependency>
-        
         <!-- Karaf features -->
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
         <!-- Logging Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>

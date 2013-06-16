@@ -46,8 +46,6 @@ public class InstallBundleCommand extends CellarCommandSupport {
     @Option(name = "-s", aliases = {"--start"}, description = "Start the bundle after installation", required = false, multiValued = false)
     boolean start;
 
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the exists
@@ -58,7 +56,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -99,7 +97,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 // broadcast the cluster event
                 ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, url, BundleEvent.INSTALLED);
                 event.setSourceCluster(cluster);
-                eventProducer.produce(event);
+                cluster.produce(event);
             } else {
                 System.err.println("Bundle location " + url + " is blocked outbound for cluster." + clusterName);
             }
@@ -107,13 +105,4 @@ public class InstallBundleCommand extends CellarCommandSupport {
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

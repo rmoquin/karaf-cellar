@@ -14,8 +14,6 @@
 package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
@@ -39,7 +37,6 @@ public class UrlAddCommand extends FeatureCommandSupport {
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
-    private EventProducer eventProducer;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -51,7 +48,7 @@ public class UrlAddCommand extends FeatureCommandSupport {
         }
 
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -116,7 +113,7 @@ public class UrlAddCommand extends FeatureCommandSupport {
                     // broadcast the cluster event
                     ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
                     event.setSourceCluster(cluster);
-                    eventProducer.produce(event);
+                    cluster.produce(event);
                 } else {
                     System.err.println("Features repository URL " + url + " already registered");
                 }
@@ -124,13 +121,4 @@ public class UrlAddCommand extends FeatureCommandSupport {
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

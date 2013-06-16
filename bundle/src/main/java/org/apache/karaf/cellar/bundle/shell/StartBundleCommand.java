@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.shell.commands.Command;
@@ -30,8 +29,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
 @Command(scope = "cluster", name = "bundle-start", description = "Start a bundle in a cluster group")
 public class StartBundleCommand extends BundleCommandSupport {
 
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -42,7 +39,7 @@ public class StartBundleCommand extends BundleCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -80,17 +77,8 @@ public class StartBundleCommand extends BundleCommandSupport {
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STARTED);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

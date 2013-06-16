@@ -40,9 +40,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
 
     @Argument(index = 3, name = "value", description = "The property value", required = true, multiValued = false)
     String value;
-
-    private EventProducer eventProducer;
-
+    
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -53,7 +51,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -85,19 +83,10 @@ public class PropAppendCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceCluster(cluster);
-            eventProducer.produce(event);
+            cluster.produce(event);
         } else {
             System.out.println("No configuration found in cluster group " + clusterName);
         }
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

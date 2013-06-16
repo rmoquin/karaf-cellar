@@ -15,7 +15,6 @@
   -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <!-- Command Bundle -->
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="cluster/config-list">
             <action class="org.apache.karaf.cellar.config.shell.ListCommand">
@@ -36,8 +35,6 @@
         <command name="cluster/config-propset">
             <action class="org.apache.karaf.cellar.config.shell.PropSetCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
-                <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -46,8 +43,6 @@
         <command name="cluster/config-propappend">
             <action class="org.apache.karaf.cellar.config.shell.PropAppendCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
-                <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -56,8 +51,6 @@
         <command name="cluster/config-propdel">
             <action class="org.apache.karaf.cellar.config.shell.PropDelCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
-                <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -66,8 +59,6 @@
         <command name="cluster/config-delete">
             <action class="org.apache.karaf.cellar.config.shell.DeleteCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
-                <property name="configurationAdmin" ref="configurationAdmin"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -76,5 +67,4 @@
     </command-bundle>
 
     <bean id="allClustersCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllClustersCompleter"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 </blueprint>

@@ -18,8 +18,6 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 
 import java.util.Map;
@@ -37,9 +35,7 @@ public class PropDelCommand extends ConfigCommandSupport {
 
     @Argument(index = 2, name = "key", description = "The property key to delete", required = true, multiValued = false)
     String key;
-
-    private EventProducer eventProducer;
-
+    
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -50,7 +46,7 @@ public class PropDelCommand extends ConfigCommandSupport {
         }
 
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -72,7 +68,7 @@ public class PropDelCommand extends ConfigCommandSupport {
                 // broadcast the cluster event
                 ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                 event.setSourceCluster(cluster);
-                eventProducer.produce(event);
+                cluster.produce(event);
             }
         } else {
             System.out.println("No configuration found in cluster group " + clusterName);
@@ -80,13 +76,4 @@ public class PropDelCommand extends ConfigCommandSupport {
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

@@ -21,7 +21,6 @@
     <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener" init-method="init"
           destroy-method="destroy">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
@@ -59,7 +58,6 @@
     <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 

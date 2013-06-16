@@ -14,14 +14,11 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
-    <!-- Command Bundle -->
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="cluster/feature-install">
             <action class="org.apache.karaf.cellar.features.shell.InstallFeatureCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="configurationAdmin" ref="configurationAdmin"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="eventProducer" ref="eventProducer"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -31,9 +28,7 @@
         <command name="cluster/feature-uninstall">
             <action class="org.apache.karaf.cellar.features.shell.UninstallFeatureCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="configurationAdmin" ref="configurationAdmin"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="eventProducer" ref="eventProducer"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -60,7 +55,6 @@
         <command name="cluster/feature-url-add">
             <action class="org.apache.karaf.cellar.features.shell.UrlAddCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
                 <property name="featuresService" ref="featuresService"/>
             </action>
             <completers>
@@ -70,7 +64,6 @@
         <command name="cluster/feature-url-remove">
             <action class="org.apache.karaf.cellar.features.shell.UrlRemoveCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
                 <property name="featuresService" ref="featuresService"/>
             </action>
             <completers>

@@ -19,7 +19,7 @@ import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
 
-@Command(scope = "cluster", name = "group-list", description = "List the clusters")
+@Command(scope = "cluster", name = "node-list", description = "List the nodes in a cluster(s)")
 public class GroupListCommand extends GroupSupport {
 
     @Argument(index = 0, name = "node", description = "The node(s) ID", required = false, multiValued = true)
@@ -29,5 +29,4 @@ public class GroupListCommand extends GroupSupport {
     protected Object doExecute() throws Exception {
         return doExecute(ManageClusterAction.LIST, null, null, nodes,false);
     }
-
 }

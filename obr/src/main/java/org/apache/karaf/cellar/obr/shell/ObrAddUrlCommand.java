@@ -16,8 +16,6 @@ package org.apache.karaf.cellar.obr.shell;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
@@ -36,9 +34,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
 
     @Argument(index = 1, name = "url", description = "The OBR URL.", required = true, multiValued = false)
     String url;
-
-    private EventProducer eventProducer;
-
+    
     @Override
     public Object doExecute() throws Exception {
         // check if the group exists
@@ -49,7 +45,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -78,17 +74,9 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
 
         return null;
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 
 }

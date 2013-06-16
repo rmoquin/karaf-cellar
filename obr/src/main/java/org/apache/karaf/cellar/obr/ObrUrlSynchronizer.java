@@ -18,12 +18,10 @@ import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 
@@ -32,7 +30,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
-    private List<EventProducer> producerList;
 
     @Override
     public void init() {
@@ -117,20 +114,10 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
 
     @Override
     public Boolean isSyncEnabled(CellarCluster cluster) {
-        Boolean result = Boolean.FALSE;
         String clusterName = cluster.getName();
 
         String propertyKey = clusterName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
         String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
-        result = Boolean.parseBoolean(propertyValue);
-        return result;
-    }
-
-    public List<EventProducer> getProducerList() {
-        return producerList;
-    }
-
-    public void setProducerList(List<EventProducer> producerList) {
-        this.producerList = producerList;
+        return Boolean.parseBoolean(propertyValue);
     }
 }

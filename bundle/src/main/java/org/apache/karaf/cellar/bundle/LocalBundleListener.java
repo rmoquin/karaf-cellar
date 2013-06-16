@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.bundle;
 
 import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.BundleEvent;
@@ -34,7 +32,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class LocalBundleListener extends BundleSupport implements SynchronousBundleListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalBundleListener.class);
-    private EventProducer eventProducer;
 
     /**
      * Callback method called when a local bundle status change.
@@ -54,12 +51,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
-            return;
-        }
-
         if (event.getBundle() != null) {
             Collection<CellarCluster> clusters = null;
             try {
@@ -70,7 +61,11 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
 
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
-
+                    // check if the producer is ON
+                    if (cluster.emitsEvents()) {
+                        LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
+                        continue;
+                    }
                     // get the bundle name or location.
                     String name = (String) event.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
                     // if there is no name, then default to symbolic name.
@@ -111,7 +106,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             // broadcast the cluster event
                             ClusterBundleEvent clusterBundleEvent = new ClusterBundleEvent(symbolicName, version, bundleLocation, type);
                             clusterBundleEvent.setSourceCluster(cluster);
-                            eventProducer.produce(clusterBundleEvent);
+                            cluster.produce(clusterBundleEvent);
                         } catch (Exception e) {
                             LOGGER.error("CELLAR BUNDLE: failed to create bundle event", e);
                         }
@@ -130,13 +125,5 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
 
     public void destroy() {
         bundleContext.removeBundleListener(this);
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 }

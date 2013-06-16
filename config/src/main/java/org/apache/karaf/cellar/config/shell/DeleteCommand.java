@@ -16,8 +16,6 @@ package org.apache.karaf.cellar.config.shell;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -36,8 +34,6 @@ public class DeleteCommand extends ConfigCommandSupport {
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
 
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -48,7 +44,7 @@ public class DeleteCommand extends ConfigCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -68,7 +64,7 @@ public class DeleteCommand extends ConfigCommandSupport {
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceCluster(cluster);
             event.setType(ConfigurationEvent.CM_DELETED);
-            eventProducer.produce(event);
+            cluster.produce(event);
 
         } else {
             System.out.println("Configuration distributed map not found for cluster group " + clusterName);

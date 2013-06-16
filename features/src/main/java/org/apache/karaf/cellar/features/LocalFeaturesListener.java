@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.features;
 
 import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -32,7 +30,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class LocalFeaturesListener extends FeaturesSupport implements org.apache.karaf.features.FeaturesListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
-    private EventProducer eventProducer;
 
     @Override
     public void init() {
@@ -52,18 +49,16 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
     @Override
     public void featureEvent(FeatureEvent event) {
 
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
-            return;
-        }
-
         if (event != null) {
             Collection<CellarCluster> clusters = super.clusterManager.getClusters();
 
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
-
+                    // check if the producer is ON
+                    if (cluster.emitsEvents()) {
+                        LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
+                        continue;
+                    }
                     Feature feature = event.getFeature();
                     String name = feature.getName();
                     String version = feature.getVersion();
@@ -81,7 +76,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         // broadcast the event
                         ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
                         featureEvent.setSourceCluster(cluster);
-                        eventProducer.produce(featureEvent);
+                        cluster.produce(featureEvent);
                     } else {
                         LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, cluster.getName());
                     }
@@ -97,18 +92,16 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
      */
     @Override
     public void repositoryEvent(RepositoryEvent event) {
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
-            return;
-        }
-
         if (event != null && event.getRepository() != null) {
             Collection<CellarCluster> clusters = clusterManager.getClusters();
 
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
+                    // check if the producer is ON
+                    if (cluster.emitsEvents()) {
+                        LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
+                        continue;
+                    }
                     ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
                     clusterRepositoryEvent.setSourceCluster(cluster);
                     RepositoryEvent.EventType type = event.getType();
@@ -157,17 +150,9 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         Thread.currentThread().setContextClassLoader(priorClassLoader);
                     }
                     // broadcast the cluster event
-                    eventProducer.produce(clusterRepositoryEvent);
+                    cluster.produce(clusterRepositoryEvent);
                 }
             }
         }
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 }

@@ -14,8 +14,6 @@
 package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.cellar.features.Constants;
@@ -35,19 +33,17 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
     @Argument(index = 2, name = "version", description = "The feature version", required = false, multiValued = false)
     String version;
 
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
         CellarCluster cluster = clusterManager.findClusterByName(clusterName);
         if (cluster == null) {
-            System.err.println("Cluster group " + clusterName + " doesn't exist");
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF for this node");
             return null;
         }
@@ -73,17 +69,8 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(feature, version, FeatureEvent.EventType.FeatureUninstalled);
         event.setForce(true);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

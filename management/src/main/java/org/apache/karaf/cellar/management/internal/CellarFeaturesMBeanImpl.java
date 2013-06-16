@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.cellar.features.Constants;
@@ -25,7 +23,6 @@ import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
 import org.apache.karaf.cellar.management.CellarFeaturesMBean;
 import org.apache.karaf.features.*;
 import org.osgi.framework.BundleEvent;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -41,9 +38,7 @@ import java.util.Map;
 public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeaturesMBean {
 
     private ClusterManager clusterManager;
-    private EventProducer eventProducer;
     private FeaturesService featuresService;
-    private ConfigurationAdmin configurationAdmin;
 
     public CellarFeaturesMBeanImpl() throws NotCompliantMBeanException {
         super(CellarFeaturesMBean.class);
@@ -57,28 +52,12 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         this.clusterManager = clusterManager;
     }
 
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
     public FeaturesService getFeaturesService() {
         return featuresService;
     }
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
-    }
-
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 
     @Override
@@ -90,7 +69,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -146,7 +125,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -173,7 +152,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -216,7 +195,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, FeatureEvent.EventType.FeatureUninstalled);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
     }
 
     @Override
@@ -278,7 +257,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -339,7 +318,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
                 // broadcast the cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
                 event.setSourceCluster(cluster);
-                eventProducer.produce(event);
+                cluster.produce(event);
             } else {
                 throw new IllegalArgumentException("Features repository URL " + url + " already registered");
             }
@@ -354,7 +333,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -415,7 +394,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             // broadcast a cluster event
             ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
             event.setSourceCluster(cluster);
-            eventProducer.produce(event);
+            cluster.produce(event);
         } else {
             throw new IllegalArgumentException("Features repository URL " + url + " not found in cluster group " + clusterName);
         }

@@ -18,8 +18,6 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
@@ -29,9 +27,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "bundle-uninstall", description = "Uninstall a bundle from a cluster group")
 public class UninstallBundleCommand extends BundleCommandSupport {
-
-    private EventProducer eventProducer;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -42,7 +37,7 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -51,47 +46,38 @@ public class UninstallBundleCommand extends BundleCommandSupport {
 
         String location;
         String key = null;
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
-            key = selector(clusterBundles);
+        key = selector(clusterBundles);
 
-            if (key == null) {
-                System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
-                return null;
-            }
+        if (key == null) {
+            System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
+            return null;
+        }
 
-            BundleState state = clusterBundles.get(key);
-            if (state == null) {
-                System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
-                return null;
-            }
-            location = state.getLocation();
+        BundleState state = clusterBundles.get(key);
+        if (state == null) {
+            System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
+            return null;
+        }
+        location = state.getLocation();
 
-            // check if the bundle is allowed
-            CellarSupport support = new CellarSupport();
-            support.setClusterManager(this.clusterManager);
-            if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, location, EventType.OUTBOUND)) {
-                System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + clusterName);
-                return null;
-            }
+        // check if the bundle is allowed
+        CellarSupport support = new CellarSupport();
+        support.setClusterManager(this.clusterManager);
+        if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, location, EventType.OUTBOUND)) {
+            System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + clusterName);
+            return null;
+        }
 
-            clusterBundles.remove(key);
+        clusterBundles.remove(key);
 
         // broadcast the cluster event
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.UNINSTALLED);
         event.setSourceCluster(cluster);
-        eventProducer.produce(event);
+        cluster.produce(event);
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }
