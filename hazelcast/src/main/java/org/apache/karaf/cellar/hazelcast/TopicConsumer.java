@@ -66,7 +66,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public void start() {
         isConsuming = true;
         listenerId = topic.addMessageListener(this);
-//        topic.addMessageListener(this);
     }
 
     @Override
@@ -74,7 +73,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         isConsuming = false;
         if (topic != null) {
             topic.removeMessageListener(listenerId);
-//            topic.removeMessageListener(this);
         }
         listenerId = null;
     }

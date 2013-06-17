@@ -17,6 +17,7 @@ import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ITopic;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Dispatcher;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
@@ -27,6 +28,7 @@ import org.apache.karaf.cellar.core.event.EventTransportFactory;
 public class HazelcastEventTransportFactory implements EventTransportFactory {
 
     private Dispatcher dispatcher;
+    private SynchronizationConfiguration synchronizationConfig;
     
     @Override
     public EventProducer getEventProducer(CellarCluster cluster, String name, Boolean pubsub) {
@@ -35,6 +37,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             TopicProducer producer = new TopicProducer();
             producer.setTopic(topic);
             producer.setNode(cluster.getLocalNode());
+            producer.setSynchronizationConfig(synchronizationConfig);
             producer.init();
             return producer;
         } else {
@@ -42,6 +45,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             QueueProducer producer = new QueueProducer();
             producer.setQueue(queue);
             producer.setNode(cluster.getLocalNode());
+            producer.setSynchronizationConfig(synchronizationConfig);
             producer.init();
             return producer;
         }
@@ -53,6 +57,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             ITopic topic = ((HazelcastCluster)cluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + name);
             TopicConsumer consumer = new TopicConsumer();
             consumer.setTopic(topic);
+            consumer.setSynchronizationConfig(synchronizationConfig);
             consumer.setDispatcher(dispatcher);
             consumer.setNode(cluster.getLocalNode());
             consumer.init();
@@ -62,6 +67,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             QueueConsumer consumer = new QueueConsumer();
             consumer.setQueue(queue);
             consumer.setDispatcher(dispatcher);
+            consumer.setSynchronizationConfig(synchronizationConfig);
             consumer.init();
             return consumer;
         }
@@ -112,5 +118,19 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
 
     public void setDispatcher(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
+    }
+
+    /**
+     * @return the synchronizationConfig
+     */
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
+    }
+
+    /**
+     * @param synchronizationConfig the synchronizationConfig to set
+     */
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
     }
 }

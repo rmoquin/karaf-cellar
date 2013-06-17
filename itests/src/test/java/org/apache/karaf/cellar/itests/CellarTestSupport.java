@@ -57,7 +57,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
-    static final Long COMMAND_TIMEOUT = 20000L;
+    static final Long COMMAND_TIMEOUT = 10000L;
     static final Long DEFAULT_TIMEOUT = 15000L;
     static final Long SERVICE_TIMEOUT = 20000L;
     static final String GROUP_ID = "org.apache.karaf";
@@ -183,7 +183,7 @@ public class CellarTestSupport {
     @Configuration
     public Option[] config() {
         Option[] options = new Option[] {
-            cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.DEBUG),
+            cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
             editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL())
         };
         String debug = System.getProperty("debugMain");
@@ -304,7 +304,7 @@ public class CellarTestSupport {
      */
     private static String explode(Dictionary dictionary) {
         Enumeration keys = dictionary.keys();
-        StringBuilder result = new StringBuilder();
+        StringBuffer result = new StringBuffer();
         while (keys.hasMoreElements()) {
             Object key = keys.nextElement();
             result.append(String.format("%s=%s", key, dictionary.get(key)));

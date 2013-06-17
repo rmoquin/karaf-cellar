@@ -52,6 +52,7 @@
     <!-- Cluster Event Transport Factory -->
     <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">
         <property name="dispatcher"  ref="dispatcher"/>
+        <property name="synchronizationConfig"  ref="synchronizationConfig"/>
     </bean>
 
     <service ref="eventTransportFactory" interface="org.apache.karaf.cellar.core.event.EventTransportFactory"/>

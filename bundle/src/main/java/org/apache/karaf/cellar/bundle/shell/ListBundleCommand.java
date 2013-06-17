@@ -42,7 +42,6 @@ public class ListBundleCommand extends CellarCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        // check if the group exists
         CellarCluster cluster = clusterManager.findClusterByName(clusterName);
         if (cluster == null) {
             System.err.println("Cluster " + clusterName + " doesn't exist");

@@ -17,7 +17,6 @@ import org.apache.karaf.cellar.core.CellarSupport;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ import java.util.Map;
  * Generic Cellar OSGi event support.
  */
 public class EventSupport extends CellarSupport {
-    
     protected EventAdmin eventAdmin;
 
     /**
@@ -34,18 +32,18 @@ public class EventSupport extends CellarSupport {
      * @param event the local event to read.
      * @return the map
      */
-    public Map<String, Serializable> getEventProperties(Event event) {
+    public Map<String, Object> getEventProperties(Event event) {
         String[] propertyNames = event.getPropertyNames();
 
-        Map<String, Serializable> properties = new HashMap<String, Serializable>();
+        Map<String, Object> properties = new HashMap<String, Object>();
 
         for (String propertyName : propertyNames) {
             Object property = event.getProperty(propertyName);
-            if (property instanceof Serializable) {
-                properties.put(propertyName, (Serializable) property);
+            if (property instanceof Object) {
+                properties.put(propertyName, (Object) property);
             }
         }
-        
+
         return properties;
     }
 
@@ -53,7 +51,7 @@ public class EventSupport extends CellarSupport {
      * Read a local {@code Event} and check if a property exists.
      *
      * @param event the local event to read.
-     * @param name  the property name to check.
+     * @param name the property name to check.
      * @return true if the property exists in the event, false else.
      */
     public boolean hasEventProperty(Event event, String name) {
@@ -74,7 +72,7 @@ public class EventSupport extends CellarSupport {
      * @param topicName the topic name.
      * @param properties the event properties.
      */
-    public void postEvent(String topicName, Map<String, Serializable> properties) {
+    public void postEvent(String topicName, Map<String, Object> properties) {
         if (topicName == null) {
             LOGGER.error("CELLAR EVENT: failed to post event");
             return;
@@ -90,7 +88,7 @@ public class EventSupport extends CellarSupport {
      * @param topicName the topic name.
      * @param properties the event properties.
      */
-    public void sendEvent(String topicName, Map<String, Serializable> properties) {
+    public void sendEvent(String topicName, Map<String, Object> properties) {
         if (topicName == null) {
             LOGGER.error("CELLAR EVENT: failed to send event");
             return;
@@ -107,5 +105,4 @@ public class EventSupport extends CellarSupport {
     public void setEventAdmin(EventAdmin eventAdmin) {
         this.eventAdmin = eventAdmin;
     }
-
 }

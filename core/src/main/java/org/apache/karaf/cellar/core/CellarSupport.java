@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Cellar generic support. This class provides a set of util methods used by other classes.
@@ -31,7 +30,6 @@ public class CellarSupport {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
     protected SynchronizationConfiguration synchronizationConfiguration;
     protected ClusterManager clusterManager;
-    private ConfigurationAdmin configurationAdmin;
 
     /**
      * Get a set of resources in the Cellar cluster groups configuration.
@@ -175,19 +173,5 @@ public class CellarSupport {
      */
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
-    }
-
-    /**
-     * @return the configurationAdmin
-     */
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    /**
-     * @param configurationAdmin the configurationAdmin to set
-     */
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
     }
 }

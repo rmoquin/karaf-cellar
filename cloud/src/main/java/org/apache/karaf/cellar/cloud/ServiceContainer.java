@@ -13,14 +13,13 @@
  */
 package org.apache.karaf.cellar.cloud;
 
-import java.io.Serializable;
 
 import org.joda.time.DateTime;
 
 /**
  * A cloud service container.
  */
-public class ServiceContainer implements Serializable {
+public class ServiceContainer {
 
 	private DateTime registeredTime;
 	private String hostName;

@@ -22,7 +22,6 @@ import org.apache.karaf.cellar.core.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.util.Map;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
@@ -52,7 +51,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
 
         try {
             if (isAllowed(event.getSourceCluster().getName(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
-                Map<String, Serializable> properties = event.getProperties();
+                Map<String, Object> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_CLUSTER_KEY, event.getSourceCluster().getName());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());

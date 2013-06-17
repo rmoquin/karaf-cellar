@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -45,23 +46,31 @@ import org.slf4j.LoggerFactory;
  * @author rmoquin
  */
 public class HazelcastCluster implements CellarCluster, Serializable, MembershipListener {
-    private static transient Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
+    @JsonIgnore
+    private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
+    @JsonIgnore
     private IdGenerator idgenerator;
-    private transient HazelcastInstance instance;
+    @JsonIgnore
+    private HazelcastInstance instance;
     private String name;
+    @JsonIgnore
     private boolean sychronizer;
-    private transient String listenerId;
+    @JsonIgnore
+    private String listenerId;
     private HazelcastNode localNode;
+    @JsonIgnore
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
-    private transient List<? extends Synchronizer> synchronizers;
+    @JsonIgnore
+    private List<? extends Synchronizer> synchronizers;
+    @JsonIgnore
     private EventProducer eventProducer;
 
-    public void init(Config config, boolean synchronizer) {
+    public void init(String name, Config config, boolean synchronizer) {
+        this.name = name;
         this.sychronizer = synchronizer;
         instance = Hazelcast.newHazelcastInstance(config);
         listenerId = instance.getCluster().addMembershipListener(this);
-        instance.getCluster().addMembershipListener(this);
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
         memberNodes.put(this.localNode.getId(), this.localNode);
     }
@@ -171,7 +180,6 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     @Override
     public void shutdown() {
         instance.getCluster().removeMembershipListener(listenerId);
-//        instance.getCluster().removeMembershipListener(this);
         if (instance != null) {
             instance.getLifecycleService().shutdown();
         }

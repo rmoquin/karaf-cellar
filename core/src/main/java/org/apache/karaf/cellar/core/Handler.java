@@ -15,12 +15,11 @@ package org.apache.karaf.cellar.core;
 
 import org.apache.karaf.cellar.core.control.Switch;
 
-import java.io.Serializable;
 
 /**
  * Generic handler.
  */
-public interface Handler<T extends Serializable> {
+public interface Handler<T extends Object> {
 
     /**
      * Get the type of the event handled by this handler.

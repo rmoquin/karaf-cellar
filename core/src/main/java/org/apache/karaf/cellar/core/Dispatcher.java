@@ -13,12 +13,10 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.io.Serializable;
-
 /**
  * Generic dispatcher interface.
  */
-public interface Dispatcher<T extends Serializable> {
+public interface Dispatcher<T extends Object> {
 
     /**
      * Dispatch an object to the appropriate handler.

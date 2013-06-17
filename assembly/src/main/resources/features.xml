@@ -22,59 +22,69 @@
         <bundle start-level="29">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/1.0.0</bundle>
     </feature>-->
     
-    <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-        <configfile finalname="/etc/hazelcast.xml">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast
-        </configfile>
-        <bundle start-level="40">mvn:com.hazelcast/hazelcast/${hazelcast.version}</bundle>
-        <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
-        <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
+    <feature name="jackson-serialization" description="Jackson serialization support" version="${jackson.version}" resolver="(obr)">
+        <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle start-level="32">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-smile/${jackson.version}</bundle>
     </feature>
-    <feature name="cellar-hazelcast" description="Cellar implementation based on Hazelcast" version="${project.version}" resolver="(obr)">
-        <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
-        <configfile finalname="/etc/cellar.synchronization.management.cfg">
+    
+    <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
+	<configfile finalname="/etc/cellar.synchronization.management.cfg">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/synchronization
         </configfile>
         <configfile finalname="/etc/cellar.cluster.management.cfg">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/cluster
         </configfile>
+	<bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
+        <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
 
-    <feature name="jackson-serialization" description="Jackson serialization support" version="${jackson.version}" resolver="(obr)">
-        <bundle start-level="40">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-        <bundle start-level="40">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-        <bundle start-level="40">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle start-level="40">mvn:com.fasterxml.jackson.module/jackson-module-afterburner/${jackson.version}</bundle>
+   <feature name="hazelcast" description="In memory data grid" version="${hazelcast.version}" resolver="(obr)">
+        <configfile finalname="/etc/hazelcast.xml">
+            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast
+        </configfile>
+        <bundle start-level="32" dependency="true">mvn:com.hazelcast/hazelcast/${hazelcast.version}</bundle>
     </feature>
-    <feature name="cellar-config" description="ConfigAdmin cluster support" version="${project.version}" resolver="(obr)">
+
+    <feature name="cellar-hazelcast" description="Cellar implementation based on Hazelcast" version="${project.version}" resolver="(obr)">
+        <feature version="${hazelcast.version}">hazelcast</feature>
+        <feature version="${project.version}">cellar-core</feature>
+        <bundle start-level="33">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
+    </feature>    
+ <feature name="cellar-config" description="ConfigAdmin cluster support" version="${project.version}" resolver="(obr)">
+        <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.config/${project.version}</bundle>
     </feature>
     <feature name="cellar-features" description="Karaf features cluster support" version="${project.version}" resolver="(obr)">
+        <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.features/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-bundle" description="Bundle cluster support" version="${project.version}" resolver="(obr)">
+        <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.bundle/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-shell" description="Cellar shell support" version="${project.version}" resolver="(obr)">
+        <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.shell/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-management" description="Cellar management" version="${project.version}" resolver="(obr)">
+        <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.management/${project.version}</bundle>
     </feature>
 
     <feature name="cellar" description="Karaf clustering" version="${project.version}" resolver="(obr)">
         <!--<feature version="1.0.0">spifly</feature>-->
         <feature version="${jackson.version}">jackson-serialization</feature>
-        <feature version="${project.version}">cellar-core</feature>
         <feature version="${project.version}">cellar-hazelcast</feature>
+        <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-config</feature>
         <feature version="${project.version}">cellar-bundle</feature>
-        <feature version="${project.version}">cellar-management</feature>
         <feature version="${project.version}">cellar-features</feature>
-        <feature version="${project.version}">cellar-shell</feature>
+	<feature version="${project.version}">cellar-management</feature>
     </feature>
 
     <feature name="cellar-dosgi" description="DOSGi support" version="${project.version}" resolver="(obr)">

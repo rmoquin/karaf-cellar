@@ -13,12 +13,10 @@
  */
 package org.apache.karaf.cellar.features;
 
-import java.io.Serializable;
-
 /**
  * Feature info to store in the cluster.
  */
-public class FeatureInfo implements Serializable {
+public class FeatureInfo {
 
     private String name;
     private String version;

@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import org.apache.karaf.cellar.core.CellarCluster;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * LocalConfigurationListener is listening for local configuration changes.
@@ -30,6 +31,7 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class LocalConfigurationListener extends ConfigurationSupport implements ConfigurationListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalConfigurationListener.class);
+    private ConfigurationAdmin configurationAdmin;
 
     /**
      * Callback method called when a local configuration changes.
@@ -43,7 +45,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Dictionary localDictionary = null;
         if (event.getType() != ConfigurationEvent.CM_DELETED) {
             try {
-                Configuration conf = getConfigurationAdmin().getConfiguration(pid, null);
+                Configuration conf = configurationAdmin.getConfiguration(pid, "?");
                 localDictionary = conf.getProperties();
             } catch (Exception e) {
                 LOGGER.error("CELLAR CONFIG: can't retrieve configuration with PID {}", pid, e);
@@ -94,5 +96,19 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
 
     public void destroy() {
         // nothing to do
+    }
+
+    /**
+     * @return the configurationAdmin
+     */
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    /**
+     * @param configurationAdmin the configurationAdmin to set
+     */
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }

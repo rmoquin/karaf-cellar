@@ -16,8 +16,8 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.hazelcast.nio.serialization.TypeSerializer;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import java.io.IOException;
@@ -29,15 +29,12 @@ import java.io.OutputStream;
  * @author rmoquin
  */
 public class GenericCellarSerializer implements TypeSerializer {
-    private final ObjectMapper mapper = new ObjectMapper();
-
-    public GenericCellarSerializer() {
-        mapper.registerModule(new AfterburnerModule());
-    }
+    SmileFactory f = new SmileFactory();
+    ObjectMapper mapper = new ObjectMapper(f);
 
     @Override
     public int getTypeId() {
-        return 5;
+        return 10;
     }
 
     @Override

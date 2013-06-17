@@ -27,6 +27,7 @@ import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarCluster;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * The ConfigurationSynchronizer is called when Cellar starts or when a node joins a cluster group.
@@ -34,7 +35,8 @@ import org.apache.karaf.cellar.core.CellarCluster;
  */
 public class ConfigurationSynchronizer extends ConfigurationSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationSynchronizer.class);
-
+    private ConfigurationAdmin configurationAdmin;
+    
     public ConfigurationSynchronizer() {
         // nothing to do
     }
@@ -160,5 +162,19 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         String propertyKey = clusterName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
         String propertyValue = (String) super.synchronizationConfiguration.getProperty(propertyKey);
         return Boolean.parseBoolean(propertyValue);
+    }
+
+    /**
+     * @return the configurationAdmin
+     */
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    /**
+     * @param configurationAdmin the configurationAdmin to set
+     */
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }

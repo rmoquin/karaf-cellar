@@ -51,7 +51,7 @@
     </service>
 
     <!-- Cluster Core Services -->
-    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.synchronizationConfiguration"/>
+    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 

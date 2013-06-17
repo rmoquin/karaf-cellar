@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.hazelcast.core.Cluster;
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import java.text.MessageFormat;
 import org.apache.karaf.cellar.core.Node;
@@ -26,7 +24,6 @@ public class HazelcastNode implements Node {
     private String host;
     private int port;
     private Member hzMember;
-    private HazelcastInstance instance;
 
     public HazelcastNode() {
     }
@@ -35,18 +32,12 @@ public class HazelcastNode implements Node {
         this.hzMember = hzMember;
     }
 
-    public void init() {
-        //The member will be set from the instance for a local node, non local nodes will come through the constructor.
-        if (instance != null) {
-            Cluster cluster = instance.getCluster();
-            hzMember = cluster.getLocalMember();
-        }
+    public void init(Member hzMember) {
         this.host = this.hzMember.getInetSocketAddress().getHostString();
         this.port = this.hzMember.getInetSocketAddress().getPort();
     }
 
     public void destroy() {
-        this.instance = null;
         this.hzMember = null;
     }
 
@@ -100,19 +91,5 @@ public class HazelcastNode implements Node {
     @Override
     public String toString() {
         return MessageFormat.format("HazelcastNode [id={0}, host={1}, port={2}]", getId(), host, port);
-    }
-
-    /**
-     * @return the instance
-     */
-    public HazelcastInstance getInstance() {
-        return instance;
-    }
-
-    /**
-     * @param instance the instance to set
-     */
-    public void setInstance(HazelcastInstance instance) {
-        this.instance = instance;
     }
 }

@@ -13,12 +13,10 @@
  */
 package org.apache.karaf.cellar.bundle;
 
-import java.io.Serializable;
-
 /**
  * Serializable wrapper to store and transport bundle state.
  */
-public class BundleState implements Serializable {
+public class BundleState {
 
     private static final long serialVersionUID = 5933673686648413918L;
 

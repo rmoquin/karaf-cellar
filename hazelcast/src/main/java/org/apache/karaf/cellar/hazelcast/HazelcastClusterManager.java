@@ -154,10 +154,10 @@ public class HazelcastClusterManager implements ClusterManager {
         Config cfg = createNewConfig(clusterName);
         if (mainCluster == null) {
             mainCluster = cluster;
-            cluster.init(cfg, true);
+            cluster.init(clusterName, cfg, true);
             cluster.setSynchronizers(synchronizers);
         } else {
-            cluster.init(cfg, false);
+            cluster.init(clusterName, cfg, false);
         }
         this.clustersByName.put(clusterName, cluster);
 

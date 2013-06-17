@@ -131,6 +131,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
         for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
             EndpointDescription endpointDescription = entry.getValue();
             if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(cluster.getLocalNode())) {
+                LOGGER.info("Remove node being added to cluster " + cluster.getName() + " with end point " + endpointDescription);
                 matches.add(endpointDescription);
             }
         }

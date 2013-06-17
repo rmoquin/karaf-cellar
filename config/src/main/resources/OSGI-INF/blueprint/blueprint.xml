@@ -28,6 +28,7 @@
           destroy-method="destroy">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="localListener" interface="org.osgi.service.cm.ConfigurationListener"/>
 
@@ -36,6 +37,7 @@
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
@@ -50,6 +52,7 @@
         </service-properties>
     </service>
 
-    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.synchronizationConfiguration"/>
+    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 </blueprint>

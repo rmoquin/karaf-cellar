@@ -21,7 +21,6 @@
     <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener" init-method="init"
           destroy-method="destroy">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="localListener" interface="org.apache.karaf.features.FeaturesListener"/>
@@ -30,7 +29,6 @@
     <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer"
           init-method="init" destroy-method="destroy">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
@@ -40,7 +38,6 @@
           init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="featuresEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
@@ -53,12 +50,9 @@
           init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-
 </blueprint>

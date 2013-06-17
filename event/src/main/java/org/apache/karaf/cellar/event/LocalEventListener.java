@@ -19,7 +19,6 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 import org.apache.karaf.cellar.core.CellarCluster;
@@ -55,7 +54,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                             return;
                         }
                         String topicName = event.getTopic();
-                        Map<String, Serializable> properties = getEventProperties(event);
+                        Map<String, Object> properties = getEventProperties(event);
                         if (isAllowed(cluster.getName(), Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);

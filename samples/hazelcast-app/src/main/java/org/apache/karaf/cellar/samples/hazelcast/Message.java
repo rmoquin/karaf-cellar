@@ -13,12 +13,10 @@
  */
 package org.apache.karaf.cellar.samples.hazelcast;
 
-import java.io.Serializable;
-
 /**
  * Message used in the Hazelcast topic.
  */
-public class Message implements Serializable {
+public class Message {
 
     private final String text;
 

@@ -29,6 +29,7 @@ import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarCluster;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * ConfigurationEventHandler handles received configuration cluster event.
@@ -37,6 +38,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.configuration.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
+    private ConfigurationAdmin configurationAdmin;
 
     @Override
     public void handle(ClusterConfigurationEvent event) {
@@ -59,7 +61,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
             Properties clusterDictionary = clusterConfigurations.get(pid);
             Configuration conf;
             try {
-                conf = getConfigurationAdmin().getConfiguration(pid, null);
+                conf = configurationAdmin.getConfiguration(pid, null);
                 if (event.getType() == ConfigurationEvent.CM_DELETED) {
                     if (conf.getProperties() != null) {
                         // delete the properties
@@ -75,7 +77,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
                         localDictionary = filter(localDictionary);
                         if (!equals(clusterDictionary, localDictionary)) {
                             conf.update((Dictionary) clusterDictionary);
-                            persistConfiguration(getConfigurationAdmin(), pid, clusterDictionary);
+                            persistConfiguration(configurationAdmin, pid, clusterDictionary);
                         }
                     }
                 }
@@ -125,4 +127,5 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     public Class<ClusterConfigurationEvent> getType() {
         return ClusterConfigurationEvent.class;
     }
+    
 }

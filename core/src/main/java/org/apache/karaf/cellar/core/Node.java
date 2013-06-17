@@ -18,7 +18,7 @@ import java.io.Serializable;
 /**
  * Generic cluster node interface.
  */
-public interface Node extends Serializable {
+public interface Node {
 
     /**
      * Get the ID of the node.
