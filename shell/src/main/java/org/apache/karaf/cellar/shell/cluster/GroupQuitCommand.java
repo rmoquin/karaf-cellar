@@ -20,8 +20,8 @@ import org.apache.karaf.shell.commands.Command;
 import java.util.List;
 import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "quit", description = "Quit node(s) from a cluster")
-public class GroupQuitCommand extends GroupSupport {
+@Command(scope = "cluster", name = "cluster-quit", description = "Quit node(s) from a cluster")
+public class GroupQuitCommand extends ClusterSupport {
 
     @Argument(index = 0, name = "name", description = "The cluster group name", required = true, multiValued = false)
     String clusterName;
@@ -36,7 +36,7 @@ public class GroupQuitCommand extends GroupSupport {
             System.err.println("Cluster name " + clusterName + " doesn't exist");
             return null;
         }
-        return doExecute(ManageClusterAction.LEAVE, clusterName, null, nodes, false);
+        return doExecute(ManageClusterAction.QUIT, clusterName, null, nodes, false);
     }
 
 }

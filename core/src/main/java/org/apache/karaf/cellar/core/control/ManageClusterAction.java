@@ -19,6 +19,7 @@ package org.apache.karaf.cellar.core.control;
 public enum ManageClusterAction {
 	SET,
     JOIN,
+    QUIT,
     LEAVE,
     LEAVE_ALL,
     LIST,

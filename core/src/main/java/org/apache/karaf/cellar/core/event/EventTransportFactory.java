@@ -15,28 +15,21 @@ package org.apache.karaf.cellar.core.event;
 
 import org.apache.karaf.cellar.core.CellarCluster;
 
+
 /**
  * A factory to create producer and consumer of cluster events.
  */
 public interface EventTransportFactory {
 
     /**
-     * Return a cluster {@link EventProducer} that produces cluster {@link Event}s for a specific cluster {@link org.apache.karaf.cellar.core.CellarCluster}.
-     *
-     * @param cluster the cluster associated with this event producer.
-     * @param pubsub true to enable pubsub mode, false else.
-     * @return the cluster event producer.
+     * @return the masterCluster
      */
-    public EventProducer getEventProducer(CellarCluster cluster, Boolean pubsub);
+    public CellarCluster getMasterCluster();
 
     /**
-     * Return a cluster {@link EventConsumer} that consumes cluster {@link Event}s for a specific cluster {@link org.apache.karaf.cellar.core.CellarCluster}.
-     *
-     * @param cluster the cluster associated with this event producer.
-     * @param pubsub true to enable pubsub mode, false else.
-     * @return the cluster event consumer.
+     * @param masterCluster the masterCluster to set
      */
-    public EventConsumer getEventConsumer(CellarCluster cluster, Boolean pubsub);
+    public void setMasterCluster(CellarCluster masterCluster);
     
     /**
      * Return a cluster {@link EventProducer} that produces cluster {@link Event}s for a specific cluster {@link org.apache.karaf.cellar.core.CellarCluster}.
@@ -45,7 +38,7 @@ public interface EventTransportFactory {
      * @param pubsub true to enable pubsub mode, false else.
      * @return the cluster event producer.
      */
-    public EventProducer getEventProducer(CellarCluster cluster, String name, Boolean pubsub);
+    public EventProducer getEventProducer(String name, Boolean pubsub);
 
     /**
      * Return a cluster {@link EventConsumer} that consumes cluster {@link Event}s for a specific cluster {@link org.apache.karaf.cellar.core.CellarCluster}.
@@ -54,5 +47,5 @@ public interface EventTransportFactory {
      * @param pubsub true to enable pubsub mode, false else.
      * @return the cluster event consumer.
      */
-    public EventConsumer getEventConsumer(CellarCluster cluster, String name, Boolean pubsub);
+    public EventConsumer getEventConsumer(String name, Boolean pubsub);
 }

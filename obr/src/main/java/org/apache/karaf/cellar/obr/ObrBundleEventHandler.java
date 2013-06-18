@@ -114,6 +114,14 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
             return;
         }
 
+        if (clusterManager == null) {
+        	LOGGER.error("CELLAR OBR: retrieved cluster event {} while groupManager is not available yet!", event);
+        	return;
+        }
+        if (!clusterManager.isLocalCluster(event.getSourceCluster())) {
+            LOGGER.debug("CELLAR OBR: node is not part of the event cluster {}", event.getSourceCluster().getName());
+            return;
+        }
         String bundleId = event.getBundleId();
         try {
             if (isAllowed(event.getSourceCluster().getName(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.INBOUND)) {

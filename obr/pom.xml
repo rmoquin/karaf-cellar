@@ -38,12 +38,14 @@
         <osgi.import>
             org.apache.karaf.cellar.core*;version=${project.version},
             org.apache.felix.service.command,
-            org.apache.karaf.shell.commands,
-            org.apache.karaf.shell.console,
+            org.apache.karaf.shell.console;version="[3,4)",
+	    org.apache.karaf.shell.console.commands;version="[3,4)",
+            org.apache.karaf.shell.console.completer;version="[3,4)",
+            org.apache.karaf.shell.commands;version="[3,4)",
             org.apache.karaf.management;version="[3,4)",
             javax.management*,
-            org.slf4j;resolution:=optional,
-            *
+            org.osgi*,
+            org.slf4j;resolution:=optional
         </osgi.import>
         <osgi.dynamic.import>
             org.apache.felix.bundlerepository,

@@ -54,6 +54,14 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
             return;
         }
 
+        if (clusterManager == null) {
+        	LOGGER.error("CELLAR OBR: retrieved event {} while clusterManager is not available yet!", event);
+        	return;
+        }
+        if (!clusterManager.isLocalCluster(event.getSourceCluster())) {
+            LOGGER.debug("CELLAR OBR: node is not part of the event cluster{}", event.getSourceCluster().getName());
+            return;
+        }
         String url = event.getUrl();
         try {
             if (isAllowed(event.getSourceCluster().getName(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {

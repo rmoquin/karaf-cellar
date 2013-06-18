@@ -22,7 +22,7 @@
               default-activation="lazy">
 
     <command-bundle>
-        <command name="cluster/list">
+        <command name="cluster/nodes-list">
             <action class="org.apache.karaf.cellar.shell.NodesListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
             </action>

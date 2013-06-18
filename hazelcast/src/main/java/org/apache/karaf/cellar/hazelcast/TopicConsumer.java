@@ -52,6 +52,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
 
     @Override
     public void consume(E event) {
+        LOGGER.warn("Received a topic consumer message: " + event.toString());
         // check if event has a specified destination.
         if ((event.getDestinations() == null || event.getDestinations().contains(node)) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
             dispatcher.dispatch(event);

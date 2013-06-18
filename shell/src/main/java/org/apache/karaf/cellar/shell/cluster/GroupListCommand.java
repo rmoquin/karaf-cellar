@@ -19,8 +19,8 @@ import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
 
-@Command(scope = "cluster", name = "node-list", description = "List the nodes in a cluster(s)")
-public class GroupListCommand extends GroupSupport {
+@Command(scope = "cluster", name = "cluster-list", description = "List the cluster(s)")
+public class GroupListCommand extends ClusterSupport {
 
     @Argument(index = 0, name = "node", description = "The node(s) ID", required = false, multiValued = true)
     List<String> nodes;

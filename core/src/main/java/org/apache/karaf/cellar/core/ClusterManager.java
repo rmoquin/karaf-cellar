@@ -26,6 +26,10 @@ public interface ClusterManager {
      */
     Collection<CellarCluster> getClusters();
     
+    public boolean isLocalCluster(CellarCluster cluster);
+    
+    public Collection<CellarCluster> getLocalClusters();
+    
     Map<String, CellarCluster> getClusterMap();
 
     /**
@@ -50,6 +54,8 @@ public interface ClusterManager {
      */
     public void leaveCluster(String clusterName);
 
+    public void deleteCluster(String clusterName);
+    
     /**
      * Look for a cluster with a given name.
      *
@@ -108,4 +114,6 @@ public interface ClusterManager {
      * @return the producer
      */
     boolean isProducer();
+
+    void createCluster(String clusterName);
 }

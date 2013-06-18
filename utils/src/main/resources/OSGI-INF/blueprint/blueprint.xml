@@ -27,9 +27,7 @@
     </bean>
     <service ref="pongHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
-    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager" availability="optional"/>
     <reference id="commandStore" interface="org.apache.karaf.cellar.core.command.CommandStore" availability="optional"/>
     <reference id="producer" interface="org.apache.karaf.cellar.core.event.EventProducer" filter="(!(type = cluster))" availability="optional"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
 </blueprint>

@@ -24,8 +24,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-@Command(scope = "cluster", name = "group-pick", description = "Picks a number of nodes from one cluster group and moves them into another")
-public class GroupPickCommand extends GroupSupport {
+@Command(scope = "cluster", name = "cluster-pick", description = "Picks a number of nodes from one cluster group and moves them into another")
+public class GroupPickCommand extends ClusterSupport {
 
     @Argument(index = 0, name = "sourceClusterName", description = "The source cluster name", required = true, multiValued = false)
     String sourceClusterName;

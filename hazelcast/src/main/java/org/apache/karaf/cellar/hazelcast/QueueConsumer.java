@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
@@ -44,19 +45,16 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private IQueue queue;
     private Dispatcher dispatcher;
     private String listenerId;
+    private Node node;
 
     public void init() {
         listenerId = queue.addItemListener(this, true);
-        queue.addItemListener(this, true);
         executorService.execute(this);
     }
 
     public void destroy() {
         isConsuming = false;
-        if (queue != null) {
-            queue.removeItemListener(listenerId);
-//            queue.removeItemListener(this);
-        }
+       queue.removeItemListener(listenerId);
         executorService.shutdown();
         listenerId = null;
     }
@@ -87,7 +85,8 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
      */
     @Override
     public void consume(E event) {
-        if (event != null && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
+        LOGGER.warn("Received a queue consumer message: " + event.toString());
+        if ((event != null) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
             dispatcher.dispatch(event);
         } else {
             if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
@@ -152,6 +151,14 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
             // ignore
         }
         return eventSwitch;
+    }
+
+    public Node getNode() {
+        return node;
+    }
+
+    public void setNode(Node node) {
+        this.node = node;
     }
 
     /**

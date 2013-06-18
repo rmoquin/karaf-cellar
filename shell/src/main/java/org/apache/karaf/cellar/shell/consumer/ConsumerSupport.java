@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.shell.consumer;
 
-import java.util.Collection;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.control.ConsumerSwitchCommand;
 import org.apache.karaf.cellar.core.control.ConsumerSwitchResult;
@@ -24,13 +23,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Generic cluster event consumer shell command support.
  */
 public abstract class ConsumerSupport extends ClusterCommandSupport {
-
     protected static final String HEADER_FORMAT = "   %-30s   %-5s";
     protected static final String OUTPUT_FORMAT = "%1s [%-30s] [%-5s]";
 
@@ -52,10 +49,7 @@ public abstract class ConsumerSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                Collection<CellarCluster> clusters = clusterManager.getClusters();
-                for (CellarCluster cellarCluster : clusters) {
-                    recipientList.addAll(cellarCluster.listNodes());
-                }
+                recipientList.addAll(clusterManager.listNodesAllClusters());
             } else {
                 // in case of status change, select only the local node
                 recipientList.add(clusterManager.getMasterCluster().getLocalNode());
@@ -89,5 +83,4 @@ public abstract class ConsumerSupport extends ClusterCommandSupport {
         }
         return null;
     }
-
 }

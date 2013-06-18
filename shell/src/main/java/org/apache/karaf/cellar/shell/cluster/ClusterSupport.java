@@ -28,7 +28,7 @@ import org.apache.karaf.cellar.core.control.ManageClusterResult;
 /**
  * Generic cluster group shell command support.
  */
-public abstract class GroupSupport extends ClusterCommandSupport {
+public abstract class ClusterSupport extends ClusterCommandSupport {
 
     protected static final String HEADER_FORMAT = "   %-20s   %s";
     protected static final String OUTPUT_FORMAT = "%1s [%-20s] [%s]";
@@ -63,7 +63,7 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                 }
             }
         } else {
-            recipientList.add(clusterManager.findClusterByName(cluster).getLocalNode());
+            recipientList.add(clusterManager.getMasterCluster().getLocalNode());
         }
 
         if (recipientList.size() < 1) {
@@ -96,7 +96,7 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                                 String mark = " ";
                                 for (Node member : g.listNodes()) {
                                     buffer.append(member.getId());
-                                    if (member.equals(g.getLocalNode())) {
+                                    if (member.equals(clusterManager.getMasterCluster().getLocalNode())) {
                                         mark = "*";
                                         buffer.append(mark);
                                     }

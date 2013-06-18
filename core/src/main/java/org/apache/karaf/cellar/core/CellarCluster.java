@@ -26,7 +26,7 @@ import org.apache.karaf.cellar.core.event.Event;
  * @author rmoquin
  */
 public interface CellarCluster {
-    
+
     /**
      * Get a map in the cluster.
      *

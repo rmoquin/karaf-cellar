@@ -136,7 +136,7 @@ public class ExportServiceListener implements ServiceListener {
                     // register the endpoint consumer
                     EventConsumer consumer = consumers.get(endpointId);
                     if (consumer == null) {
-                        consumer = eventTransportFactory.getEventConsumer(cluster, Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId, false);
+                        consumer = eventTransportFactory.getEventConsumer(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId, false);
                         consumers.put(endpointId, consumer);
                     } else if (!consumer.isConsuming()) {
                         consumer.start();

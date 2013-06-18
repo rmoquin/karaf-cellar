@@ -100,6 +100,16 @@ public class HazelcastClusterManager implements ClusterManager {
     }
 
     @Override
+    public boolean isLocalCluster(CellarCluster cluster) {
+        return this.mainCluster.getLocalNode().equals(cluster.getLocalNode());
+    }
+
+    @Override
+    public Collection<CellarCluster> getLocalClusters() {
+        return this.getClusters();
+    }
+
+    @Override
     public String generateId() {
         CellarCluster cluster = this.getMasterCluster();
         return cluster.generateId();
@@ -144,9 +154,18 @@ public class HazelcastClusterManager implements ClusterManager {
         if (eventConsumer != null) {
             eventConsumer.stop();
         }
+        persistConfig(clusterName, false);
     }
 
-    protected void createCluster(String clusterName) {
+    @Override
+    public void deleteCluster(String clusterName) {
+        if (!clusterName.equals(this.mainCluster.getName())) {
+            this.leaveCluster(clusterName);
+        }
+    }
+
+    @Override
+    public void createCluster(String clusterName) {
         if (this.clustersByName.containsKey(clusterName)) {
             throw new IllegalArgumentException("This node is already a member of the cluster named: " + clusterName);
         }
@@ -156,6 +175,7 @@ public class HazelcastClusterManager implements ClusterManager {
             mainCluster = cluster;
             cluster.init(clusterName, cfg, true);
             cluster.setSynchronizers(synchronizers);
+            this.eventTransportFactory.setMasterCluster(mainCluster);
         } else {
             cluster.init(clusterName, cfg, false);
         }
@@ -168,7 +188,7 @@ public class HazelcastClusterManager implements ClusterManager {
             if (!producerRegistrations.containsKey(clusterName)) {
                 EventProducer eventProducer = groupProducers.get(clusterName);
                 if (eventProducer == null) {
-                    eventProducer = eventTransportFactory.getEventProducer(cluster, Boolean.TRUE);
+                    eventProducer = eventTransportFactory.getEventProducer(clusterName, Boolean.TRUE);
                     groupProducers.put(clusterName, eventProducer);
                 }
                 ServiceRegistration producerRegistration = bundleContext.registerService(EventProducer.class.getCanonicalName(), eventProducer, (Dictionary) serviceProperties);
@@ -179,7 +199,7 @@ public class HazelcastClusterManager implements ClusterManager {
             if (!consumerRegistrations.containsKey(clusterName)) {
                 EventConsumer eventConsumer = clusterConsumer.get(clusterName);
                 if (eventConsumer == null) {
-                    eventConsumer = eventTransportFactory.getEventConsumer(cluster, true);
+                    eventConsumer = eventTransportFactory.getEventConsumer(clusterName, true);
                     clusterConsumer.put(clusterName, eventConsumer);
                 } else if (!eventConsumer.isConsuming()) {
                     eventConsumer.start();

@@ -14,7 +14,6 @@
  */
 package org.apache.karaf.cellar.shell.handler;
 
-import java.util.Collection;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.control.ManageHandlersCommand;
 import org.apache.karaf.cellar.core.control.ManageHandlersResult;
@@ -24,7 +23,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Generic cluster event handler shell command support.
@@ -52,10 +50,7 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
         } else {
             if (status == null) {
                 // in case of status display, select all nodes
-                Collection<CellarCluster> clusters = clusterManager.getClusters();
-                for (CellarCluster cellarCluster : clusters) {
-                    recipientList.add(cellarCluster.getLocalNode());
-                }
+                recipientList.addAll(clusterManager.listNodesAllClusters());
             } else {
                 // in case of status change, select only the local node
                 recipientList.add(clusterManager.getMasterCluster().getLocalNode());
@@ -77,13 +72,17 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
             System.out.println(String.format(HEADER_FORMAT, "Node", "Status", "Event Handler"));
             for (Map.Entry<Node,ManageHandlersResult> handlersResultEntry : results.entrySet()) {
                 Node node = handlersResultEntry.getKey();
+                String local = " ";
+                if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
+                    local = "*";
+                }
                 ManageHandlersResult result = handlersResultEntry.getValue();
                 if (result != null && result.getHandlers() != null) {
 
                     for (Map.Entry<String,String>  handlerEntry: result.getHandlers().entrySet()) {
                         String handler =  handlerEntry.getKey();
                         String s = handlerEntry.getValue();
-                        System.out.println(String.format(OUTPUT_FORMAT, false, node.getId(), s, handler));
+                        System.out.println(String.format(OUTPUT_FORMAT, local, node.getId(), s, handler));
                     }
                 }
             }

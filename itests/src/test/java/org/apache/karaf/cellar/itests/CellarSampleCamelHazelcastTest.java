@@ -59,10 +59,10 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println("Child1: " + node1);
         System.err.println("Child2: " + node2);
 
-        System.err.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
-        System.err.println(executeCommand("cluster:group-set consumer-grp " + node1));
-        System.err.println(executeCommand("cluster:group-set consumer-grp " + node2));
-        System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:cluster-set producer-grp " + localNode.getId()));
+        System.err.println(executeCommand("cluster:cluster-set consumer-grp " + node1));
+        System.err.println(executeCommand("cluster:cluster-set consumer-grp " + node2));
+        System.err.println(executeCommand("cluster:cluster-list"));
 
         System.err.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
         System.err.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
@@ -70,7 +70,7 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("feature:list"));
         System.err.println(executeCommand("bundle:list"));
 
-        System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:cluster-list"));
         System.err.println(executeCommand("instance:connect child2 bundle:list -t 0"));
 
         Thread.sleep(20000);

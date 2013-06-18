@@ -62,9 +62,8 @@ public class RemoteServiceCallHandler extends CellarSupport implements EventHand
         Object targetService = null;
 
         if (event != null) {
-            ServiceReference[] serviceReferences = null;
             try {
-                serviceReferences = bundleContext.getServiceReferences(event.getServiceClass(), null);
+                ServiceReference[] serviceReferences = bundleContext.getServiceReferences(event.getServiceClass(), null);
                 if (serviceReferences != null && serviceReferences.length > 0) {
                     targetService = bundleContext.getService(serviceReferences[0]);
                     bundleContext.ungetService(serviceReferences[0]);
@@ -95,7 +94,7 @@ public class RemoteServiceCallHandler extends CellarSupport implements EventHand
                     RemoteServiceResult result = new RemoteServiceResult(event.getId());
                     result.setResult(obj);
 
-                    EventProducer producer = eventTransportFactory.getEventProducer(event.getSourceCluster(), Constants.RESULT_PREFIX + Constants.SEPARATOR + event.getSourceNode().getId() + event.getEndpointId(), false);
+                    EventProducer producer = eventTransportFactory.getEventProducer(Constants.RESULT_PREFIX + Constants.SEPARATOR + event.getSourceNode().getId() + event.getEndpointId(), false);
                     producer.produce(result);
 
                 } catch (NoSuchMethodException e) {

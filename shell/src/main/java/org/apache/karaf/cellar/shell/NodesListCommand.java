@@ -13,34 +13,27 @@
  */
 package org.apache.karaf.cellar.shell;
 
-import java.util.Collection;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "list", description = "Lists the clusters and all nodes in those clusters")
+@Command(scope = "cluster", name = "node-list", description = "List the nodes in the cluster")
 public class NodesListCommand extends ClusterCommandSupport {
     private static final String HEADER_FORMAT = "   %-30s   %-20s   %-5s";
     private static final String OUTPUT_FORMAT = "%1s [%-30s] [%-20s] [%5s]";
 
     @Override
     protected Object doExecute() throws Exception {
-        Collection<CellarCluster> clusters = clusterManager.getClusters();
-        if (clusters != null && !clusters.isEmpty()) {
-            for (CellarCluster cluster : clusters) {
-                Set<Node> nodes = cluster.listNodes();
-                if (!nodes.isEmpty()) {
-                    System.out.println(String.format(HEADER_FORMAT, "ID", "Host Name", "Port"));
-                    for (Node node : nodes) {
-                        String mark = " ";
-                        if (node.equals(cluster.getLocalNode())) {
-                            mark = "*";
-                        }
-                        System.out.println(String.format(OUTPUT_FORMAT, mark, node.getId(), node.getHost(), node.getPort()));
-                    }
+        Set<Node> nodes = clusterManager.getMasterCluster().listNodes();
+        if (!nodes.isEmpty()) {
+            System.out.println(String.format(HEADER_FORMAT, "ID", "Host Name", "Port"));
+            for (Node node : nodes) {
+                String mark = " ";
+                if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
+                    mark = "*";
                 }
+                System.out.println(String.format(OUTPUT_FORMAT, mark, node.getId(), node.getHost(), node.getPort()));
             }
         } else {
             System.err.println("No node found in the cluster");

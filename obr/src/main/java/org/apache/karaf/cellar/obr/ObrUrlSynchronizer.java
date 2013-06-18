@@ -34,7 +34,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     @Override
     public void init() {
         super.init();
-        Collection<CellarCluster> clusters = clusterManager.getClusters();
+        Collection<CellarCluster> clusters = clusterManager.getLocalClusters();
         if (clusters != null && !clusters.isEmpty()) {
             for (CellarCluster cluster : clusters) {
                 if (isSyncEnabled(cluster)) {
@@ -91,14 +91,14 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     public void push(CellarCluster cluster) {
         if (cluster != null) {
             String clusterName = cluster.getName();
-            Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+            Set<String> clusterUrls = clusterManager.getMasterCluster().getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
 
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {
-                if (isAllowed(cluster.getName(), Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
+                if (isAllowed(clusterName, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
                     clusterUrls.add(repository.getURI().toString());
                     // update OBR bundles in the cluster group
-                    Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+                    Set<ObrBundleInfo> clusterBundles = clusterManager.getMasterCluster().getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
                     Resource[] resources = repository.getResources();
                     for (Resource resource : resources) {
                         ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());

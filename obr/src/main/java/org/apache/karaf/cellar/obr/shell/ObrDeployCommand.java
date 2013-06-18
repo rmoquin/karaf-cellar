@@ -24,7 +24,7 @@ import org.apache.karaf.shell.commands.Option;
 @Command(scope = "cluster", name = "obr-deploy", description = "Deploy an OBR bundle in a cluster")
 public class ObrDeployCommand extends ObrCommandSupport {
 
-    @Argument(index = 0, name = "ccluster", description = "The cluster name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
     String clusterName;
 
     @Argument(index = 1, name="bundleId", description = "The bundle ID (symbolicname,version in the OBR) to deploy", required = true, multiValued = false)

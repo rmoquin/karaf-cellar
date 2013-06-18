@@ -26,25 +26,25 @@ import org.apache.karaf.cellar.core.event.EventTransportFactory;
  * An event transport factory powered by Hazelcast.
  */
 public class HazelcastEventTransportFactory implements EventTransportFactory {
-
     private Dispatcher dispatcher;
     private SynchronizationConfiguration synchronizationConfig;
-    
+    private CellarCluster masterCluster;
+
     @Override
-    public EventProducer getEventProducer(CellarCluster cluster, String name, Boolean pubsub) {
+    public EventProducer getEventProducer(String name, Boolean pubsub) {
         if (pubsub) {
-            ITopic topic = ((HazelcastCluster)cluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + name);
+            ITopic topic = ((HazelcastCluster)masterCluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + name);
             TopicProducer producer = new TopicProducer();
             producer.setTopic(topic);
-            producer.setNode(cluster.getLocalNode());
+            producer.setNode(masterCluster.getLocalNode());
             producer.setSynchronizationConfig(synchronizationConfig);
             producer.init();
             return producer;
         } else {
-            IQueue queue = ((HazelcastCluster)cluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
+            IQueue queue = ((HazelcastCluster)masterCluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
             QueueProducer producer = new QueueProducer();
             producer.setQueue(queue);
-            producer.setNode(cluster.getLocalNode());
+            producer.setNode(masterCluster.getLocalNode());
             producer.setSynchronizationConfig(synchronizationConfig);
             producer.init();
             return producer;
@@ -52,61 +52,23 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
     }
 
     @Override
-    public EventConsumer getEventConsumer(CellarCluster cluster, String name, Boolean pubsub) {
+    public EventConsumer getEventConsumer(String name, Boolean pubsub) {
         if (pubsub) {
-            ITopic topic = ((HazelcastCluster)cluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + name);
+            ITopic topic = ((HazelcastCluster)masterCluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + name);
             TopicConsumer consumer = new TopicConsumer();
             consumer.setTopic(topic);
             consumer.setSynchronizationConfig(synchronizationConfig);
             consumer.setDispatcher(dispatcher);
-            consumer.setNode(cluster.getLocalNode());
+            consumer.setNode(masterCluster.getLocalNode());
             consumer.init();
             return consumer;
         } else {
-            IQueue queue = ((HazelcastCluster)cluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
+            IQueue queue = ((HazelcastCluster)masterCluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
             QueueConsumer consumer = new QueueConsumer();
             consumer.setQueue(queue);
             consumer.setDispatcher(dispatcher);
             consumer.setSynchronizationConfig(synchronizationConfig);
-            consumer.init();
-            return consumer;
-        }
-    }
-    
-    @Override
-    public EventProducer getEventProducer(CellarCluster cluster, Boolean pubsub) {
-        if (pubsub) {
-            ITopic topic = ((HazelcastCluster)cluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + cluster.getName());
-            TopicProducer producer = new TopicProducer();
-            producer.setTopic(topic);
-            producer.setNode(cluster.getLocalNode());
-            producer.init();
-            return producer;
-        } else {
-            IQueue queue = ((HazelcastCluster)cluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + cluster.getName());
-            QueueProducer producer = new QueueProducer();
-            producer.setQueue(queue);
-            producer.setNode(cluster.getLocalNode());
-            producer.init();
-            return producer;
-        }
-    }
-
-    @Override
-    public EventConsumer getEventConsumer(CellarCluster cluster, Boolean pubsub) {
-        if (pubsub) {
-            ITopic topic = ((HazelcastCluster)cluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + cluster.getName());
-            TopicConsumer consumer = new TopicConsumer();
-            consumer.setTopic(topic);       
-            consumer.setDispatcher(dispatcher);
-            consumer.setNode(cluster.getLocalNode());
-            consumer.init();
-            return consumer;
-        } else {
-            IQueue queue = ((HazelcastCluster)cluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + cluster.getName());
-            QueueConsumer consumer = new QueueConsumer();
-            consumer.setQueue(queue);
-            consumer.setDispatcher(dispatcher);
+            consumer.setNode(masterCluster.getLocalNode());
             consumer.init();
             return consumer;
         }
@@ -132,5 +94,21 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
      */
     public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the masterCluster
+     */
+    @Override
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
+    }
+
+    /**
+     * @param masterCluster the masterCluster to set
+     */
+    @Override
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }

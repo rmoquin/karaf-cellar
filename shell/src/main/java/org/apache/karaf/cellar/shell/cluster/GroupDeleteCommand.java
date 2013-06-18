@@ -17,22 +17,29 @@ import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "cluster", name = "cluster-create", description = "Create/Join a cluster")
-public class GroupCreateCommand extends ClusterSupport {
+@Command(scope = "cluster", name = "cluster-delete", description = "Delete a cluster")
+public class GroupDeleteCommand extends ClusterSupport {
 
-    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
+    @Argument(index = 0, name = "cluster", description = "The cluster group name", required = true, multiValued = false)
     String clusterName;
 
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster group = clusterManager.findClusterByName(clusterName);
-        if (group != null) {
-            System.err.println("Cluster " + clusterName + " already exists");
+        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
+        if (cluster == null) {
+            System.err.println("Cluster " + clusterName + " doesn't exist");
             return null;
         }
 
-        clusterManager.createCluster(clusterName);
+        // check if the group doesn't contain nodes
+        if (!cluster.listNodes().isEmpty()) {
+            System.err.println("Cluster " + clusterName  + " is not empty");
+            return null;
+        }
+
+        clusterManager.deleteCluster(clusterName);
+
         return null;
     }
 

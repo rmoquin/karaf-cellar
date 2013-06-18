@@ -186,26 +186,6 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     }
 
     /**
-     * Get a topic in Hazelcast.
-     *
-     * @param name the topic name.
-     * @return the topic in Hazelcast.
-     */
-    public ITopic getTopic(String name) {
-        return instance.getTopic(name);
-    }
-
-    /**
-     * Get a queue in Hazelcast.
-     *
-     * @param name the queue name.
-     * @return the queue in Hazelcast.
-     */
-    public IQueue getQueue(String name) {
-        return instance.getQueue(name);
-    }
-
-    /**
      * Get a Map in Hazelcast.
      *
      * @param mapName the Map name.
@@ -225,6 +205,26 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     @Override
     public List getList(String listName) {
         return instance.getList(listName);
+    }
+    
+    /**
+     * Get a Topic in Hazelcast.
+     *
+     * @param topicName the Topic name.
+     * @return the Topic in Hazelcast.
+     */
+    public ITopic getTopic(String topicName) {
+        return instance.getTopic(topicName);
+    }
+    
+    /**
+     * Get a Queue in Hazelcast.
+     *
+     * @param queueName the Queue name.
+     * @return the Queue in Hazelcast.
+     */
+    public IQueue getQueue(String queueName) {
+        return instance.getQueue(queueName);
     }
 
     /**

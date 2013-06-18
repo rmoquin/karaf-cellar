@@ -25,9 +25,6 @@ public class HazelcastNode implements Node {
     private int port;
     private Member hzMember;
 
-    public HazelcastNode() {
-    }
-    
     public HazelcastNode(Member hzMember) {
         this.hzMember = hzMember;
     }
