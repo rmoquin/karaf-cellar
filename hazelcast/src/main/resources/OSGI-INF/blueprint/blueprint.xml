@@ -22,6 +22,15 @@
 
     <ext:property-placeholder />
 
+    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+    </bean>
+    
+    <bean id="bundleClassLoader" class="org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader" init-method="init">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="bundleListener" ref="bundleListener"/>
+    </bean>
+
     <!-- Discovery Task -->
     <bean id="discoveryTask" class="org.apache.karaf.cellar.core.discovery.DiscoveryTask" init-method="init" destroy-method="destroy">
         <property name="discoveryServices" ref="discoveryServices"/>
@@ -45,10 +54,24 @@
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="synchronizers" ref="synchronizers"/>
         <property name="hazelcastConfig" value="${karaf.home}/etc/hazelcast.xml"/>
+        <property name="bundleClassLoader" ref="bundleClassLoader"/>
     </bean>
     
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
 
+    <bean id="executionContext" class="org.apache.karaf.cellar.core.command.ClusteredExecutionContext"
+          destroy-method="shutdown">
+        <property name="commandStore" ref="commandStore"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+    </bean>
+    
+    <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
+    
+    <reference availability="optional" interface="org.apache.karaf.cellar.core.event.EventProducer"
+               filter="(name = default)">
+        <reference-listener ref="executionContext" bind-method="initProducer" unbind-method="removeProducer"/>
+    </reference>
+    
     <!-- Cluster Event Transport Factory -->
     <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">
         <property name="dispatcher"  ref="dispatcher"/>
@@ -68,7 +91,7 @@
 
     <reference id="registry" interface="org.apache.karaf.cellar.core.event.EventHandlerRegistry"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-
+    
     <reference-list id="discoveryServices" availability="optional"
                     interface="org.apache.karaf.cellar.core.discovery.DiscoveryService"/>
     <reference-list id="groupEventProducers" availability="optional" interface="org.apache.karaf.cellar.core.event.EventProducer"

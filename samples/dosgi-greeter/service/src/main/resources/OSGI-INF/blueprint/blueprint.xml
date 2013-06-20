@@ -18,13 +18,8 @@
     <!-- Greeter Implementation -->
     <bean id="greeterImpl" class="org.apache.karaf.cellar.samples.dosgi.greeter.service.GreeterImpl">
         <!-- We want the greeter to display the origin of the greet, so we use the nodeId -->
-        <argument ref="nodeId"/>
+        <argument ref="clusterManager"/>
     </bean>
-
-    <!-- The current Node -->
-    <bean id="node" factory-ref="clusterManager" factory-method="getNode"/>
-    <!-- The id of the current node -->
-    <bean id="nodeId" factory-ref="node" factory-method="getId"/>
 
     <!-- OSGi Services  & References -->
     <service ref="greeterImpl" interface="org.apache.karaf.cellar.samples.dosgi.greeter.api.Greeter">

@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.samples.dosgi.greeter.service;
 
+import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.Greet;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.GreetResponse;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.Greeter;
@@ -25,8 +26,8 @@ public class GreeterImpl implements Greeter {
     private int counter=0;
     private String id;
 
-    public GreeterImpl(String id) {
-        this.id = id;
+    public GreeterImpl(ClusterManager clusterManager) {
+        this.id = clusterManager.getMasterCluster().getLocalNode().getId();
     }
 
     @Override

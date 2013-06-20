@@ -13,9 +13,9 @@
  */
 package org.apache.karaf.cellar.samples.hazelcast;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ITopic;
-import com.hazelcast.core.IdGenerator;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -35,13 +35,12 @@ public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext context) throws Exception {
-        ServiceReference reference = context.getServiceReference("com.hazelcast.core.HazelcastInstance");
-        HazelcastInstance instance = (HazelcastInstance) context.getService(reference);
+        ServiceReference reference = context.getServiceReference("org.apache.karaf.cellar.core.ClusterManager");
+        ClusterManager instance = (ClusterManager) context.getService(reference);
         context.ungetService(reference);
         try {
-            IdGenerator idGenerator = instance.getIdGenerator("cellar-sample-generator");
-            Long id = idGenerator.newId();
-            topic = instance.getTopic("cellar-sample-topic");
+            String id = instance.generateId();
+            topic = ((HazelcastCluster)instance.getMasterCluster()).getTopic("cellar-sample-topic");
             listenerId = topic.addMessageListener(messageListener);
             topic.publish(new Message("id="+id));
         } catch (Exception ex) {

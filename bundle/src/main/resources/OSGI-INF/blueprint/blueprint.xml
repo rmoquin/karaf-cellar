@@ -20,19 +20,15 @@
     <!-- Local Bundle Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init"
           destroy-method="destroy">
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="featuresService" ref="featuresService"/>
     </bean>
 
     <!-- Bundle Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.bundle.BundleSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
-        <property name="clusterManager" ref="clusterManager"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
@@ -40,9 +36,6 @@
     <bean id="eventHandler" class="org.apache.karaf.cellar.bundle.BundleEventHandler"
           init-method="init" destroy-method="destroy">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
-        <property name="clusterManager" ref="clusterManager"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
@@ -53,6 +46,4 @@
     <!-- Cluster Core Services -->
     <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
-
 </blueprint>

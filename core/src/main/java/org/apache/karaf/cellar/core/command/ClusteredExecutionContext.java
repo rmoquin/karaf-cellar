@@ -22,16 +22,21 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.event.EventProducer;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Clustered execution context.
  */
 public class ClusteredExecutionContext implements ExecutionContext {
-
+    private static transient Logger LOGGER = LoggerFactory.getLogger(ClusteredExecutionContext.class);
     private Producer producer;
     private CommandStore commandStore;
-
     private ScheduledExecutorService timeoutScheduler = new ScheduledThreadPoolExecutor(10);
+    private BundleContext bundleContext;
 
     public ClusteredExecutionContext() {
         // nothing to do
@@ -40,6 +45,22 @@ public class ClusteredExecutionContext implements ExecutionContext {
     public ClusteredExecutionContext(Producer producer, CommandStore commandStore) {
         this.producer = producer;
         this.commandStore = commandStore;
+    }
+
+    public void initProducer(ServiceReference<EventProducer> producerReference) {
+        LOGGER.warn("The event producer was bound.");
+        this.producer = this.bundleContext.getService(producerReference);
+    }
+
+    public void removeProducer(ServiceReference<ExecutionContext> producer) {
+        producer = null;
+    }
+
+    @Override
+    public void shutdown() {
+        timeoutScheduler.shutdown();
+        this.producer = null;
+        this.commandStore = null;
     }
 
     @Override
@@ -60,14 +81,6 @@ public class ClusteredExecutionContext implements ExecutionContext {
         }
     }
 
-    public Producer getProducer() {
-        return producer;
-    }
-
-    public void setProducer(Producer producer) {
-        this.producer = producer;
-    }
-
     public CommandStore getCommandStore() {
         return commandStore;
     }
@@ -76,4 +89,17 @@ public class ClusteredExecutionContext implements ExecutionContext {
         this.commandStore = commandStore;
     }
 
+    /**
+     * @return the bundleContext
+     */
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
+     * @param bundleContext the bundleContext to set
+     */
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
 }

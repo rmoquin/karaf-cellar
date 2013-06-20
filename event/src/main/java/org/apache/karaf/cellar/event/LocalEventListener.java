@@ -28,11 +28,16 @@ public class LocalEventListener extends EventSupport implements EventHandler {
 
     @Override
     public void handleEvent(Event event) {
+        // ignore log entry event
+        if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) {
+            return;
+        }
+
         try {
-            if (event != null && event.getTopic() != null) {
+            if (event.getTopic() != null) {
                 Collection<CellarCluster> clusters = null;
                 try {
-                    clusters = clusterManager.getClusters();
+                    clusters = clusterManager.getLocalClusters();
                 } catch (Exception e) {
                     LOGGER.warn("Failed to list local groups. Is Cellar uninstalling ?", e);
                     return;
@@ -60,7 +65,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
                             clusterEvent.setSourceCluster(cluster);
                             cluster.produce(clusterEvent);
-                        } else if (!topicName.startsWith("org/osgi/service/log/LogEntry/")) {
+                        } else {
                             LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
                         }
                     }

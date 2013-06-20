@@ -24,13 +24,13 @@ public interface ClusterManager {
     /**
      * @return the clusters
      */
-    Collection<CellarCluster> getClusters();
-    
+    public Collection<CellarCluster> getClusters();
+
     public boolean isLocalCluster(CellarCluster cluster);
-    
+
     public Collection<CellarCluster> getLocalClusters();
-    
-    Map<String, CellarCluster> getClusterMap();
+
+    public Map<String, CellarCluster> getClusterMap();
 
     /**
      * Retrieves all nodes from all clusters.
@@ -55,7 +55,7 @@ public interface ClusterManager {
     public void leaveCluster(String clusterName);
 
     public void deleteCluster(String clusterName);
-    
+
     /**
      * Look for a cluster with a given name.
      *
@@ -66,54 +66,54 @@ public interface ClusterManager {
 
     public Node findNodeById(String nodeId);
 
-    String generateId();
+    public String generateId();
 
-    CellarCluster getMasterCluster();
+    public CellarCluster getMasterCluster();
 
     /**
      * @return the consumer
      */
-    boolean isConsumer();
+    public boolean isConsumer();
 
     /**
      * @return the enableBundleEvents
      */
-    boolean isEnableBundleEvents();
+    public boolean isEnableBundleEvents();
 
     /**
      * @return the enableClusterEvents
      */
-    boolean isEnableClusterEvents();
+    public boolean isEnableClusterEvents();
 
     /**
      * @return the enableConfigurationEvents
      */
-    boolean isEnableConfigurationEvents();
+    public boolean isEnableConfigurationEvents();
 
     /**
      * @return the enableDOSGIEvents
      */
-    boolean isEnableDOSGIEvents();
+    public boolean isEnableDOSGIEvents();
 
     /**
      * @return the enableFeatureEvents
      */
-    boolean isEnableFeatureEvents();
+    public boolean isEnableFeatureEvents();
 
     /**
      * @return the enableOBRBundleEvents
      */
-    boolean isEnableOBRBundleEvents();
+    public boolean isEnableOBRBundleEvents();
 
     /**
      * @return the enableObrEvents
      */
-    boolean isEnableObrEvents();
+    public boolean isEnableObrEvents();
 
     /**
      * @return the producer
      */
-    boolean isProducer();
+    public boolean isProducer();
 
-    void createCluster(String clusterName);
+    public void createCluster(String clusterName);
 }

@@ -54,7 +54,7 @@ public class RemoteServiceFactory implements ServiceFactory {
 
     @Override
     public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-        // nothing to do
+        this.executionContext.shutdown();
     }
 
 }

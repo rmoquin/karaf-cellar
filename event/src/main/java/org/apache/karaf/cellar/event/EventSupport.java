@@ -38,9 +38,10 @@ public class EventSupport extends CellarSupport {
         Map<String, Object> properties = new HashMap<String, Object>();
 
         for (String propertyName : propertyNames) {
-            Object property = event.getProperty(propertyName);
-            if (property instanceof Object) {
-                properties.put(propertyName, (Object) property);
+            // event property (org.osgi.framework.ServiceEvent for instance) contains non serializable objects (like source or service reference)
+            if (!propertyName.equals("event")) {
+                Object property = event.getProperty(propertyName);
+                    properties.put(propertyName, property);
             }
         }
 

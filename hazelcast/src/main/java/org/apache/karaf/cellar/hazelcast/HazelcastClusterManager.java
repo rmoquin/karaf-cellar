@@ -36,6 +36,7 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
+import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
@@ -50,6 +51,7 @@ public class HazelcastClusterManager implements ClusterManager {
     private static transient Logger LOGGER = LoggerFactory.getLogger(HazelcastClusterManager.class);
     private String hazelcastConfig;
     private String clusterPid;
+    private BundleClassLoader bundleClassLoader;
     private CellarCluster mainCluster;
     private List<String> clusterNames = new ArrayList<String>();
     private Map<String, CellarCluster> clustersByName = new ConcurrentHashMap<String, CellarCluster>();
@@ -257,7 +259,7 @@ public class HazelcastClusterManager implements ClusterManager {
             cfg = new Config();
         }
         cfg.getGroupConfig().setName(name);
-        cfg.setClassLoader(this.getClass().getClassLoader());
+        cfg.setClassLoader(bundleClassLoader);
         GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
         globalConfig.setImplementation(new GenericCellarSerializer());
@@ -526,5 +528,19 @@ public class HazelcastClusterManager implements ClusterManager {
      */
     public void setHazelcastConfig(String hazelcastConfig) {
         this.hazelcastConfig = hazelcastConfig;
+    }
+
+    /**
+     * @return the bundleClassLoader
+     */
+    public BundleClassLoader getBundleClassLoader() {
+        return bundleClassLoader;
+    }
+
+    /**
+     * @param bundleClassLoader the bundleClassLoader to set
+     */
+    public void setBundleClassLoader(BundleClassLoader bundleClassLoader) {
+        this.bundleClassLoader = bundleClassLoader;
     }
 }

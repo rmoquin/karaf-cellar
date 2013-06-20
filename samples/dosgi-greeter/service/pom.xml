@@ -51,6 +51,20 @@
             <artifactId>org.apache.karaf.cellar.samples.dosgi.greeter.api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.core</artifactId>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.hazelcast</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

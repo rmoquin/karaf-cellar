@@ -33,4 +33,6 @@ public interface ExecutionContext {
      */
     public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws Exception;
 
+    void shutdown();
+
 }

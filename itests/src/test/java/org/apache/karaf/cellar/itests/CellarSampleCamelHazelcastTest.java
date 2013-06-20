@@ -42,7 +42,7 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.err.println(executeCommand("feature:add-url mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/3.0.0-SNAPSHOT/xml/features"));
+        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/3.0.0-SNAPSHOT/xml/features"));
 
         System.err.println(executeCommand("instance:list"));
 

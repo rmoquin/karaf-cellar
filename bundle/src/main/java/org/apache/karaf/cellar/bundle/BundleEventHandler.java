@@ -103,7 +103,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = new Boolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
