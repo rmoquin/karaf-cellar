@@ -48,11 +48,12 @@ public class ClusteredExecutionContext implements ExecutionContext {
     }
 
     public void initProducer(ServiceReference<EventProducer> producerReference) {
-        LOGGER.warn("The event producer was bound.");
+        LOGGER.warn("The event producer was bound." + this.producer);
         this.producer = this.bundleContext.getService(producerReference);
     }
 
     public void removeProducer(ServiceReference<ExecutionContext> producer) {
+        LOGGER.warn("The event producer was removed.");
         producer = null;
     }
 
@@ -101,5 +102,19 @@ public class ClusteredExecutionContext implements ExecutionContext {
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    /**
+     * @return the producer
+     */
+    public Producer getProducer() {
+        return producer;
+    }
+
+    /**
+     * @param producer the producer to set
+     */
+    public void setProducer(Producer producer) {
+        this.producer = producer;
     }
 }

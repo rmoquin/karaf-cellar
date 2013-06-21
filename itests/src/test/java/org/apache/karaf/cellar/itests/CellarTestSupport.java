@@ -65,7 +65,6 @@ public class CellarTestSupport {
     static final String INSTANCE_STARTED = "Started";
     static final String INSTANCE_STARTING = "Starting";
     static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
-
     ExecutorService executor = Executors.newCachedThreadPool();
     @Inject
     protected BundleContext bundleContext;
@@ -304,7 +303,7 @@ public class CellarTestSupport {
      */
     private static String explode(Dictionary dictionary) {
         Enumeration keys = dictionary.keys();
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         while (keys.hasMoreElements()) {
             Object key = keys.nextElement();
             result.append(String.format("%s=%s", key, dictionary.get(key)));

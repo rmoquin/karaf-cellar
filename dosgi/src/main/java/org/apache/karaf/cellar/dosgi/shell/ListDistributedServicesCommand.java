@@ -28,7 +28,7 @@ public class ListDistributedServicesCommand extends CellarCommandSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        Map<String, EndpointDescription> remoteEndpoints = clusterManager.getMasterCluster().getMap(Constants.REMOTE_ENDPOINTS);
+        Map<String, EndpointDescription> remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
         if (remoteEndpoints != null && !remoteEndpoints.isEmpty()) {
             System.out.println(String.format(LIST_FORMAT, "Service Class", "Provider Node"));
             for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {

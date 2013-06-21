@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import org.apache.karaf.cellar.core.CellarCluster;
@@ -36,6 +37,12 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     @Override
     public void init() {
         super.init();
+        Collection<CellarCluster> clusters = clusterManager.getLocalClusters();
+        if (clusters != null && !clusters.isEmpty()) {
+            for (CellarCluster cluster : clusters) {
+                this.synchronize(cluster);
+            }
+        }
     }
 
     @Override
@@ -43,6 +50,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         super.destroy();
     }
 
+    @Override
     public boolean synchronize(CellarCluster cluster) {
         if (isSyncEnabled(cluster)) {
             pull(cluster);
@@ -63,10 +71,8 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     public void pull(CellarCluster cluster) {
         if (cluster != null) {
             String clusterName = cluster.getName();
-            LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster {}", clusterName);
-            List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
-            cluster.getList(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            List<String> clusterRepositories = this.clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = this.clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
             // get the features repositories URLs from the cluster group
             if (clusterRepositories != null && !clusterRepositories.isEmpty()) {
                 for (String url : clusterRepositories) {
@@ -134,7 +140,6 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     public void push(CellarCluster cluster) {
         if (cluster != null) {
             String groupName = cluster.getName();
-            LOGGER.info("CELLAR FEATURES: pushing features repositories and features in cluster group {}", groupName);
             cluster.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             Repository[] repositoryList = new Repository[0];

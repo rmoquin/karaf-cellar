@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.io.Serializable;
-
 /**
  * Generic cluster node interface.
  */

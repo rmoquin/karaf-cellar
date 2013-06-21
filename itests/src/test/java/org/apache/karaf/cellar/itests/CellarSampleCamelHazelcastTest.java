@@ -73,7 +73,7 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:cluster-list"));
         System.err.println(executeCommand("instance:connect child2 bundle:list -t 0"));
 
-        Thread.sleep(20000);
+        Thread.sleep(10000);
         String output1 = executeCommand("instance:connect child1  log:display | grep \"Hallo Cellar\"");
         System.err.println(output1);
         String output2 = executeCommand("instance:connect child2  log:display | grep \"Hallo Cellar\"");

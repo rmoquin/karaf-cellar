@@ -17,18 +17,14 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import com.hazelcast.nio.serialization.TypeSerializer;
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.ByteArraySerializer;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  *
  * @author rmoquin
  */
-public class GenericCellarSerializer implements TypeSerializer {
+public class GenericCellarSerializer implements ByteArraySerializer<Object> {
     SmileFactory f = new SmileFactory();
     ObjectMapper mapper = new ObjectMapper(f);
 
@@ -38,18 +34,16 @@ public class GenericCellarSerializer implements TypeSerializer {
     }
 
     @Override
-    public void write(ObjectDataOutput out, Object object)
-            throws IOException {
-        mapper.writeValue((OutputStream) out, object);
-    }
-
-    @Override
-    public Object read(ObjectDataInput in) throws IOException {
-        return mapper.readValue((InputStream) in,
-                Object.class);
-    }
-
-    @Override
     public void destroy() {
+    }
+
+    @Override
+    public byte[] write(Object object) throws IOException {
+        return mapper.writeValueAsBytes(object);
+    }
+
+    @Override
+    public Object read(byte[] buffer) throws IOException {
+        return mapper.readValue(buffer, Object.class);
     }
 }

@@ -26,11 +26,14 @@ public class NodesListCommand extends ClusterCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         Set<Node> nodes = clusterManager.getMasterCluster().listNodes();
+        Node masterNode = clusterManager.getMasterCluster().getLocalNode();
+        System.err.println("Master Node " + masterNode.toString());
         if (!nodes.isEmpty()) {
             System.out.println(String.format(HEADER_FORMAT, "ID", "Host Name", "Port"));
             for (Node node : nodes) {
                 String mark = " ";
-                if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
+                System.err.println("Node: " + node.toString());
+                if (node.equals(masterNode)) {
                     mark = "*";
                 }
                 System.out.println(String.format(OUTPUT_FORMAT, mark, node.getId(), node.getHost(), node.getPort()));

@@ -29,13 +29,15 @@
     <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer"
           init-method="init" destroy-method="destroy">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>        
+        <property name="clusterManager" ref="clusterManager"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
+
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Features Event Handler -->
     <bean id="featuresEventHandler" class="org.apache.karaf.cellar.features.FeaturesEventHandler"
-      init-method="init" destroy-method="destroy">
+          init-method="init" destroy-method="destroy">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
@@ -47,7 +49,7 @@
 
     <!-- Cluster Features Repositories Event Handler -->
     <bean id="repositoryEventHandler" class="org.apache.karaf.cellar.features.RepositoryEventHandler"
-      init-method="init" destroy-method="destroy">
+          init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>

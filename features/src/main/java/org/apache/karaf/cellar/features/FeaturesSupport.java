@@ -91,7 +91,6 @@ public class FeaturesSupport extends CellarSupport {
         if (feature != null) {
             String clusterName = cluster.getName();
             Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
-
             if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());

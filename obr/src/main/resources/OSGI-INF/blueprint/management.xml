@@ -24,7 +24,6 @@
 
     <bean id="cellarOBRMBean" class="org.apache.karaf.cellar.obr.management.internal.CellarOBRMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
     <bean id="mbeanRegister" class="org.apache.karaf.management.MBeanRegistrer">

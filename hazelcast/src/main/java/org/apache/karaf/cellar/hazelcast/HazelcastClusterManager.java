@@ -16,6 +16,8 @@ package org.apache.karaf.cellar.hazelcast;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
 import com.hazelcast.config.GlobalSerializerConfig;
+import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ITopic;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -263,8 +265,61 @@ public class HazelcastClusterManager implements ClusterManager {
         GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
         globalConfig.setImplementation(new GenericCellarSerializer());
-        cfg.getSerializationConfig().setGlobalSerializer(globalConfig);
+        cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);
         return cfg;
+    }
+    
+    /**
+     * Get a Map from the main administrative cluster.
+     *
+     * @param mapName the Map name.
+     * @return the Map with the specifed name.
+     */
+    @Override
+    public Map getMap(String mapName) {
+        return this.mainCluster.getMap(mapName);
+    }
+
+    /**
+     * Get a List from the main administrative cluster.
+     *
+     * @param listName the List name.
+     * @return the List with the specifed name.
+     */
+    @Override
+    public List getList(String listName) {
+        return this.mainCluster.getList(listName);
+    }
+    
+    /**
+     * Get a Topic from the main administrative cluster.
+     *
+     * @param topicName the Topic name.
+     * @return the Topic with the specifed name.
+     */
+    public ITopic getTopic(String topicName) {
+        return ((HazelcastClusterManager)this.mainCluster).getTopic(topicName);
+    }
+    
+    /**
+     * Get a Queue from the main administrative cluster.
+     *
+     * @param queueName the Queue name.
+     * @return the Queue with the specifed name.
+     */
+    public IQueue getQueue(String queueName) {
+        return ((HazelcastClusterManager)this.mainCluster).getQueue(queueName);
+    }
+
+    /**
+     * Get a Set from the main administrative cluster.
+     *
+     * @param setName the Set name.
+     * @return the Set with the specifed name.
+     */
+    @Override
+    public Set getSet(String setName) {
+        return this.mainCluster.getSet(setName);
     }
 
     /**

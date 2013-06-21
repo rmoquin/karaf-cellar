@@ -54,7 +54,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
-        remoteEndpoints = clusterManager.getMasterCluster().getMap(Constants.REMOTE_ENDPOINTS);
+        remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
         service.scheduleAtFixedRate(this, 0, 5, TimeUnit.SECONDS);
     }
 
@@ -126,12 +126,14 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      */
     private void checkListener(ListenerInfo listenerInfo) {
         // iterate through known services and import them if needed
-        CellarCluster cluster = clusterManager.getMasterCluster();
+        CellarCluster masterCluster = clusterManager.getMasterCluster();
         Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
         for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
             EndpointDescription endpointDescription = entry.getValue();
-            if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(cluster.getLocalNode())) {
-                LOGGER.info("Remove node being added to cluster " + cluster.getName() + " with end point " + endpointDescription);
+            if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(masterCluster.getLocalNode())) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Remove node being added to cluster " + masterCluster.getName() + " with end point " + endpointDescription);
+                }
                 matches.add(endpointDescription);
             }
         }

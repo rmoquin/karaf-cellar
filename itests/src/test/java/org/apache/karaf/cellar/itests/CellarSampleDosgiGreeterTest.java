@@ -43,7 +43,7 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.err.println(executeCommand("feature:addurl mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
 
         System.err.println(executeCommand("instance:list"));
 
@@ -76,7 +76,6 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         System.err.println(greetOutput);
         assertEquals("Expected 10 greets", 10, countGreetsFromNode(greetOutput, node1));
         System.err.println(executeCommand("cluster:cluster-set service-grp " + node2));
-        Thread.sleep(10000);
         Thread.sleep(10000);
         System.err.println(executeCommand("cluster:cluster-list"));
         System.err.println(executeCommand("instance:connect child2 osgi:list -t 0"));

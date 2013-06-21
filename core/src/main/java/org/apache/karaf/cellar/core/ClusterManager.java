@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.core;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +39,30 @@ public interface ClusterManager {
      * @return all nodes from all known clusters.
      */
     public Set<Node> listNodesAllClusters();
+
+	 /**
+     * Get the nodes with a given ID.
+     *
+     * @param ids the collection of ID to look for.
+     * @return the set of nodes.
+     */
+//    public Set<Node> listNodes(Collection<String> ids);
+
+    /**
+     * Get the nodes in a given cluster group.
+     *
+     * @param group the cluster group.
+     * @return the set of nodes in the cluster group.
+     */
+//    public Set<Node> listNodesByGroup(Group group);
+
+    /**
+     * Get a node identified by a given ID.
+     *
+     * @param id the id of the node to look for.
+     * @return the node.
+     */
+//    public Node findNodeById(String id);
 
     /**
      * Create a new cluster.
@@ -70,6 +95,30 @@ public interface ClusterManager {
 
     public CellarCluster getMasterCluster();
 
+    /**
+     * Get a Map in Hazelcast.
+     *
+     * @param mapName the Map in the main administrative cluster.
+     * @return the Map with the specified name.
+     */
+    public Map getMap(String mapName);
+
+    /**
+     * Get a List in the main administrative cluster.
+     *
+     * @param listName the List name.
+     * @return the List with the specified name.
+     */
+    public List getList(String listName);
+
+    /**
+     * Get a Set from the main administrative cluster.
+     *
+     * @param setName the Set name.
+     * @return the Set with the specifed name.
+     */
+    public Set getSet(String setName);
+    
     /**
      * @return the consumer
      */

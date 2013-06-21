@@ -53,7 +53,7 @@ public class ExportServiceListener implements ServiceListener {
     public void init() {
         cluster = clusterManager.getMasterCluster();
         node = cluster.getLocalNode();
-        remoteEndpoints = cluster.getMap(Constants.REMOTE_ENDPOINTS);
+        remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
         bundleContext.addServiceListener(this);
 
         // lookup for already exported services

@@ -61,13 +61,14 @@
 
     <bean id="executionContext" class="org.apache.karaf.cellar.core.command.ClusteredExecutionContext"
           destroy-method="shutdown">
+        <property name="producer" ref="masterEventProducer"/>
         <property name="commandStore" ref="commandStore"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
     
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
     
-    <reference availability="optional" interface="org.apache.karaf.cellar.core.event.EventProducer"
+    <reference id="masterEventProducer" availability="optional" interface="org.apache.karaf.cellar.core.event.EventProducer"
                filter="(name = default)">
         <reference-listener ref="executionContext" bind-method="initProducer" unbind-method="removeProducer"/>
     </reference>
