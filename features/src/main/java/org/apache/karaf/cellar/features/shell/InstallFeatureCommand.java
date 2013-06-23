@@ -50,7 +50,7 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }

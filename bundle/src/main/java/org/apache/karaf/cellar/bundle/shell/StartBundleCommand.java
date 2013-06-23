@@ -39,7 +39,7 @@ public class StartBundleCommand extends BundleCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -47,7 +47,7 @@ public class StartBundleCommand extends BundleCommandSupport {
         // update the bundle in the cluster group
         String location;
         String key = null;
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
             key = selector(clusterBundles);
 

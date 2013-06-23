@@ -45,7 +45,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -57,10 +57,10 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         }
 
         // update the OBR URLs in the cluster group
-        Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         clusterUrls.add(url);
         // update the OBR bundles in the cluster group
-        Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         synchronized(obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();

@@ -97,6 +97,30 @@ public class CellarSupport {
     }
 
     /**
+     * Get a set of resources in the Cellar cluster groups configuration.
+     *
+     * @param listType a comma separated string of resources.
+     * @param group the cluster.
+     * @param category the resource category name.
+     * @param type the event type (inbound, outbound).
+     * @return the set of resources.
+     */
+    public Set<String> getListEntries(String listType, CellarCluster group, String category, EventType type) {
+        Set<String> result = null;
+        if (group != null) {
+            String groupName = group.getName();
+            Set<String> items = getListEntries(listType, groupName, category, type);
+            if (items != null && !items.isEmpty()) {
+                if (result == null) {
+                    result = new HashSet<String>();
+                }
+                result.addAll(items);
+            }
+        }
+        return result;
+    }
+
+    /**
      * Check if a resource is allowed for a type of cluster event.
      *
      * @param clusterName the cluster name.

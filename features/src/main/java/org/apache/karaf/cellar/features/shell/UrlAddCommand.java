@@ -48,15 +48,15 @@ public class UrlAddCommand extends FeatureCommandSupport {
         }
 
         // check if the event producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
 
             // get the features repositories in the cluster group
-            List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
             // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
 
             for (String url : urls) {
                 // check if the URL is already registered

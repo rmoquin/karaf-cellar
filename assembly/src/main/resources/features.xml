@@ -17,11 +17,6 @@
 
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
     
-    <!--    <feature name='spifly' version='1.0.0'>
-        <bundle dependency="true">mvn:org.ow2.asm/asm-all/4.1</bundle>
-        <bundle start-level="29">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/1.0.0</bundle>
-    </feature>-->
-    
     <feature name="jackson-serialization" description="Jackson serialization support" version="${jackson.version}" resolver="(obr)">
         <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>

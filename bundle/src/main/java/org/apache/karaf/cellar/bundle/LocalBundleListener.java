@@ -62,7 +62,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
                     // check if the producer is ON
-                    if (cluster.emitsEvents()) {
+                    if (!cluster.emitsEvents()) {
                         LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
                         continue;
                     }
@@ -80,7 +80,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                     if (isAllowed(cluster.getName(), Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
                         try {
                             // update bundles in the cluster group
-                            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + cluster.getName());
+                            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + cluster.getName());
                             if (type == BundleEvent.UNINSTALLED) {
                                 clusterBundles.remove(symbolicName + "/" + version);
                             } else {

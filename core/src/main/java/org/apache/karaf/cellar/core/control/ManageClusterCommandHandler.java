@@ -15,10 +15,12 @@ package org.apache.karaf.cellar.core.control;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 
 import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.Configurations;
 
 /**
  * Manager cluster command handler.
@@ -34,13 +36,22 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
         ManageClusterAction action = command.getAction();
 
         String targetClusterName = command.getClusterName();
+        Node node = clusterManager.getMasterCluster().getLocalNode();
 
         if (ManageClusterAction.JOIN.equals(action)) {
             joinCluster(targetClusterName);
-        } else if (ManageClusterAction.LEAVE.equals(action)) {
-            leaveCluster(targetClusterName);
-        } else if (ManageClusterAction.LEAVE_ALL.equals(action)) {
-            leaveAllClusters();
+        } else if (ManageClusterAction.QUIT.equals(action)) {
+            quitCluster(targetClusterName);
+            if (clusterManager.listLocalClusters().isEmpty()) {
+                joinCluster(Configurations.DEFAULT_GROUP_NAME);
+            }
+        } else if (ManageClusterAction.PURGE.equals(action)) {
+            purgeClusters();
+            joinCluster(Configurations.DEFAULT_GROUP_NAME);
+        } else if (ManageClusterAction.SET.equals(action)) {
+            CellarCluster localCluster = clusterManager.listLocalClusters().iterator().next();
+            quitCluster(localCluster.getName());
+            joinCluster(targetClusterName);
         }
 
         addClusterListToResult(result);
@@ -54,8 +65,7 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
      * @param result the result where to add the cluster list.
      */
     public void addClusterListToResult(ManageClusterResult result) {
-        //TODO Figure out what this means.
-        Collection<CellarCluster> clusters = clusterManager.getClusters();
+        Set<CellarCluster> clusters = clusterManager.listAllClusters();
 
         for (CellarCluster c : clusters) {
             result.getClusters().add(c);
@@ -68,15 +78,11 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
      * @param targetClusterName the target cluster name where to add the node.
      */
     public void joinCluster(String targetClusterName) {
-        //TODO Figure out what this means.
-        Node node = getClusterManager().getMasterCluster().getLocalNode();
-        CellarCluster targetCluster = clusterManager.findClusterByName(targetClusterName);
+        CellarCluster targetCluster = clusterManager.findLocalCluster(targetClusterName);
         if (targetCluster == null) {
-            clusterManager.joinCluster(targetClusterName);
-        } else if (!targetCluster.listNodes().contains(node)) {
-            targetCluster.listNodes().add(node);
-            clusterManager.getClusters().add(targetCluster);
-            clusterManager.joinCluster(targetClusterName);
+            clusterManager.createCluster(targetClusterName);
+        } else {
+			LOGGER.warn("This node is already a part of cluster: " + targetClusterName);
         }
     }
 
@@ -85,18 +91,27 @@ public class ManageClusterCommandHandler extends CommandHandler<ManageClusterCom
      *
      * @param targetClusterName the target cluster to leave.
      */
-    public void leaveCluster(String targetClusterName) {
-        //TODO Figure out out how to remove the cluster config
-        CellarCluster cluster = getClusterManager().findClusterByName(targetClusterName);
-
+    public void quitCluster(String clusterName) {
+		CellarCluster targetCluster = clusterManager.findLocalCluster(clusterName);
+        if (targetCluster != null) {
+            clusterManager.deleteCluster(clusterName);
+        } else {
+			LOGGER.warn("This node isn't part of cluster: " + clusterName + " and therefore doesn't need to leave it.");
+        }
     }
 
     /**
      * Remove {@link Node} from all {@link CellarCluster}s.
      */
-    public void leaveAllClusters() {
-        Map<String, CellarCluster> clusters = getClusterManager().getClusterMap();
-        //TODO Figure out out how to remove the cluster configs.
+    public void purgeClusters() {
+        Set<CellarCluster> clusters = clusterManager.listLocalClusters();
+        if ((clusters != null) && (!clusters.isEmpty())) {
+            for (CellarCluster cellarCluster : clusters) {
+                clusterManager.deleteCluster(cellarCluster);
+            }
+        } else {
+			LOGGER.warn("This node isn't part of any clusters other than the default which cannot be disconected.");
+        }
     }
 
     @Override

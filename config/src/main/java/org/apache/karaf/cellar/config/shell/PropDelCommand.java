@@ -46,7 +46,7 @@ public class PropDelCommand extends ConfigCommandSupport {
         }
 
         // check if the event producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }

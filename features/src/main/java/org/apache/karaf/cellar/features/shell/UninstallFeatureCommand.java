@@ -43,7 +43,7 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF for this node");
             return null;
         }

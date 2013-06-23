@@ -71,8 +71,7 @@ public class HazelcastNode implements Node {
         }
 
         HazelcastNode that = (HazelcastNode) o;
-        String id = this.hzMember.getUuid();
-        if (id != null ? !id.equals(that.getId()) : that.getId() != null) {
+        if (this.getId() != null ? !this.getId().equals(that.getId()) : that.getId() != null) {
             return false;
         }
 
@@ -81,8 +80,7 @@ public class HazelcastNode implements Node {
 
     @Override
     public int hashCode() {
-        String id = this.hzMember.getUuid();
-        return id != null ? id.hashCode() : 0;
+        return this.getId() != null ? this.getId().hashCode() : 0;
     }
 
     @Override

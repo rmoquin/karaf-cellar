@@ -31,7 +31,7 @@ public class Command<R extends Result> extends Event {
 
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(Command.class);
 
-    protected long timeout = 2000;
+    protected long timeout = 10000;
     protected final BlockingQueue<Map<Node, R>> resultQueue = new LinkedBlockingQueue<Map<Node, R>>();
     protected final Map<Node, R> nodeResults = new HashMap<Node, R>();
 

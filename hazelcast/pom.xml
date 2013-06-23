@@ -37,14 +37,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <osgi.import>
             com.hazelcast*,
-            org.apache.karaf.cellar.bundle;version="${project.version}",
-            org.apache.karaf.cellar.core;version="${project.version}",
-            org.apache.karaf.cellar.core.*;version="${project.version}",
+            org.apache.karaf.cellar.core*;version="${project.version}",
             org.apache.karaf.cellar.utils.ping;version="${project.version}",
             org.apache.karaf.features;version="[3,4)",
-            org.apache.karaf.cellar.features;version="${project.version}",
+            org.osgi*,
             org.slf4j;resolution:=optional,
-            *
+	    *
         </osgi.import>
         <osgi.export>
             org.apache.karaf.cellar.hazelcast*;version="${project.version}"

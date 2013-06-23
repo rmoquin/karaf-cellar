@@ -25,7 +25,6 @@ import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class HazelcastCluster implements CellarCluster, Serializable, MembershipListener {
+public class HazelcastCluster implements CellarCluster, MembershipListener {
     @JsonIgnore
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
@@ -65,6 +64,25 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
     private List<? extends Synchronizer> synchronizers;
     @JsonIgnore
     private EventProducer eventProducer;
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + (this.name != null ? this.name.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final HazelcastCluster other = (HazelcastCluster) obj;
+        return true;
+    }
 
     public void init(String name, Config config, boolean synchronizer) {
         this.name = name;
@@ -87,7 +105,7 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
 
     @Override
     public boolean emitsEvents() {
-        return eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF);
+        return eventProducer.getSwitch().getStatus().equals(SwitchStatus.ON);
     }
     
     /**
@@ -179,6 +197,7 @@ public class HazelcastCluster implements CellarCluster, Serializable, Membership
 
     @Override
     public void shutdown() {
+        this.eventProducer = null;
         instance.getCluster().removeMembershipListener(listenerId);
         if (instance != null) {
             instance.getLifecycleService().shutdown();

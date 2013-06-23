@@ -20,9 +20,7 @@ public enum ManageClusterAction {
 	SET,
     JOIN,
     QUIT,
-    LEAVE,
-    LEAVE_ALL,
-    LIST,
-	PURGE;
+    PURGE,
+    LIST;
 
 }

@@ -71,6 +71,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     public void pull(CellarCluster cluster) {
         if (cluster != null) {
             String clusterName = cluster.getName();
+            LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster {}", clusterName);
             List<String> clusterRepositories = this.clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
             Map<FeatureInfo, Boolean> clusterFeatures = this.clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
             // get the features repositories URLs from the cluster group
@@ -140,7 +141,8 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     public void push(CellarCluster cluster) {
         if (cluster != null) {
             String groupName = cluster.getName();
-            cluster.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+            LOGGER.info("CELLAR FEATURES: pushing features repositories and features in cluster group {}", groupName);
+            clusterManager.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             Repository[] repositoryList = new Repository[0];
             Feature[] featuresList = new Feature[0];

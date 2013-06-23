@@ -49,7 +49,7 @@ public class DiscoveryTask implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.trace("CELLAR DISCOVERY: starting the discovery task");
+        LOGGER.warn("CELLAR DISCOVERY: starting the discovery task");
 
         if (configurationAdmin != null) {
             Set<String> members = new LinkedHashSet<String>();
@@ -58,34 +58,34 @@ public class DiscoveryTask implements Runnable {
                     service.refresh();
                     Set<String> discovered = service.discoverMembers();
                     members.addAll(discovered);
-                    LOGGER.trace("CELLAR DISCOVERY: service {} found members {}", service, discovered);
+                    LOGGER.warn("CELLAR DISCOVERY: service {} found members {}", service, discovered);
                 }
                 try {
-                	LOGGER.trace("CELLAR DISCOVERY: retrieving configuration for PID={}", Discovery.PID);
+                	LOGGER.warn("CELLAR DISCOVERY: retrieving configuration for PID={}", Discovery.PID);
                     Configuration configuration = configurationAdmin.getConfiguration(Discovery.PID);
                     Dictionary properties = configuration.getProperties();
                     if (properties == null) {
                     	// this is a new configuration ...
-                    	LOGGER.trace("CELLAR DISCOVERY: configuration is new");
+                    	LOGGER.warn("CELLAR DISCOVERY: configuration is new");
                     	properties = new Hashtable();
                     }
                     String newMemberText = CellarUtils.createStringFromSet(members, true);
                     String memberText = (String) properties.get(Discovery.MEMBERS_PROPERTY_NAME);
                     if (newMemberText != null && newMemberText.length() > 0 && !newMemberText.equals(memberText)) {
                         properties.put(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME, newMemberText);
-                        LOGGER.trace("CELLAR DISCOVERY: adding a new member {} to configuration and updating it", newMemberText);
+                        LOGGER.warn("CELLAR DISCOVERY: adding a new member {} to configuration and updating it", newMemberText);
                         configuration.update(properties);
                     } else {
-                    	LOGGER.trace("CELLAR DISCOVERY: found a valid member in the configuration will skip");
+                    	LOGGER.warn("CELLAR DISCOVERY: found a valid member in the configuration will skip");
                     }
                 } catch (IOException e) {
                     LOGGER.error("CELLAR DISCOVERY: failed to update member list", e);
                 }
             } else {
-            	LOGGER.trace("CELLAR DISCOVERY: no discovery services found ... ");
+            	LOGGER.warn("CELLAR DISCOVERY: no discovery services found ... ");
             }
         } else {
-        	LOGGER.trace("CELLAR DISCOVERY: no config admin found");
+        	LOGGER.warn("CELLAR DISCOVERY: no config admin found");
         }
     }
 

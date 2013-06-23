@@ -77,7 +77,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             String clusterName = cluster.getName();
             LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", clusterName);
 
-            Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
 
             for (String clusterConfiguration : clusterConfigurations.keySet()) {
                 if (isAllowed(cluster.getName(), Constants.CATEGORY, clusterConfiguration, EventType.INBOUND)) {
@@ -114,14 +114,14 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     public void push(CellarCluster cluster) {
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             LOGGER.warn("CELLAR CONFIG: cluster event producer is OFF");
             return;
         }
 
         String clusterName = cluster.getName();
         LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", clusterName);
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
 
         Configuration[] localConfigurations;
         try {

@@ -48,7 +48,7 @@ public class ListBundleCommand extends CellarCommandSupport {
             return null;
         }
 
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
             if (clusterBundles != null && !clusterBundles.isEmpty()) {
                 System.out.println(String.format("Bundles in cluster group " + clusterName));
                 System.out.println(String.format(HEADER_FORMAT, "ID", "State", "Name"));

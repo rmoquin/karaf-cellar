@@ -46,7 +46,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
         List<String> result = new ArrayList<String>();
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         for (String pid : clusterConfigurations.keySet()) {
             result.add(pid);
         }
@@ -63,7 +63,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -74,7 +74,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties properties = clusterConfigurations.remove(pid);
@@ -101,7 +101,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         TabularData table = new TabularDataSupport(tableType);
         
         CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         Properties clusterProperties = clusterConfigurations.get(pid);
         if (clusterProperties != null) {
             Enumeration propertyNames = clusterProperties.propertyNames();
@@ -126,7 +126,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -137,7 +137,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties clusterProperties = clusterConfigurations.get(pid);
@@ -165,7 +165,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is on
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -176,7 +176,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties clusterProperties = clusterConfigurations.get(pid);
@@ -211,7 +211,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the event producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -222,7 +222,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties clusterDictionary = clusterConfigurations.get(pid);

@@ -90,12 +90,14 @@ public class FeaturesSupport extends CellarSupport {
     public void pushFeature(Feature feature, CellarCluster cluster) {
         if (feature != null) {
             String clusterName = cluster.getName();
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+LOGGER.warn("Pushing feature for cluster: " + clusterName);
             if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     Boolean installed = featuresService.isInstalled(feature);
                     clusterFeatures.put(info, installed);
+LOGGER.warn("Feature for cluster: " + clusterName + " " + clusterFeatures);
                 }
             } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster {}", feature.getName(), clusterName);
         } else LOGGER.warn("CELLAR FEATURES: feature is null");
@@ -112,7 +114,7 @@ public class FeaturesSupport extends CellarSupport {
     public void pushFeature(Feature feature, CellarCluster cluster, Boolean force) {
         if (feature != null) {
             String clusterName = cluster.getName();
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
 
             if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
                 if (featuresService != null && clusterFeatures != null) {
@@ -131,7 +133,7 @@ public class FeaturesSupport extends CellarSupport {
      */
     public void pushRepository(Repository repository, CellarCluster cluster) {
         String clusterName = cluster.getName();
-        List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
 
         boolean found = false;
         for (String clusterRepository : clusterRepositories) {
@@ -154,7 +156,7 @@ public class FeaturesSupport extends CellarSupport {
      */
     public void removeRepository(Repository repository, CellarCluster cluster) {
         String clusterName = cluster.getName();
-        List<String> clusterRepositories = cluster.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
 
         if (featuresService != null && clusterRepositories != null) {
             URI uri = repository.getURI();

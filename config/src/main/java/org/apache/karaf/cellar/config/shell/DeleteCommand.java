@@ -44,7 +44,7 @@ public class DeleteCommand extends ConfigCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -55,7 +55,7 @@ public class DeleteCommand extends ConfigCommandSupport {
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update configurations in the cluster group
             clusterConfigurations.remove(pid);

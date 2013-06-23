@@ -18,8 +18,6 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.shell.commands.Argument;
@@ -56,7 +54,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -83,7 +81,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 jarInputStream.close();
 
                     // update the cluster
-                    Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+                    Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
                     BundleState state = new BundleState();
                     state.setName(name);
                     state.setLocation(url);

@@ -55,7 +55,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
                     // check if the producer is ON
-                    if (cluster.emitsEvents()) {
+                    if (!cluster.emitsEvents()) {
                         LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
                         continue;
                     }
@@ -98,7 +98,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
             if (clusters != null && !clusters.isEmpty()) {
                 for (CellarCluster cluster : clusters) {
                     // check if the producer is ON
-                    if (cluster.emitsEvents()) {
+                    if (!cluster.emitsEvents()) {
                         LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
                         continue;
                     }
@@ -114,7 +114,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                             pushRepository(event.getRepository(), cluster);
                             // update the features in the cluster group
 
-                            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     // check the feature in the distributed map
@@ -136,7 +136,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         } else {
                             removeRepository(event.getRepository(), cluster);
                             // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());

@@ -51,7 +51,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -62,7 +62,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the configurations in the cluster group
             Properties properties = clusterConfigurations.get(pid);

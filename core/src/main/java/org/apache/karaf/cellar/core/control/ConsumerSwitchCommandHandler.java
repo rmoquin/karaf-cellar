@@ -21,7 +21,8 @@ import org.apache.karaf.cellar.core.command.CommandHandler;
  * Consumer switch command handler.
  */
 public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchCommand, ConsumerSwitchResult> {
-    private final Switch commandSwitch = new BasicSwitch("org.apache.karaf.cellar.command.producer.switch");
+    public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
+    private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private Consumer consumer;
 
     /**

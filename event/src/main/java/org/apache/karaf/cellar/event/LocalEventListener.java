@@ -54,7 +54,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                 if (clusters != null && !clusters.isEmpty()) {
                     for (CellarCluster cluster : clusters) {
                         // check if the producer is ON
-                        if (cluster.emitsEvents()) {
+                        if (!cluster.emitsEvents()) {
                             LOGGER.warn("CELLAR EVENT: cluster event producer is OFF");
                             return;
                         }

@@ -59,7 +59,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
@@ -83,7 +83,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         jarInputStream.close();
 
             // update the cluster group
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
             BundleState state = new BundleState();
             state.setName(name);
             state.setLocation(location);
@@ -105,12 +105,12 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
         // update the cluster group
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
             String key = selector(symbolicName, version, clusterBundles);
 
@@ -148,12 +148,12 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
         // update the cluster group
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
             String key = selector(symbolicName, version, clusterBundles);
 
@@ -192,12 +192,12 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
         // update the cluster group
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
 
             String key = selector(symbolicName, version, clusterBundles);
 
@@ -241,7 +241,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
                 new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
             int id = 0;
             for (String bundle : clusterBundles.keySet()) {
                 String[] tokens = bundle.split("/");

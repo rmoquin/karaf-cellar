@@ -44,7 +44,7 @@ public class PropSetCommand extends ConfigCommandSupport {
         // check if the group exists
         CellarCluster cluster = clusterManager.findClusterByName(clusterName);
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -55,7 +55,7 @@ public class PropSetCommand extends ConfigCommandSupport {
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterMap.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
         if (clusterConfigurations != null) {
             // update the configurations in the cluster group
             Properties properties = clusterConfigurations.get(pid);

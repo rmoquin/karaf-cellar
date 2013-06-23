@@ -45,7 +45,7 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             System.err.println("Cluster event producer is OFF for this node");
             return null;
         }
@@ -60,7 +60,7 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
         Set<String> urls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         urls.remove(url);
         // remove bundles from the distributed map
-        Set<ObrBundleInfo> bundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<ObrBundleInfo> bundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         synchronized(obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();

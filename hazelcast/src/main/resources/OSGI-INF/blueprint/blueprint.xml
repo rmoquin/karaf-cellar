@@ -32,10 +32,10 @@
     </bean>
 
     <!-- Discovery Task -->
-    <bean id="discoveryTask" class="org.apache.karaf.cellar.core.discovery.DiscoveryTask" init-method="init" destroy-method="destroy">
+<!--    <bean id="discoveryTask" class="org.apache.karaf.cellar.core.discovery.DiscoveryTask" init-method="init" destroy-method="destroy">
         <property name="discoveryServices" ref="discoveryServices"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
+    </bean>-->
         
     <bean id="synchronizationConfig" class="org.apache.karaf.cellar.hazelcast.internal.HazelcastSynchronizationConfiguration">
         <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>

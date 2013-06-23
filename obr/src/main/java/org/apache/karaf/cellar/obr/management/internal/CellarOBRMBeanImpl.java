@@ -52,7 +52,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         List<String> result = new ArrayList<String>();
-        Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         for (String url : clusterUrls) {
             result.add(url);
         }
@@ -75,7 +75,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
                 new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
-            Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+            Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
             for (ObrBundleInfo info : clusterBundles) {
                 CompositeData data = new CompositeDataSupport(compositeType,
                         new String[]{ "name", "symbolic", "version" },
@@ -94,7 +94,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -106,10 +106,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // update OBR URLs in the cluster group
-        Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         clusterUrls.add(url);
         // update OBR bundles in the cluster group
-        Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         synchronized (obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
@@ -136,7 +136,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
@@ -148,10 +148,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // update the OBR URLs in the cluster group
-        Set<String> clusterUrls = cluster.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         clusterUrls.remove(url);
         // update the OBR bundles in the cluster group
-        Set<ObrBundleInfo> clusterBundles = cluster.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
         synchronized (obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
@@ -177,7 +177,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 

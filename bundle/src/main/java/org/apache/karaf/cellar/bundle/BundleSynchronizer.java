@@ -61,7 +61,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
         if (cluster != null) {
             String groupName = cluster.getName();
             LOGGER.debug("CELLAR BUNDLE: pulling bundles from cluster group {}", groupName);
-            Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             for (Map.Entry<String, BundleState> entry : clusterBundles.entrySet()) {
                 String id = entry.getKey();
@@ -102,14 +102,14 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     public void push(CellarCluster cluster) {
 
         // check if the producer is ON
-        if (cluster.emitsEvents()) {
+        if (!cluster.emitsEvents()) {
             LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
             return;
         }
 
         String groupName = cluster.getName();
         LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
-        Map<String, BundleState> clusterBundles = cluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
         Bundle[] bundles;
 
