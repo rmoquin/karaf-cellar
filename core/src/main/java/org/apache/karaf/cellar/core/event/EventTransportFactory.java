@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.core.event;
 
-import org.apache.karaf.cellar.core.CellarCluster;
 
 
 /**
@@ -24,12 +23,10 @@ public interface EventTransportFactory {
     /**
      * @return the masterCluster
      */
-    public CellarCluster getMasterCluster();
 
     /**
      * @param masterCluster the masterCluster to set
      */
-    public void setMasterCluster(CellarCluster masterCluster);
     
     /**
      * Return a cluster {@link EventProducer} that produces cluster {@link Event}s for a specific cluster {@link org.apache.karaf.cellar.core.CellarCluster}.

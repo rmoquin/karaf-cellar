@@ -20,8 +20,8 @@
     <!-- Local Bundle Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init"
           destroy-method="destroy">
-        <property name="clusterManager" ref="clusterManager"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="groupManager" ref="groupManager"/>
     </bean>
 
     <!-- Bundle Synchronizer -->
@@ -45,5 +45,5 @@
 
     <!-- Cluster Core Services -->
     <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
-    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager" />
 </blueprint>

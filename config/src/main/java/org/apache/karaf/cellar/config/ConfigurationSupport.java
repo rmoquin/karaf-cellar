@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.config;
 
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -26,7 +25,7 @@ import java.util.*;
 /**
  * Generic configuration support.
  */
-public class ConfigurationSupport extends CellarSupport {
+public class ConfigurationSupport {
 
     private static String[] EXCLUDED_PROPERTIES = {"service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories"};
 
@@ -43,7 +42,7 @@ public class ConfigurationSupport extends CellarSupport {
     public Properties dictionaryToProperties(Dictionary dictionary) {
         Properties properties = new Properties();
         //Dictionary seems to indicate that keys won't return null;
-        if (dictionary != null) {
+        if (dictionary != null && dictionary.keys() != null) {
 
             Enumeration keys = dictionary.keys();
             while (keys.hasMoreElements()) {
@@ -84,7 +83,6 @@ public class ConfigurationSupport extends CellarSupport {
             //No need to convert this to a string simply to compare the objects.
             Object sourceValue = source.get(key);
             Object targetValue = target.get(key);
-//          The Dictionary object says that neither keys or values can be null, so don't bother with a check
             if (!sourceValue.equals(targetValue))
                 return false;
         }

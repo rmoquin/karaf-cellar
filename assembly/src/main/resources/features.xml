@@ -25,11 +25,11 @@
     </feature>
     
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-	<configfile finalname="/etc/cellar.synchronization.management.cfg">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/synchronization
+        <configfile finalname="/etc/org.apache.karaf.cellar.groups.cfg">
+            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/groups
         </configfile>
-        <configfile finalname="/etc/cellar.cluster.management.cfg">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/cluster
+        <configfile finalname="/etc/org.apache.karaf.cellar.node.cfg">
+            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/node
         </configfile>
 	<bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>

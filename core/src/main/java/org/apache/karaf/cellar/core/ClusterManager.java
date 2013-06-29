@@ -23,79 +23,6 @@ import java.util.Set;
  */
 public interface ClusterManager {
     /**
-     * @return the clusters
-     */
-    public Collection<CellarCluster> getClusters();
-
-    public boolean isLocalCluster(CellarCluster cluster);
-
-    public Collection<CellarCluster> getLocalClusters();
-
-    public Map<String, CellarCluster> getClusterMap();
-
-    /**
-     * Retrieves all nodes from all clusters.
-     *
-     * @return all nodes from all known clusters.
-     */
-    public Set<Node> listNodesAllClusters();
-
-	 /**
-     * Get the nodes with a given ID.
-     *
-     * @param ids the collection of ID to look for.
-     * @return the set of nodes.
-     */
-//    public Set<Node> listNodes(Collection<String> ids);
-
-    /**
-     * Get the nodes in a given cluster group.
-     *
-     * @param group the cluster group.
-     * @return the set of nodes in the cluster group.
-     */
-//    public Set<Node> listNodesByGroup(Group group);
-
-    /**
-     * Get a node identified by a given ID.
-     *
-     * @param id the id of the node to look for.
-     * @return the node.
-     */
-//    public Node findNodeById(String id);
-
-    /**
-     * Create a new cluster.
-     *
-     * @param clusterName the new cluster name.
-     * @return the created cluster.
-     */
-    public void joinCluster(String clusterName);
-
-    /**
-     * Delete an existing cluster.
-     *
-     * @param clusterName the cluster name to delete.
-     */
-    public void leaveCluster(String clusterName);
-
-    public void deleteCluster(String clusterName);
-
-    /**
-     * Look for a cluster with a given name.
-     *
-     * @param clusterName the cluster name to look for.
-     * @return the cluster found, or null if no cluster found.
-     */
-    public CellarCluster findClusterByName(String clusterName);
-
-    public Node findNodeById(String nodeId);
-
-    public String generateId();
-
-    public CellarCluster getMasterCluster();
-
-    /**
      * Get a Map in Hazelcast.
      *
      * @param mapName the Map in the main administrative cluster.
@@ -118,51 +45,82 @@ public interface ClusterManager {
      * @return the Set with the specifed name.
      */
     public Set getSet(String setName);
+
+    /**
+     * Get the nodes in the cluster.
+     *
+     * @return the set of nodes in the cluster.
+     */
+    public Set<Node> listNodes();
+
+    /**
+     * Get the nodes with a given ID.
+     *
+     * @param ids the collection of ID to look for.
+     * @return the set of nodes.
+     */
+    public Set<Node> listNodes(Collection<String> ids);
+
+	/**
+     * @return the clusters
+     */
+    public Collection<CellarCluster> getClusters();
+
+    /**
+     * Get the nodes in a given cluster group.
+     *
+     * @param group the cluster group.
+     * @return the set of nodes in the cluster group.
+     */
+    public Set<Node> listNodesByGroup(Group group);
+
+	    /**
+     * Get a node identified by a given ID.
+     *
+     * @param id the id of the node to look for.
+     * @return the node.
+     */
+    public Node findNodeById(String id);
+	 
+    /**
+     * Leave an existing cluster.
+     *
+     * @param clusterName the cluster name to leave.
+     * @return the node.
+     */
+    public void leaveCluster(String clusterName);
     
     /**
-     * @return the consumer
+     * Look for a cluster with a given name.
+     *
+     * @param clusterName the cluster name to look for.
+     * @return the cluster found, or null if no cluster found.
      */
-    public boolean isConsumer();
+    public CellarCluster findClusterByName(String clusterName);
+
+/**
+     * Get the local node.
+     *
+     * @return the local node.
+     */
+public Node getNode();
 
     /**
-     * @return the enableBundleEvents
+     * Generate an unique ID across the cluster.
+     *
+     * @return a unique ID across the cluster.
      */
-    public boolean isEnableBundleEvents();
-
-    /**
-     * @return the enableClusterEvents
-     */
-    public boolean isEnableClusterEvents();
-
-    /**
-     * @return the enableConfigurationEvents
-     */
-    public boolean isEnableConfigurationEvents();
-
-    /**
-     * @return the enableDOSGIEvents
-     */
-    public boolean isEnableDOSGIEvents();
-
-    /**
-     * @return the enableFeatureEvents
-     */
-    public boolean isEnableFeatureEvents();
-
-    /**
-     * @return the enableOBRBundleEvents
-     */
-    public boolean isEnableOBRBundleEvents();
-
-    /**
-     * @return the enableObrEvents
-     */
-    public boolean isEnableObrEvents();
-
-    /**
-     * @return the producer
-     */
-    public boolean isProducer();
+    public String generateId();
 
     public void createCluster(String clusterName);
+	
+	/**
+     * Start the local node.
+     */
+    public void start();
+
+    /**
+     * Stop the local node.
+     */
+    public void stop();
 }

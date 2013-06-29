@@ -13,21 +13,21 @@
  */
 package org.apache.karaf.cellar.core.control;
 
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.command.Result;
 
 import java.util.HashSet;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Manager group result.
  */
-public class ManageClusterResult extends Result {
+public class ManageGroupResult extends Result {
 
     private Boolean success = Boolean.TRUE;
-    private Set<CellarCluster> clusters = new HashSet<CellarCluster>();
+    private Set<Group> groups = new HashSet<Group>();
 
-    public ManageClusterResult(String id) {
+    public ManageGroupResult(String id) {
         super(id);
     }
 
@@ -39,12 +39,12 @@ public class ManageClusterResult extends Result {
         this.success = success;
     }
 
-    public Set<CellarCluster> getClusters() {
-        return clusters;
+    public Set<Group> getGroups() {
+        return groups;
     }
 
-    public void setClusters(Set<CellarCluster> clusters) {
-        this.clusters = clusters;
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
     }
 
 }

@@ -27,29 +27,28 @@ import java.util.regex.Pattern;
  * Cellar generic support. This class provides a set of util methods used by other classes.
  */
 public class CellarSupport {
-    protected static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
-    protected SynchronizationConfiguration synchronizationConfiguration;
-    protected ClusterManager clusterManager;
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
+    private SynchronizationConfiguration synchronizationConfiguration;
 
     /**
      * Get a set of resources in the Cellar cluster groups configuration.
      *
      * @param listType the comma separated list of resources.
-     * @param cluster the cluster name.
+     * @param group the group name.
      * @param category the resource category name.
      * @param type the event type (inbound, outbound).
      * @return the set of resources.
      */
-    public Set<String> getListEntries(String listType, String cluster, String category, EventType type) {
+    public Set<String> getListEntries(String listType, String group, String category, EventType type) {
         Set<String> result = null;
-        if (cluster != null) {
+        if (group != null) {
             if (synchronizationConfiguration != null) {
-                String parent = (String) synchronizationConfiguration.getProperty(cluster + Configurations.SEPARATOR + Configurations.PARENT);
+                String parent = (String) synchronizationConfiguration.getProperty(group + Configurations.SEPARATOR + Configurations.PARENT);
                 if (parent != null) {
                     result = getListEntries(listType, parent, category, type);
                 }
 
-                String propertyName = cluster + Configurations.SEPARATOR + category + Configurations.SEPARATOR + listType + Configurations.SEPARATOR + type.name().toLowerCase();
+                String propertyName = group + Configurations.SEPARATOR + category + Configurations.SEPARATOR + listType + Configurations.SEPARATOR + type.name().toLowerCase();
                 String propertyValue = (String) synchronizationConfiguration.getProperty(propertyName);
                 if (propertyValue != null) {
                     propertyValue = propertyValue.replaceAll("\n", "");
@@ -80,11 +79,11 @@ public class CellarSupport {
      * @param type the event type (inbound, outbound).
      * @return the set of resources.
      */
-    public Set<String> getListEntries(String listType, Collection<String> clusters, String category, EventType type) {
+    public Set<String> getListEntries(String listType, Collection<String> groups, String category, EventType type) {
         Set<String> result = null;
-        if (clusters != null && !clusters.isEmpty()) {
-            for (String cluster : clusters) {
-                Set<String> items = getListEntries(listType, cluster, category, type);
+        if (groups != null && !groups.isEmpty()) {
+            for (String group : groups) {
+                Set<String> items = getListEntries(listType, group, category, type);
                 if (items != null && !items.isEmpty()) {
                     if (result == null) {
                         result = new HashSet<String>();
@@ -105,7 +104,7 @@ public class CellarSupport {
      * @param type the event type (inbound, outbound).
      * @return the set of resources.
      */
-    public Set<String> getListEntries(String listType, CellarCluster group, String category, EventType type) {
+    public Set<String> getListEntries(String listType, Group group, String category, EventType type) {
         Set<String> result = null;
         if (group != null) {
             String groupName = group.getName();
@@ -128,10 +127,10 @@ public class CellarSupport {
      * @param event the resource name.
      * @param type the event type (inbound, outbound).
      */
-    public Boolean isAllowed(String clusterName, String category, String event, EventType type) {
+    public Boolean isAllowed(Group group, String category, String event, EventType type) {
         Boolean result = true;
-        Set<String> whiteList = getListEntries(Configurations.WHITELIST, clusterName, category, type);
-        Set<String> blackList = getListEntries(Configurations.BLACKLIST, clusterName, category, type);
+        Set<String> whiteList = getListEntries(Configurations.WHITELIST, group, category, type);
+        Set<String> blackList = getListEntries(Configurations.BLACKLIST, group, category, type);
 
         // if no white listed items we assume all are accepted.
         if (whiteList != null && !whiteList.isEmpty()) {
@@ -183,19 +182,5 @@ public class CellarSupport {
      */
     public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
-    }
-
-    /**
-     * @return the clusterManager
-     */
-    public ClusterManager getClusterManager() {
-        return clusterManager;
-    }
-
-    /**
-     * @param clusterManager the clusterManager to set
-     */
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
     }
 }

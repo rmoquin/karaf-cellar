@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.core.command;
 
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.Producer;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -25,7 +24,7 @@ import java.util.Set;
 /**
  * Command handler.
  */
-public abstract class CommandHandler<C extends Command<R>, R extends Result> extends CellarSupport implements EventHandler<C> {
+public abstract class CommandHandler<C extends Command<R>, R extends Result> implements EventHandler<C> {
 
     protected Producer producer;
 

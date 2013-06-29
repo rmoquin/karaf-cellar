@@ -14,15 +14,19 @@
 package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Producer;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Producer switch command handler.
  */
 public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchCommand, ProducerSwitchResult> {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ProducerSwitchCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
+    private SynchronizationConfiguration synchronizationConfiguration;
 
     /**
      * Execute a producer switch command.
@@ -45,8 +49,8 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
             }
             try {
                 if (this.synchronizationConfiguration != null) {
-                    super.synchronizationConfiguration.setProperty(Configurations.PRODUCER, statusValue);
-                    super.synchronizationConfiguration.save();
+                    this.synchronizationConfiguration.setProperty(Configurations.PRODUCER, statusValue);
+                    this.synchronizationConfiguration.save();
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Error setting producer switch.", ex);
@@ -66,13 +70,17 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
         return commandSwitch;
     }
 
-    @Override
-    public Producer getProducer() {
-        return producer;
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
     }
 
-    @Override
-    public void setProducer(Producer producer) {
-        this.producer = producer;
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
     }
 }

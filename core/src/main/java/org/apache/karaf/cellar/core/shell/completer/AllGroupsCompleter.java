@@ -11,17 +11,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.event;
+package org.apache.karaf.cellar.core.shell.completer;
+
+import org.apache.karaf.cellar.core.Group;
 
 /**
- * Event configuration constants.
+ * Completer for all cluster groups.
  */
-public class Constants {
+public class AllGroupsCompleter extends GroupCompleterSupport {
 
-    public static final String CATEGORY = "event";
-    public static final String EVENT_PROCESSED_KEY = "org.apache.karaf.cellar.event.processed";
-    public static final String EVENT_PROCESSED_VALUE = "true";
-    public static final String EVENT_SOURCE_GROUP_KEY = "org.apache.karaf.cellar.event.source.group";
-    public static final String EVENT_SOURCE_NODE_KEY = "org.apache.karaf.cellar.event.source.node";
+    /**
+     * Accept all cluster groups for completion.
+     *
+     * @param group the cluster group to check.
+     * @return always return true.
+     */
+    @Override
+    protected boolean acceptsGroup(Group group) {
+        return true;
+    }
 
 }

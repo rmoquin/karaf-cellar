@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.core.shell;
 
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
@@ -22,6 +23,7 @@ import org.apache.karaf.shell.console.OsgiCommandSupport;
 public abstract class CellarCommandSupport extends OsgiCommandSupport {
 
     protected ClusterManager clusterManager;
+    protected GroupManager groupManager;
 
     public ClusterManager getClusterManager() {
         return clusterManager;
@@ -29,5 +31,11 @@ public abstract class CellarCommandSupport extends OsgiCommandSupport {
 
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
+    }
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
     }
 }

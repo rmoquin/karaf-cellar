@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Listener for the service import.
@@ -101,7 +100,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             }
 
             // make sure we only import remote services
-            String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getMasterCluster().getLocalNode().getId() + ")))";
+                String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getNode().getId() + ")))";
             // iterate through known services and import them if needed
             Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
             for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
@@ -126,14 +125,10 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      */
     private void checkListener(ListenerInfo listenerInfo) {
         // iterate through known services and import them if needed
-        CellarCluster masterCluster = clusterManager.getMasterCluster();
         Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
         for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
             EndpointDescription endpointDescription = entry.getValue();
-            if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(masterCluster.getLocalNode())) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Remove node being added to cluster " + masterCluster.getName() + " with end point " + endpointDescription);
-                }
+                if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(clusterManager.getNode().getId())) {
                 matches.add(endpointDescription);
             }
         }
@@ -160,7 +155,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
         EventConsumer resultConsumer = consumers.get(endpoint.getId());
         if (resultConsumer == null) {
-            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getMasterCluster().getLocalNode().getId() + endpoint.getId(), Boolean.FALSE);
+            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getNode().getId() + endpoint.getId(), Boolean.FALSE);
             consumers.put(endpoint.getId(), resultConsumer);
         } else if (!resultConsumer.isConsuming()) {
             resultConsumer.start();

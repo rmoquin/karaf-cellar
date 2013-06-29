@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Listener called when a new service is exported.
@@ -48,18 +47,17 @@ public class ExportServiceListener implements ServiceListener {
     private final Map<String, EventConsumer> consumers = new HashMap<String, EventConsumer>();
 
     private Node node;
-    private CellarCluster cluster;
-
+    
     public void init() {
-        cluster = clusterManager.getMasterCluster();
-        node = cluster.getLocalNode();
+        node = clusterManager.getNode();
         remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
         bundleContext.addServiceListener(this);
 
         // lookup for already exported services
+        ServiceReference[] references = null;
         try {
             String filter = "(" + Constants.EXPORTED_INTERFACES + "=" + Constants.ALL_INTERFACES + ")";
-            ServiceReference[] references = bundleContext.getServiceReferences((String) null, filter);
+            references = bundleContext.getServiceReferences((String) null, filter);
 
             if (references != null) {
                 for (ServiceReference reference : references) {

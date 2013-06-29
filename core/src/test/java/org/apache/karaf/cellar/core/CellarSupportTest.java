@@ -58,9 +58,10 @@ public class CellarSupportTest {
     };
     Properties props = new Properties();
 
+    Group defaultGroup = new Group("default");
     @Before
     public void setUp() throws Exception {
-        InputStream is = getClass().getResourceAsStream("synchronization.cfg");
+        InputStream is = getClass().getResourceAsStream("groups.properties");
         props.load(is);
         is.close();
         Map propsDictionary = props;
@@ -77,19 +78,19 @@ public class CellarSupportTest {
         support.setSynchronizationConfiguration(configuration);
 
         Boolean expectedResult = false;
-        Boolean result = support.isAllowed("default", "config", "org.apache.karaf.shell", EventType.INBOUND);
-        assertEquals("Shell should not be allowed", expectedResult, result);
+        Boolean result = support.isAllowed(defaultGroup,"config","org.apache.karaf.shell", EventType.INBOUND);
+        assertEquals("Shell should not be allowed",expectedResult,result);
 
         expectedResult = true;
-        result = support.isAllowed("default", "config", "org.apache.karaf.cellar.group", EventType.INBOUND);
-        assertEquals("Group config should be allowed", expectedResult, result);
+        result = support.isAllowed(defaultGroup,"config","org.apache.karaf.cellar.group", EventType.INBOUND);
+        assertEquals("Group config should be allowed",expectedResult,result);
 
         expectedResult = false;
-        result = support.isAllowed("default", "config", "org.apache.karaf.cellar.node", EventType.INBOUND);
-        assertEquals("Node config should be allowed", expectedResult, result);
+        result = support.isAllowed(defaultGroup,"config","org.apache.karaf.cellar.node", EventType.INBOUND);
+        assertEquals("Node config should be allowed",expectedResult,result);
 
         expectedResult = false;
-        result = support.isAllowed("default", "config", "org.apache.karaf.cellar.instance", EventType.INBOUND);
-        assertEquals("Instance config should be allowed", expectedResult, result);
+        result = support.isAllowed(defaultGroup,"config","org.apache.karaf.cellar.instance", EventType.INBOUND);
+        assertEquals("Instance config should be allowed",expectedResult,result);
     }
 }

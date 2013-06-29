@@ -38,6 +38,8 @@ import java.util.Map;
 public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeaturesMBean {
 
     private ClusterManager clusterManager;
+    private GroupManager groupManager;
+    private EventProducer eventProducer;
     private FeaturesService featuresService;
 
     public CellarFeaturesMBeanImpl() throws NotCompliantMBeanException {
@@ -52,6 +54,12 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         this.clusterManager = clusterManager;
     }
 
+    public GroupManager getGroupManager() {
+        return this.groupManager;
+    }
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
     public FeaturesService getFeaturesService() {
         return featuresService;
     }
@@ -61,27 +69,27 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     }
 
     @Override
-    public void install(String clusterName, String name, String version, boolean noClean, boolean noRefresh) throws Exception {
+    public void install(String groupName, String name, String version, boolean noClean, boolean noRefresh) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the feature is allowed outbound
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+        if (!support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + clusterName);
         }
 
             // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             // check if the feature exist
             FeatureInfo feature = null;
@@ -101,9 +109,9 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
             if (feature == null) {
                 if (version == null)
-                    throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + clusterName);
+                    throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + groupName);
                 else
-                    throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + clusterName);
+                    throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + groupName);
             }
 
             // update the cluster group
@@ -111,7 +119,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             try {
                 // TODO does it make sense ?
                 List<BundleInfo> bundles = featuresService.getFeature(feature.getName(), version).getBundles();
-                Map<String, BundleState> clusterBundles = clusterManager.getMap(org.apache.karaf.cellar.bundle.Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+                Map<String, BundleState> clusterBundles = clusterManager.getMap(org.apache.karaf.cellar.bundle.Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
                 for (BundleInfo bundle : bundles) {
                     BundleState state = new BundleState();
                     state.setLocation(bundle.getLocation());
@@ -124,8 +132,8 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
     }
 
     @Override
@@ -144,27 +152,27 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     }
 
     @Override
-    public void uninstall(String clusterName, String name, String version) throws Exception {
+    public void uninstall(String groupName, String name, String version) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the feature is allowed outbound
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+            throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 
             // get the features in the cluster
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             // check if the feature exist
             FeatureInfo feature = null;
@@ -184,9 +192,9 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
             if (feature == null) {
                 if (version == null)
-                    throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + clusterName);
+                    throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + groupName);
                 else
-                    throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + clusterName);
+                    throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + groupName);
             }
 
             // update the cluster group
@@ -194,8 +202,8 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, FeatureEvent.EventType.FeatureUninstalled);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
     }
 
     @Override
@@ -204,7 +212,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     }
 
     @Override
-    public TabularData getFeatures(String clusterName) throws Exception {
+    public TabularData getFeatures(String group) throws Exception {
         CompositeType featuresType = new CompositeType("Feature", "Karaf Cellar feature",
                 new String[]{"name", "version", "installed"},
                 new String[]{"Name of the feature", "Version of the feature", "Whether the feature is installed or not"},
@@ -230,15 +238,15 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     }
 
     @Override
-    public List<String> getUrls(String clusterName) throws Exception {
+    public List<String> getUrls(String groupName) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // get the features repositories in the cluster group
-        List<String> clusterRepositories = cluster.getManagerList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
 
         List<String> result = new ArrayList<String>();
         for (String clusterRepository : clusterRepositories) {
@@ -249,22 +257,22 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     }
 
     @Override
-    public void addUrl(String clusterName, String url) throws Exception {
+    public void addUrl(String groupName, String url) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the event producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
             // get the features repositories in the cluster group
-            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
             // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             // check if the URL is already registered
             boolean found = false;
@@ -317,30 +325,30 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
                 // broadcast the cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
-                event.setSourceCluster(cluster);
-                cluster.produce(event);
+                event.setSourceGroup(group);
+                eventProducer.produce(event);
             } else {
                 throw new IllegalArgumentException("Features repository URL " + url + " already registered");
             }
     }
 
     @Override
-    public void removeUrl(String clusterName, String url) throws Exception {
+    public void removeUrl(String groupName, String url) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the event producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // get the features repositories in the cluster group
-        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
         // get the features in the cluster group
-        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
         // looking for the URL in the list
         boolean found = false;
@@ -393,10 +401,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
             // broadcast a cluster event
             ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
-            event.setSourceCluster(cluster);
-            cluster.produce(event);
+            event.setSourceGroup(group);
+            eventProducer.produce(event);
         } else {
-            throw new IllegalArgumentException("Features repository URL " + url + " not found in cluster group " + clusterName);
+            throw new IllegalArgumentException("Features repository URL " + url + " not found in cluster group " + groupName);
         }
     }
 

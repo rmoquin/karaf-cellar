@@ -24,10 +24,10 @@ function renderGroups(data) {
 
 function renderView() {
     renderStatusLine();
-    renderTable("Cluster Nodes", "group_table", ["Cluster", "Node", "Actions"]);
+    renderTable("Cluster Nodes", "group_table", ["Group", "Node", "Actions"]);
 
     var txt = "<form method='post'><table id='group_table_footer' class='ui-widget-header nicetable noauto ui-widget'><tbody>" +
-            "<tr><input type='hidden' name='action' value='createCluster'/>" +
+            "<tr><input type='hidden' name='action' value='createGroup'/>" +
             "<td><input id='groupName' type='text' name='groupName' style='width:100%' colspan='2'/></td>" +
             "<td class='col_Actions'><input type='button' value='Create Group' onclick='addGroup()'/></td>" +
             "</tr></tbody></table></form><br/>";

@@ -15,14 +15,12 @@ package org.apache.karaf.cellar.core.event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Event handler service registry.
  */
 public class EventHandlerServiceRegistry<E extends Event> implements EventHandlerRegistry<E> {
-    private static transient final Logger LOGGER = LoggerFactory.getLogger(EventHandlerServiceRegistry.class);
+
     private Map<Class, EventHandler> eventHandlerMap = new ConcurrentHashMap<Class, EventHandler>();
 
     /**
@@ -35,12 +33,8 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
     public EventHandler<E> getHandler(E event) {
         if (event != null) {
             Class clazz = event.getClass();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Getting eventhandler for event class: " + clazz.toString());
-            }
             return eventHandlerMap.get(clazz);
         }
-        LOGGER.info("No event handler could be retrieved for event: " + event);
         return null;
     }
 
@@ -52,9 +46,6 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
 
     public void unbind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Unbinding event handler type: " + handler.getType());
-            }
             eventHandlerMap.remove(handler.getType());
         }
     }

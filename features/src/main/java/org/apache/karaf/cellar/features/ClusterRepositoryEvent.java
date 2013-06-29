@@ -35,7 +35,7 @@ public class ClusterRepositoryEvent extends Event {
 
 	@Override
 	public String toString() {
-		return MessageFormat.format("ClusterRepositoryEvent [type={0}, id={1}, sourceNode={2}, sourceCluster={3}, destination={4}, force={5}, postPublish={6}]", type, id, sourceNode, this.getSourceCluster(), destinations, force, postPublish);
+		return MessageFormat.format("ClusterRepositoryEvent [type={0}, id={1}, sourceNode={2}, sourceGroup={3}, destination={4}, force={5}, postPublish={6}]", type, id, sourceNode, sourceGroup, destination, force, postPublish);
 	}
     
 }

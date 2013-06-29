@@ -54,17 +54,19 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
             return;
         }
 
-        if (clusterManager == null) {
-        	LOGGER.error("CELLAR OBR: retrieved event {} while clusterManager is not available yet!", event);
+        if (groupManager == null) {
+        	//in rare cases for example right after installation this happens!
+        	LOGGER.error("CELLAR OBR: retrieved event {} while groupManager is not available yet!", event);
         	return;
         }
-        if (!clusterManager.isLocalCluster(event.getSourceCluster())) {
-            LOGGER.debug("CELLAR OBR: node is not part of the event cluster{}", event.getSourceCluster().getName());
+        // check if the group is local
+        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
+            LOGGER.debug("CELLAR OBR: node is not part of the event cluster group {}", event.getSourceGroup().getName());
             return;
         }
         String url = event.getUrl();
         try {
-            if (isAllowed(event.getSourceCluster().getName(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
+            if (isAllowed(event.getSourceGroup(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
                 if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
                     obrService.addRepository(url);

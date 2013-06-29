@@ -18,17 +18,21 @@
         <command name="cluster/feature-install">
             <action class="org.apache.karaf.cellar.features.shell.InstallFeatureCommand">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
+                <property name="eventProducer" ref="eventProducer"/>
             </action>
             <completers>
-                <ref component-id="allClustersCompleter"/>
+                <ref component-id="allGroupCompleter"/>
                 <ref component-id="allFeatureCompleter"/>
             </completers>
         </command>
         <command name="cluster/feature-uninstall">
             <action class="org.apache.karaf.cellar.features.shell.UninstallFeatureCommand">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
+                <property name="eventProducer" ref="eventProducer"/>
             </action>
             <completers>
                 <ref component-id="allClustersCompleter"/>
@@ -38,41 +42,49 @@
         <command name="cluster/feature-list">
             <action class="org.apache.karaf.cellar.features.shell.ListGroupFeatures">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
             </action>
             <completers>
-                <ref component-id="allClustersCompleter"/>
+                <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
         <command name="cluster/feature-url-list">
             <action class="org.apache.karaf.cellar.features.shell.UrlListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
             </action>
             <completers>
-                <ref component-id="allClustersCompleter"/>
+                <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
         <command name="cluster/feature-url-add">
             <action class="org.apache.karaf.cellar.features.shell.UrlAddCommand">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="eventProducer" ref="eventProducer"/>
                 <property name="featuresService" ref="featuresService"/>
             </action>
             <completers>
-                <ref component-id="allClustersCompleter"/>
+                <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
         <command name="cluster/feature-url-remove">
             <action class="org.apache.karaf.cellar.features.shell.UrlRemoveCommand">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="groupManager" ref="groupManager"/>
+                <property name="eventProducer" ref="eventProducer"/>
                 <property name="featuresService" ref="featuresService"/>
             </action>
             <completers>
-                <ref component-id="allClustersCompleter"/>
+                <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
     </command-bundle>
 
-    <bean id="allClustersCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllClustersCompleter"/>
+    <bean id="allGroupCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllGroupsCompleter">
+        <property name="groupManager" ref="groupManager"/>
+    </bean>
 
     <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
         <property name="featuresService" ref="featuresService"/>

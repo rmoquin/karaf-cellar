@@ -58,9 +58,13 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
             return;
         }
 
+        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
+            LOGGER.debug("CELLAR FEATURES: node is not part of the event cluster group {}", event.getSourceGroup().getName());
+            return;
+        }
         String name = event.getName();
         String version = event.getVersion();
-        if (isAllowed(event.getSourceCluster().getName(), Constants.FEATURES_CATEGORY, name, EventType.INBOUND) || event.getForce()) {
+        if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.FEATURES_CATEGORY, name, EventType.INBOUND) || event.getForce()) {
             FeatureEvent.EventType type = event.getType();
             Boolean isInstalled = isFeatureInstalledLocally(name, version);
             try {
@@ -93,9 +97,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
             } catch (Exception e) {
                 LOGGER.error("CELLAR FEATURES: failed to handle cluster feature event", e);
             }
-        } else {
-            LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, event.getSourceCluster().getName());
-        }
+        } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, event.getSourceGroup().getName());
     }
 
     /**
@@ -117,7 +119,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(SWITCH_HANDLER_NAME));
+            boolean status = Boolean.parseBoolean((String) super.getSynchronizationConfiguration().getProperty(SWITCH_HANDLER_NAME));
             if (status) {
                 eventSwitch.turnOn();
             } else {

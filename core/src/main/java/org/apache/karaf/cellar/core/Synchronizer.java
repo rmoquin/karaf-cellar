@@ -19,30 +19,25 @@ package org.apache.karaf.cellar.core;
 public interface Synchronizer {
 
     /**
-     * Perform both a push and a pull on the specified cluster.
-     */
-    public boolean synchronize(CellarCluster cluster);
-    
-    /**
-     * Push local resources states in a cluster.
+     * Push local resources states in a cluster group.
      *
-     * @param cluster the cluster where to push local resources states.
+     * @param group the cluster group where to push local resources states.
      */
-    public void push(CellarCluster cluster);
+    public void push(Group group);
 
     /**
-     * Pull resources states from a cluster to update local states.
+     * Pull resources states from a cluster group to update local states.
      *
-     * @param cluster the cluster where to pull the resources states.
+     * @param group the cluster group where to pull the resources states.
      */
-    public void pull(CellarCluster cluster);
+    public void pull(Group group);
 
     /**
-     * Check if the sync flag is enabled for a given cluster.
+     * Check if the sync flag is enabled for a given cluster group.
      *
-     * @param cluster the cluster to check.
+     * @param group the cluster group.
      * @return true if sync flag is enabled, false else.
      */
-    public Boolean isSyncEnabled(CellarCluster cluster);
+    public Boolean isSyncEnabled(Group group);
 
 }

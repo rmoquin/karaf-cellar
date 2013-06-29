@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -28,7 +29,10 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -39,6 +43,10 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     public static final String SWITCH_ID = "org.apache.karaf.cellar.configuration.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private ConfigurationAdmin configurationAdmin;
+    private CellarSupport cellarSupport;
+    private ClusterManager clusterManager;
+    private GroupManager groupManager;
+    private SynchronizationConfiguration synchronizationConfiguration;
 
     @Override
     public void handle(ClusterConfigurationEvent event) {
@@ -49,14 +57,18 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
             return;
         }
 
-        CellarCluster cluster = event.getSourceCluster();
-        String clusterName = cluster.getName();
+        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
+            LOGGER.debug("CELLAR CONFIG: node is not part of the event cluster group {}",event.getSourceGroup().getName());
+            return;
+        }
+        Group group = event.getSourceGroup();
+        String groupName = group.getName();
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
         String pid = event.getId();
 
-        if (isAllowed(event.getSourceCluster().getName(), Constants.CATEGORY, pid, EventType.INBOUND)) {
+        if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, pid, EventType.INBOUND)) {
 
             Properties clusterDictionary = clusterConfigurations.get(pid);
             Configuration conf;
@@ -84,9 +96,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
             } catch (IOException ex) {
                 LOGGER.error("CELLAR CONFIG: failed to read cluster configuration", ex);
             }
-        } else {
-            LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, clusterName);
-        }
+        } else LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
     }
 
     public void init() {
@@ -106,7 +116,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -126,6 +136,76 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     @Override
     public Class<ClusterConfigurationEvent> getType() {
         return ClusterConfigurationEvent.class;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the clusterManager
+     */
+    public ClusterManager getClusterManager() {
+        return clusterManager;
+    }
+
+    /**
+     * @param clusterManager the clusterManager to set
+     */
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    /**
+     * @return the configurationAdmin
+     */
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    /**
+     * @param configurationAdmin the configurationAdmin to set
+     */
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
     }
     
 }

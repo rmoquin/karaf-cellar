@@ -13,6 +13,9 @@
  */
 package org.apache.karaf.cellar.event;
 
+import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -21,23 +24,30 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
+import java.util.Set;
 
 public class LocalEventListener extends EventSupport implements EventHandler {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalEventListener.class);
 
+    private EventProducer eventProducer;
     @Override
     public void handleEvent(Event event) {
+
         // ignore log entry event
-        if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) {
+        if (event.getTopic().startsWith("org/osgi/service/log/LogEntry"))
+            return;
+
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR EVENT: cluster event producer is OFF");
             return;
         }
 
         try {
-            if (event.getTopic() != null) {
-                Collection<CellarCluster> clusters = null;
+            if (event != null && event.getTopic() != null) {
+                Set<Group> groups = null;
                 try {
-                    clusters = clusterManager.getLocalClusters();
+                    groups = groupManager.listLocalGroups();
                 } catch (Exception e) {
                     LOGGER.warn("Failed to list local groups. Is Cellar uninstalling ?", e);
                     return;
@@ -51,20 +61,15 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                     }
                 }
 
-                if (clusters != null && !clusters.isEmpty()) {
-                    for (CellarCluster cluster : clusters) {
-                        // check if the producer is ON
-                        if (!cluster.emitsEvents()) {
-                            LOGGER.warn("CELLAR EVENT: cluster event producer is OFF");
-                            return;
-                        }
+                if (groups != null && !groups.isEmpty()) {
+                    for (Group group : groups) {
                         String topicName = event.getTopic();
                         Map<String, Object> properties = getEventProperties(event);
-                        if (isAllowed(cluster.getName(), Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
+                        if (isAllowed(group, Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
-                            clusterEvent.setSourceCluster(cluster);
-                            cluster.produce(clusterEvent);
+                            clusterEvent.setSourceGroup(group);
+                            eventProducer.produce(clusterEvent);
                         } else {
                             LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
                         }
@@ -86,5 +91,11 @@ public class LocalEventListener extends EventSupport implements EventHandler {
      * Destruction method.
      */
     public void destroy() {
+    }
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }

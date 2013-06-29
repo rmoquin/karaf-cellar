@@ -13,8 +13,8 @@
  */
 package org.apache.karaf.cellar.features;
 
-import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
@@ -23,13 +23,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
+import java.util.Set;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 
 /**
  * Local features listener.
  */
 public class LocalFeaturesListener extends FeaturesSupport implements org.apache.karaf.features.FeaturesListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
+    private EventProducer eventProducer;
 
     @Override
     public void init() {
@@ -49,36 +52,38 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
     @Override
     public void featureEvent(FeatureEvent event) {
 
-        if (event != null) {
-            Collection<CellarCluster> clusters = super.clusterManager.getClusters();
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
+            return;
+        }
 
-            if (clusters != null && !clusters.isEmpty()) {
-                for (CellarCluster cluster : clusters) {
-                    // check if the producer is ON
-                    if (!cluster.emitsEvents()) {
-                        LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
-                        continue;
-                    }
+        if (event != null) {
+            Set<Group> groups = groupManager.listLocalGroups();
+
+            if (groups != null && !groups.isEmpty()) {
+                for (Group group : groups) {
+
                     Feature feature = event.getFeature();
                     String name = feature.getName();
                     String version = feature.getVersion();
 
-                    if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+                    if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
                         FeatureEvent.EventType type = event.getType();
 
                         // update the features in the cluster group
                         if (FeatureEvent.EventType.FeatureInstalled.equals(event.getType())) {
-                            pushFeature(event.getFeature(), cluster, true);
+                            pushFeature(event.getFeature(), group, true);
                         } else {
-                            pushFeature(event.getFeature(), cluster, false);
+                            pushFeature(event.getFeature(), group, false);
                         }
 
                         // broadcast the event
                         ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
-                        featureEvent.setSourceCluster(cluster);
-                        cluster.produce(featureEvent);
+                        featureEvent.setSourceGroup(group);
+                        eventProducer.produce(featureEvent);
                     } else {
-                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, cluster.getName());
+                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
                     }
                 }
             }
@@ -92,18 +97,20 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
      */
     @Override
     public void repositoryEvent(RepositoryEvent event) {
-        if (event != null && event.getRepository() != null) {
-            Collection<CellarCluster> clusters = clusterManager.getClusters();
 
-            if (clusters != null && !clusters.isEmpty()) {
-                for (CellarCluster cluster : clusters) {
-                    // check if the producer is ON
-                    if (!cluster.emitsEvents()) {
-                        LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
-                        continue;
-                    }
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR FEATURES: cluster event producer is OFF");
+            return;
+        }
+
+        if (event != null && event.getRepository() != null) {
+            Set<Group> groups = groupManager.listLocalGroups();
+
+            if (groups != null && !groups.isEmpty()) {
+                for (Group group : groups) {
                     ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
-                    clusterRepositoryEvent.setSourceCluster(cluster);
+                    clusterRepositoryEvent.setSourceGroup(group);
                     RepositoryEvent.EventType type = event.getType();
                     ClassLoader priorClassLoader = Thread.currentThread().getContextClassLoader();
 
@@ -111,10 +118,10 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
                         // update the features repositories in the cluster group
                         if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
-                            pushRepository(event.getRepository(), cluster);
+                            pushRepository(event.getRepository(), group);
                             // update the features in the cluster group
 
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     // check the feature in the distributed map
@@ -134,9 +141,9 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                                 LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
                             }
                         } else {
-                            removeRepository(event.getRepository(), cluster);
+                            removeRepository(event.getRepository(), group);
                             // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + cluster.getName());
+                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
                             try {
                                 for (Feature feature : event.getRepository().getFeatures()) {
                                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
@@ -146,13 +153,22 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                                 LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
                             }
                         }
+
                     } finally {
                         Thread.currentThread().setContextClassLoader(priorClassLoader);
                     }
                     // broadcast the cluster event
-                    cluster.produce(clusterRepositoryEvent);
+                    eventProducer.produce(clusterRepositoryEvent);
                 }
             }
         }
+    }
+
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }

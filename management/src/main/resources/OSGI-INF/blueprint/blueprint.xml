@@ -18,6 +18,7 @@
     <ext:property-placeholder/>
     
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
@@ -26,6 +27,7 @@
     <bean id="cellarMBean" class="org.apache.karaf.cellar.management.internal.CellarMBeanImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
     <service ref="cellarMBean" auto-export="interfaces">
@@ -48,6 +50,7 @@
     <!-- Cellar Config MBean -->
     <bean id="cellarConfigMBean" class="org.apache.karaf.cellar.management.internal.CellarConfigMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
     </bean>
     <service ref="cellarConfigMBean" auto-export="interfaces">
         <service-properties>
@@ -58,6 +61,7 @@
     <!-- Cellar Features MBean -->
     <bean id="cellarFeaturesMBean" class="org.apache.karaf.cellar.management.internal.CellarFeaturesMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
     </bean>
     <service ref="cellarFeaturesMBean" auto-export="interfaces">
@@ -66,20 +70,22 @@
         </service-properties>
     </service>
 
-    <!-- Cellar Cluster Cluster MBean -->
-    <bean id="cellarClusterMBean" class="org.apache.karaf.cellar.management.internal.CellarClusterMBeanImpl">
+    <!-- Cellar Cluster Group MBean -->
+    <bean id="cellarGroupMBean" class="org.apache.karaf.cellar.management.internal.CellarGroupMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="executionContext" ref="executionContext"/>
+        <property name="groupManager" ref="groupManager"/>
     </bean>
-    <service ref="cellarClusterMBean" auto-export="interfaces">
+    <service ref="cellarGroupMBean" auto-export="interfaces">
         <service-properties>
-            <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=cluster,name=${karaf.name}"/>
+            <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=group,name=${karaf.name}"/>
         </service-properties>
     </service>
 
     <!-- Cellar Bundle MBean -->
     <bean id="cellarBundleMBean" class="org.apache.karaf.cellar.management.internal.CellarBundleMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
     </bean>
     <service ref="cellarBundleMBean" auto-export="interfaces">
         <service-properties>

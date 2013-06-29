@@ -49,14 +49,18 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
             return;
         }
 
+        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
+            LOGGER.debug("CELLAR BUNDLE: node is not part of the event cluster group {}", event.getSourceGroup().getName());
+            return;
+        }
         try {
             // check if the pid is marked as local.
-            if (isAllowed(event.getSourceCluster().getName(), Constants.CATEGORY, event.getLocation(), EventType.INBOUND)) {
+            if (isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getLocation(), EventType.INBOUND)) {
                 // check the features first
                 List<Feature> matchingFeatures = retrieveFeature(event.getLocation());
                 for (Feature feature : matchingFeatures) {
-                    if (!isAllowed(event.getSourceCluster().getName(), "features", feature.getName(), EventType.INBOUND)) {
-                        LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", event.getLocation(), feature.getName(), event.getSourceCluster().getName());
+					if (!isAllowed(event.getSourceGroup(), "features", feature.getName(), EventType.INBOUND)) {
+						LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", event.getLocation(), feature.getName(), event.getSourceGroup().getName());
                         return;
                     }
                 }
@@ -76,9 +80,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
                     updateBundle(event.getSymbolicName(), event.getVersion());
                     LOGGER.debug("CELLAR BUNDLE: updating {}/{}", event.getSymbolicName(), event.getVersion());
                 }
-            } else {
-                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", event.getSymbolicName(), event.getSourceCluster().getName());
-            }
+            } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", event.getSymbolicName(), event.getSourceGroup().getName());
         } catch (BundleException e) {
             LOGGER.error("CELLAR BUNDLE: failed to install bundle {}/{}.", new Object[] { event.getSymbolicName(), event.getVersion() }, e);
         } catch (Exception e) {

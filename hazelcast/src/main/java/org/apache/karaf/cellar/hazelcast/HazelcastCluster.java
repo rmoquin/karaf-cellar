@@ -19,7 +19,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IList;
+import com.hazelcast.core.IMap;
 import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ISet;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
@@ -65,25 +68,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @JsonIgnore
     private EventProducer eventProducer;
 
-    @Override
-    public int hashCode() {
-        int hash = 7;
-        hash = 67 * hash + (this.name != null ? this.name.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final HazelcastCluster other = (HazelcastCluster) obj;
-        return true;
-    }
-
     public void init(String name, Config config, boolean synchronizer) {
         this.name = name;
         this.sychronizer = synchronizer;
@@ -92,10 +76,10 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
         memberNodes.put(this.localNode.getId(), this.localNode);
     }
-    
+
     /**
      * Sends a cluster event from this cluster as the source of the event.
-     * 
+     *
      * @param event to send
      */
     @Override
@@ -107,7 +91,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public boolean emitsEvents() {
         return eventProducer.getSwitch().getStatus().equals(SwitchStatus.ON);
     }
-    
+
     /**
      * Get the list of Hazelcast nodes.
      *
@@ -204,6 +188,28 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         }
     }
 
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 67 * hash + (this.name != null ? this.name.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final HazelcastCluster other = (HazelcastCluster) obj;
+        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * Get a Map in Hazelcast.
      *
@@ -211,7 +217,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      * @return the Map in Hazelcast.
      */
     @Override
-    public Map getMap(String mapName) {
+    public IMap getMap(String mapName) {
         return instance.getMap(mapName);
     }
 
@@ -222,10 +228,10 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      * @return the List in Hazelcast.
      */
     @Override
-    public List getList(String listName) {
+    public IList getList(String listName) {
         return instance.getList(listName);
     }
-    
+
     /**
      * Get a Topic in Hazelcast.
      *
@@ -235,7 +241,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public ITopic getTopic(String topicName) {
         return instance.getTopic(topicName);
     }
-    
+
     /**
      * Get a Queue in Hazelcast.
      *
@@ -253,7 +259,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      * @return the Set in Hazelcast.
      */
     @Override
-    public Set getSet(String setName) {
+    public ISet getSet(String setName) {
         return instance.getSet(setName);
     }
 

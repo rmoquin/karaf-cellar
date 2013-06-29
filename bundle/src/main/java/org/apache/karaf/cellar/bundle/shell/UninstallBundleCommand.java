@@ -18,21 +18,21 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
 
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "bundle-uninstall", description = "Uninstall a bundle from a cluster group")
 public class UninstallBundleCommand extends BundleCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            System.err.println("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
 
@@ -46,18 +46,18 @@ public class UninstallBundleCommand extends BundleCommandSupport {
 
         String location;
         String key = null;
-        Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + clusterName);
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
         key = selector(clusterBundles);
 
         if (key == null) {
-            System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
+                System.err.println("Bundle " + key + " not found in cluster group " + groupName);
             return null;
         }
 
         BundleState state = clusterBundles.get(key);
         if (state == null) {
-            System.err.println("Bundle " + key + " not found in cluster group " + clusterName);
+                System.err.println("Bundle " + key + " not found in cluster group " + groupName);
             return null;
         }
         location = state.getLocation();
@@ -65,8 +65,8 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         // check if the bundle is allowed
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, location, EventType.OUTBOUND)) {
-            System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + clusterName);
+            if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
+                System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
             return null;
         }
 
@@ -75,8 +75,8 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         // broadcast the cluster event
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.UNINSTALLED);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
 
         return null;
     }

@@ -58,13 +58,6 @@ public class ClusteredExecutionContext implements ExecutionContext {
     }
 
     @Override
-    public void shutdown() {
-        timeoutScheduler.shutdown();
-        this.producer = null;
-        this.commandStore = null;
-    }
-
-    @Override
     public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
         if (command == null) {
             throw new StoreNotFoundException("Command store not found");

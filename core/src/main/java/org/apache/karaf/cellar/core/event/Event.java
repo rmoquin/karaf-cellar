@@ -13,10 +13,10 @@
  */
 package org.apache.karaf.cellar.core.event;
 
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
 
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * This class represents an event that is broad-casted to the cluster.
@@ -26,7 +26,7 @@ public class Event {
 
     protected String id;
     protected Node sourceNode;
-    protected CellarCluster sourceCluster;
+    protected Group sourceGroup;
     protected Set<Node> destinations;
     protected Boolean force = Boolean.FALSE;
     protected Boolean postPublish = Boolean.FALSE;
@@ -51,6 +51,14 @@ public class Event {
         this.sourceNode = sourceNode;
     }
 
+    public Group getSourceGroup() {
+        return sourceGroup;
+    }
+
+    public void setSourceGroup(Group sourceGroup) {
+        this.sourceGroup = sourceGroup;
+    }
+    
     public Set<Node> getDestinations() {
         return destinations;
     }
@@ -74,19 +82,4 @@ public class Event {
     public void setPostPublish(Boolean postPublish) {
         this.postPublish = postPublish;
     }
-
-    /**
-     * @return the sourceCluster
-     */
-    public CellarCluster getSourceCluster() {
-        return sourceCluster;
-    }
-
-    /**
-     * @param sourceCluster the sourceCluster to set
-     */
-    public void setSourceCluster(CellarCluster sourceCluster) {
-        this.sourceCluster = sourceCluster;
-    }
-
 }

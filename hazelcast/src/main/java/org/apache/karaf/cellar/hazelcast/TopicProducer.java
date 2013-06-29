@@ -47,9 +47,7 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     @Override
     public void produce(E event) {
         if (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce() || event instanceof Result) {
-            LOGGER.info("Event already had a source node?  " + event.getSourceNode());
             event.setSourceNode(node);
-            LOGGER.info("Event to be sent?  " + event.toString());
             topic.publish(event);
         } else {
             if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {

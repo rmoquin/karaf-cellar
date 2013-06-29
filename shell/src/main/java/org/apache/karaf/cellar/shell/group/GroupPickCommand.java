@@ -11,11 +11,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.cluster;
+package org.apache.karaf.cellar.shell.group;
 
-import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageClusterAction;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -24,32 +24,32 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-@Command(scope = "cluster", name = "cluster-pick", description = "Picks a number of nodes from one cluster group and moves them into another")
-public class GroupPickCommand extends ClusterSupport {
+@Command(scope = "cluster", name = "group-pick", description = "Picks a number of nodes from one cluster group and moves them into another")
+public class GroupPickCommand extends GroupSupport {
 
-    @Argument(index = 0, name = "sourceClusterName", description = "The source cluster name", required = true, multiValued = false)
-    String sourceClusterName;
+    @Argument(index = 0, name = "sourceGroupName", description = "The source cluster group name", required = true, multiValued = false)
+    String sourceGroupName;
 
-    @Argument(index = 1, name = "targetClusterName", description = "The destination cluster name", required = true, multiValued = false)
-    String targetClusterName;
+    @Argument(index = 1, name = "targetGroupName", description = "The destination cluster group name", required = true, multiValued = false)
+    String targetGroupName;
 
     @Argument(index = 2, name = "count", description = "The number of nodes to transfer", required = false, multiValued = false)
     int count = 1;
 
     @Override
     protected Object doExecute() throws Exception {
-        CellarCluster sourceCluster = clusterManager.findClusterByName(sourceClusterName);
-        if (sourceCluster == null) {
-            System.err.println("Source cluster " + sourceClusterName + " doesn't exist");
+        Group sourceGroup = groupManager.findGroupByName(sourceGroupName);
+        if (sourceGroup == null) {
+            System.err.println("Source cluster group " + sourceGroupName + " doesn't exist");
             return null;
         }
-        CellarCluster targetCluster = clusterManager.findClusterByName(targetClusterName);
-        if (targetCluster == null) {
-            System.err.println("Target cluster group " + targetClusterName + " doesn't exist");
+        Group targetGroup = groupManager.findGroupByName(targetGroupName);
+        if (targetGroup == null) {
+            System.err.println("Target cluster group " + targetGroupName + " doesn't exist");
             return null;
         }
 
-        Set<Node> groupMembers = sourceCluster.listNodes();
+        Set<Node> groupMembers = sourceGroup.getNodes();
 
         if (count > groupMembers.size())
             count = groupMembers.size();
@@ -60,11 +60,11 @@ public class GroupPickCommand extends ClusterSupport {
                 break;
             List<String> recipients = new LinkedList<String>();
             recipients.add(node.getId());
-            doExecute(ManageClusterAction.SET, targetClusterName, sourceCluster, recipients);
+            doExecute(ManageGroupAction.SET, targetGroupName, sourceGroup, recipients);
             i++;
         }
 
-        return doExecute(ManageClusterAction.LIST, null, null, new ArrayList(), false);
+        return doExecute(ManageGroupAction.LIST, null, null, new ArrayList(), false);
     }
 
 }

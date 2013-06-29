@@ -13,8 +13,8 @@
  */
 package org.apache.karaf.cellar.features;
 
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -25,17 +25,24 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
  * Generic features support.
  */
-public class FeaturesSupport extends CellarSupport {
+public class FeaturesSupport {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSupport.class);
 
     protected FeaturesService featuresService;
-
+    protected ClusterManager clusterManager;
+    protected CellarSupport cellarSupport;
+    protected GroupManager groupManager;
+    private SynchronizationConfiguration synchronizationConfiguration;
+    
     public void init() {
         // nothing to do
     }
@@ -82,58 +89,57 @@ public class FeaturesSupport extends CellarSupport {
     }
 
     /**
-     * Push a {@code Feature} and its status in a cluster.
+     * Push a {@code Feature} and its status in a cluster group.
      *
-     * @param feature the feature to push in the cluster.
-     * @param the cluster.
+     * @param feature the feature to push in the cluster group.
+     * @param group the cluster group.
      */
-    public void pushFeature(Feature feature, CellarCluster cluster) {
+    public void pushFeature(Feature feature, Group group) {
         if (feature != null) {
-            String clusterName = cluster.getName();
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
-LOGGER.warn("Pushing feature for cluster: " + clusterName);
-            if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
+            String groupName = group.getName();
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+
+            if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     Boolean installed = featuresService.isInstalled(feature);
                     clusterFeatures.put(info, installed);
-LOGGER.warn("Feature for cluster: " + clusterName + " " + clusterFeatures);
                 }
-            } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster {}", feature.getName(), clusterName);
+            } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
         } else LOGGER.warn("CELLAR FEATURES: feature is null");
     }
 
     /**
-     * Push a {@code Feature} and its status in a cluster.
+     * Push a {@code Feature} and its status in a cluster group.
      * This version of the method force the bundle status, without looking the features service.
      *
-     * @param feature the feature to push in the cluster.
-     * @param cluster the cluster.
+     * @param feature the feature to push in the cluster group.
+     * @param group the cluster group.
      * @param force true to force the bundle status (ignoring the features service), false else.
      */
-    public void pushFeature(Feature feature, CellarCluster cluster, Boolean force) {
+    public void pushFeature(Feature feature, Group group, Boolean force) {
         if (feature != null) {
-            String clusterName = cluster.getName();
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            String groupName = group.getName();
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
+            if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     clusterFeatures.put(info, force);
                 }
-            } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster {}", feature.getName());
+            } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
         } else LOGGER.warn("CELLAR FEATURES: feature is null");
     }
 
     /**
-     * Push a features {@code Repository} in a cluster.
+     * Push a features {@code Repository} in a cluster group.
      *
-     * @param repository the features repository to push in the cluster.
-     * @param cluster the cluster.
+     * @param repository the features repository to push in the cluster group.
+     * @param group the cluster group.
      */
-    public void pushRepository(Repository repository, CellarCluster cluster) {
-        String clusterName = cluster.getName();
-        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+    public void pushRepository(Repository repository, Group group) {
+        String groupName = group.getName();
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
 
         boolean found = false;
         for (String clusterRepository : clusterRepositories) {
@@ -149,14 +155,14 @@ LOGGER.warn("Feature for cluster: " + clusterName + " " + clusterFeatures);
     }
 
     /**
-     * Remove a features {@code Repository} from a cluster.
+     * Remove a features {@code Repository} from a cluster group.
      *
-     * @param repository the features repository to remove from the cluster.
-     * @param cluster the cluster.
+     * @param repository the features repository to remove from the cluster group.
+     * @param group the cluster group.
      */
-    public void removeRepository(Repository repository, CellarCluster cluster) {
-        String clusterName = cluster.getName();
-        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+    public void removeRepository(Repository repository, Group group) {
+        String groupName = group.getName();
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
 
         if (featuresService != null && clusterRepositories != null) {
             URI uri = repository.getURI();
@@ -170,6 +176,62 @@ LOGGER.warn("Feature for cluster: " + clusterName + " " + clusterFeatures);
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
+    }
+
+    /**
+     * @return the clusterManager
+     */
+    public ClusterManager getClusterManager() {
+        return clusterManager;
+    }
+
+    /**
+     * @param clusterManager the clusterManager to set
+     */
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
     }
 
 }

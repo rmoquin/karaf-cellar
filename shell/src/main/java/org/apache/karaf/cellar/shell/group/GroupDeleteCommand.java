@@ -11,34 +11,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.cluster;
+package org.apache.karaf.cellar.shell.group;
 
-import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "cluster", name = "cluster-delete", description = "Delete a cluster")
-public class GroupDeleteCommand extends ClusterSupport {
+@Command(scope = "cluster", name = "group-delete", description = "Delete a cluster group")
+public class GroupDeleteCommand extends GroupSupport {
 
-    @Argument(index = 0, name = "cluster", description = "The cluster group name", required = true, multiValued = false)
-    String clusterName;
+    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    String groupName;
 
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            System.err.println("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
 
         // check if the group doesn't contain nodes
-        if (!cluster.listNodes().isEmpty()) {
-            System.err.println("Cluster " + clusterName  + " is not empty");
+        if (group.getNodes() != null && !group.getNodes().isEmpty()) {
+            System.err.println("Cluster group " + groupName  + " is not empty");
             return null;
         }
 
-        clusterManager.deleteCluster(clusterName);
+        groupManager.deleteGroup(groupName);
 
         return null;
     }

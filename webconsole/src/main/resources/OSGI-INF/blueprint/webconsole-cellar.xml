@@ -19,11 +19,13 @@
 -->
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
 
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
 
     <bean id="cellarPlugin" class="org.apache.karaf.cellar.webconsole.CellarPlugin" init-method="start"
           destroy-method="stop">
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
     </bean>
     <service ref="cellarPlugin" interface="javax.servlet.Servlet">

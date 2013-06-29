@@ -18,11 +18,11 @@ import org.apache.karaf.cellar.core.command.ResultHandler;
 /**
  * Manager group result handler.
  */
-public class ManageGroupResultHandler extends ResultHandler<ManageClusterResult> {
+public class ManageGroupResultHandler extends ResultHandler<ManageGroupResult> {
 
     @Override
-    public Class<ManageClusterResult> getType() {
-        return ManageClusterResult.class;
+    public Class<ManageGroupResult> getType() {
+        return ManageGroupResult.class;
     }
 
 }

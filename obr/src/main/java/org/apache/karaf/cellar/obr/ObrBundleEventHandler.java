@@ -114,17 +114,17 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
             return;
         }
 
-        if (clusterManager == null) {
+        if (groupManager == null) {
         	LOGGER.error("CELLAR OBR: retrieved cluster event {} while groupManager is not available yet!", event);
         	return;
         }
-        if (!clusterManager.isLocalCluster(event.getSourceCluster())) {
-            LOGGER.debug("CELLAR OBR: node is not part of the event cluster {}", event.getSourceCluster().getName());
+        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
+            LOGGER.debug("CELLAR OBR: node is not part of the event cluster group {}", event.getSourceGroup().getName());
             return;
         }
         String bundleId = event.getBundleId();
         try {
-            if (isAllowed(event.getSourceCluster().getName(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.INBOUND)) {
+            if (isAllowed(event.getSourceGroup(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.INBOUND)) {
                 Resolver resolver = obrService.resolver();
                 String[] target = getTarget(bundleId);
                 Resource resource = selectNewestVersion(searchRepository(target[0], target[1]));
@@ -136,11 +136,9 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
                 if ((resolver.getAddedResources() != null) &&
                         (resolver.getAddedResources().length > 0)) {
                     if (resolver.resolve()) {
-                        if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE) {
+                        if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE)
                             resolver.deploy(Resolver.START);
-                        } else {
-                            resolver.deploy(0);
-                        }
+                        else resolver.deploy(0);
                     }
                 } else {
                     Reason[] reqs = resolver.getUnsatisfiedRequirements();

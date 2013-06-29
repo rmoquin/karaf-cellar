@@ -7,12 +7,12 @@
 
          http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-  -->
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
 <blueprint default-availability="mandatory"
            xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -26,26 +26,42 @@
     <!-- Local Configuration Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.config.LocalConfigurationListener" init-method="init"
           destroy-method="destroy">
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
-        <property name="clusterManager" ref="clusterManager"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="eventProducer" ref="eventProducer"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
+
     <service ref="localListener" interface="org.osgi.service.cm.ConfigurationListener"/>
 
     <!-- Configuration Synchronizer -->
-    <bean id="synchronizer" class="org.apache.karaf.cellar.config.ConfigurationSynchronizer"
-          init-method="init" destroy-method="destroy" depends-on="eventHandler">
+    <bean id="synchronizer" class="org.apache.karaf.cellar.config.ConfigurationSynchronizer" init-method="init" 
+          destroy-method="destroy" depends-on="eventHandler">
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
-        <property name="clusterManager" ref="clusterManager"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="eventProducer" ref="eventProducer"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
+
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
-    <!-- Cluster Event Handler -->
-    <bean id="eventHandler" class="org.apache.karaf.cellar.config.ConfigurationEventHandler"
-          init-method="init" destroy-method="destroy">
-        <property name="clusterManager" ref="clusterManager"/>
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
+    
+    <!-- Cluster Event Handler -->
+    <bean id="eventHandler" class="org.apache.karaf.cellar.config.ConfigurationEventHandler" init-method="init" 
+          destroy-method="destroy">
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
+        <property name="groupManager" ref="groupManager"/>
+    </bean>
+    
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
@@ -54,5 +70,7 @@
 
     <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
 </blueprint>

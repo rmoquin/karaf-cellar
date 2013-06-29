@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.features;
 
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
@@ -23,10 +24,9 @@ import org.slf4j.LoggerFactory;
 
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
+import java.util.Set;
 
 /**
  * Features synchronizer.
@@ -37,10 +37,15 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     @Override
     public void init() {
         super.init();
-        Collection<CellarCluster> clusters = clusterManager.getLocalClusters();
-        if (clusters != null && !clusters.isEmpty()) {
-            for (CellarCluster cluster : clusters) {
-                this.synchronize(cluster);
+        Set<Group> groups = groupManager.listLocalGroups();
+        if (groups != null && !groups.isEmpty()) {
+            for (Group group : groups) {
+                if (isSyncEnabled(group)) {
+                    pull(group);
+                    push(group);
+                } else {
+                    LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
+                }
             }
         }
     }
@@ -50,30 +55,19 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         super.destroy();
     }
 
-    @Override
-    public boolean synchronize(CellarCluster cluster) {
-        if (isSyncEnabled(cluster)) {
-            pull(cluster);
-            push(cluster);
-            return true;
-        } else {
-            LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster {}", cluster.getName());
-            return false;
-        }
-    }
-
     /**
      * Pull the features repositories and features states from a cluster, and update the local states.
      *
      * @param cluster the cluster group.
      */
     @Override
-    public void pull(CellarCluster cluster) {
-        if (cluster != null) {
-            String clusterName = cluster.getName();
-            LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster {}", clusterName);
-            List<String> clusterRepositories = this.clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
-            Map<FeatureInfo, Boolean> clusterFeatures = this.clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+    public void pull(Group group) {
+        if (group != null) {
+            String groupName = group.getName();
+            LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster group {}", groupName);
+            List<String> clusterRepositories = getClusterManager().getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
+            Map<FeatureInfo, Boolean> clusterFeatures = getClusterManager().getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+            getClusterManager().getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             // get the features repositories URLs from the cluster group
             if (clusterRepositories != null && !clusterRepositories.isEmpty()) {
                 for (String url : clusterRepositories) {
@@ -95,7 +89,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 for (FeatureInfo info : clusterFeatures.keySet()) {
                     String name = info.getName();
                     // check if feature is blocked
-                    if (isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.INBOUND)) {
+                    if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.INBOUND)) {
                         Boolean remotelyInstalled = clusterFeatures.get(info);
                         Boolean locallyInstalled = isFeatureInstalledLocally(info.getName(), info.getVersion());
 
@@ -125,7 +119,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                             }
                         }
                     } else {
-                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, clusterName);
+                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, groupName);
                     }
                 }
             }
@@ -133,14 +127,14 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     }
 
     /**
-     * Push features repositories and features local states to a cluster.
+     * Push features repositories and features local states to a cluster group.
      *
-     * @param cluster the cluster cluster.
+     * @param group the cluster group.
      */
     @Override
-    public void push(CellarCluster cluster) {
-        if (cluster != null) {
-            String groupName = cluster.getName();
+    public void push(Group group) {
+        if (group != null) {
+            String groupName = group.getName();
             LOGGER.info("CELLAR FEATURES: pushing features repositories and features in cluster group {}", groupName);
             clusterManager.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
@@ -157,14 +151,14 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
             // push features repositories to the cluster group
             if (repositoryList != null && repositoryList.length > 0) {
                 for (Repository repository : repositoryList) {
-                    pushRepository(repository, cluster);
+                    pushRepository(repository, group);
                 }
             }
 
             // push features to the cluster group
             if (featuresList != null && featuresList.length > 0) {
                 for (Feature feature : featuresList) {
-                    pushFeature(feature, cluster);
+                    pushFeature(feature, group);
                 }
             }
         }
@@ -177,13 +171,13 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
      * @return true if the sync flag is enabled, false else.
      */
     @Override
-    public Boolean isSyncEnabled(CellarCluster cluster) {
+    public Boolean isSyncEnabled(Group group) {
         Boolean result = Boolean.FALSE;
-        String groupName = cluster.getName();
+        String groupName = group.getName();
 
         try {
             String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
+            String propertyValue = (String) this.getSynchronizationConfiguration().getProperty(propertyKey);
             result = Boolean.parseBoolean(propertyValue);
         } catch (Exception e) {
             LOGGER.error("CELLAR FEATURES: error while checking if sync is enabled", e);

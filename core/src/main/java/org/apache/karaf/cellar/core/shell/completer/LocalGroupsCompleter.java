@@ -11,26 +11,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.core.command;
+package org.apache.karaf.cellar.core.shell.completer;
 
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
 
-import java.util.Map;
-
 /**
- * Command execution context.
+ * Local cluster groups completer.
  */
-public interface ExecutionContext {
+public class LocalGroupsCompleter extends GroupCompleterSupport {
 
     /**
-     * Execute {@link Command} and retrieve {@link Result}.
+     * Add cluster groups where the local node is belonging.
      *
-     * @param command
-     * @param <R>
-     * @param <C>
-     * @return
-     * @throws Exception
+     * @param group the cluster group candidate for completion.
+     * @return true if the cluster group has been accepted, false else.
      */
-    public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws Exception;
+    @Override
+    protected boolean acceptsGroup(Group group) {
+        Node node = groupManager.getNode();
+        if (group.getNodes().contains(node))
+            return true;
+        else return false;
+    }
 
 }

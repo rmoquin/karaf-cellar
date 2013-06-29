@@ -11,17 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.event;
+package org.apache.karaf.cellar.core.control;
 
 /**
- * Event configuration constants.
+ * Manage group action enum state.
  */
-public class Constants {
+public enum ManageGroupAction {
 
-    public static final String CATEGORY = "event";
-    public static final String EVENT_PROCESSED_KEY = "org.apache.karaf.cellar.event.processed";
-    public static final String EVENT_PROCESSED_VALUE = "true";
-    public static final String EVENT_SOURCE_GROUP_KEY = "org.apache.karaf.cellar.event.source.group";
-    public static final String EVENT_SOURCE_NODE_KEY = "org.apache.karaf.cellar.event.source.node";
+    SET,
+    JOIN,
+    QUIT,
+    PURGE,
+    LIST;
 
 }

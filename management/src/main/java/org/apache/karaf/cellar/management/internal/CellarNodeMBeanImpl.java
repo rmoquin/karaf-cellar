@@ -23,7 +23,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Implementation of the Cellar Node MBean.
@@ -78,16 +77,14 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
 
         TabularData table = new TabularDataSupport(tableType);
 
-        Collection<CellarCluster> cluster = clusterManager.getClusters();
+        Set<Node> nodes = clusterManager.listNodes();
 
-        for (CellarCluster cellarCluster : cluster) {
-            Set<Node> nodes = cellarCluster.listNodes();
             for (Node node : nodes) {
+            boolean local = (nodes.equals(clusterManager.getNode()));
                 CompositeData data = new CompositeDataSupport(nodeType,
-                        new String[] { "id", "hostname", "port" },
-                        new Object[] { node.getId(), node.getHost(), node.getPort() });
+                    new String[]{ "id", "hostname", "port", "local" },
+                    new Object[]{ node.getId(), node.getHost(), node.getPort(), local });
                 table.put(data);
-            }
         }
 
         return table;

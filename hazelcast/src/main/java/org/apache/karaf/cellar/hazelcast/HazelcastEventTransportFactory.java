@@ -99,7 +99,6 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
     /**
      * @return the masterCluster
      */
-    @Override
     public CellarCluster getMasterCluster() {
         return masterCluster;
     }
@@ -107,7 +106,6 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
     /**
      * @param masterCluster the masterCluster to set
      */
-    @Override
     public void setMasterCluster(CellarCluster masterCluster) {
         this.masterCluster = masterCluster;
     }

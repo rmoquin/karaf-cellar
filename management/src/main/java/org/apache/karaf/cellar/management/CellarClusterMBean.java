@@ -18,7 +18,23 @@ import javax.management.openmbean.TabularData;
 /**
  * Describe the operations and attributes of the Cellar Cluster Group MBean.
  */
-public interface CellarClusterMBean {
+public interface CellarGroupMBean {
+
+    /**
+     * Create a cluster group.
+     *
+     * @param name the cluster group name.
+     * @throws Exception in case of create failure.
+     */
+    void create(String name) throws Exception;
+
+    /**
+     * Delete a cluster group.
+     *
+     * @param name the cluster group name.
+     * @throws Exception in case of delete failure.
+     */
+    void delete(String name) throws Exception;
 
     /**
      * Join a node in a cluster group.
@@ -44,5 +60,6 @@ public interface CellarClusterMBean {
      * @return the list of cluster groups.
      * @throws Exception in case of retrieval failure.
      */
-    TabularData getClusters() throws Exception;
+    TabularData getGroups() throws Exception;
+
 }

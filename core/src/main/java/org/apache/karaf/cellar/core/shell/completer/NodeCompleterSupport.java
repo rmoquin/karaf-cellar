@@ -30,8 +30,7 @@ public abstract class NodeCompleterSupport implements Completer {
     @Override
     public int complete(String buffer, int cursor, List<String> candidates) {
         StringsCompleter delegate = new StringsCompleter();
-        //TODO complete this
-        /*try {
+        try {
             for (Node node : clusterManager.listNodes()) {
                 if (acceptsNode(node)) {
                     String id = node.getId();
@@ -42,7 +41,7 @@ public abstract class NodeCompleterSupport implements Completer {
             }
         } catch (Exception e) {
             // Ignore
-        }*/
+        }
         return delegate.complete(buffer, cursor, candidates);
     }
 

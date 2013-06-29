@@ -31,22 +31,23 @@ import java.util.*;
 public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfigMBean {
 
     private ClusterManager clusterManager;
+    private GroupManager groupManager;
 
     public CellarConfigMBeanImpl() throws NotCompliantMBeanException {
         super(CellarConfigMBean.class);
     }
 
     @Override
-    public List<String> listConfig(String clusterName) throws Exception {
+    public List<String> listConfig(String groupName) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         List<String> result = new ArrayList<String>();
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         for (String pid : clusterConfigurations.keySet()) {
             result.add(pid);
         }
@@ -55,42 +56,42 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     }
 
     @Override
-    public void deleteConfig(String clusterName, String pid) throws Exception {
+    public void deleteConfig(String groupName, String pid) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the PID is allowed outbound
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+            throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties properties = clusterConfigurations.remove(pid);
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-            event.setSourceCluster(cluster);
+            event.setSourceGroup(group);
             event.setType(ConfigurationEvent.CM_DELETED);
-            cluster.produce(event);
+            eventProducer.produce(event);
         } else {
-            throw new IllegalArgumentException("No configuration found in cluster group " + clusterName);
+            throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
     }
 
     @Override
-    public TabularData listProperties(String clusterName, String pid) throws Exception {
+    public TabularData listProperties(String groupName, String pid) throws Exception {
 
         CompositeType compositeType = new CompositeType("Property", "Cellar Config Property",
                 new String[]{"key", "value"},
@@ -100,8 +101,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
                 compositeType, new String[]{"key"});
         TabularData table = new TabularDataSupport(tableType);
         
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         Properties clusterProperties = clusterConfigurations.get(pid);
         if (clusterProperties != null) {
             Enumeration propertyNames = clusterProperties.propertyNames();
@@ -118,26 +118,26 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     }
 
     @Override
-    public void setProperty(String clusterName, String pid, String key, String value) throws Exception {
+    public void setProperty(String groupName, String pid, String key, String value) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the PID is allowed outbound
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+            throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties clusterProperties = clusterConfigurations.get(pid);
@@ -149,8 +149,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-            event.setSourceCluster(cluster);
-            cluster.produce(event);
+            event.setSourceGroup(group);
+            eventProducer.produce(event);
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + clusterName);
         }
@@ -159,20 +159,20 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     @Override
     public void appendProperty(String groupName, String pid, String key, String value) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(groupName);
-        if (cluster == null) {
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is on
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the pid is allowed outbound
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -195,34 +195,34 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-            event.setSourceCluster(cluster);
-            cluster.produce(event);
+            event.setSourceGroup(group);
+            eventProducer.produce(event);
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
     }
 
     @Override
-    public void deleteProperty(String clusterName, String pid, String key) throws Exception {
+    public void deleteProperty(String groupName, String pid, String key) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the event producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the pid is allowed outbound
         CellarSupport support = new CellarSupport();
         support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+            throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         if (clusterConfigurations != null) {
             // update the cluster group
             Properties clusterDictionary = clusterConfigurations.get(pid);
@@ -231,11 +231,11 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
                 clusterConfigurations.put(pid, clusterDictionary);
                 // broadcast the cluster event
                 ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-                event.setSourceCluster(cluster);
-                cluster.produce(event);
+                event.setSourceGroup(group);
+                eventProducer.produce(event);
             }
         } else {
-            throw new IllegalArgumentException("No configuration found in cluster group " + clusterName);
+            throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
     }
 
@@ -245,5 +245,11 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
+    }
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
     }
 }

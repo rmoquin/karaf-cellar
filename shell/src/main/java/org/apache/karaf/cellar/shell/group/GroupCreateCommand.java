@@ -11,28 +11,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.cluster;
+package org.apache.karaf.cellar.shell.group;
 
-import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-@Command(scope = "cluster", name = "cluster-create", description = "Create/Join a cluster")
-public class GroupCreateCommand extends ClusterSupport {
+@Command(scope = "cluster", name = "group-create", description = "Create a cluster group")
+public class GroupCreateCommand extends GroupSupport {
 
-    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
-    String clusterName;
+    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    String groupName;
 
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster group = clusterManager.findClusterByName(clusterName);
+        Group group = groupManager.findGroupByName(groupName);
         if (group != null) {
-            System.err.println("Cluster " + clusterName + " already exists");
+            System.err.println("Cluster group " + groupName + " already exists");
             return null;
         }
 
-        clusterManager.createCluster(clusterName);
+        groupManager.createGroup(groupName);
         return null;
     }
 

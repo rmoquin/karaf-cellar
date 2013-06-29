@@ -11,29 +11,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.cluster;
+package org.apache.karaf.cellar.shell.group;
 
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageGroupCommand;
+import org.apache.karaf.cellar.core.control.ManageGroupResult;
 import org.apache.karaf.cellar.shell.ClusterCommandSupport;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.control.ManageClusterAction;
-import org.apache.karaf.cellar.core.control.ManageClusterCommand;
-import org.apache.karaf.cellar.core.control.ManageClusterResult;
 
 /**
  * Generic cluster group shell command support.
  */
-public abstract class ClusterSupport extends ClusterCommandSupport {
+public abstract class GroupSupport extends ClusterCommandSupport {
 
     protected static final String HEADER_FORMAT = "   %-20s   %s";
     protected static final String OUTPUT_FORMAT = "%1s [%-20s] [%s]";
 
-    protected Object doExecute(ManageClusterAction action, String group, CellarCluster source, Collection<String> nodes) throws Exception {
+    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodes) throws Exception {
         return doExecute(action, group, source, nodes, true);
     }
 
@@ -41,15 +41,15 @@ public abstract class ClusterSupport extends ClusterCommandSupport {
      * Executes the command.
      *
      * @param action the group action to perform.
-     * @param cluster the cluster name.
+     * @param group the cluster group name.
      * @param nodeIds the node IDs.
      * @param suppressOutput true to display command output, false else.
      * @return the Object resulting of the command execution.
      * @throws Exception in case of execution failure.
      */
-    protected Object doExecute(ManageClusterAction action, String cluster, CellarCluster source, Collection<String> nodeIds, Boolean suppressOutput) throws Exception {
+    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodeIds, Boolean suppressOutput) throws Exception {
 
-        ManageClusterCommand command = new ManageClusterCommand(clusterManager.generateId());
+        ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
@@ -63,40 +63,40 @@ public abstract class ClusterSupport extends ClusterCommandSupport {
                 }
             }
         } else {
-            recipientList.add(clusterManager.getMasterCluster().getLocalNode());
+            recipientList.add(clusterManager.getNode());
         }
 
         if (recipientList.size() < 1) {
             return null;
         }
 
-        command.setDestinations(recipientList);
+        command.setDestination(recipientList);
         command.setAction(action);
 
-        if (cluster != null) {
-            command.setClusterName(cluster);
+        if (group != null) {
+            command.setGroupName(group);
         }
 
         if (source != null) {
-            command.setSourceCluster(source);
+            command.setSourceGroup(source);
         }
 
-        Map<Node, ManageClusterResult> results = executionContext.execute(command);
+        Map<Node, ManageGroupResult> results = executionContext.execute(command);
         if (!suppressOutput) {
             if (results == null || results.isEmpty()) {
                 System.out.println("No result received within given timeout");
             } else {
-                System.out.println(String.format(HEADER_FORMAT, "Cluster", "Members"));
+                System.out.println(String.format(HEADER_FORMAT, "Group", "Members"));
                 for (Node node : results.keySet()) {
-                    ManageClusterResult result = results.get(node);
-                    if (result != null && result.getClusters()!= null) {
-                        for (CellarCluster g : result.getClusters()) {
-                            StringBuilder buffer = new StringBuilder();
-                            if (!g.listNodes().isEmpty()) {
+                    ManageGroupResult result = results.get(node);
+                    if (result != null && result.getGroups() != null) {
+                        for (Group g : result.getGroups()) {
+                            StringBuffer buffer = new StringBuffer();
+                            if (g.getNodes() != null && !g.getNodes().isEmpty()) {
                                 String mark = " ";
-                                for (Node member : g.listNodes()) {
+                                for (Node member : g.getNodes()) {
                                     buffer.append(member.getId());
-                                    if (member.equals(clusterManager.getMasterCluster().getLocalNode())) {
+                                    if (member.equals(clusterManager.getNode())) {
                                         mark = "*";
                                         buffer.append(mark);
                                     }

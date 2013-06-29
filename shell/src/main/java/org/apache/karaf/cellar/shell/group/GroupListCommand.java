@@ -11,22 +11,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.shell.cluster;
+package org.apache.karaf.cellar.shell.group;
 
-import org.apache.karaf.cellar.core.control.ManageClusterAction;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.List;
 
-@Command(scope = "cluster", name = "cluster-list", description = "List the cluster(s)")
-public class GroupListCommand extends ClusterSupport {
+@Command(scope = "cluster", name = "group-list", description = "List the cluster groups")
+public class GroupListCommand extends GroupSupport {
 
     @Argument(index = 0, name = "node", description = "The node(s) ID", required = false, multiValued = true)
     List<String> nodes;
 
     @Override
     protected Object doExecute() throws Exception {
-        return doExecute(ManageClusterAction.LIST, null, null, nodes,false);
+        return doExecute(ManageGroupAction.LIST, null, null, nodes,false);
     }
+
 }

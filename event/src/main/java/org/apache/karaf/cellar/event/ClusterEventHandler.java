@@ -43,22 +43,26 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
             return;
         }
 
-        if (clusterManager == null) {
-            // in rare cases for example right after installation this happens!
-            LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
+        if (groupManager == null) {
+        	// in rare cases for example right after installation this happens!
+        	LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
+        	return;
+        }
+
+        // check if the group is local
+        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
+            LOGGER.debug("CELLAR EVENT: node is not part of the event cluster group");
             return;
         }
 
         try {
-            if (isAllowed(event.getSourceCluster().getName(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
-                Map<String, Object> properties = event.getProperties();
+            if (isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
+                Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
-                properties.put(Constants.EVENT_SOURCE_CLUSTER_KEY, event.getSourceCluster().getName());
+                properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
                 postEvent(event.getTopicName(), properties);
-            } else {
-                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceCluster().getName());
-            }
+            } else LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }
