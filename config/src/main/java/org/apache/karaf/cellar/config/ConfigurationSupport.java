@@ -41,15 +41,12 @@ public class ConfigurationSupport {
      */
     public Properties dictionaryToProperties(Dictionary dictionary) {
         Properties properties = new Properties();
-        //Dictionary seems to indicate that keys won't return null;
-        if (dictionary != null && dictionary.keys() != null) {
-
+        if (dictionary != null) {
             Enumeration keys = dictionary.keys();
             while (keys.hasMoreElements()) {
                 Object key = keys.nextElement();
-                //Dictionary values can't be null
-                Object value = dictionary.get(key);
-                properties.put(key, value);
+                if (key != null && dictionary.get(key) != null) {
+                    properties.put(key, dictionary.get(key));
             }
         }
         return properties;
@@ -72,17 +69,18 @@ public class ConfigurationSupport {
         if (source.isEmpty() && target.isEmpty())
             return true;
 
-        //Might as well check this first before comparing items.
         if (source.size() != target.size())
             return false;
-        
+
         Enumeration sourceKeys = source.keys();
         while (sourceKeys.hasMoreElements()) {
             Object key = sourceKeys.nextElement();
-            
-            //No need to convert this to a string simply to compare the objects.
             Object sourceValue = source.get(key);
             Object targetValue = target.get(key);
+            if (sourceValue != null && targetValue == null)
+                return false;
+            if (sourceValue == null && targetValue != null)
+                return false;
             if (!sourceValue.equals(targetValue))
                 return false;
         }
@@ -103,7 +101,6 @@ public class ConfigurationSupport {
             while (sourceKeys.hasMoreElements()) {
                 String key = (String) sourceKeys.nextElement();
                 if (!isExcludedProperty(key)) {
-                    //No point in converting to string here.
                     Object value = dictionary.get(key);
                     result.put(key, value);
                 }
@@ -155,30 +152,26 @@ public class ConfigurationSupport {
                         storageFile = new File(new URL((String) val).toURI());
                     }
                 } catch (Exception e) {
-                    //No need to cast if you use a different constructor.
                     throw new IOException(e.getMessage(), e);
                 }
             }
-            //The super class specified that this properties object uses Strings for keys and values...
+
             org.apache.felix.utils.properties.Properties p = new org.apache.felix.utils.properties.Properties(storageFile);
-            
-            //but do this first, otherwise you are going to double check values added from
-            //the props arguement that was passed in and you'll already know they pass that test..
-            // remove "removed" properties from the file
             List<String> propertiesToRemove = new ArrayList<String>();
             Set<String> set = p.keySet();
+
             for (String key : set) {
-                //The key can't be null so remove that check.
                 if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
                         && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     propertiesToRemove.add(key);
                 }
             }
+
             for (String key : propertiesToRemove) {
                 p.remove(key);
             }
-            
+
             for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
                 String key = keys.nextElement();
                 if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
@@ -187,6 +180,7 @@ public class ConfigurationSupport {
                     p.put(key, (String) props.get(key));
                 }
             }
+
             // save the cfg file
             storage.mkdirs();
             p.save();

@@ -258,6 +258,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
     @Override
     public void addUrl(String groupName, String url) throws Exception {
+        this.addUrl(groupName, url, false);
+    }
+
+    @Override
+    public void addUrl(String groupName, String url, boolean install) throws Exception {
         // check if the group exists
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
@@ -325,6 +330,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
                 // broadcast the cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
+                event.setInstall(install);
                 event.setSourceGroup(group);
                 eventProducer.produce(event);
             } else {
@@ -334,6 +340,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
     @Override
     public void removeUrl(String groupName, String url) throws Exception {
+        this.removeUrl(groupName, url, false);
+    }
+
+    @Override
+    public void removeUrl(String groupName, String url, boolean uninstall) throws Exception {
         // check if the group exists
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
@@ -401,6 +412,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
             // broadcast a cluster event
             ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
+            event.setUninstall(uninstall);
             event.setSourceGroup(group);
             eventProducer.produce(event);
         } else {

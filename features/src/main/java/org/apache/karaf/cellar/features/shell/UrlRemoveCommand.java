@@ -22,6 +22,7 @@ import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 
 import java.net.URI;
 import java.util.List;
@@ -37,6 +38,10 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
+    @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features contained in the repository URLs", required = false, multiValued = false)
+    boolean uninstall;
+
+    private EventProducer eventProducer;
     
     @Override
     protected Object doExecute() throws Exception {
@@ -112,8 +117,9 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
 
                 // broadcast a cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
-                event.setSourceCluster(cluster);
-                cluster.produce(event);
+                event.setUninstall(uninstall);
+                event.setSourceGroup(group);
+                eventProducer.produce(event);
             } else {
                 System.err.println("Features repository URL " + url + " not found in cluster group " + clusterName);
             }

@@ -51,6 +51,12 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
+            return;
+        }
+
         if (event.getBundle() != null) {
             Set<Group> groups = null;
             try {
@@ -61,11 +67,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
-                    // check if the producer is ON
-                    if (!cluster.emitsEvents()) {
-                        LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
-                        continue;
-                    }
                     // get the bundle name or location.
                     String name = (String) event.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
                     // if there is no name, then default to symbolic name.

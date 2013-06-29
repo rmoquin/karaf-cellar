@@ -181,7 +181,7 @@ public class CellarTestSupport {
 
     @Configuration
     public Option[] config() {
-        Option[] options = new Option[] {
+        Option[] options = new Option[]{
             cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
             editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL())
         };
