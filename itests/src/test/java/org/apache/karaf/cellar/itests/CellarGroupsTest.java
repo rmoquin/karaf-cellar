@@ -45,7 +45,7 @@ public class CellarGroupsTest extends CellarTestSupport {
 
         System.err.println(executeCommand("cluster:node-list"));
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
-        Set<Node> nodes = clusterManager.listNodesAllClusters();
+        Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
 
         System.err.println(executeCommand("cluster:cluster-list"));

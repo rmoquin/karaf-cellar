@@ -21,7 +21,6 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
@@ -80,15 +79,16 @@ public class CellarFeaturesTest extends CellarTestSupport {
 
         //Test feature command - install - before a node joins
         System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
-        System.err.println(executeCommand("cluster:cluster-set testgroup " + getNodeIdOfChild("child1")));
+        System.err.println(executeCommand("cluster:group-set testgroup " + getNodeIdOfChild("child1")));
         Thread.sleep(5000);
         eventadminFeatureStatus = executeCommand("instance:connect child1 feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
 
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
-        Set<Node> nodes = clusterManager.listNodesAllClusters();
+        Set<Node> nodes = clusterManager.listNodes();
         System.err.println(executeCommand("cluster:node-list"));
+        assertNotNull(localNode);
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
     }
 
