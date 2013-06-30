@@ -22,20 +22,24 @@ import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupManager;
 
 public class LocalEventListener extends EventSupport implements EventHandler {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalEventListener.class);
-
     private EventProducer eventProducer;
+    private GroupManager groupManager;
+    private CellarSupport cellarSupport;
+
     @Override
     public void handleEvent(Event event) {
 
         // ignore log entry event
-        if (event.getTopic().startsWith("org/osgi/service/log/LogEntry"))
+        if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) {
             return;
+        }
 
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
@@ -65,12 +69,13 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                     for (Group group : groups) {
                         String topicName = event.getTopic();
                         Map<String, Object> properties = getEventProperties(event);
-                        if (isAllowed(group, Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
+                        if (cellarSupport.isAllowed(group, Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
                             clusterEvent.setSourceGroup(group);
                             eventProducer.produce(clusterEvent);
-                        } else LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
+                        } else {
+                            LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
                         }
                     }
                 }
@@ -91,10 +96,40 @@ public class LocalEventListener extends EventSupport implements EventHandler {
      */
     public void destroy() {
     }
+
     public EventProducer getEventProducer() {
         return eventProducer;
     }
+
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
     }
 }

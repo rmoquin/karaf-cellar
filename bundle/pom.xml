@@ -61,6 +61,10 @@
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         
+        <dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.core</artifactId>
+        </dependency>
         <!-- Karaf features -->
         <dependency>
             <groupId>org.apache.karaf.features</groupId>

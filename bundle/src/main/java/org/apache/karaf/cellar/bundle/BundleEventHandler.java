@@ -26,6 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
  * The BundleEventHandler is responsible to process received cluster event for bundles.
@@ -34,7 +37,10 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.bundle.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-
+    private SynchronizationConfiguration synchronizationConfig;
+    private GroupManager groupManager;
+    private CellarSupport cellarSupport;
+    
     /**
      * Handle received bundle cluster events.
      *
@@ -55,11 +61,11 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
         }
         try {
             // check if the pid is marked as local.
-            if (isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getLocation(), EventType.INBOUND)) {
+            if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getLocation(), EventType.INBOUND)) {
                 // check the features first
                 List<Feature> matchingFeatures = retrieveFeature(event.getLocation());
                 for (Feature feature : matchingFeatures) {
-					if (!isAllowed(event.getSourceGroup(), "features", feature.getName(), EventType.INBOUND)) {
+					if (!cellarSupport.isAllowed(event.getSourceGroup(), "features", feature.getName(), EventType.INBOUND)) {
 						LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", event.getLocation(), feature.getName(), event.getSourceGroup().getName());
                         return;
                     }
@@ -105,7 +111,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -125,5 +131,47 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     @Override
     public Class<ClusterBundleEvent> getType() {
         return ClusterBundleEvent.class;
+    }
+
+    /**
+     * @return the synchronizationConfig
+     */
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
+    }
+
+    /**
+     * @param synchronizationConfig the synchronizationConfig to set
+     */
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
     }
 }

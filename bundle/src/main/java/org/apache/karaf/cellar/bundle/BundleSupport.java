@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.bundle;
 
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -23,12 +22,14 @@ import org.osgi.framework.BundleException;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic Cellar bundle support.
  */
-public class BundleSupport extends CellarSupport {
-
+public class BundleSupport {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
 	private FeaturesService featuresService;
 

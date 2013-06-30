@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupManager;
 
 /**
  * LocalBundleListener is listening for local bundles changes.
@@ -35,6 +38,9 @@ import java.util.Set;
 public class LocalBundleListener extends BundleSupport implements SynchronousBundleListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalBundleListener.class);
     private EventProducer eventProducer;
+    private GroupManager groupManager;
+    private CellarCluster masterCluster;
+    private CellarSupport cellarSupport;
 
     /**
      * Callback method called when a local bundle status change.
@@ -81,10 +87,10 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                     String bundleLocation = event.getBundle().getLocation();
                     int type = event.getType();
 
-                    if (isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
+                    if (cellarSupport.isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
                         try {
                             // update bundles in the cluster group
-                            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + group.getName());
+                            Map<String, BundleState> clusterBundles = masterCluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + group.getName());
                             if (type == BundleEvent.UNINSTALLED) {
                                 clusterBundles.remove(symbolicName + "/" + version);
                             } else {
@@ -101,7 +107,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             // check the features first
                             List<Feature> matchingFeatures = retrieveFeature(bundleLocation);
                             for (Feature feature : matchingFeatures) {
-            					if (!isAllowed(group, "features", feature.getName(), EventType.OUTBOUND)) {
+            					if (!cellarSupport.isAllowed(group, "features", feature.getName(), EventType.OUTBOUND)) {
             						LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, feature.getName(), group.getName());
                                     return;
                                 }
@@ -135,6 +141,48 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
 
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the masterCluster
+     */
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
+    }
+
+    /**
+     * @param masterCluster the masterCluster to set
+     */
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
     }
 
 }

@@ -19,6 +19,8 @@ import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
@@ -27,6 +29,7 @@ import java.util.Map;
 
 @Command(scope = "cluster", name = "bundle-uninstall", description = "Uninstall a bundle from a cluster group")
 public class UninstallBundleCommand extends BundleCommandSupport {
+    private EventProducer eventProducer;
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -37,7 +40,7 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -64,8 +67,7 @@ public class UninstallBundleCommand extends BundleCommandSupport {
 
         // check if the bundle is allowed
         CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-            if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
+        if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
                 System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
             return null;
         }
@@ -79,5 +81,11 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         eventProducer.produce(event);
 
         return null;
+    }
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }

@@ -27,10 +27,12 @@ import org.osgi.framework.BundleReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Dictionary;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group.
@@ -39,7 +41,11 @@ import java.util.Set;
 public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
     private EventProducer eventProducer;
-
+    private SynchronizationConfiguration synchronizationConfig;
+    private GroupManager groupManager;
+    private CellarCluster masterCluster;
+    private CellarSupport cellarSupport;
+    
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
@@ -47,7 +53,9 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 if (isSyncEnabled(group)) {
                     pull(group);
                     push(group);
-                } else LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
+                } else {
+                    LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
+                }
             }
         }
     }
@@ -66,7 +74,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR BUNDLE: pulling bundles from cluster group {}", groupName);
-            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            Map<String, BundleState> clusterBundles = masterCluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             for (Map.Entry<String, BundleState> entry : clusterBundles.entrySet()) {
                 String id = entry.getKey();
@@ -78,7 +86,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 if (tokens != null && tokens.length == 2) {
                     if (state != null) {
                         String bundleLocation = state.getLocation();
-                            if (isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.INBOUND)) {
+                        if (cellarSupport.isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.INBOUND)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {
                                     installBundleFromLocation(state.getLocation());
@@ -89,7 +97,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                             } catch (BundleException e) {
                                 LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
                             }
-                            } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
+                        } else {
+                            LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
                         }
                     }
                 }
@@ -113,63 +122,70 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
         if (group != null) {
             String groupName = group.getName();
-        LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
-        Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
+            Map<String, BundleState> clusterBundles = masterCluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-        Bundle[] bundles;
-                BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
+            Bundle[] bundles;
+            BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
 
-        bundles = bundleContext.getBundles();
-        for (Bundle bundle : bundles) {
-            String symbolicName = bundle.getSymbolicName();
-            String version = bundle.getVersion().toString();
-            String bundleLocation = bundle.getLocation();
-            int status = bundle.getState();
-            String id = symbolicName + "/" + version;
+            bundles = bundleContext.getBundles();
+            for (Bundle bundle : bundles) {
+                String symbolicName = bundle.getSymbolicName();
+                String version = bundle.getVersion().toString();
+                String bundleLocation = bundle.getLocation();
+                int status = bundle.getState();
+                String id = symbolicName + "/" + version;
 
-            // check if the pid is marked as local.
-                    if (isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
+                // check if the pid is marked as local.
+                if (cellarSupport.isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
 
-                BundleState bundleState = new BundleState();
-                // get the bundle name or location.
-                String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
-                // if there is no name, then default to symbolic name.
-                name = (name == null) ? bundle.getSymbolicName() : name;
-                // if there is no symbolic name, resort to location.
-                name = (name == null) ? bundle.getLocation() : name;
-                bundleState.setName(name);
-                bundleState.setLocation(bundleLocation);
+                    BundleState bundleState = new BundleState();
+                    // get the bundle name or location.
+                    String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
+                    // if there is no name, then default to symbolic name.
+                    name = (name == null) ? bundle.getSymbolicName() : name;
+                    // if there is no symbolic name, resort to location.
+                    name = (name == null) ? bundle.getLocation() : name;
+                    bundleState.setName(name);
+                    bundleState.setLocation(bundleLocation);
 
-                        if (status == Bundle.ACTIVE)
-                    status = BundleEvent.STARTED;
-                        if (status == Bundle.INSTALLED)
-                    status = BundleEvent.INSTALLED;
-                        if (status == Bundle.RESOLVED)
-                    status = BundleEvent.RESOLVED;
-                        if (status == Bundle.STARTING)
-                    status = BundleEvent.STARTING;
-                        if (status == Bundle.UNINSTALLED)
-                    status = BundleEvent.UNINSTALLED;
-                        if (status == Bundle.STOPPING)
-                    status = BundleEvent.STARTED;
+                    if (status == Bundle.ACTIVE) {
+                        status = BundleEvent.STARTED;
+                    }
+                    if (status == Bundle.INSTALLED) {
+                        status = BundleEvent.INSTALLED;
+                    }
+                    if (status == Bundle.RESOLVED) {
+                        status = BundleEvent.RESOLVED;
+                    }
+                    if (status == Bundle.STARTING) {
+                        status = BundleEvent.STARTING;
+                    }
+                    if (status == Bundle.UNINSTALLED) {
+                        status = BundleEvent.UNINSTALLED;
+                    }
+                    if (status == Bundle.STOPPING) {
+                        status = BundleEvent.STARTED;
+                    }
 
-                bundleState.setStatus(status);
+                    bundleState.setStatus(status);
 
-                BundleState existingState = clusterBundles.get(id);
+                    BundleState existingState = clusterBundles.get(id);
 
-                if (existingState == null ||
-                        !existingState.getLocation().equals(bundleState.getLocation()) ||
-                        existingState.getStatus() != bundleState.getStatus()) {
-                    // update the distributed map
-                    clusterBundles.put(id, bundleState);
+                    if (existingState == null ||
+                            !existingState.getLocation().equals(bundleState.getLocation()) ||
+                            existingState.getStatus() != bundleState.getStatus()) {
+                        // update the distributed map
+                        clusterBundles.put(id, bundleState);
 
-                    // broadcast the event
-                    ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
-                            event.setSourceGroup(group);
-                            eventProducer.produce(event);
-                        }
+                        // broadcast the event
+                        ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
+                        event.setSourceGroup(group);
+                        eventProducer.produce(event);
+                    }
 
-                    } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
+                } else {
+                    LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
                 }
             }
         }
@@ -188,7 +204,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
         try {
             String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) super.synchronizationConfiguration.getProperty(propertyKey);
+            String propertyValue = (String) this.synchronizationConfig.getProperty(propertyKey);
             result = Boolean.parseBoolean(propertyValue);
         } catch (Exception e) {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
@@ -202,5 +218,47 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
+    }
+
+    /**
+     * @return the synchronizationConfig
+     */
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
+    }
+
+    /**
+     * @param synchronizationConfig the synchronizationConfig to set
+     */
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the masterCluster
+     */
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
+    }
+
+    /**
+     * @param masterCluster the masterCluster to set
+     */
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }

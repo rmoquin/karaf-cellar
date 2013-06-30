@@ -1,49 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~  you may not use this file except in compliance with the License.
-  ~  You may obtain a copy of the License at
-  ~
-  ~        http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~  Unless required by applicable law or agreed to in writing, software
-  ~  distributed under the License is distributed on an "AS IS" BASIS,
-  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~  See the License for the specific language governing permissions and
-  ~  limitations under the License.
-  -->
+~ Licensed under the Apache License, Version 2.0 (the "License");
+~  you may not use this file except in compliance with the License.
+~  You may obtain a copy of the License at
+~
+~        http://www.apache.org/licenses/LICENSE-2.0
+~
+~  Unless required by applicable law or agreed to in writing, software
+~  distributed under the License is distributed on an "AS IS" BASIS,
+~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+~  See the License for the specific language governing permissions and
+~  limitations under the License.
+-->
 <blueprint default-availability="mandatory"
-    xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Bundle Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="featuresService" ref="featuresService"/>
+        <property name="masterCluster" ref="masterCluster"/>
         <property name="groupManager" ref="groupManager"/>
+        <property name="eventProducer" ref="eventProducer"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
 
     <!-- Bundle Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.bundle.BundleSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="featuresService" ref="featuresService"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
+        <property name="masterCluster" ref="masterCluster"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="eventProducer" ref="eventProducer"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
+    
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Bundle Event Handler -->
     <bean id="eventHandler" class="org.apache.karaf.cellar.bundle.BundleEventHandler"
           init-method="init" destroy-method="destroy">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="featuresService" ref="featuresService"/>
         <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
+    
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
 
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+    </bean>
+
     <!-- Cluster Core Services -->
     <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager" />
+    <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
+    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 </blueprint>

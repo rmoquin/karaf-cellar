@@ -20,11 +20,12 @@
 
     <!-- Local Event Listener -->
     <bean id="localEventListener" class="org.apache.karaf.cellar.event.LocalEventListener" init-method="init" destroy-method="destroy">
-        <property name="clusterManager" ref="clusterManager"/>
-        <property name="groupManager" ref="groupManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="eventAdmin" ref="eventAdmin"/>
         <property name="eventProducer" ref="eventProducer"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
+    
     <service ref="localEventListener">
         <interfaces>
             <value>org.osgi.service.event.EventHandler</value>
@@ -40,11 +41,12 @@
 
     <!-- Cluster Event Handler -->
     <bean id="clusterEventHandler" class="org.apache.karaf.cellar.event.ClusterEventHandler" init-method="init" destroy-method="destroy">
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-        <property name="clusterManager" ref="clusterManager"/>
-        <property name="instance" ref="hazelcast"/>
         <property name="eventAdmin" ref="eventAdmin"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
+    
     <service ref="clusterEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
@@ -56,5 +58,5 @@
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" />
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
-
+    <reference id="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
 </blueprint>

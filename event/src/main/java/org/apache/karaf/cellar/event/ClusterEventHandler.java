@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
@@ -33,6 +35,8 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private SynchronizationConfiguration synchronizationConfig;
+    private GroupManager groupManager;
+    private CellarSupport cellarSupport;
 
     @Override
     public void handle(ClusterEvent event) {
@@ -44,9 +48,9 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
         }
 
         if (groupManager == null) {
-        	// in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
-        	return;
+            // in rare cases for example right after installation this happens!
+            LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
+            return;
         }
 
         // check if the group is local
@@ -56,13 +60,15 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
         }
 
         try {
-            if (isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
-                Map<String, Serializable> properties = event.getProperties();
+            if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
+                Map<String, Object> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
                 postEvent(event.getTopicName(), properties);
-            } else LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+            } else {
+                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+            }
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }
@@ -119,5 +125,33 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
      */
     public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
     }
 }

@@ -19,6 +19,8 @@ import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.shell.commands.Argument;
@@ -44,6 +46,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
     @Option(name = "-s", aliases = {"--start"}, description = "Start the bundle after installation", required = false, multiValued = false)
     boolean start;
 
+    private EventProducer eventProducer;
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -54,14 +57,12 @@ public class InstallBundleCommand extends CellarCommandSupport {
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
 
         CellarSupport support = new CellarSupport();
-        
-        support.setGroupManager(this.groupManager);
         for (String url : urls) {
             // check if the bundle is allowed
             if (support.isAllowed(group, Constants.CATEGORY, url, EventType.OUTBOUND)) {
@@ -102,5 +103,11 @@ public class InstallBundleCommand extends CellarCommandSupport {
         }
 
         return null;
+    }
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }
