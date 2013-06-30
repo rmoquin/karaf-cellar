@@ -37,10 +37,10 @@ public class CellarBundleTest extends CellarTestSupport {
     	assertNotNull(featuresService);
     	
         installCellar();
-        Thread.sleep(SERVICE_TIMEOUT);
-        System.err.println(executeCommand("cluster:bundle-list default"));
+        Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
+		System.err.println(executeCommand("cluster:bundle-list default"));
         assertEquals(1, clusterManager.getClusters().size());
         assertEquals(1, clusterManager.getMasterCluster().listNodes().size());
         assertNotNull(clusterManager.getMasterCluster().getLocalNode());

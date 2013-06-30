@@ -87,7 +87,7 @@
                 <version>2.9</version>
                 <configuration>
                     <useFile>false</useFile>
-                    <test>CellarSampleDosgiGreeterTest</test>
+                    <!--<test>CellarSampleDosgiGreeterTest</test>-->
                 </configuration>
             </plugin>
             <plugin>
