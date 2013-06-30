@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.event.Event;
 
 /**
  *
@@ -75,6 +74,14 @@ public interface CellarCluster {
     public Node findNodeById(String id);
 
     /**
+     * Returns whether or not this cluster contains a node with the specified id.
+     *
+     * @param id the node ID.
+     * @return true if there is a node with that id.
+     */
+    public boolean hasNodeWithId(String id);
+            
+    /**
      * Get the local node.
      *
      * @return the local node.
@@ -93,14 +100,5 @@ public interface CellarCluster {
      */
     public String getName();
     
-    /**
-     * @return the local cluster chosen to handle sending and receiving synchronization events.
-     */
-    public boolean isSychronizer();
-
     void shutdown();
-
-    void produce(Event event);
-
-    boolean emitsEvents();
 }

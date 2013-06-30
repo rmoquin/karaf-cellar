@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.osgi.framework.BundleContext;
@@ -28,12 +29,10 @@ import org.osgi.framework.FrameworkUtil;
  * Manage handlers command handler.
  */
 public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersCommand, ManageHandlersResult> {
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageHandlersCommandHandler.class);
-
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.listhandlers.switch";
-
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
+    private SynchronizationConfiguration synchronizationConfiguration;
 
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
@@ -94,9 +93,9 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            if (super.synchronizationConfiguration != null) {
-                super.synchronizationConfiguration.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
-                    
+            if (this.synchronizationConfiguration != null) {
+                this.synchronizationConfiguration.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
+
             }
         } catch (Exception e) {
             LOGGER.warn("Can't persist the handler " + handler + " status", e);
@@ -113,4 +112,17 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
         return commandSwitch;
     }
 
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
+    }
 }

@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import java.util.Collection;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
@@ -23,14 +22,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
  * OBR URL Synchronizer.
  */
 public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
-
+    private CellarSupport cellarSupport;
+    private SynchronizationConfiguration synchronizationConfiguration;
+    private ClusterManager clusterManager;
+    private GroupManager groupManager;
+    
     @Override
     public void init() {
         super.init();
@@ -40,11 +47,12 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
                 if (isSyncEnabled(group)) {
                     pull(group);
                     push(group);
-                } else LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
+                } else {
+                    LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
+                }
             }
         }
     }
-    
 
     @Override
     public void destroy() {
@@ -87,10 +95,10 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
 
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {
-                    if (isAllowed(group, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
+                if (cellarSupport.isAllowed(group, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
                     clusterUrls.add(repository.getURI().toString());
                     // update OBR bundles in the cluster group
-                        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+                    Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
                     Resource[] resources = repository.getResources();
                     for (Resource resource : resources) {
                         ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());
@@ -98,19 +106,74 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
                         // TODO fire event to the other nodes ?
                     }
                 } else {
-                        LOGGER.warn("CELLAR OBR: URL {} is blocked outbound for cluster group {}", repository.getURI().toString(), groupName);
-                    }
+                    LOGGER.warn("CELLAR OBR: URL {} is blocked outbound for cluster group {}", repository.getURI().toString(), groupName);
                 }
             }
         }
     }
 
     @Override
-    public Boolean isSyncEnabled(CellarCluster cluster) {
+    public Boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
 
-            String propertyKey = groupName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+        String propertyKey = groupName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
         String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
         return Boolean.parseBoolean(propertyValue);
+    }
+
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the clusterManager
+     */
+    public ClusterManager getClusterManager() {
+        return clusterManager;
+    }
+
+    /**
+     * @param clusterManager the clusterManager to set
+     */
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
     }
 }

@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.dosgi;
 
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -29,21 +28,18 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
  * Handler for cluster remote service call event.
  */
-public class RemoteServiceCallHandler extends CellarSupport implements EventHandler<RemoteServiceCall> {
-
+public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall> {
     public static final String SWITCH_ID = "org.apache.karaf.cellar.dosgi.switch";
-
     private static final transient Logger LOGGER = LoggerFactory.getLogger(RemoteServiceCallHandler.class);
-
     private final Switch dosgiSwitch = new BasicSwitch(SWITCH_ID);
-
     private BundleContext bundleContext;
-
     private EventTransportFactory eventTransportFactory;
+    private SynchronizationConfiguration synchronizationConfiguration;
 
     /**
      * Handle a cluster remote service call event.
@@ -127,12 +123,12 @@ public class RemoteServiceCallHandler extends CellarSupport implements EventHand
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-                Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    dosgiSwitch.turnOn();
-                } else {
-                    dosgiSwitch.turnOff();
-                }
+            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            if (status) {
+                dosgiSwitch.turnOn();
+            } else {
+                dosgiSwitch.turnOff();
+            }
         } catch (Exception e) {
             // ignore
         }
@@ -155,4 +151,17 @@ public class RemoteServiceCallHandler extends CellarSupport implements EventHand
         this.eventTransportFactory = eventTransportFactory;
     }
 
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
+    }
 }

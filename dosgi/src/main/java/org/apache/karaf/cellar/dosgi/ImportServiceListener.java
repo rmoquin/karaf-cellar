@@ -100,7 +100,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             }
 
             // make sure we only import remote services
-                String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getNode().getId() + ")))";
+            String filter = "(&" + listenerInfo.getFilter() + "(!(" + Constants.ENDPOINT_FRAMEWORK_UUID + "=" + clusterManager.getMasterCluster().getLocalNode().getId() + ")))";
             // iterate through known services and import them if needed
             Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
             for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
@@ -128,7 +128,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
         Set<EndpointDescription> matches = new LinkedHashSet<EndpointDescription>();
         for (Map.Entry<String, EndpointDescription> entry : remoteEndpoints.entrySet()) {
             EndpointDescription endpointDescription = entry.getValue();
-                if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(clusterManager.getNode().getId())) {
+            if (endpointDescription.matches(listenerInfo.getFilter()) && !endpointDescription.getNodes().contains(clusterManager.getMasterCluster().getLocalNode())) {
                 matches.add(endpointDescription);
             }
         }
@@ -155,7 +155,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
         EventConsumer resultConsumer = consumers.get(endpoint.getId());
         if (resultConsumer == null) {
-            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getNode().getId() + endpoint.getId(), Boolean.FALSE);
+            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getMasterCluster().getLocalNode().getId() + endpoint.getId(), Boolean.FALSE);
             consumers.put(endpoint.getId(), resultConsumer);
         } else if (!resultConsumer.isConsuming()) {
             resultConsumer.start();

@@ -26,11 +26,8 @@ import java.util.*;
  * Generic configuration support.
  */
 public class ConfigurationSupport {
-
-    private static String[] EXCLUDED_PROPERTIES = {"service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories"};
-
+    private static String[] EXCLUDED_PROPERTIES = { "service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories" };
     private static final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
-
     protected File storage;
 
     /**
@@ -47,6 +44,7 @@ public class ConfigurationSupport {
                 Object key = keys.nextElement();
                 if (key != null && dictionary.get(key) != null) {
                     properties.put(key, dictionary.get(key));
+                }
             }
         }
         return properties;
@@ -60,29 +58,36 @@ public class ConfigurationSupport {
      * @return true if the two dictionaries are equal, false else.
      */
     protected boolean equals(Dictionary source, Dictionary target) {
-        if (source == null && target == null)
+        if (source == null && target == null) {
             return true;
+        }
 
-        if (source == null || target == null)
+        if (source == null || target == null) {
             return false;
+        }
 
-        if (source.isEmpty() && target.isEmpty())
+        if (source.isEmpty() && target.isEmpty()) {
             return true;
+        }
 
-        if (source.size() != target.size())
+        if (source.size() != target.size()) {
             return false;
+        }
 
         Enumeration sourceKeys = source.keys();
         while (sourceKeys.hasMoreElements()) {
             Object key = sourceKeys.nextElement();
             Object sourceValue = source.get(key);
             Object targetValue = target.get(key);
-            if (sourceValue != null && targetValue == null)
+            if (sourceValue != null && targetValue == null) {
                 return false;
-            if (sourceValue == null && targetValue != null)
+            }
+            if (sourceValue == null && targetValue != null) {
                 return false;
-            if (!sourceValue.equals(targetValue))
+            }
+            if (!sourceValue.equals(targetValue)) {
                 return false;
+            }
         }
 
         return true;
@@ -117,8 +122,9 @@ public class ConfigurationSupport {
      */
     public boolean isExcludedProperty(String propertyName) {
         for (int i = 0; i < EXCLUDED_PROPERTIES.length; i++) {
-            if (EXCLUDED_PROPERTIES[i].equals(propertyName))
+            if (EXCLUDED_PROPERTIES[i].equals(propertyName)) {
                 return true;
+            }
         }
         return false;
     }
@@ -161,9 +167,9 @@ public class ConfigurationSupport {
             Set<String> set = p.keySet();
 
             for (String key : set) {
-                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key) &&
+                         !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key) &&
+                         !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     propertiesToRemove.add(key);
                 }
             }
@@ -172,11 +178,11 @@ public class ConfigurationSupport {
                 p.remove(key);
             }
 
-            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
+            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements();) {
                 String key = keys.nextElement();
-                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
-                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
-                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key) &&
+                         !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key) &&
+                         !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     p.put(key, (String) props.get(key));
                 }
             }
@@ -206,5 +212,4 @@ public class ConfigurationSupport {
     public void setStorage(File storage) {
         this.storage = storage;
     }
-
 }

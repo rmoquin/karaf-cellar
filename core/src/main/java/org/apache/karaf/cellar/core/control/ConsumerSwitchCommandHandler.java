@@ -15,15 +15,20 @@ package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Consumer;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Consumer switch command handler.
  */
 public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchCommand, ConsumerSwitchResult> {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConsumerSwitchCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private Consumer consumer;
+    private SynchronizationConfiguration synchronizationConfiguration;
 
     /**
      * Handle the {@code ConsumeSwitchCommand} command.
@@ -45,8 +50,8 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
             }
             try {
                 if (this.synchronizationConfiguration != null) {
-                    super.synchronizationConfiguration.setProperty(Configurations.CONSUMER, statusValue);
-                    super.synchronizationConfiguration.save();
+                    this.synchronizationConfiguration.setProperty(Configurations.CONSUMER, statusValue);
+                    this.synchronizationConfiguration.save();
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Error setting consumer switch.", ex);
@@ -72,5 +77,19 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
 
     public void setConsumer(Consumer consumer) {
         this.consumer = consumer;
+    }
+
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
     }
 }

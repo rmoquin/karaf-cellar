@@ -14,13 +14,12 @@
 package org.apache.karaf.cellar.obr;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.osgi.framework.BundleContext;
 
 /**
  * Generic OBR support.
  */
-public class ObrSupport extends CellarSupport {
+public class ObrSupport {
 
     protected BundleContext bundleContext;
     protected RepositoryAdmin obrService;

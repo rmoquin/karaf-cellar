@@ -22,6 +22,7 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
     </bean>
+
     <service ref="obrBundleEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
@@ -32,24 +33,35 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
     <bean id="obrUrlSynchronizer" class="org.apache.karaf.cellar.obr.ObrUrlSynchronizer"
             init-method="init" destroy-method="destroy">
         <property name="obrService" ref="repositoryAdmin"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfig"/>
     </bean>
+    
     <service ref="obrUrlSynchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster OBR URL Event Handler -->
     <bean id="obrUrlEventHandler" class="org.apache.karaf.cellar.obr.ObrUrlEventHandler"
           init-method="init" destroy-method="destroy">
         <property name="obrService" ref="repositoryAdmin"/>
-        <property name="clusterManager" ref="clusterManager"/>
+        <property name="cellarSupport" ref="cellarSupport"/>
         <property name="groupManager" ref="groupManager"/>
+        <property name="synchronizationConfiguration" ref="synchronizationConfig"/>
     </bean>
+
     <service ref="obrUrlEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
+    
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+    </bean>
 
     <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-
+    <reference id="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
 </blueprint>

@@ -13,7 +13,10 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -29,7 +32,10 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.urls.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-
+    private CellarSupport cellarSupport;
+    private SynchronizationConfiguration synchronizationConfiguration;
+    private GroupManager groupManager;
+    
     @Override
     public void init() {
         super.init();
@@ -66,7 +72,7 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
         }
         String url = event.getUrl();
         try {
-            if (isAllowed(event.getSourceGroup(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
+            if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
                 if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
                     obrService.addRepository(url);
@@ -93,7 +99,7 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) super.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -103,5 +109,47 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
             // ignore
         }
         return this.eventSwitch;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the synchronizationConfiguration
+     */
+    public SynchronizationConfiguration getSynchronizationConfiguration() {
+        return synchronizationConfiguration;
+    }
+
+    /**
+     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     */
+    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+        this.synchronizationConfiguration = synchronizationConfiguration;
+    }
+
+    /**
+     * @return the groupManager
+     */
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    /**
+     * @param groupManager the groupManager to set
+     */
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
     }
 }

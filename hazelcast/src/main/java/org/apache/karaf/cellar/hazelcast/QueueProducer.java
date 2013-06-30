@@ -14,8 +14,8 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.IQueue;
+import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -35,7 +35,7 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private SynchronizationConfiguration synchronizationConfig;
     private IQueue<E> queue;
-    private Node node;
+    private CellarCluster masterCluster;
 
     public void init() {
     }
@@ -47,7 +47,7 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     @Override
     public void produce(E event) {
         if (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce() || event instanceof Result) {
-            event.setSourceNode(node);
+            event.setSourceNode(this.masterCluster.getLocalNode());
             try {
                 queue.put(event);
             } catch (InterruptedException e) {
@@ -99,16 +99,16 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     }
 
     /**
-     * @return the node
+     * @return the masterCluster
      */
-    public Node getNode() {
-        return node;
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
     }
 
     /**
-     * @param node the node to set
+     * @param masterCluster the masterCluster to set
      */
-    public void setNode(Node node) {
-        this.node = node;
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }

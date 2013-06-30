@@ -30,16 +30,12 @@ import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.Event;
-import org.apache.karaf.cellar.core.event.EventProducer;
+import org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +46,7 @@ import org.slf4j.LoggerFactory;
 public class HazelcastCluster implements CellarCluster, MembershipListener {
     @JsonIgnore
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
+    private HazelcastConfigurationManager configManager;
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
     @JsonIgnore
     private IdGenerator idgenerator;
@@ -57,39 +54,34 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private HazelcastInstance instance;
     private String name;
     @JsonIgnore
-    private boolean sychronizer;
-    @JsonIgnore
     private String listenerId;
     private HazelcastNode localNode;
+    private Config config;
     @JsonIgnore
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
-    @JsonIgnore
-    private List<? extends Synchronizer> synchronizers;
-    @JsonIgnore
-    private EventProducer eventProducer;
 
-    public void init(String name, Config config, boolean synchronizer) {
-        this.name = name;
-        this.sychronizer = synchronizer;
-        instance = Hazelcast.newHazelcastInstance(config);
-        listenerId = instance.getCluster().addMembershipListener(this);
+    public void init() {
+        this.config = this.configManager.getHazelcastConfig(this.name);
+        this.instance = Hazelcast.newHazelcastInstance(config);
+        this.listenerId = instance.getCluster().addMembershipListener(this);
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-        memberNodes.put(this.localNode.getId(), this.localNode);
+        this.memberNodes.put(this.localNode.getId(), this.localNode);
+    }
+    
+    @Override
+    public void shutdown() {
+        instance.getCluster().removeMembershipListener(listenerId);
+        if (instance != null) {
+            instance.getLifecycleService().shutdown();
+        }
     }
 
-    /**
-     * Sends a cluster event from this cluster as the source of the event.
-     *
-     * @param event to send
-     */
-    @Override
-    public void produce(Event event) {
-        this.eventProducer.produce(event);
+    public String addMembershipListener(MembershipListener listener) {
+        return instance.getCluster().addMembershipListener(listener);
     }
 
-    @Override
-    public boolean emitsEvents() {
-        return eventProducer.getSwitch().getStatus().equals(SwitchStatus.ON);
+    public boolean removeMembershipListener(String registrationId) {
+        return instance.getCluster().removeMembershipListener(registrationId);
     }
 
     /**
@@ -139,6 +131,20 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     }
 
     /**
+     * Returns whether or not this cluster contains a node with the specified id.
+     *
+     * @param id the node ID.
+     * @return true if there is a node with that id.
+     */
+    @Override
+    public boolean hasNodeWithId(String id) {
+        if (id != null) {
+            return this.memberNodes.containsKey(id);
+        }
+        return false;
+    }
+
+    /**
      * Generate an unique ID.
      *
      * @return the generated unique ID.
@@ -154,19 +160,8 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
-        try {
-            HazelcastNode newNode = new HazelcastNode(member);
-            this.memberNodes.put(newNode.getId(), newNode);
-            if (synchronizers != null && !synchronizers.isEmpty()) {
-                for (Synchronizer synchronizer : synchronizers) {
-                    if (synchronizer.isSyncEnabled(this)) {
-                        synchronizer.synchronize(this);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Error while adding memberAdded", e);
-        }
+        HazelcastNode newNode = new HazelcastNode(member);
+        this.memberNodes.put(newNode.getId(), newNode);
     }
 
     @Override
@@ -177,15 +172,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
             LOGGER.info("Node , " + uuid + ", left cluster, " + this.name + ".");
         }
         node.destroy();
-    }
-
-    @Override
-    public void shutdown() {
-        this.eventProducer = null;
-        instance.getCluster().removeMembershipListener(listenerId);
-        if (instance != null) {
-            instance.getLifecycleService().shutdown();
-        }
     }
 
     @Override
@@ -308,45 +294,16 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     }
 
     /**
-     * @return the synchronizers
+     * @return the configManager
      */
-    public List<? extends Synchronizer> getSynchronizers() {
-        return synchronizers;
+    public HazelcastConfigurationManager getConfigManager() {
+        return configManager;
     }
 
     /**
-     * @param synchronizers the synchronizers to set
+     * @param configManager the configManager to set
      */
-    public void setSynchronizers(List<? extends Synchronizer> synchronizers) {
-        this.synchronizers = synchronizers;
-    }
-
-    /**
-     * @return the sychronizer
-     */
-    @Override
-    public boolean isSychronizer() {
-        return sychronizer;
-    }
-
-    /**
-     * @param sychronizer the sychronizer to set
-     */
-    public void setSychronizer(boolean sychronizer) {
-        this.sychronizer = sychronizer;
-    }
-
-    /**
-     * @return the eventProducer
-     */
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    /**
-     * @param eventProducer the eventProducer to set
-     */
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+    public void setConfigManager(HazelcastConfigurationManager configManager) {
+        this.configManager = configManager;
     }
 }

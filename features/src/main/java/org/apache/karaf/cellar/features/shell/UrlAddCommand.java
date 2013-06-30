@@ -14,6 +14,9 @@
 package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
@@ -27,13 +30,12 @@ import org.apache.karaf.shell.commands.Option;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "feature-url-add", description = "Add a list of features repository URLs in a cluster")
+@Command(scope = "cluster", name = "feature-url-add", description = "Add a list of features repository URLs in a cluster group")
 public class UrlAddCommand extends FeatureCommandSupport {
 
-    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
-    String clusterName;
+    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    String groupName;
 
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
@@ -46,21 +48,22 @@ public class UrlAddCommand extends FeatureCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            System.err.println("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
 
         // check if the event producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
 
             // get the features repositories in the cluster group
-            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + clusterName);
+            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
             // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             for (String url : urls) {
                 // check if the URL is already registered
@@ -125,5 +128,11 @@ public class UrlAddCommand extends FeatureCommandSupport {
             }
 
         return null;
+    }
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }

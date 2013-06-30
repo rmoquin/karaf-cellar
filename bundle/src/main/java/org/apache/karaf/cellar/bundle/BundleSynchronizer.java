@@ -16,14 +16,21 @@ package org.apache.karaf.cellar.bundle;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
+import org.osgi.framework.BundleReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group.
@@ -31,6 +38,7 @@ import java.util.Map;
  */
 public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
+    private EventProducer eventProducer;
 
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
@@ -98,7 +106,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     public void push(Group group) {
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
             return;
         }
@@ -109,6 +117,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
         Bundle[] bundles;
+                BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
 
         bundles = bundleContext.getBundles();
         for (Bundle bundle : bundles) {
@@ -157,7 +166,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     // broadcast the event
                     ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
                             event.setSourceGroup(group);
-                    cluster.produce(event);
+                            eventProducer.produce(event);
                         }
 
                     } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
@@ -185,5 +194,13 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
         }
         return result;
+    }
+
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 }

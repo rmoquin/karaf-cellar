@@ -17,6 +17,8 @@ import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.*;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.management.CellarBundleMBean;
 import org.osgi.framework.BundleEvent;
@@ -38,26 +40,12 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
     private ClusterManager clusterManager;
     private GroupManager groupManager;
+    private EventProducer eventProducer;
 
     public CellarBundleMBeanImpl() throws NotCompliantMBeanException {
         super(CellarBundleMBean.class);
     }
 
-    public ClusterManager getClusterManager() {
-        return this.clusterManager;
-    }
-
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
-    }
-
-    public GroupManager getGroupManager() {
-        return this.groupManager;
-    }
-
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
-    }
     @Override
     public void install(String groupName, String location) throws Exception {
         // check if cluster group exists
@@ -67,14 +55,14 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF for this node");
         }
 
         // check if the bundle location is allowed
         CellarSupport support = new CellarSupport();
         if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + clusterName);
+            throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
         }
 
         // get the name and version in the location MANIFEST
@@ -135,7 +123,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             // check if the bundle location is allowed outbound
             CellarSupport support = new CellarSupport();
             if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
-                throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + clusterName);
+                throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
             }
 
             clusterBundles.remove(key);
@@ -187,8 +175,8 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         // broadcast the cluster event
         String[] split = key.split("/");
         ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STARTED);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
     }
 
     @Override
@@ -209,7 +197,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
         String key = null;
         String location = null;
-        try {
             Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
             String key = selector(symbolicName, version, clusterBundles);
@@ -226,9 +213,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
             // check if the bundle location is allowed outbound
             CellarSupport support = new CellarSupport();
-            support.setClusterManager(this.clusterManager);
-            support.setGroupManager(this.groupManager);
-            support.setConfigurationAdmin(this.configurationAdmin);
             if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
                 throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
             }
@@ -400,4 +384,27 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         return key;
     }
 
+    public ClusterManager getClusterManager() {
+        return this.clusterManager;
+    }
+
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    public GroupManager getGroupManager() {
+        return this.groupManager;
+    }
+
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+    
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+    
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
 }

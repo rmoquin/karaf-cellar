@@ -31,41 +31,21 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 
 /**
  * Implementation of the Cellar Features MBean.
  */
 public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeaturesMBean {
-
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private EventProducer eventProducer;
     private FeaturesService featuresService;
+    private CellarSupport cellarSupport;
 
     public CellarFeaturesMBeanImpl() throws NotCompliantMBeanException {
         super(CellarFeaturesMBean.class);
-    }
-
-    public ClusterManager getClusterManager() {
-        return this.clusterManager;
-    }
-
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
-    }
-
-    public GroupManager getGroupManager() {
-        return this.groupManager;
-    }
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
-    }
-    public FeaturesService getFeaturesService() {
-        return featuresService;
-    }
-
-    public void setFeaturesService(FeaturesService featuresService) {
-        this.featuresService = featuresService;
     }
 
     @Override
@@ -81,54 +61,52 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        // check if the feature is allowed outbound
-        CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + clusterName);
+        if (!cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+            throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 
-            // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+        // get the features in the cluster group
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            // check if the feature exist
-            FeatureInfo feature = null;
-            for (FeatureInfo info : clusterFeatures.keySet()) {
-                if (version == null) {
-                    if (info.getName().equals(name)) {
-                        feature = info;
-                        break;
-                    }
-                } else {
-                    if (info.getName().equals(name) && info.getVersion().equals(version)) {
-                        feature = info;
-                        break;
-                    }
+        // check if the feature exist
+        FeatureInfo feature = null;
+        for (FeatureInfo info : clusterFeatures.keySet()) {
+            if (version == null) {
+                if (info.getName().equals(name)) {
+                    feature = info;
+                    break;
+                }
+            } else {
+                if (info.getName().equals(name) && info.getVersion().equals(version)) {
+                    feature = info;
+                    break;
                 }
             }
+        }
 
-            if (feature == null) {
-                if (version == null)
-                    throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + groupName);
-                else
-                    throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + groupName);
+        if (feature == null) {
+            if (version == null) {
+                throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + groupName);
+            } else {
+                throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + groupName);
             }
+        }
 
-            // update the cluster group
-            clusterFeatures.put(feature, true);
-            try {
-                // TODO does it make sense ?
-                List<BundleInfo> bundles = featuresService.getFeature(feature.getName(), version).getBundles();
-                Map<String, BundleState> clusterBundles = clusterManager.getMap(org.apache.karaf.cellar.bundle.Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
-                for (BundleInfo bundle : bundles) {
-                    BundleState state = new BundleState();
-                    state.setLocation(bundle.getLocation());
-                    state.setStatus(BundleEvent.STARTED);
-                    clusterBundles.put(bundle.toString(), state);
-                }
-            } catch (Exception e) {
-                // ignore
+        // update the cluster group
+        clusterFeatures.put(feature, true);
+        try {
+            // TODO does it make sense ?
+            List<BundleInfo> bundles = featuresService.getFeature(feature.getName(), version).getBundles();
+            Map<String, BundleState> clusterBundles = clusterManager.getMap(org.apache.karaf.cellar.bundle.Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+            for (BundleInfo bundle : bundles) {
+                BundleState state = new BundleState();
+                state.setLocation(bundle.getLocation());
+                state.setStatus(BundleEvent.STARTED);
+                clusterBundles.put(bundle.toString(), state);
             }
+        } catch (Exception e) {
+            // ignore
+        }
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
@@ -164,41 +142,39 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        // check if the feature is allowed outbound
-        CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+        if (!cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 
-            // get the features in the cluster
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+        // get the features in the cluster
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            // check if the feature exist
-            FeatureInfo feature = null;
-            for (FeatureInfo info : clusterFeatures.keySet()) {
-                if (version == null) {
-                    if (info.getName().equals(name)) {
-                        feature = info;
-                        break;
-                    }
-                } else {
-                    if (info.getName().equals(name) && info.getVersion().equals(version)) {
-                        feature = info;
-                        break;
-                    }
+        // check if the feature exist
+        FeatureInfo feature = null;
+        for (FeatureInfo info : clusterFeatures.keySet()) {
+            if (version == null) {
+                if (info.getName().equals(name)) {
+                    feature = info;
+                    break;
+                }
+            } else {
+                if (info.getName().equals(name) && info.getVersion().equals(version)) {
+                    feature = info;
+                    break;
                 }
             }
+        }
 
-            if (feature == null) {
-                if (version == null)
-                    throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + groupName);
-                else
-                    throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + groupName);
+        if (feature == null) {
+            if (version == null) {
+                throw new IllegalArgumentException("Feature " + name + " doesn't exist in cluster group " + groupName);
+            } else {
+                throw new IllegalArgumentException("Feature " + name + "/" + version + " doesn't exist in cluster group " + groupName);
             }
+        }
 
-            // update the cluster group
-            clusterFeatures.put(feature, false);
+        // update the cluster group
+        clusterFeatures.put(feature, false);
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, FeatureEvent.EventType.FeatureUninstalled);
@@ -214,25 +190,24 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     @Override
     public TabularData getFeatures(String group) throws Exception {
         CompositeType featuresType = new CompositeType("Feature", "Karaf Cellar feature",
-                new String[]{"name", "version", "installed"},
-                new String[]{"Name of the feature", "Version of the feature", "Whether the feature is installed or not"},
-                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.BOOLEAN});
+                new String[] { "name", "version", "installed" },
+                new String[] { "Name of the feature", "Version of the feature", "Whether the feature is installed or not" },
+                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.BOOLEAN });
 
         TabularType tabularType = new TabularType("Features", "Table of all Karaf Cellar features",
-                featuresType, new String[]{"name", "version"});
+                featuresType, new String[] { "name", "version" });
         TabularData table = new TabularDataSupport(tabularType);
 
-            CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
-            if (clusterFeatures != null && !clusterFeatures.isEmpty()) {
-                for (FeatureInfo feature : clusterFeatures.keySet()) {
-                    boolean installed = clusterFeatures.get(feature);
-                    CompositeData data = new CompositeDataSupport(featuresType,
-                            new String[]{"name", "version", "installed"},
-                            new Object[]{feature.getName(), feature.getVersion(), installed});
-                    table.put(data);
-                }
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group);
+        if (clusterFeatures != null && !clusterFeatures.isEmpty()) {
+            for (FeatureInfo feature : clusterFeatures.keySet()) {
+                boolean installed = clusterFeatures.get(feature);
+                CompositeData data = new CompositeDataSupport(featuresType,
+                        new String[] { "name", "version", "installed" },
+                        new Object[] { feature.getName(), feature.getVersion(), installed });
+                table.put(data);
             }
+        }
 
         return table;
     }
@@ -274,68 +249,69 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-            // get the features repositories in the cluster group
-            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
-            // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+        // get the features repositories in the cluster group
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
+        // get the features in the cluster group
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            // check if the URL is already registered
-            boolean found = false;
-            for (String repository : clusterRepositories) {
-                if (repository.equals(url)) {
-                    found = true;
+        // check if the URL is already registered
+        boolean found = false;
+        for (String repository : clusterRepositories) {
+            if (repository.equals(url)) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // update the repository temporary locally
+            Repository repository = null;
+            boolean localRegistered = false;
+            // local lookup
+            for (Repository registeredRepository : featuresService.listRepositories()) {
+                if (registeredRepository.getURI().equals(new URI(url))) {
+                    repository = registeredRepository;
                     break;
                 }
             }
-            if (!found) {
-                // update the repository temporary locally
-                Repository repository = null;
-                boolean localRegistered = false;
-                // local lookup
+            if (repository == null) {
+                // registered locally
+                try {
+                    featuresService.addRepository(new URI(url));
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("Features repository URL " + url + " is not valid: " + e.getMessage());
+                }
+                // get the repository
                 for (Repository registeredRepository : featuresService.listRepositories()) {
                     if (registeredRepository.getURI().equals(new URI(url))) {
                         repository = registeredRepository;
                         break;
                     }
                 }
-                if (repository == null) {
-                    // registered locally
-                    try {
-                        featuresService.addRepository(new URI(url));
-                    } catch (Exception e) {
-                        throw new IllegalArgumentException("Features repository URL " + url + " is not valid: " + e.getMessage());
-                    }
-                    // get the repository
-                    for (Repository registeredRepository : featuresService.listRepositories()) {
-                        if (registeredRepository.getURI().equals(new URI(url))) {
-                            repository = registeredRepository;
-                            break;
-                        }
-                    }
-                } else {
-                    localRegistered = true;
-                }
-
-                // update the cluster group
-                clusterRepositories.add(url);
-
-                for (Feature feature : repository.getFeatures()) {
-                    FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
-                    clusterFeatures.put(info, false);
-                }
-
-                // un-register the repository if it's not local registered
-                if (!localRegistered)
-                    featuresService.removeRepository(new URI(url));
-
-                // broadcast the cluster event
-                ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
-                event.setInstall(install);
-                event.setSourceGroup(group);
-                eventProducer.produce(event);
             } else {
-                throw new IllegalArgumentException("Features repository URL " + url + " already registered");
+                localRegistered = true;
             }
+
+            // update the cluster group
+            clusterRepositories.add(url);
+
+            for (Feature feature : repository.getFeatures()) {
+                FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
+                clusterFeatures.put(info, false);
+            }
+
+            // un-register the repository if it's not local registered
+            if (!localRegistered) {
+                featuresService.removeRepository(new URI(url));
+            }
+
+            // broadcast the cluster event
+            ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
+            event.setInstall(install);
+            event.setSourceGroup(group);
+            eventProducer.produce(event);
+        } else {
+            throw new IllegalArgumentException("Features repository URL " + url + " already registered");
+        }
     }
 
     @Override
@@ -407,8 +383,9 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // un-register the repository if it's not local registered
-            if (!localRegistered)
+            if (!localRegistered) {
                 featuresService.removeRepository(new URI(url));
+            }
 
             // broadcast a cluster event
             ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
@@ -420,4 +397,41 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
     }
 
+    public ClusterManager getClusterManager() {
+        return this.clusterManager;
+    }
+
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    public GroupManager getGroupManager() {
+        return this.groupManager;
+    }
+
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    public FeaturesService getFeaturesService() {
+        return featuresService;
+    }
+
+    public void setFeaturesService(FeaturesService featuresService) {
+        this.featuresService = featuresService;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
+    }
 }

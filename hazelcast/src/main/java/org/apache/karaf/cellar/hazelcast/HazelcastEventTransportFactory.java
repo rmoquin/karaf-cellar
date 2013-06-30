@@ -36,7 +36,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             ITopic topic = ((HazelcastCluster)masterCluster).getTopic(Constants.TOPIC + Constants.SEPARATOR + name);
             TopicProducer producer = new TopicProducer();
             producer.setTopic(topic);
-            producer.setNode(masterCluster.getLocalNode());
+            producer.setMasterCluster(masterCluster);
             producer.setSynchronizationConfig(synchronizationConfig);
             producer.init();
             return producer;
@@ -44,7 +44,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             IQueue queue = ((HazelcastCluster)masterCluster).getQueue(Constants.QUEUE + Constants.SEPARATOR + name);
             QueueProducer producer = new QueueProducer();
             producer.setQueue(queue);
-            producer.setNode(masterCluster.getLocalNode());
+            producer.setMasterCluster(masterCluster);
             producer.setSynchronizationConfig(synchronizationConfig);
             producer.init();
             return producer;
@@ -59,7 +59,7 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             consumer.setTopic(topic);
             consumer.setSynchronizationConfig(synchronizationConfig);
             consumer.setDispatcher(dispatcher);
-            consumer.setNode(masterCluster.getLocalNode());
+            consumer.setMasterCluster(masterCluster);
             consumer.init();
             return consumer;
         } else {
@@ -68,7 +68,6 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
             consumer.setQueue(queue);
             consumer.setDispatcher(dispatcher);
             consumer.setSynchronizationConfig(synchronizationConfig);
-            consumer.setNode(masterCluster.getLocalNode());
             consumer.init();
             return consumer;
         }

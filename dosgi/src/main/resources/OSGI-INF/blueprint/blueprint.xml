@@ -22,22 +22,23 @@
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
     </bean>
+
     <service ref="importServiceListener" interface="org.osgi.framework.hooks.service.ListenerHook"/>
 
     <!-- Export Service Listener -->
     <bean id="exportServiceListener" class="org.apache.karaf.cellar.dosgi.ExportServiceListener" init-method="init" destroy-method="destroy">
-        <property name="clusterManager" ref="clusterManager"/>
+        <property name="masterCluster" ref="masterCluster"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
     </bean>
 
     <!-- Remote Service Call Event Handler -->
     <bean id="remoteServiceCallHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler">
-        <property name="clusterManager" ref="clusterManager"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="configurationAdmin" ref="configurationAdmin" />
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
+    
     <service ref="remoteServiceCallHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
@@ -48,11 +49,13 @@
     <bean id="remoteServiceResultHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceResultHandler">
         <property name="commandStore" ref="commandStore"/>
     </bean>
+
     <service ref="remoteServiceResultHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="eventTransportFactory" interface="org.apache.karaf.cellar.core.event.EventTransportFactory"/>
     <reference id="commandStore" interface="org.apache.karaf.cellar.core.command.CommandStore"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-
+    
 </blueprint>

@@ -61,35 +61,19 @@ public interface ClusterManager {
      */
     public Set<Node> listNodes(Collection<String> ids);
 
-	/**
+    /**
      * @return the clusters
      */
     public Collection<CellarCluster> getClusters();
 
     /**
-     * Get the nodes in a given cluster group.
-     *
-     * @param group the cluster group.
-     * @return the set of nodes in the cluster group.
-     */
-    public Set<Node> listNodesByGroup(Group group);
-
-	    /**
      * Get a node identified by a given ID.
      *
      * @param id the id of the node to look for.
      * @return the node.
      */
     public Node findNodeById(String id);
-	 
-    /**
-     * Leave an existing cluster.
-     *
-     * @param clusterName the cluster name to leave.
-     * @return the node.
-     */
-    public void leaveCluster(String clusterName);
-    
+
     /**
      * Look for a cluster with a given name.
      *
@@ -98,13 +82,6 @@ public interface ClusterManager {
      */
     public CellarCluster findClusterByName(String clusterName);
 
-/**
-     * Get the local node.
-     *
-     * @return the local node.
-     */
-public Node getNode();
-
     /**
      * Generate an unique ID across the cluster.
      *
@@ -112,15 +89,8 @@ public Node getNode();
      */
     public String generateId();
 
-    public void createCluster(String clusterName);
-	
-	/**
-     * Start the local node.
-     */
-    public void start();
-
     /**
-     * Stop the local node.
+     * @return the masterCluster
      */
-    public void stop();
+    CellarCluster getMasterCluster();
 }

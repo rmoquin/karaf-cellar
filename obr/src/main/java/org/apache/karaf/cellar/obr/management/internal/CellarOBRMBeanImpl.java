@@ -17,6 +17,8 @@ import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.*;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
@@ -37,6 +39,8 @@ import java.util.Set;
 public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean {
 
     private ClusterManager clusterManager;
+    private GroupManager groupManager;
+    private EventProducer eventProducer;
     private RepositoryAdmin obrService;
 
     public CellarOBRMBeanImpl() throws NotCompliantMBeanException {
@@ -44,15 +48,15 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
     }
 
     @Override
-    public List<String> listUrls(String clusterName) throws Exception {
+    public List<String> listUrls(String groupName) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         List<String> result = new ArrayList<String>();
-        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
         for (String url : clusterUrls) {
             result.add(url);
         }
@@ -60,11 +64,11 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
     }
 
     @Override
-    public TabularData listBundles(String clusterName) throws Exception {
+    public TabularData listBundles(String groupName) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         CompositeType compositeType = new CompositeType("OBR Bundle", "Bundles available in the OBR service",
@@ -75,41 +79,47 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
                 new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
-            Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
             for (ObrBundleInfo info : clusterBundles) {
                 CompositeData data = new CompositeDataSupport(compositeType,
                         new String[]{ "name", "symbolic", "version" },
                         new Object[]{ info.getPresentationName(), info.getSymbolicName(), info.getVersion() });
                 table.put(data);
             }
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
+        }
+
         return table;
     }
 
     @Override
-    public void addUrl(String clusterName, String url) throws Exception {
+    public void addUrl(String groupName, String url) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+            throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
         }
 
         // update OBR URLs in the cluster group
-        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
         clusterUrls.add(url);
         // update OBR bundles in the cluster group
-        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
         synchronized (obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
@@ -123,35 +133,34 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
         event.setForce(true);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
     }
 
     @Override
-    public void removeUrl(String clusterName, String url) throws Exception {
+    public void removeUrl(String groupName, String url) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+            throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
         }
 
         // update the OBR URLs in the cluster group
-        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
         clusterUrls.remove(url);
         // update the OBR bundles in the cluster group
-        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + clusterName);
+        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
         synchronized (obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
@@ -164,36 +173,35 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_REMOVE_EVENT_TYPE);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
     }
 
     @Override
-    public void deploy(String clusterName, String bundleId) throws Exception {
+    public void deploy(String groupName, String bundleId) throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            throw new IllegalArgumentException("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the bundle ID is allowed outbound
         CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(cluster.getName(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.OUTBOUND)) {
-            throw new IllegalArgumentException("OBR bundle " + bundleId + " is blocked outbound for cluster group " + clusterName);
+        if (!support.isAllowed(group, Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.OUTBOUND)) {
+            throw new IllegalArgumentException("OBR bundle " + bundleId + " is blocked outbound for cluster group " + groupName);
         }
 
         // broadcast a cluster event
         int type = 0;
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
         event.setForce(true);
-        event.setSourceCluster(cluster);
-        cluster.produce(event);
+        event.setSourceGroup(group);
+        eventProducer.produce(event);
     }
 
     public ClusterManager getClusterManager() {
@@ -202,6 +210,22 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
+    }
+
+    public GroupManager getGroupManager() {
+        return groupManager;
+    }
+
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
     }
 
     public RepositoryAdmin getObrService() {

@@ -15,17 +15,18 @@ package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Abstract cluster feature shell command.
@@ -44,15 +45,14 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @param version the feature version.
      * @param status the feature status (installed, uninstalled).
      */
-    public Boolean updateFeatureStatus(String clusterName, String feature, String version, Boolean status) {
+    public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
 
         Boolean result = Boolean.FALSE;
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        //I don't think it's possible for a cluster to be empty, but I'll do with it.
-        if (cluster == null || cluster.listNodes().isEmpty()) {
+            Group group = groupManager.findGroupByName(groupName);
+            if (group == null || group.getNodes().isEmpty()) {
 
             FeatureInfo info = new FeatureInfo(feature, version);
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+                Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             // check the existing configuration
             if (version == null || (version.trim().length() < 1)) {
                 for (FeatureInfo f : clusterFeatures.keySet()) {
@@ -91,41 +91,37 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @param version the feature version.
      * @return true if the feature exists in the cluster group, false else.
      */
-    public boolean featureExists(String clusterName, String feature, String version) {
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+    public boolean featureExists(String groupName, String feature, String version) {
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-        if (clusterFeatures == null) {
-            return false;
-        }
+            if (clusterFeatures == null)
+                return false;
 
-        for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
-            if (version == null) {
-                if (distributedFeature.getName().equals(feature)) {
-                    return true;
-                }
-            } else {
-                if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version)) {
-                    return true;
+            for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
+                if (version == null) {
+                    if (distributedFeature.getName().equals(feature))
+                        return true;
+                } else {
+                    if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version))
+                        return true;
                 }
             }
-        }
 
-        return false;
+            return false;
     }
 
     /**
      * Check if a cluster features event is allowed.
      *
-     * @param cluster the cluster.
+     * @param group the cluster group.
      * @param category the features category name.
      * @param name the feature name.
      * @param type the event type (inbound, outbound).
      * @return true if the cluster features event is allowed, false else.
      */
-    public boolean isAllowed(CellarCluster cluster, String category, String name, EventType type) {
+    public boolean isAllowed(Group group, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
-        return support.isAllowed(cluster.getName(), Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
+        return support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
     }
 
     public FeaturesService getFeaturesService() {

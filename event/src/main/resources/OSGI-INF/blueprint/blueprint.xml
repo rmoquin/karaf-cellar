@@ -51,7 +51,6 @@
         </service-properties>
     </service>
 
-    <reference id="hazelcast" interface="com.hazelcast.core.HazelcastInstance"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>

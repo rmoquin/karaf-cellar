@@ -78,7 +78,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     try {
                         ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                         clusterConfigurationEvent.setSourceGroup(group);
-                        clusterConfigurationEvent.setSourceNode(clusterManager.getNode());
+                        clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
                             // update the configurations in the cluster group
                             clusterConfigurations.remove(pid);

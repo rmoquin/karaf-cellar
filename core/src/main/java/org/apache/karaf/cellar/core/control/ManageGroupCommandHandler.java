@@ -19,9 +19,9 @@ import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.GroupManager;
 
 /**
  * Manager cluster command handler.
@@ -29,11 +29,12 @@ import org.apache.karaf.cellar.core.Group;
 public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand, ManageGroupResult> {
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.managegroup.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private ClusterManager clusterManager;
+    private CellarCluster masterCluster;
+    private GroupManager groupManager;
     private Node node;
     
     public void init() {
-        this.node = this.clusterManager.getNode();
+        this.node = this.masterCluster.getLocalNode();
     }
     
     @Override
@@ -138,16 +139,30 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
     }
 
     /**
-     * @return the clusterManager
+     * @return the groupManager
      */
-    public ClusterManager getClusterManager() {
-        return clusterManager;
+    public GroupManager getGroupManager() {
+        return groupManager;
     }
 
     /**
-     * @param clusterManager the clusterManager to set
+     * @param groupManager the groupManager to set
      */
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the masterCluster
+     */
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
+    }
+
+    /**
+     * @param masterCluster the masterCluster to set
+     */
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }

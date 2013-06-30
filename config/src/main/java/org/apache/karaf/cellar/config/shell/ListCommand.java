@@ -15,6 +15,7 @@ package org.apache.karaf.cellar.config.shell;
 
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
@@ -22,13 +23,12 @@ import org.apache.karaf.shell.commands.Option;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "config-list", description = "List the configurations in a cluster")
+@Command(scope = "cluster", name = "config-list", description = "List the configurations in a cluster group")
 public class ListCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, name = "cluster", description = "The cluster group", required = true, multiValued = false)
-    String clusterName;
+    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    String groupName;
 
     @Argument(index = 1, name = "pid", description = "The configuration PID to look for", required = false, multiValued = false)
     String searchPid;
@@ -39,13 +39,13 @@ public class ListCommand extends ConfigCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            System.err.println("Cluster " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = cluster.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
         if (clusterConfigurations != null && !clusterConfigurations.isEmpty()) {
             for (String pid : clusterConfigurations.keySet()) {
@@ -64,7 +64,7 @@ public class ListCommand extends ConfigCommandSupport {
                     }
                 }
             }
-        } else System.err.println("No configuration PID found in cluster group " + clusterName);
+        } else System.err.println("No configuration PID found in cluster group " + groupName);
 
         return null;
     }

@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.dosgi;
 
-import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
@@ -30,6 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Listener called when a new service is exported.
@@ -38,19 +38,17 @@ public class ExportServiceListener implements ServiceListener {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ExportServiceListener.class);
 
-    private ClusterManager clusterManager;
+    private CellarCluster masterCluster;
     private EventTransportFactory eventTransportFactory;
-
     private BundleContext bundleContext;
     private Map<String, EndpointDescription> remoteEndpoints;
-
     private final Map<String, EventConsumer> consumers = new HashMap<String, EventConsumer>();
 
     private Node node;
     
     public void init() {
-        node = clusterManager.getNode();
-        remoteEndpoints = clusterManager.getMap(Constants.REMOTE_ENDPOINTS);
+        node = masterCluster.getLocalNode();
+        remoteEndpoints = masterCluster.getMap(Constants.REMOTE_ENDPOINTS);
         bundleContext.addServiceListener(this);
 
         // lookup for already exported services
@@ -214,14 +212,6 @@ public class ExportServiceListener implements ServiceListener {
         return interfaceList;
     }
 
-    public ClusterManager getClusterManager() {
-        return clusterManager;
-    }
-
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
-    }
-
     public EventTransportFactory getEventTransportFactory() {
         return eventTransportFactory;
     }
@@ -236,6 +226,20 @@ public class ExportServiceListener implements ServiceListener {
 
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    /**
+     * @return the masterCluster
+     */
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
+    }
+
+    /**
+     * @param masterCluster the masterCluster to set
+     */
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 
 }

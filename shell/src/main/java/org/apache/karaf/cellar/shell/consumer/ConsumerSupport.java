@@ -52,7 +52,7 @@ public abstract class ConsumerSupport extends ClusterCommandSupport {
                 recipientList = clusterManager.listNodes();
             } else {
                 // in case of status change, select only the local node
-                recipientList.add(clusterManager.getNode());
+                recipientList.add(clusterManager.getMasterCluster().getLocalNode());
             }
         }
 
@@ -70,7 +70,7 @@ public abstract class ConsumerSupport extends ClusterCommandSupport {
             System.out.println(String.format(HEADER_FORMAT, "Node", "Status"));
             for (Node node : results.keySet()) {
                 String local = " ";
-                if (node.equals(clusterManager.getNode())) {
+                if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
                     local = "*";
                 }
                 ConsumerSwitchResult result = results.get(node);

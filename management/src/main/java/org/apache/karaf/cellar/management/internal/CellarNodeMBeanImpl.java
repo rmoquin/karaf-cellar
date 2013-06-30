@@ -80,7 +80,7 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
         Set<Node> nodes = clusterManager.listNodes();
 
             for (Node node : nodes) {
-            boolean local = (nodes.equals(clusterManager.getNode()));
+            boolean local = (nodes.equals(clusterManager.getMasterCluster().getLocalNode()));
                 CompositeData data = new CompositeDataSupport(nodeType,
                     new String[]{ "id", "hostname", "port", "local" },
                     new Object[]{ node.getId(), node.getHost(), node.getPort(), local });

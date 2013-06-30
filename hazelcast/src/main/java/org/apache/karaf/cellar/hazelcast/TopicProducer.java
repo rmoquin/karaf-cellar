@@ -14,8 +14,8 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.ITopic;
+import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -34,7 +34,7 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.producer";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private ITopic topic;
-    private Node node;
+    private CellarCluster masterCluster;
     private SynchronizationConfiguration synchronizationConfig;
 
     public void init() {
@@ -47,7 +47,7 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     @Override
     public void produce(E event) {
         if (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce() || event instanceof Result) {
-            event.setSourceNode(node);
+            event.setSourceNode(masterCluster.getLocalNode());
             topic.publish(event);
         } else {
             if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
@@ -95,16 +95,16 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     }
 
     /**
-     * @return the node
+     * @return the masterCluster
      */
-    public Node getNode() {
-        return node;
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
     }
 
     /**
-     * @param node the node to set
+     * @param masterCluster the masterCluster to set
      */
-    public void setNode(Node node) {
-        this.node = node;
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }

@@ -16,6 +16,9 @@ package org.apache.karaf.cellar.config.shell;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.core.event.EventType;
@@ -23,51 +26,51 @@ import org.osgi.service.cm.ConfigurationEvent;
 
 import java.util.Map;
 import java.util.Properties;
-import org.apache.karaf.cellar.core.CellarCluster;
 
-@Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster")
+@Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster group")
 public class DeleteCommand extends ConfigCommandSupport {
 
-    @Argument(index = 0, name = "cluster", description = "The cluster name", required = true, multiValued = false)
-    String clusterName;
+    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    String groupName;
 
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
 
+    private EventProducer eventProducer;
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            System.err.println("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
 
         // check if the producer is ON
-        if (!cluster.emitsEvents()) {
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
 
         // check if the config pid is allowed
-        if (!isAllowed(cluster, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
-            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + clusterName);
+        if (!isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+            System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
             return null;
         }
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + clusterName);
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         if (clusterConfigurations != null) {
             // update configurations in the cluster group
             clusterConfigurations.remove(pid);
 
             // broadcast a cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
-            event.setSourceCluster(cluster);
+            event.setSourceGroup(group);
             event.setType(ConfigurationEvent.CM_DELETED);
-            cluster.produce(event);
+            eventProducer.produce(event);
 
         } else {
-            System.out.println("Configuration distributed map not found for cluster group " + clusterName);
+            System.out.println("Configuration distributed map not found for cluster group " + groupName);
         }
 
         return null;

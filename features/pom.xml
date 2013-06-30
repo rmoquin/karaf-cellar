@@ -50,6 +50,15 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
+
         <!-- Internal Dependencies -->
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>

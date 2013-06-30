@@ -24,6 +24,8 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 
 /**
  * Implementation of the Cellar Config MBean.
@@ -32,7 +34,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-
+    private EventProducer eventProducer;
+    private CellarSupport cellarSupport;
+    
     public CellarConfigMBeanImpl() throws NotCompliantMBeanException {
         super(CellarConfigMBean.class);
     }
@@ -69,9 +73,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the PID is allowed outbound
-        CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -130,10 +132,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        // check if the PID is allowed outbound
-        CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -152,7 +151,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             event.setSourceGroup(group);
             eventProducer.produce(event);
         } else {
-            throw new IllegalArgumentException("No configuration found in cluster group " + clusterName);
+            throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
     }
 
@@ -168,11 +167,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
-
-        // check if the pid is allowed outbound
-        CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        
+        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -215,10 +211,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        // check if the pid is allowed outbound
-        CellarSupport support = new CellarSupport();
-        support.setClusterManager(this.clusterManager);
-        if (!support.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
             throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -251,5 +244,33 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     }
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the eventProducer
+     */
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    /**
+     * @param eventProducer the eventProducer to set
+     */
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
     }
 }

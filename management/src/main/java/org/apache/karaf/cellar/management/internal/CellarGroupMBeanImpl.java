@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.management.internal;
 
-import java.util.Collection;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -27,6 +26,8 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,30 +35,9 @@ import java.util.Set;
  */
 public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMBean {
     private ClusterManager clusterManager;
+    private GroupManager groupManager;
     private ExecutionContext executionContext;
 
-    public ClusterManager getClusterManager() {
-        return this.clusterManager;
-    }
-
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
-    }
-
-    public ExecutionContext getExecutionContext() {
-        return this.executionContext;
-    }
-
-    public void setExecutionContext(ExecutionContext executionContext) {
-        this.executionContext = executionContext;
-    }
-
-    public GroupManager getGroupManager() {
-        return this.groupManager;
-    }
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
-    }
     public CellarGroupMBeanImpl() throws NotCompliantMBeanException {
         super(CellarGroupMBean.class);
     }
@@ -70,23 +50,25 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         }
         groupManager.createGroup(name);
     }
+
     @Override
     public void delete(String name) throws Exception {
-            Group g = groupManager.findGroupByName(name);
-            List<String> nodes = new LinkedList<String>();
-            if (g.getNodes() != null && !g.getNodes().isEmpty()) {
-                for (Node n : g.getNodes()) {
-                    nodes.add(n.getId());
-                }
-                ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
-                command.setAction(ManageGroupAction.QUIT);
-                command.setGroupName(name);
-                Set<Node> recipientList = clusterManager.listNodes(nodes);
-                command.setDestination(recipientList);
-                executionContext.execute(command);
+        Group g = groupManager.findGroupByName(name);
+        List<String> nodes = new LinkedList<String>();
+        if (g.getNodes() != null && !g.getNodes().isEmpty()) {
+            for (Node n : g.getNodes()) {
+                nodes.add(n.getId());
             }
-            groupManager.deleteGroup(name);
+            ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
+            command.setAction(ManageGroupAction.QUIT);
+            command.setGroupName(name);
+            Set<Node> recipientList = clusterManager.listNodes(nodes);
+            command.setDestinations(recipientList);
+            executionContext.execute(command);
+        }
+        groupManager.deleteGroup(name);
     }
+
     @Override
     public void join(String groupName, String nodeId) throws Exception {
         Group group = groupManager.findGroupByName(groupName);
@@ -104,7 +86,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
         command.setAction(ManageGroupAction.JOIN);
         command.setGroupName(groupName);
-        command.setDestination(nodes);
+        command.setDestinations(nodes);
 
         executionContext.execute(command);
     }
@@ -126,7 +108,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
         command.setAction(ManageGroupAction.QUIT);
         command.setGroupName(groupName);
-        command.setDestination(nodes);
+        command.setDestinations(nodes);
         executionContext.execute(command);
     }
 
@@ -145,7 +127,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         TabularData table = new TabularDataSupport(tableType);
 
         for (Group group : allGroups) {
-            StringBuffer members = new StringBuffer();
+            StringBuilder members = new StringBuilder();
             for (Node node : group.getNodes()) {
                 // display only up and running nodes in the cluster
                 if (clusterManager.findNodeById(node.getId()) != null) {
@@ -155,10 +137,34 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             }
             CompositeData data = new CompositeDataSupport(groupType,
                     new String[] { "name", "members" },
-                    new Object[]{ group.getName(), members.toString() });
+                    new Object[] { group.getName(), members.toString() });
             table.put(data);
         }
 
         return table;
+    }
+
+    public ClusterManager getClusterManager() {
+        return this.clusterManager;
+    }
+
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    public ExecutionContext getExecutionContext() {
+        return this.executionContext;
+    }
+
+    public void setExecutionContext(ExecutionContext executionContext) {
+        this.executionContext = executionContext;
+    }
+    
+    public GroupManager getGroupManager() {
+        return this.groupManager;
+    }
+    
+    public void setGroupManager(GroupManager groupManager) {
+        this.groupManager = groupManager;
     }
 }

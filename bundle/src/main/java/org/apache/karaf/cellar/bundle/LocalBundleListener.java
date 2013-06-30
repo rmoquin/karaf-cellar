@@ -13,9 +13,10 @@
  */
 package org.apache.karaf.cellar.bundle;
 
-import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.BundleEvent;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * LocalBundleListener is listening for local bundles changes.
@@ -32,6 +34,7 @@ import java.util.Map;
  */
 public class LocalBundleListener extends BundleSupport implements SynchronousBundleListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalBundleListener.class);
+    private EventProducer eventProducer;
 
     /**
      * Callback method called when a local bundle status change.
@@ -57,7 +60,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
-        if (event.getBundle() != null) {
+        if (event != null && event.getBundle() != null) {
             Set<Group> groups = null;
             try {
                 groups = groupManager.listLocalGroups();
@@ -125,4 +128,13 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
     public void destroy() {
         bundleContext.removeBundleListener(this);
     }
+
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
+
 }

@@ -63,14 +63,14 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                 }
             }
         } else {
-            recipientList.add(clusterManager.getNode());
+            recipientList.add(clusterManager.getMasterCluster().getLocalNode());
         }
 
         if (recipientList.size() < 1) {
             return null;
         }
 
-        command.setDestination(recipientList);
+        command.setDestinations(recipientList);
         command.setAction(action);
 
         if (group != null) {
@@ -98,7 +98,7 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                                     // display only up and running nodes in the cluster
                                     if (clusterManager.findNodeById(member.getId()) != null) {
                                         buffer.append(member.getId());
-                                        if (member.equals(clusterManager.getNode())) {
+                                        if (member.equals(clusterManager.getMasterCluster().getLocalNode())) {
                                             mark = "*";
                                             buffer.append(mark);
                                         }

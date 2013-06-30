@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 
 /**
@@ -45,7 +44,6 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private IQueue queue;
     private Dispatcher dispatcher;
     private String listenerId;
-    private Node node;
 
     public void init() {
         listenerId = queue.addItemListener(this, true);
@@ -54,7 +52,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
 
     public void destroy() {
         isConsuming = false;
-       queue.removeItemListener(listenerId);
+        queue.removeItemListener(listenerId);
         executorService.shutdown();
         listenerId = null;
     }
@@ -67,7 +65,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
                 try {
                     e = getQueue().poll(10, TimeUnit.SECONDS);
                 } catch (InterruptedException e1) {
-                    LOGGER.warn("CELLAR HAZELCAST: consume task interrupted");
+                    LOGGER.warn("CELLAR HAZELCAST: consume task interrupted", e);
                 }
                 if (e != null) {
                     consume(e);
@@ -151,14 +149,6 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
             // ignore
         }
         return eventSwitch;
-    }
-
-    public Node getNode() {
-        return node;
-    }
-
-    public void setNode(Node node) {
-        this.node = node;
     }
 
     /**

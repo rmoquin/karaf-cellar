@@ -16,9 +16,9 @@ package org.apache.karaf.cellar.hazelcast;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
+import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Dispatcher;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -38,7 +38,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private ITopic topic;
     private Dispatcher dispatcher;
     private SynchronizationConfiguration synchronizationConfig;
-    private Node node;
+    private CellarCluster masterCluster;
     private boolean isConsuming;
     private String listenerId;
 
@@ -54,7 +54,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public void consume(E event) {
         LOGGER.warn("Received a topic consumer message: " + event.toString());
         // check if event has a specified destination.
-        if ((event.getDestinations() == null || event.getDestinations().contains(node)) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
+        if ((event.getDestinations() == null || event.getDestinations().contains(masterCluster.getLocalNode())) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
             dispatcher.dispatch(event);
         } else {
             if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
@@ -135,16 +135,16 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     }
 
     /**
-     * @return the node
+     * @return the masterCluster
      */
-    public Node getNode() {
-        return node;
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
     }
 
     /**
-     * @param node the node to set
+     * @param masterCluster the masterCluster to set
      */
-    public void setNode(Node node) {
-        this.node = node;
+    public void setMasterCluster(CellarCluster masterCluster) {
+        this.masterCluster = masterCluster;
     }
 }

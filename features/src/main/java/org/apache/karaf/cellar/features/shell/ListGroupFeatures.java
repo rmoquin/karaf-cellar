@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.shell.commands.Argument;
@@ -21,7 +22,6 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
 import java.util.Map;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 @Command(scope = "cluster", name = "feature-list", description = "List the features in a cluster group")
 public class ListGroupFeatures extends FeatureCommandSupport {
@@ -29,22 +29,22 @@ public class ListGroupFeatures extends FeatureCommandSupport {
     protected static final String HEADER_FORMAT = " %-11s   %-15s   %s";
     protected static final String OUTPUT_FORMAT = "[%-11s] [%-15s] %s";
 
-    @Argument(index = 0, name = "cluster", description = "The cluster group name", required = true, multiValued = false)
-    String clusterName;
+    @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
+    String groupName;
 
     @Option(name = "-i", aliases = { "--installed" }, description = "Display only installed features", required = false, multiValued = false)
     boolean installed;
 
     @Override
     protected Object doExecute() throws Exception {
-        CellarCluster cluster = clusterManager.findClusterByName(clusterName);
-        if (cluster == null) {
-            System.err.println("Cluster group " + clusterName + " doesn't exist");
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null) {
+            System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
-            Map<FeatureInfo, Boolean> clusterFeatures = cluster.getMap(Constants.FEATURES + Configurations.SEPARATOR + clusterName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             if (clusterFeatures != null && !clusterFeatures.isEmpty()) {
-                System.out.println(String.format("Features in cluster group " + clusterName));
+                System.out.println(String.format("Features in cluster group " + groupName));
                 System.out.println(String.format(HEADER_FORMAT, "Status", "Version", "Name"));
                 for (FeatureInfo info : clusterFeatures.keySet()) {
                     String name = info.getName();
@@ -62,7 +62,7 @@ public class ListGroupFeatures extends FeatureCommandSupport {
                         System.out.println(String.format(OUTPUT_FORMAT, statusString, version, name));
                     }
                 }
-            } else System.err.println("No features in cluster group " + clusterName);
+            } else System.err.println("No features in cluster group " + groupName);
         return null;
     }
 

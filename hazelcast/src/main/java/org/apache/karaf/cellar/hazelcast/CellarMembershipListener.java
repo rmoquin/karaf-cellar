@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
@@ -25,37 +24,34 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Cellar membership listener.
  */
-public class CellarMembershipListener extends HazelcastInstanceAware implements MembershipListener {
-
+public class CellarMembershipListener implements MembershipListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarMembershipListener.class);
-
+    private HazelcastCluster masterCluster;
     private GroupManager groupManager;
     private List<? extends Synchronizer> synchronizers;
 
-    public CellarMembershipListener(HazelcastInstance instance) {
-        this.instance = instance;
-        instance.getCluster().addMembershipListener(this);
+    public void init() {
+        this.masterCluster.addMembershipListener(this);
     }
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
         try {
-            Member local = instance.getCluster().getLocalMember();
+            boolean hasNode = this.masterCluster.hasNodeWithId(member.getUuid());
 
-            if (local.equals(member) && synchronizers != null && !synchronizers.isEmpty()) {
+            if (hasNode && synchronizers != null && !synchronizers.isEmpty()) {
                 Set<Group> groups = groupManager.listLocalGroups();
-                if (groups != null && !groups.isEmpty()) {
-                    for (Group group : groups) {
-                        for (Synchronizer synchronizer : synchronizers) {
-                            if (synchronizer.isSyncEnabled(group)) {
-                                synchronizer.pull(group);
-                                synchronizer.push(group);
-                            }
+                for (Group group : groups) {
+                    for (Synchronizer synchronizer : synchronizers) {
+                        if (synchronizer.isSyncEnabled(group)) {
+                            synchronizer.pull(group);
+                            synchronizer.push(group);
                         }
                     }
                 }
@@ -86,4 +82,17 @@ public class CellarMembershipListener extends HazelcastInstanceAware implements 
         this.synchronizers = synchronizers;
     }
 
+    /**
+     * @return the masterCluster
+     */
+    public CellarCluster getMasterCluster() {
+        return masterCluster;
+    }
+
+    /**
+     * @param masterCluster the masterCluster to set
+     */
+    public void setMasterCluster(HazelcastCluster masterCluster) {
+        this.masterCluster = masterCluster;
+    }
 }
