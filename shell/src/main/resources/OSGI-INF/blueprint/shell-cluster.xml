@@ -198,4 +198,4 @@
     <bean id="otherGroupCompleter" class="org.apache.karaf.cellar.core.shell.completer.OtherGroupsCompleter">
         <property name="groupManager" ref="groupManager"/>
     </bean>
-</bp:blueprint>
+</blueprint>
