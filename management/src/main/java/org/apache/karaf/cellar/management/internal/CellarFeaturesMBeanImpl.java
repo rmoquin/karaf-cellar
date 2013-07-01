@@ -434,4 +434,18 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
     }
+
+    /**
+     * @return the eventProducer
+     */
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    /**
+     * @param eventProducer the eventProducer to set
+     */
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
 }
