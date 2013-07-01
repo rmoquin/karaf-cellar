@@ -75,7 +75,7 @@ public class CellarSupportTest {
     @Test
     public void testIsAllowed() {
         CellarSupport support = new CellarSupport();
-        support.setSynchronizationConfiguration(configuration);
+        support.setSynchronizationConfig(configuration);
 
         Boolean expectedResult = false;
         Boolean result = support.isAllowed(defaultGroup,"config","org.apache.karaf.shell", EventType.INBOUND);
