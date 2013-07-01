@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class CellarSupport {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
-    private SynchronizationConfiguration synchronizationConfiguration;
+    private SynchronizationConfiguration synchronizationConfig;
 
     /**
      * Get a set of resources in the Cellar cluster groups configuration.
@@ -42,14 +42,14 @@ public class CellarSupport {
     public Set<String> getListEntries(String listType, String group, String category, EventType type) {
         Set<String> result = null;
         if (group != null) {
-            if (synchronizationConfiguration != null) {
-                String parent = (String) synchronizationConfiguration.getProperty(group + Configurations.SEPARATOR + Configurations.PARENT);
+            if (synchronizationConfig != null) {
+                String parent = (String) synchronizationConfig.getProperty(group + Configurations.SEPARATOR + Configurations.PARENT);
                 if (parent != null) {
                     result = getListEntries(listType, parent, category, type);
                 }
 
                 String propertyName = group + Configurations.SEPARATOR + category + Configurations.SEPARATOR + listType + Configurations.SEPARATOR + type.name().toLowerCase();
-                String propertyValue = (String) synchronizationConfiguration.getProperty(propertyName);
+                String propertyValue = (String) synchronizationConfig.getProperty(propertyName);
                 if (propertyValue != null) {
                     propertyValue = propertyValue.replaceAll("\n", "");
                     String[] itemList = propertyValue.split(Configurations.DELIMETER);
@@ -171,16 +171,16 @@ public class CellarSupport {
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
     }
 
     /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
     }
 }
