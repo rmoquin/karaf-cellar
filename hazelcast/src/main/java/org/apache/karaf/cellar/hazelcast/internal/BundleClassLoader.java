@@ -38,6 +38,12 @@ public class BundleClassLoader extends ClassLoader {
     public void init() {
         this.bundle = bundleContext.getBundle();
     }
+    
+    public void destroy() {
+        this.bundleContext = null;
+        this.bundle = null;
+        this.bundleListener = null;
+    }
 
     @Override
     protected Class<?> findClass(String name) throws ClassNotFoundException {

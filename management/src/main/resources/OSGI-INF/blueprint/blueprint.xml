@@ -17,13 +17,6 @@
 
     <ext:property-placeholder/>
     
-    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
-
     <!-- Core Cellar MBean -->
     <bean id="cellarMBean" class="org.apache.karaf.cellar.management.internal.CellarMBeanImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
@@ -108,4 +101,13 @@
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
         <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
+    
+    <reference id="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
+    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
+    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
+
 </blueprint>

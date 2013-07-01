@@ -35,7 +35,7 @@
                 <property name="eventProducer" ref="eventProducer"/>
             </action>
             <completers>
-                <ref component-id="allClustersCompleter"/>
+                <ref component-id="allGroupCompleter"/>
                 <ref component-id="allFeatureCompleter"/>
             </completers>
         </command>

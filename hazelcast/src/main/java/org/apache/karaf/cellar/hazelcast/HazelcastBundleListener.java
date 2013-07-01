@@ -37,10 +37,17 @@ public class HazelcastBundleListener implements SynchronousBundleListener {
         scanExistingBundles();
     }
 
+    public void destroy() {
+        bundleContext.removeBundleListener(this);
+        this.bundleContext = null;
+        emptyResources();
+        loadedResources.clear();
+    }
+
     public void scanExistingBundles() {
         Bundle[] bundles = bundleContext.getBundles();
         for (Bundle bundle : bundles) {
-            checkBundle(bundle);
+            loadFromBundle(bundle);
         }
     }
 
@@ -50,25 +57,27 @@ public class HazelcastBundleListener implements SynchronousBundleListener {
         switch (event.getType()) {
             case BundleEvent.STARTING:
             case BundleEvent.STARTED:
-                checkBundle(event.getBundle());
+                loadFromBundle(event.getBundle());
                 break;
             case BundleEvent.STOPPING:
             case BundleEvent.STOPPED:
+                unloadFromBundle(event.getBundle());
+                break;
             case BundleEvent.RESOLVED:
             case BundleEvent.UNINSTALLED:
         }
     }
 
-public void checkBundle(Bundle bundle) {
+    public void loadFromBundle(Bundle bundle) {
         //Bit of a dirty hack.
         if (bundle != null) {
             Dictionary dictionary = bundle.getHeaders();
-            Enumeration<URL> urls = bundle.findEntries("META-INF/services/", "*", true);
-            if (urls == null) {
-                return;
-            }
             String bundleName = (String) dictionary.get(org.osgi.framework.Constants.BUNDLE_NAME);
             if ("hazelcast".equals(bundleName)) {
+                Enumeration<URL> urls = bundle.findEntries("META-INF/services/", "*", true);
+                if (urls == null) {
+                    return;
+                }
                 if (urls.hasMoreElements()) {
                     while (urls.hasMoreElements()) {
                         URL url = urls.nextElement();
@@ -84,6 +93,24 @@ public void checkBundle(Bundle bundle) {
                     }
                 }
             }
+        }
+    }
+
+    public void unloadFromBundle(Bundle bundle) {
+//Bit of a dirty hack.
+        if (bundle != null) {
+            Dictionary dictionary = bundle.getHeaders();
+            String bundleName = (String) dictionary.get(org.osgi.framework.Constants.BUNDLE_NAME);
+            if ("hazelcast".equals(bundleName)) {
+                emptyResources();
+            }
+        }
+    }
+
+    private void emptyResources() {
+        for (Map.Entry<String, Vector<URL>> entry : loadedResources.entrySet()) {
+            Vector<URL> vector = entry.getValue();
+            vector.clear();
         }
     }
 

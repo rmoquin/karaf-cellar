@@ -36,57 +36,35 @@
     <build>
         <resources>
             <resource>
-                <directory>src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*</include>
-                </includes>
+                <directory>src/main/resources/resources</directory>
+                <targetPath>resources</targetPath>
             </resource>
         </resources>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <useDefaultDelimiters>false</useDefaultDelimiters>
-                    <delimiters>
-                        <delimiter>${*}</delimiter>
-                    </delimiters>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>filter</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>resources</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>attach-artifact</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>attach-artifact</goal>
                         </goals>
                         <configuration>
                             <artifacts>
                                 <artifact>
-                                    <file>target/classes/groups.cfg</file>
+                                    <file>target/classes/resources/etc/groups.cfg</file>
                                     <type>cfg</type>
                                     <classifier>groups</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>target/classes/node.cfg</file>
+                                    <file>target/classes/resources/etc/node.cfg</file>
                                     <type>cfg</type>
                                     <classifier>node</classifier>
                                 </artifact>
                                 <artifact>
-                                    <file>target/classes/hazelcast.xml</file>
+                                    <file>target/classes/resources/etc/hazelcast.xml</file>
                                     <type>xml</type>
                                     <classifier>hazelcast</classifier>
                                 </artifact>
@@ -134,6 +112,9 @@
             <plugin>
                 <groupId>org.apache.karaf.tooling</groupId>
                 <artifactId>karaf-maven-plugin</artifactId>
+                <configuration>
+                    <inputFile>src/main/resources/feature.xml</inputFile>
+                </configuration>
             </plugin>
         </plugins>
     </build>

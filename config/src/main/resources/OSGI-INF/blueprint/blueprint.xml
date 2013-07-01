@@ -49,7 +49,7 @@
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
     </bean>
     
     <!-- Cluster Event Handler -->

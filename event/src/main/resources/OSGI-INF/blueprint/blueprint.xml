@@ -52,6 +52,10 @@
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
+    
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+    </bean>
 
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>

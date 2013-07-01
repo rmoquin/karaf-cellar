@@ -30,6 +30,7 @@ import java.util.Map;
 @Command(scope = "cluster", name = "bundle-uninstall", description = "Uninstall a bundle from a cluster group")
 public class UninstallBundleCommand extends BundleCommandSupport {
     private EventProducer eventProducer;
+    
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists

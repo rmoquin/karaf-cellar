@@ -567,6 +567,7 @@
                         <Embed-Dependency>${osgi.embed.dependency}</Embed-Dependency>
                     </instructions>
                     <supportedProjectTypes>
+                        <supportedProjectType>kar</supportedProjectType>
                         <supportedProjectType>jar</supportedProjectType>
                         <supportedProjectType>war</supportedProjectType>
                         <supportedProjectType>bundle</supportedProjectType>

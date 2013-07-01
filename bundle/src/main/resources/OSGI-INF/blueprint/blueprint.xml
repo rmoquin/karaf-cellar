@@ -59,13 +59,14 @@
     </service>
 
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
     </bean>
 
     <!-- Cluster Core Services -->
     <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
+    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 </blueprint>

@@ -22,11 +22,13 @@
 
     <ext:property-placeholder />
     
-    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init">
+    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
+    destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
     
-    <bean id="bundleClassLoader" class="org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader" init-method="init">
+    <bean id="bundleClassLoader" class="org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader" init-method="init"
+    destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="bundleListener" ref="bundleListener"/>
     </bean>
@@ -39,7 +41,7 @@
                                update-method="update"/>
     </bean>
     
-    <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="destroy">
+    <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="shutdown">
         <property name="name" value="default"/>
         <property name="configManager" ref="configManager"/>
     </bean>
@@ -82,9 +84,9 @@
 
     <!-- Members Listener -->
     <bean id="membershipListener" class="org.apache.karaf.cellar.hazelcast.CellarMembershipListener" init-method="init">
-        <argument index="0" ref="hazelcast"/>
         <property name="synchronizers" ref="synchronizers"/>
         <property name="groupManager" ref="groupManager"/>
+        <property name="masterCluster" ref="masterCluster"/>
     </bean>
     
     <!-- Cluster Event Transport Factory -->
@@ -163,7 +165,7 @@
     <!-- Handler For Cluster Manage Handlers Command Event -->
     <bean id="manageHandlersCommandHandler" class="org.apache.karaf.cellar.core.control.ManageHandlersCommandHandler">
         <property name="producer" ref="eventProducer"/>
-        <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
 
     <service ref="manageHandlersCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
