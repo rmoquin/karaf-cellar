@@ -70,7 +70,7 @@
 
     <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
         <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
     </bean>
 

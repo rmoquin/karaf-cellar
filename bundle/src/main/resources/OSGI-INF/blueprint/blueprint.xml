@@ -33,7 +33,7 @@
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
+        <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
         <property name="masterCluster" ref="masterCluster"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="eventProducer" ref="eventProducer"/>
@@ -47,7 +47,7 @@
           init-method="init" destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>
+        <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
@@ -58,7 +58,7 @@
         </service-properties>
     </service>
 
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
         <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
     </bean>
 

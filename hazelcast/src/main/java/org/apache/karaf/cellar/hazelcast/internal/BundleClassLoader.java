@@ -76,11 +76,10 @@ public class BundleClassLoader extends ClassLoader {
 
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-        name = name.substring(length);
-        LOGGER.warn(name);
-        LOGGER.warn(bundleListener.getResources().toString());
-        if (bundleListener.getResources().containsKey(name)) {
-            return bundleListener.getResources().get(name).elements();
+        String metainfClazz = name.substring(length);
+        LOGGER.warn(metainfClazz);
+        if (bundleListener.getResources().containsKey(metainfClazz)) {
+            return bundleListener.getResources().get(metainfClazz).elements();
         } else {
             return bundle.findEntries(name, "*", false);
         }

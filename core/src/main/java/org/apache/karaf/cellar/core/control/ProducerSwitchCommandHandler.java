@@ -26,7 +26,7 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ProducerSwitchCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SynchronizationConfiguration synchronizationConfiguration;
+    private SynchronizationConfiguration synchronizationConfig;
 
     /**
      * Execute a producer switch command.
@@ -48,9 +48,9 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
                 producer.getSwitch().turnOff();
             }
             try {
-                if (this.synchronizationConfiguration != null) {
-                    this.synchronizationConfiguration.setProperty(Configurations.PRODUCER, statusValue);
-                    this.synchronizationConfiguration.save();
+                if (this.synchronizationConfig != null) {
+                    this.synchronizationConfig.setProperty(Configurations.PRODUCER, statusValue);
+                    this.synchronizationConfig.save();
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Error setting producer switch.", ex);
@@ -71,16 +71,16 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
     }
 
     /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
     }
 }

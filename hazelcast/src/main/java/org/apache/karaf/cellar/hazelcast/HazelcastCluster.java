@@ -17,7 +17,6 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hazelcast.config.Config;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.IMap;
@@ -35,7 +34,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +44,6 @@ import org.slf4j.LoggerFactory;
 public class HazelcastCluster implements CellarCluster, MembershipListener {
     @JsonIgnore
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
-    private HazelcastConfigurationManager configManager;
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
     @JsonIgnore
     private IdGenerator idgenerator;
@@ -61,8 +58,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
 
     public void init() {
-        this.config = this.configManager.getHazelcastConfig(this.name);
-        this.instance = Hazelcast.newHazelcastInstance(config);
         this.listenerId = instance.getCluster().addMembershipListener(this);
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
         this.memberNodes.put(this.localNode.getId(), this.localNode);
@@ -291,19 +286,5 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      */
     public void setLocalNode(HazelcastNode localNode) {
         this.localNode = localNode;
-    }
-
-    /**
-     * @return the configManager
-     */
-    public HazelcastConfigurationManager getConfigManager() {
-        return configManager;
-    }
-
-    /**
-     * @param configManager the configManager to set
-     */
-    public void setConfigManager(HazelcastConfigurationManager configManager) {
-        this.configManager = configManager;
     }
 }

@@ -43,6 +43,9 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private String listenerId;
 
     public void init() {
+        if (topic == null) {
+            topic = ((HazelcastCluster)masterCluster).getTopic(Constants.TOPIC);
+        }
         start();
     }
 

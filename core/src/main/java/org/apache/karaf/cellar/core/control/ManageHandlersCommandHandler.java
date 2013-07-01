@@ -32,7 +32,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageHandlersCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.listhandlers.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SynchronizationConfiguration synchronizationConfiguration;
+    private SynchronizationConfiguration synchronizationConfig;
 
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
@@ -93,8 +93,8 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            if (this.synchronizationConfiguration != null) {
-                this.synchronizationConfiguration.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
+            if (this.synchronizationConfig != null) {
+                this.synchronizationConfig.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
 
             }
         } catch (Exception e) {
@@ -113,16 +113,16 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public SynchronizationConfiguration getSynchronizationConfig() {
+        return synchronizationConfig;
     }
 
     /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
+    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+        this.synchronizationConfig = synchronizationConfig;
     }
 }

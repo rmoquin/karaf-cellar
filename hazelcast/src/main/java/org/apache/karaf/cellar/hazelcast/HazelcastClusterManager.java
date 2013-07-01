@@ -15,8 +15,10 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ITopic;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import org.apache.karaf.cellar.core.ClusterManager;
 import java.util.Map;
@@ -33,21 +35,13 @@ import org.slf4j.LoggerFactory;
 public class HazelcastClusterManager implements ClusterManager {
     private static transient Logger LOGGER = LoggerFactory.getLogger(HazelcastClusterManager.class);
     private CellarCluster masterCluster;
-    private List<CellarCluster> clusters;
     private Map<String, CellarCluster> clusterMap = new ConcurrentHashMap<String, CellarCluster>();
 
     public void init() {
+        this.clusterMap.put(masterCluster.getName(), masterCluster);
     }
 
     public void destroy() {
-    }
-
-    public void bind(CellarCluster cellarCluster) {
-        clusterMap.put(cellarCluster.getName(), masterCluster);
-    }
-
-    public void unbind(CellarCluster cellarCluster) {
-        clusterMap.remove(cellarCluster.getName());
     }
 
     /**
@@ -135,7 +129,8 @@ public class HazelcastClusterManager implements ClusterManager {
 
     @Override
     public Node findNodeById(String nodeId) {
-        for (CellarCluster cellarCluster : clusters) {
+        for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
+            CellarCluster cellarCluster = it.next();
             Node node = cellarCluster.findNodeById(nodeId);
             if (node != null) {
                 return node;
@@ -159,19 +154,15 @@ public class HazelcastClusterManager implements ClusterManager {
      */
     @Override
     public List<CellarCluster> getClusters() {
-        return clusters;
-    }
-
-    /**
-     * @param clusters the clusters to set
-     */
-    public void setClusters(List<CellarCluster> clusters) {
-        this.clusters = clusters;
+        List<CellarCluster> list = new ArrayList<CellarCluster>();
+        list.addAll(clusterMap.values());
+        return list;
     }
 
     /**
      * @return the masterCluster
      */
+    @Override
     public CellarCluster getMasterCluster() {
         return masterCluster;
     }

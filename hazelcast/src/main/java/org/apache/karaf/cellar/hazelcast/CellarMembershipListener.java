@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
 
 /**
  * Cellar membership listener.
@@ -85,7 +84,7 @@ public class CellarMembershipListener implements MembershipListener {
     /**
      * @return the masterCluster
      */
-    public CellarCluster getMasterCluster() {
+    public HazelcastCluster getMasterCluster() {
         return masterCluster;
     }
 

@@ -48,7 +48,7 @@
 
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
         <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
     </bean>
     
