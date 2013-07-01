@@ -226,4 +226,32 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
     }
+
+    /**
+     * @return the clusterManager
+     */
+    public ClusterManager getClusterManager() {
+        return clusterManager;
+    }
+
+    /**
+     * @param clusterManager the clusterManager to set
+     */
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
+    }
+
+    /**
+     * @return the eventProducer
+     */
+    public EventProducer getEventProducer() {
+        return eventProducer;
+    }
+
+    /**
+     * @param eventProducer the eventProducer to set
+     */
+    public void setEventProducer(EventProducer eventProducer) {
+        this.eventProducer = eventProducer;
+    }
 }

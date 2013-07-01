@@ -261,4 +261,18 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     public void setMasterCluster(CellarCluster masterCluster) {
         this.masterCluster = masterCluster;
     }
+
+    /**
+     * @return the cellarSupport
+     */
+    public CellarSupport getCellarSupport() {
+        return cellarSupport;
+    }
+
+    /**
+     * @param cellarSupport the cellarSupport to set
+     */
+    public void setCellarSupport(CellarSupport cellarSupport) {
+        this.cellarSupport = cellarSupport;
+    }
 }

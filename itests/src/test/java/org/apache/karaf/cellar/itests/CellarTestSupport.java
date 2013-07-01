@@ -183,8 +183,7 @@ public class CellarTestSupport {
     public Option[] config() {
         Option[] options = new Option[]{
             cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
-                editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
-                editConfigurationFileExtend("etc/config.properties", "org.apache.aries.blueprint.synchronous", "true")
+                editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL())
         };
         String debug = System.getProperty("debugMain");
         if (debug != null) {
