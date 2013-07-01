@@ -89,7 +89,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
                 Set<String> groupNames = convertStringToSet(groups);
                 if (groupNames != null && !groupNames.isEmpty()) {
                     for (String groupName : groupNames) {
-                        LOGGER.error("Ending up with some linked HASHMAP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
                         registerGroup(groupName);
                     }
                 }
@@ -326,15 +325,11 @@ public class HazelcastGroupManager implements GroupManager, EntryListener, Confi
 
     @Override
     public void registerGroup(String groupName) {
-        try {
         Group group = listGroups().get(groupName);
         if (group == null) {
             group = new Group(groupName);
         }
         registerGroup(group);
-        } catch(Exception ex) {
-            LOGGER.error("Error attemmpting to register group for some reason: " + groupName + " listGroups: " + listGroups(), ex);
-        }
     }
 
     @Override
