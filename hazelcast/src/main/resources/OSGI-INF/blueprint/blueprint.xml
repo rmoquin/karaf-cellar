@@ -124,7 +124,7 @@
     
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
     
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
         <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
     
