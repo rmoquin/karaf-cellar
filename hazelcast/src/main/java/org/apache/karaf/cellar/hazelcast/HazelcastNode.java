@@ -26,10 +26,11 @@ public class HazelcastNode implements Node {
     private Member hzMember;
 
     public HazelcastNode(Member hzMember) {
-        this.hzMember = hzMember;
+        this.init(hzMember);
     }
 
     public void init(Member hzMember) {
+        this.hzMember = hzMember;
         this.host = this.hzMember.getInetSocketAddress().getHostString();
         this.port = this.hzMember.getInetSocketAddress().getPort();
     }

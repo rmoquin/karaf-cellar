@@ -16,7 +16,8 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hazelcast.config.Config;
+import com.hazelcast.core.DistributedObjectEvent;
+import com.hazelcast.core.DistributedObjectListener;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.IMap;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class HazelcastCluster implements CellarCluster, MembershipListener {
+public class HazelcastCluster implements CellarCluster, MembershipListener, DistributedObjectListener {
     @JsonIgnore
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
@@ -51,24 +52,28 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private HazelcastInstance instance;
     private String name;
     @JsonIgnore
-    private String listenerId;
+    private String memberListenerId;
+    private String doListenerId;
     private HazelcastNode localNode;
-    private Config config;
     @JsonIgnore
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
 
     public void init() {
-        this.listenerId = instance.getCluster().addMembershipListener(this);
+        this.memberListenerId = instance.getCluster().addMembershipListener(this);
+        this.doListenerId = instance.addDistributedObjectListener(this);
         this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
         this.memberNodes.put(this.localNode.getId(), this.localNode);
     }
     
     @Override
     public void shutdown() {
-        instance.getCluster().removeMembershipListener(listenerId);
+        instance.getCluster().removeMembershipListener(memberListenerId);
+        instance.removeDistributedObjectListener(doListenerId);
         if (instance != null) {
             instance.getLifecycleService().shutdown();
         }
+        this.memberNodes.clear();
+        instance = null;
     }
 
     public String addMembershipListener(MembershipListener listener) {
@@ -77,6 +82,14 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
 
     public boolean removeMembershipListener(String registrationId) {
         return instance.getCluster().removeMembershipListener(registrationId);
+    }
+    
+    public String addDistributedObjectListener(DistributedObjectListener listenerId) {
+        return instance.addDistributedObjectListener(listenerId);
+    }
+
+    public boolean removeDistributedObjectListener(String listenerId) {
+        return instance.removeDistributedObjectListener(listenerId);
     }
 
     /**
@@ -167,6 +180,16 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
             LOGGER.info("Node , " + uuid + ", left cluster, " + this.name + ".");
         }
         node.destroy();
+    }
+    
+        @Override
+    public void distributedObjectCreated(DistributedObjectEvent event) {
+        LOGGER.info("A new distributed object was created: " + event.toString());
+    }
+
+    @Override
+    public void distributedObjectDestroyed(DistributedObjectEvent event) {
+        LOGGER.info("A distributed object was removed: " + event.toString());
     }
 
     @Override

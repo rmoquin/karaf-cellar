@@ -22,15 +22,15 @@
 
     <ext:property-placeholder />
     
-    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
+<!--    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-    </bean>
+    </bean>-->
     
     <bean id="bundleClassLoader" class="org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="bundleListener" ref="bundleListener"/>
+        <!--<property name="bundleListener" ref="bundleListener"/>-->
     </bean>
     
     <bean id="instanceFactory" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastServiceFactory"
@@ -107,11 +107,13 @@
           destroy-method="destroy">
         <property name="dispatcher" ref="dispatcher"/>
         <property name="masterCluster" ref="masterCluster"/>
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
 
     <!-- Cluster Event Producer -->
     <bean id="eventProducer" class="org.apache.karaf.cellar.hazelcast.TopicProducer" init-method="init">
         <property name="masterCluster" ref="masterCluster"/>
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
     </bean>
     
     <service ref="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
@@ -120,6 +122,7 @@
     <bean id="executionContext" class="org.apache.karaf.cellar.core.command.ClusteredExecutionContext">
         <property name="producer" ref="eventProducer"/>
         <property name="commandStore" ref="commandStore"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
     
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>

@@ -38,6 +38,9 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     private SynchronizationConfiguration synchronizationConfig;
 
     public void init() {
+        if (topic == null) {
+            topic = ((HazelcastCluster)masterCluster).getTopic(Constants.TOPIC);
+        }
     }
 
     public void destroy() {

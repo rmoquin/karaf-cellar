@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import org.apache.karaf.cellar.core.Node;
 
 /**
  * Cellar membership listener.
@@ -42,14 +43,19 @@ public class CellarMembershipListener implements MembershipListener {
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
         try {
-            boolean hasNode = this.masterCluster.hasNodeWithId(member.getUuid());
-
-            if (hasNode && synchronizers != null && !synchronizers.isEmpty()) {
+            Node localNode = this.masterCluster.getLocalNode();
+            if (localNode.getId().equals(member.getUuid()) && synchronizers != null && !synchronizers.isEmpty()) {
                 Set<Group> groups = groupManager.listLocalGroups();
                 for (Group group : groups) {
                     for (Synchronizer synchronizer : synchronizers) {
                         if (synchronizer.isSyncEnabled(group)) {
+                            if (LOGGER.isInfoEnabled()) {
+                                LOGGER.info("Synchronizing local node via pull from group: " + group.getName());
+                            }
                             synchronizer.pull(group);
+                            if (LOGGER.isInfoEnabled()) {
+                                LOGGER.info("Synchronizing local node via push to group: " + group.getName());
+                            }
                             synchronizer.push(group);
                         }
                     }

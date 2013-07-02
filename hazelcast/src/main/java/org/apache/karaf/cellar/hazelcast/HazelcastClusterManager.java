@@ -42,6 +42,8 @@ public class HazelcastClusterManager implements ClusterManager {
     }
 
     public void destroy() {
+        this.clusterMap.clear();
+        this.masterCluster = null;
     }
 
     /**
