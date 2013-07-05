@@ -32,7 +32,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group.
@@ -41,7 +41,7 @@ import org.apache.karaf.cellar.core.SynchronizationConfiguration;
 public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
     private EventProducer eventProducer;
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
     private GroupManager groupManager;
     private CellarCluster masterCluster;
     private CellarSupport cellarSupport;
@@ -223,14 +223,14 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 

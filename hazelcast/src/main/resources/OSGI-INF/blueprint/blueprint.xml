@@ -22,33 +22,27 @@
 
     <ext:property-placeholder />
     
-<!--    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
+    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-    </bean>-->
+    </bean>
     
     <bean id="bundleClassLoader" class="org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <!--<property name="bundleListener" ref="bundleListener"/>-->
+        <property name="bundleListener" ref="bundleListener"/>
     </bean>
     
-    <bean id="instanceFactory" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastServiceFactory"
-          init-method="init" destroy-method="destroy">
-        <property name="clusterName" value="default"/>
-        <property name="xmlConfig" value="${karaf.home}/etc/hazelcast.xml"/>
+    <bean id="configManager" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager">
         <property name="hzClassLoader" ref="bundleClassLoader"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="xmlConfig" value="${karaf.home}/etc/hazelcast.xml"/>
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.discovery" update-strategy="component-managed"
                                update-method="update"/>
-    </bean>
-    
-    <bean id="hazelcast" class="com.hazelcast.core.HazelcastInstance" factory-ref="instanceFactory"
-      factory-method="getInstance" destroy-method="shutdown"/>
+    </bean>    
     
     <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="shutdown">
         <property name="name" value="default"/>
-        <property name="instance" ref="hazelcast"/>
+        <property name="configManager" ref="configManager"/>
     </bean>
     
     <service ref="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster">
@@ -68,6 +62,7 @@
     <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.groups" update-strategy="component-managed" update-method="updated"/>
         <property name="masterCluster" ref="masterCluster"/>
+        <property name="synchronizationConfig" ref="synchronizationConfig"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>

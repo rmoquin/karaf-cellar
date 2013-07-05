@@ -26,6 +26,10 @@ public class ClusterRepositoryEvent extends Event {
     private Boolean install;
     private Boolean uninstall;
 
+    public ClusterRepositoryEvent() {
+        super();
+    }
+    
     public ClusterRepositoryEvent(String id, EventType type) {
         super(id);
         this.type = type;

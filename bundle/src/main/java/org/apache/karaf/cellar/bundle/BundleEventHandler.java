@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 
 /**
  * The BundleEventHandler is responsible to process received cluster event for bundles.
@@ -37,7 +37,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.bundle.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
     
@@ -136,14 +136,14 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 

@@ -14,7 +14,7 @@
 package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,7 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ProducerSwitchCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
 
     /**
      * Execute a producer switch command.
@@ -73,14 +73,14 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 }

@@ -19,7 +19,7 @@ import com.hazelcast.core.MessageListener;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Dispatcher;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -37,7 +37,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private ITopic topic;
     private Dispatcher dispatcher;
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
     private CellarCluster masterCluster;
     private boolean isConsuming;
     private String listenerId;
@@ -126,14 +126,14 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 

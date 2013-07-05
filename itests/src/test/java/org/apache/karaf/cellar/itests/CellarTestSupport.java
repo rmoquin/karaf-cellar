@@ -189,7 +189,7 @@ public class CellarTestSupport {
         if (debug != null) {
             int l = options.length;
             options = Arrays.copyOf(options, l + 1);
-            options[l] = KarafDistributionOption.debugConfiguration();
+            options[l] = KarafDistributionOption.debugConfiguration("5005", true);
         }
         return options;
     }

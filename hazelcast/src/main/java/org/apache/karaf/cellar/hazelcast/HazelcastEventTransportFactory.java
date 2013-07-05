@@ -17,7 +17,7 @@ import com.hazelcast.core.IQueue;
 import com.hazelcast.core.ITopic;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Dispatcher;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventTransportFactory;
@@ -27,7 +27,7 @@ import org.apache.karaf.cellar.core.event.EventTransportFactory;
  */
 public class HazelcastEventTransportFactory implements EventTransportFactory {
     private Dispatcher dispatcher;
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
     private CellarCluster masterCluster;
 
     @Override
@@ -84,14 +84,14 @@ public class HazelcastEventTransportFactory implements EventTransportFactory {
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 

@@ -18,6 +18,7 @@ package org.apache.karaf.cellar.hazelcast;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hazelcast.core.DistributedObjectEvent;
 import com.hazelcast.core.DistributedObjectListener;
+import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IList;
 import com.hazelcast.core.IMap;
@@ -28,6 +29,7 @@ import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -35,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,23 +51,26 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
     @JsonIgnore
     private IdGenerator idgenerator;
-    @JsonIgnore
     private HazelcastInstance instance;
+    private HazelcastConfigurationManager configManager;
     private String name;
-    @JsonIgnore
     private String memberListenerId;
     private String doListenerId;
     private HazelcastNode localNode;
-    @JsonIgnore
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
 
     public void init() {
-        this.memberListenerId = instance.getCluster().addMembershipListener(this);
-        this.doListenerId = instance.addDistributedObjectListener(this);
-        this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-        this.memberNodes.put(this.localNode.getId(), this.localNode);
+        try {
+            this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, name));        
+            this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
+            this.memberNodes.put(this.localNode.getId(), this.localNode);
+            this.memberListenerId = instance.getCluster().addMembershipListener(this);
+            this.doListenerId = instance.addDistributedObjectListener(this);
+        } catch (FileNotFoundException ex) {
+            LOGGER.error("Error initializing hazelcast cluster.", ex);
+        }
     }
-    
+
     @Override
     public void shutdown() {
         instance.getCluster().removeMembershipListener(memberListenerId);
@@ -83,7 +89,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
     public boolean removeMembershipListener(String registrationId) {
         return instance.getCluster().removeMembershipListener(registrationId);
     }
-    
+
     public String addDistributedObjectListener(DistributedObjectListener listenerId) {
         return instance.addDistributedObjectListener(listenerId);
     }
@@ -181,8 +187,8 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
         }
         node.destroy();
     }
-    
-        @Override
+
+    @Override
     public void distributedObjectCreated(DistributedObjectEvent event) {
         LOGGER.info("A new distributed object was created: " + event.toString());
     }
@@ -309,5 +315,19 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
      */
     public void setLocalNode(HazelcastNode localNode) {
         this.localNode = localNode;
+    }
+
+    /**
+     * @return the configManager
+     */
+    public HazelcastConfigurationManager getConfigManager() {
+        return configManager;
+    }
+
+    /**
+     * @param configManager the configManager to set
+     */
+    public void setConfigManager(HazelcastConfigurationManager configManager) {
+        this.configManager = configManager;
     }
 }

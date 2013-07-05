@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author rmoquin
  */
-public interface SynchronizationConfiguration {
+public interface SwitchConfiguration {
     /**
      * Saves any changes made to this configuration object.
      */
@@ -42,8 +42,5 @@ public interface SynchronizationConfiguration {
      */
     public Map<String, Object> getProperties();
 
-    /**
-     * @param properties the properties to set
-     */
-    public void setProperties(Map<String, Object> properties);
+    void updated(Map<String, Object> properties);
 }

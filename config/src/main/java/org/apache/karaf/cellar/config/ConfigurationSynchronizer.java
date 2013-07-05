@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -45,9 +45,9 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private GroupManager groupManager;
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
-	private EventProducer eventProducer;
-    private SynchronizationConfiguration synchronizationConfiguration;
-    
+    private EventProducer eventProducer;
+    private SwitchConfiguration synchronizationConfiguration;
+
     public ConfigurationSynchronizer() {
         // nothing to do
     }
@@ -154,26 +154,25 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             }
         }
     }
-        /**
-         * Check if configuration sync flag is enabled for a cluster group.
-         *
-         * @param cluster the cluster group.
-         * @return true if the configuration sync flag is enabled for the cluster group, false else.
-         */
-        @Override
-        public Boolean isSyncEnabled(Group group) {
+
+    /**
+     * Check if configuration sync flag is enabled for a cluster group.
+     *
+     * @param cluster the cluster group.
+     * @return true if the configuration sync flag is enabled for the cluster group, false else.
+     */
+    @Override
+    public Boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
 
-            String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
-            return Boolean.parseBoolean(propertyValue);
-        }
+        String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+        String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
+        return Boolean.parseBoolean(propertyValue);
+    }
 
-        /**
-         * @return the configurationAdmin
-         */
-    
-
+    /**
+     * @return the configurationAdmin
+     */
     public ConfigurationAdmin getConfigurationAdmin() {
         return configurationAdmin;
     }
@@ -216,14 +215,14 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     /**
      * @return the synchronizationConfiguration
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
+    public SwitchConfiguration getSynchronizationConfiguration() {
         return synchronizationConfiguration;
     }
 
     /**
      * @param synchronizationConfiguration the synchronizationConfiguration to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
     }
 

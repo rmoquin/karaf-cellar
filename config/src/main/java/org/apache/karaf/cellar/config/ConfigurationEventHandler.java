@@ -32,7 +32,7 @@ import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -46,7 +46,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     private CellarSupport cellarSupport;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private SynchronizationConfiguration synchronizationConfiguration;
+    private SwitchConfiguration synchronizationConfiguration;
 
     @Override
     public void handle(ClusterConfigurationEvent event) {
@@ -197,14 +197,14 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     /**
      * @return the synchronizationConfiguration
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
+    public SwitchConfiguration getSynchronizationConfiguration() {
         return synchronizationConfiguration;
     }
 
     /**
      * @param synchronizationConfiguration the synchronizationConfiguration to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
     }
     

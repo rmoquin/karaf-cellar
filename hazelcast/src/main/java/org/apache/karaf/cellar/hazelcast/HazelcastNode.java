@@ -21,27 +21,29 @@ import org.apache.karaf.cellar.core.Node;
  * Cluster node powered by Hazelcast.
  */
 public class HazelcastNode implements Node {
+    private String id;
     private String host;
     private int port;
-    private Member hzMember;
 
+    public HazelcastNode() {
+    }
+    
     public HazelcastNode(Member hzMember) {
         this.init(hzMember);
     }
 
     public void init(Member hzMember) {
-        this.hzMember = hzMember;
-        this.host = this.hzMember.getInetSocketAddress().getHostString();
-        this.port = this.hzMember.getInetSocketAddress().getPort();
+        this.id = hzMember.getUuid();
+        this.host = hzMember.getInetSocketAddress().getHostString();
+        this.port = hzMember.getInetSocketAddress().getPort();
     }
 
     public void destroy() {
-        this.hzMember = null;
     }
 
     @Override
     public String getId() {
-        return hzMember.getUuid();
+        return this.id;
     }
 
     @Override
@@ -87,5 +89,12 @@ public class HazelcastNode implements Node {
     @Override
     public String toString() {
         return MessageFormat.format("HazelcastNode [id={0}, host={1}, port={2}]", getId(), host, port);
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 }

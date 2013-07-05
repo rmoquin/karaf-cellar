@@ -18,7 +18,8 @@ package org.apache.karaf.cellar.hazelcast.internal;
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
@@ -28,40 +29,26 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class HazelcastSynchronizationConfiguration implements SynchronizationConfiguration {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSynchronizationConfiguration.class);
+public class HazelcastSwitchConfiguration implements SwitchConfiguration {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSwitchConfiguration.class);
     private Map<String, Object> properties;
     private ConfigurationAdmin configurationAdmin;
-    private String pid;
-
-    public void updated(Map<String, Object> properties) {
-        this.properties = properties;
-    }
-
-    /**
-     * @return the properties
-     */
-    @Override
-    public Map<String, Object> getProperties() {
-        return properties;
-    }
-
-    /**
-     * @param properties the properties to set
-     */
-    @Override
-    public void setProperties(Map<String, Object> properties) {
-        this.properties = properties;
-    }
+    private String pid = Configurations.GROUP_SYNC_RULES_PID;
 
     @Override
     public Object getProperty(String name) {
+        LOGGER.warn("Attempting to retrieve sync value for property: " + name);
         return properties.get(name);
     }
 
     @Override
     public void setProperty(String name, Object value) {
         this.properties.put(name, value);
+    }
+
+    @Override
+    public void updated(Map<String, Object> properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -105,5 +92,10 @@ public class HazelcastSynchronizationConfiguration implements SynchronizationCon
      */
     public void setPid(String pid) {
         this.pid = pid;
+    }
+    
+    @Override
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 }

@@ -15,7 +15,7 @@ package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Consumer;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private Consumer consumer;
-    private SynchronizationConfiguration synchronizationConfiguration;
+    private SwitchConfiguration synchronizationConfiguration;
 
     /**
      * Handle the {@code ConsumeSwitchCommand} command.
@@ -82,14 +82,14 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     /**
      * @return the synchronizationConfiguration
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
+    public SwitchConfiguration getSynchronizationConfiguration() {
         return synchronizationConfiguration;
     }
 
     /**
      * @param synchronizationConfiguration the synchronizationConfiguration to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
     }
 }

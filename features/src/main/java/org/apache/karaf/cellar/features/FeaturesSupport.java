@@ -28,7 +28,7 @@ import java.util.Map;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 
 /**
  * Generic features support.
@@ -41,7 +41,7 @@ public class FeaturesSupport {
     protected ClusterManager clusterManager;
     protected CellarSupport cellarSupport;
     protected GroupManager groupManager;
-    private SynchronizationConfiguration synchronizationConfiguration;
+    private SwitchConfiguration synchronizationConfiguration;
     
     public void init() {
         // nothing to do
@@ -223,14 +223,14 @@ public class FeaturesSupport {
     /**
      * @return the synchronizationConfiguration
      */
-    public SynchronizationConfiguration getSynchronizationConfiguration() {
+    public SwitchConfiguration getSynchronizationConfiguration() {
         return synchronizationConfiguration;
     }
 
     /**
      * @param synchronizationConfiguration the synchronizationConfiguration to set
      */
-    public void setSynchronizationConfiguration(SynchronizationConfiguration synchronizationConfiguration) {
+    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
         this.synchronizationConfiguration = synchronizationConfiguration;
     }
 

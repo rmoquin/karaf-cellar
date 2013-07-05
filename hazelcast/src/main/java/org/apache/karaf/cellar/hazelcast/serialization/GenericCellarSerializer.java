@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.hazelcast;
+package org.apache.karaf.cellar.hazelcast.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
@@ -25,14 +25,19 @@ import java.io.IOException;
  * @author rmoquin
  */
 public class GenericCellarSerializer implements ByteArraySerializer<Object> {
-    SmileFactory f = new SmileFactory();
-    ObjectMapper mapper = new ObjectMapper(f);
+    private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
+        
+    protected int typeId;
+
+    public GenericCellarSerializer() {
+        mapper.enableDefaultTyping();
+    }
 
     @Override
     public int getTypeId() {
-        return 10;
+        return 100;
     }
-
+    
     @Override
     public void destroy() {
     }

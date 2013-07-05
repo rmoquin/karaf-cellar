@@ -14,7 +14,7 @@
 package org.apache.karaf.cellar.core.control;
 
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.osgi.framework.BundleContext;
@@ -32,7 +32,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageHandlersCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.listhandlers.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
 
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
@@ -115,14 +115,14 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 }

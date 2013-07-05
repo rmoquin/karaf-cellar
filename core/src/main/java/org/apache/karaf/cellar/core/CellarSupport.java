@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class CellarSupport {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
 
     /**
      * Get a set of resources in the Cellar cluster groups configuration.
@@ -173,14 +173,14 @@ public class CellarSupport {
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 }

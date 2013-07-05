@@ -19,9 +19,9 @@ package org.apache.karaf.cellar.core;
 public class Configurations {
 
     public static final String DEFAULT_GROUP_NAME = "default";
-    public static final String GROUP_ENTRIES = "cellar.group.entries";
-    public static final String GROUPS_PID = "org.apache.karaf.cellar.groups";
-    public static final String GROUPS_CONFIG = "cellar.groups.config";
+    public static final String GROUP_ENTRIES = "cellar.groups.list";
+    public static final String GROUP_SYNC_RULES_PID = "org.apache.karaf.cellar.groups";
+    public static final String GROUPS_SYNC_RULES_MAP = "cellar.groups.rules";
     public static final String GROUPS_KEY = "groups";
     public static final String NODE = "org.apache.karaf.cellar.node";
     public static final String PRODUCER = "producer";

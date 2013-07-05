@@ -32,7 +32,7 @@ public class BundleClassLoader extends ClassLoader {
     private static Logger LOGGER = LoggerFactory.getLogger(BundleClassLoader.class);
     private BundleContext bundleContext;
     private Bundle bundle;
-//    private HazelcastBundleListener bundleListener;
+    private HazelcastBundleListener bundleListener;
     private int length = "META-INF/services/".length();
 
     public void init() {
@@ -42,7 +42,7 @@ public class BundleClassLoader extends ClassLoader {
     public void destroy() {
         this.bundleContext = null;
         this.bundle = null;
-//        this.bundleListener = null;
+        this.bundleListener = null;
     }
 
     @Override
@@ -66,23 +66,23 @@ public class BundleClassLoader extends ClassLoader {
 
     @Override
     public URL getResource(String name) {
-//        name = name.substring(length);
-//        if (bundleListener.getResources().containsKey(name)) {
-//            return bundleListener.getResources().get(name).get(0);
-//        } else {
+        name = name.substring(length);
+        if (bundleListener.getResources().containsKey(name)) {
+            return bundleListener.getResources().get(name).get(0);
+        } else {
             return bundle.getEntry(name);
-//        }
+        }
     }
 
     @Override
     public Enumeration<URL> getResources(String name) throws IOException {
-//        String metainfClazz = name.substring(length);
-//        LOGGER.warn(metainfClazz);
-//        if (bundleListener.getResources().containsKey(metainfClazz)) {
-//            return bundleListener.getResources().get(metainfClazz).elements();
-//        } else {
+        String metainfClazz = name.substring(length);
+        LOGGER.warn(metainfClazz);
+        if (bundleListener.getResources().containsKey(metainfClazz)) {
+            return bundleListener.getResources().get(metainfClazz).elements();
+        } else {
             return bundle.findEntries(name, "*", false);
-//        }
+        }
     }
 
     @Override
@@ -111,14 +111,14 @@ public class BundleClassLoader extends ClassLoader {
     /**
      * @return the bundleListener
      */
-//    public HazelcastBundleListener getBundleListener() {
-//        return bundleListener;
-//    }
+    public HazelcastBundleListener getBundleListener() {
+        return bundleListener;
+    }
 
     /**
      * @param bundleListener the bundleListener to set
      */
-//    public void setBundleListener(HazelcastBundleListener bundleListener) {
-//        this.bundleListener = bundleListener;
-//    }
+    public void setBundleListener(HazelcastBundleListener bundleListener) {
+        this.bundleListener = bundleListener;
+    }
 }

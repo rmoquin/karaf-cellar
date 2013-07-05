@@ -28,7 +28,7 @@ import static org.junit.Assert.assertEquals;
 
 public class CellarSupportTest {
     ConfigurationAdmin configurationAdmin = createMock(ConfigurationAdmin.class);
-    SynchronizationConfiguration configuration = new SynchronizationConfiguration() {
+    SwitchConfiguration configuration = new SwitchConfiguration() {
         Map<String, Object> properties;
 
         @Override

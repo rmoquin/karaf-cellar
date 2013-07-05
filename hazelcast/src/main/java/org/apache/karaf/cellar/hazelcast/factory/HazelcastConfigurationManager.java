@@ -14,9 +14,11 @@
 package org.apache.karaf.cellar.hazelcast.factory;
 
 import com.hazelcast.config.Config;
+import com.hazelcast.config.FileSystemXmlConfig;
 import com.hazelcast.config.GlobalSerializerConfig;
+import com.hazelcast.config.SerializerConfig;
 import com.hazelcast.config.TcpIpConfig;
-import com.hazelcast.config.XmlConfigBuilder;
+import java.io.FileNotFoundException;
 import org.apache.karaf.cellar.core.discovery.Discovery;
 import org.apache.karaf.cellar.core.utils.CellarUtils;
 import org.slf4j.Logger;
@@ -25,8 +27,12 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.hazelcast.GenericCellarSerializer;
+import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.hazelcast.HazelcastNode;
+import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
+import org.apache.karaf.cellar.hazelcast.serialization.GroupCellarSerializer;
+import org.apache.karaf.cellar.hazelcast.serialization.NodeCellarSerializer;
 
 /**
  * Hazelcast configuration manager.
@@ -35,6 +41,9 @@ import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 public class HazelcastConfigurationManager {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastConfigurationManager.class);
     private Set<String> discoveredMemberSet = new LinkedHashSet<String>();
+    private String xmlConfig;
+    private BundleClassLoader hzClassLoader;
+
     /**
      * Update configuration of a Hazelcast instance.
      *
@@ -45,7 +54,7 @@ public class HazelcastConfigurationManager {
             if (properties.containsKey(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME)) {
                 Set<String> newDiscoveredMemberSet = CellarUtils.createSetFromString((String) properties.get(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME));
                 if (!CellarUtils.collectionEquals(discoveredMemberSet, newDiscoveredMemberSet)) {
-                    LOGGER.info("Hazelcast discoveredMemberSet has been changed from {} to {}", discoveredMemberSet, newDiscoveredMemberSet);
+                    LOGGER.info("Hazelcast discoveredMemberSet has been changed from {0} to {1}", discoveredMemberSet, newDiscoveredMemberSet);
                     discoveredMemberSet = newDiscoveredMemberSet;
                 }
             }
@@ -57,10 +66,30 @@ public class HazelcastConfigurationManager {
      *
      * @return the Hazelcast configuration.
      */
-    public Config getHazelcastConfig(String clusterName, BundleClassLoader hzClassLoader) {
-        Config cfg = new XmlConfigBuilder().build();
-            cfg.getGroupConfig().setName(clusterName);
-//        cfg.setClassLoader(hzClassLoader);
+    public Config createHazelcastConfig(String clusterName, String nodeName, BundleClassLoader hzClassLoader) throws FileNotFoundException {
+        Config config = this.createHazelcastConfig(clusterName, nodeName);
+        config.setClassLoader(hzClassLoader);
+        return config;
+    }
+
+    /**
+     * Build a Hazelcast {@link com.hazelcast.config.Config}.
+     *
+     * @return the Hazelcast configuration.
+     */
+    public Config createHazelcastConfig(String clusterName, String nodeName) throws FileNotFoundException {
+        Config cfg = new FileSystemXmlConfig(xmlConfig);
+        cfg.setInstanceName(nodeName);
+        cfg.getGroupConfig().setName(clusterName);
+
+        SerializerConfig sc = new SerializerConfig().setImplementation(new GroupCellarSerializer()).
+                setTypeClass(Group.class);
+        cfg.getSerializationConfig().addSerializerConfig(sc);
+
+        SerializerConfig node = new SerializerConfig().setImplementation(new NodeCellarSerializer()).
+                setTypeClass(HazelcastNode.class);
+        cfg.getSerializationConfig().addSerializerConfig(node);
+
         GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
         globalConfig.setImplementation(new GenericCellarSerializer());
@@ -70,5 +99,33 @@ public class HazelcastConfigurationManager {
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);
         }
         return cfg;
+    }
+
+    /**
+     * @return the hzClassLoader
+     */
+    public BundleClassLoader getHzClassLoader() {
+        return hzClassLoader;
+    }
+
+    /**
+     * @param hzClassLoader the hzClassLoader to set
+     */
+    public void setHzClassLoader(BundleClassLoader hzClassLoader) {
+        this.hzClassLoader = hzClassLoader;
+    }
+
+    /**
+     * @return the xmlConfig
+     */
+    public String getXmlConfig() {
+        return xmlConfig;
+    }
+
+    /**
+     * @param xmlConfig the xmlConfig to set
+     */
+    public void setXmlConfig(String xmlConfig) {
+        this.xmlConfig = xmlConfig;
     }
 }

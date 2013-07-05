@@ -16,7 +16,7 @@ package org.apache.karaf.cellar.hazelcast;
 import com.hazelcast.core.ITopic;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -35,7 +35,7 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private ITopic topic;
     private CellarCluster masterCluster;
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
 
     public void init() {
         if (topic == null) {
@@ -86,14 +86,14 @@ public class TopicProducer<E extends Event> implements EventProducer<E> {
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 

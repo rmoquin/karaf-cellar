@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SynchronizationConfiguration;
+import org.apache.karaf.cellar.core.SwitchConfiguration;
 
 /**
  * Handler for cluster event.
@@ -34,7 +34,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private SynchronizationConfiguration synchronizationConfig;
+    private SwitchConfiguration synchronizationConfig;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
 
@@ -116,14 +116,14 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     /**
      * @return the synchronizationConfig
      */
-    public SynchronizationConfiguration getSynchronizationConfig() {
+    public SwitchConfiguration getSynchronizationConfig() {
         return synchronizationConfig;
     }
 
     /**
      * @param synchronizationConfig the synchronizationConfig to set
      */
-    public void setSynchronizationConfig(SynchronizationConfiguration synchronizationConfig) {
+    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
         this.synchronizationConfig = synchronizationConfig;
     }
 
