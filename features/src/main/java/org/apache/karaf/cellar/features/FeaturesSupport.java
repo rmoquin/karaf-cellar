@@ -41,7 +41,7 @@ public class FeaturesSupport {
     protected ClusterManager clusterManager;
     protected CellarSupport cellarSupport;
     protected GroupManager groupManager;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
     
     public void init() {
         // nothing to do
@@ -221,17 +221,16 @@ public class FeaturesSupport {
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
-
 }

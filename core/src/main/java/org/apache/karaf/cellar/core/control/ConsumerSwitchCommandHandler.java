@@ -28,7 +28,7 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private Consumer consumer;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
 
     /**
      * Handle the {@code ConsumeSwitchCommand} command.
@@ -49,9 +49,9 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
                 consumer.getSwitch().turnOff();
             }
             try {
-                if (this.synchronizationConfiguration != null) {
-                    this.synchronizationConfiguration.setProperty(Configurations.CONSUMER, statusValue);
-                    this.synchronizationConfiguration.save();
+                if (this.switchConfig != null) {
+                    this.switchConfig.setProperty(Configurations.CONSUMER, statusValue);
+                    this.switchConfig.save();
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Error setting consumer switch.", ex);
@@ -80,16 +80,16 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

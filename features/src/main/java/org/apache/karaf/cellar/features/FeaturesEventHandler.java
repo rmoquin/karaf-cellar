@@ -119,7 +119,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            boolean status = Boolean.parseBoolean((String) super.getSynchronizationConfiguration().getProperty(SWITCH_HANDLER_NAME));
+            boolean status = Boolean.parseBoolean((String) super.getSwitchConfig().getProperty(SWITCH_HANDLER_NAME));
             if (status) {
                 eventSwitch.turnOn();
             } else {

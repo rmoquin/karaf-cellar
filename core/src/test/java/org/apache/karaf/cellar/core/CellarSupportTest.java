@@ -37,11 +37,6 @@ public class CellarSupportTest {
         }
 
         @Override
-        public void setProperties(Map<String, Object> properties) {
-            this.properties = properties;
-        }
-
-        @Override
         public Object getProperty(String name) {
             return properties.get(name);
         }
@@ -55,6 +50,11 @@ public class CellarSupportTest {
         public Map<String, Object> getProperties() {
             return properties;
         }
+
+        @Override
+        public void updated(Map<String, Object> properties) {
+            this.properties = properties;
+        }
     };
     Properties props = new Properties();
 
@@ -65,7 +65,7 @@ public class CellarSupportTest {
         props.load(is);
         is.close();
         Map propsDictionary = props;
-        configuration.setProperties(propsDictionary);
+        configuration.updated(propsDictionary);
     }
 
     @After
@@ -75,7 +75,7 @@ public class CellarSupportTest {
     @Test
     public void testIsAllowed() {
         CellarSupport support = new CellarSupport();
-        support.setSynchronizationConfig(configuration);
+        support.setSwitchConfig(configuration);
 
         Boolean expectedResult = false;
         Boolean result = support.isAllowed(defaultGroup,"config","org.apache.karaf.shell", EventType.INBOUND);

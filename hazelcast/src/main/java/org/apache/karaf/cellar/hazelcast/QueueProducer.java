@@ -33,7 +33,7 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(QueueProducer.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.queue.producer";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
     private IQueue<E> queue;
     private CellarCluster masterCluster;
 
@@ -64,7 +64,7 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) synchronizationConfig.getProperty(Configurations.PRODUCER));
+            Boolean status = Boolean.parseBoolean((String) switchConfig.getProperty(Configurations.PRODUCER));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -85,20 +85,6 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     }
 
     /**
-     * @return the synchronizationConfig
-     */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
-    }
-
-    /**
-     * @param synchronizationConfig the synchronizationConfig to set
-     */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
-    }
-
-    /**
      * @return the masterCluster
      */
     public CellarCluster getMasterCluster() {
@@ -110,5 +96,19 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
      */
     public void setMasterCluster(CellarCluster masterCluster) {
         this.masterCluster = masterCluster;
+    }
+
+    /**
+     * @return the switchConfig
+     */
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
+    }
+
+    /**
+     * @param switchConfig the switchConfig to set
+     */
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

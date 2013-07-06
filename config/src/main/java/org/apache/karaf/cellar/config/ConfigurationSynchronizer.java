@@ -46,7 +46,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
     private EventProducer eventProducer;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
 
     public ConfigurationSynchronizer() {
         // nothing to do
@@ -166,7 +166,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         String groupName = group.getName();
 
         String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
+        String propertyValue = (String) this.switchConfig.getProperty(propertyKey);
         return Boolean.parseBoolean(propertyValue);
     }
 
@@ -213,20 +213,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     }
 
     /**
-     * @return the synchronizationConfiguration
-     */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
-    }
-
-    /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
-     */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
-    }
-
-    /**
      * @return the clusterManager
      */
     public ClusterManager getClusterManager() {
@@ -252,5 +238,19 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
+    }
+
+    /**
+     * @return the switchConfig
+     */
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
+    }
+
+    /**
+     * @param switchConfig the switchConfig to set
+     */
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

@@ -46,7 +46,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     private CellarSupport cellarSupport;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
 
     @Override
     public void handle(ClusterConfigurationEvent event) {
@@ -116,7 +116,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -192,20 +192,19 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
+    }    
+
+    /**
+     * @return the switchConfig
+     */
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @param switchConfig the switchConfig to set
      */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
-
-    /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
-     */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
-    }
-    
 }

@@ -32,7 +32,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageHandlersCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.listhandlers.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
 
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
@@ -93,8 +93,8 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            if (this.synchronizationConfig != null) {
-                this.synchronizationConfig.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
+            if (this.switchConfig != null) {
+                this.switchConfig.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
 
             }
         } catch (Exception e) {
@@ -113,16 +113,16 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     }
 
     /**
-     * @return the synchronizationConfig
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfig the synchronizationConfig to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

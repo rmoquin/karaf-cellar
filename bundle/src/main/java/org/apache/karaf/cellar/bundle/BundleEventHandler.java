@@ -37,7 +37,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.bundle.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
     
@@ -111,7 +111,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -131,20 +131,6 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
     @Override
     public Class<ClusterBundleEvent> getType() {
         return ClusterBundleEvent.class;
-    }
-
-    /**
-     * @return the synchronizationConfig
-     */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
-    }
-
-    /**
-     * @param synchronizationConfig the synchronizationConfig to set
-     */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
     }
 
     /**
@@ -173,5 +159,19 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
      */
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the switchConfig
+     */
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
+    }
+
+    /**
+     * @param switchConfig the switchConfig to set
+     */
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

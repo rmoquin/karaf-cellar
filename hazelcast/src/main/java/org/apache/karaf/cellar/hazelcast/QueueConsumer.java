@@ -40,7 +40,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private Boolean isConsuming = Boolean.TRUE;
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
     private IQueue queue;
     private Dispatcher dispatcher;
     private String listenerId;
@@ -139,7 +139,7 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) synchronizationConfig.getProperty(Configurations.CONSUMER));
+            Boolean status = Boolean.parseBoolean((String) switchConfig.getProperty(Configurations.CONSUMER));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -152,16 +152,16 @@ public class QueueConsumer<E extends Event> implements EventConsumer<E>, ItemLis
     }
 
     /**
-     * @return the synchronizationConfig
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfig the synchronizationConfig to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

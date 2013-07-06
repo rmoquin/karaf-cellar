@@ -58,8 +58,8 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
     static final Long COMMAND_TIMEOUT = 10000L;
-    static final Long DEFAULT_TIMEOUT = 15000L;
-    static final Long SERVICE_TIMEOUT = 20000L;
+    static final Long DEFAULT_TIMEOUT = 10000L;
+    static final Long SERVICE_TIMEOUT = 15000L;
     static final String GROUP_ID = "org.apache.karaf";
     static final String ARTIFACT_ID = "apache-karaf";
     static final String INSTANCE_STARTED = "Started";

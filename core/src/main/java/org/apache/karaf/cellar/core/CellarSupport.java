@@ -28,7 +28,7 @@ import java.util.regex.Pattern;
  */
 public class CellarSupport {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
 
     /**
      * Get a set of resources in the Cellar cluster groups configuration.
@@ -42,14 +42,14 @@ public class CellarSupport {
     public Set<String> getListEntries(String listType, String group, String category, EventType type) {
         Set<String> result = null;
         if (group != null) {
-            if (synchronizationConfig != null) {
-                String parent = (String) synchronizationConfig.getProperty(group + Configurations.SEPARATOR + Configurations.PARENT);
+            if (switchConfig != null) {
+                String parent = (String) switchConfig.getProperty(group + Configurations.SEPARATOR + Configurations.PARENT);
                 if (parent != null) {
                     result = getListEntries(listType, parent, category, type);
                 }
 
                 String propertyName = group + Configurations.SEPARATOR + category + Configurations.SEPARATOR + listType + Configurations.SEPARATOR + type.name().toLowerCase();
-                String propertyValue = (String) synchronizationConfig.getProperty(propertyName);
+                String propertyValue = (String) switchConfig.getProperty(propertyName);
                 if (propertyValue != null) {
                     propertyValue = propertyValue.replaceAll("\n", "");
                     String[] itemList = propertyValue.split(Configurations.DELIMETER);
@@ -171,16 +171,16 @@ public class CellarSupport {
     }
 
     /**
-     * @return the synchronizationConfig
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfig the synchronizationConfig to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

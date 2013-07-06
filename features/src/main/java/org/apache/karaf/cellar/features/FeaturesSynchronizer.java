@@ -177,7 +177,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
 
         try {
             String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) this.getSynchronizationConfiguration().getProperty(propertyKey);
+            String propertyValue = (String) this.getSwitchConfig().getProperty(propertyKey);
             result = Boolean.parseBoolean(propertyValue);
         } catch (Exception e) {
             LOGGER.error("CELLAR FEATURES: error while checking if sync is enabled", e);

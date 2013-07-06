@@ -37,7 +37,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private ITopic topic;
     private Dispatcher dispatcher;
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
     private CellarCluster masterCluster;
     private boolean isConsuming;
     private String listenerId;
@@ -111,7 +111,7 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) synchronizationConfig.getProperty(Configurations.CONSUMER));
+            Boolean status = Boolean.parseBoolean((String) switchConfig.getProperty(Configurations.CONSUMER));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -121,20 +121,6 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
             // ignore
         }
         return eventSwitch;
-    }
-
-    /**
-     * @return the synchronizationConfig
-     */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
-    }
-
-    /**
-     * @param synchronizationConfig the synchronizationConfig to set
-     */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
     }
 
     /**
@@ -149,5 +135,19 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
      */
     public void setMasterCluster(CellarCluster masterCluster) {
         this.masterCluster = masterCluster;
+    }
+
+    /**
+     * @return the switchConfig
+     */
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
+    }
+
+    /**
+     * @param switchConfig the switchConfig to set
+     */
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

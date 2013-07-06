@@ -40,7 +40,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.bundles.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private CellarSupport cellarSupport;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
     private GroupManager groupManager;
 
     @Override
@@ -175,7 +175,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -199,20 +199,6 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
      */
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
-    }
-
-    /**
-     * @return the synchronizationConfiguration
-     */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
-    }
-
-    /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
-     */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
     }
 
     /**

@@ -44,7 +44,7 @@
         <property name="eventAdmin" ref="eventAdmin"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
     
     <service ref="clusterEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -54,7 +54,7 @@
     </service>
     
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
 
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
@@ -62,5 +62,5 @@
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" />
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
-    <reference id="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
+    <reference id="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
 </blueprint>

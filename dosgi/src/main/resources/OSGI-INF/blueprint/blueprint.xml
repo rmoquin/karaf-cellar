@@ -36,7 +36,7 @@
     <bean id="remoteServiceCallHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler">
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
     
     <service ref="remoteServiceCallHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">

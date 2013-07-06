@@ -39,7 +39,7 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     private final Switch dosgiSwitch = new BasicSwitch(SWITCH_ID);
     private BundleContext bundleContext;
     private EventTransportFactory eventTransportFactory;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
 
     /**
      * Handle a cluster remote service call event.
@@ -123,7 +123,7 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.synchronizationConfiguration.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
             if (status) {
                 dosgiSwitch.turnOn();
             } else {
@@ -152,16 +152,16 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     }
 
     /**
-     * @return the synchronizationConfiguration
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

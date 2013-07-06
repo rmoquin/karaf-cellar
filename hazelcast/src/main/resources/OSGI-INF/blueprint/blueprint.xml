@@ -62,19 +62,30 @@
     <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.groups" update-strategy="component-managed" update-method="updated"/>
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
+        <property name="syncRules" ref="syncRules"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
     
-    <service ref="groupManager">
-        <interfaces>
-            <value>org.apache.karaf.cellar.core.GroupManager</value>
-            <value>org.osgi.service.cm.ConfigurationListener</value>
-        </interfaces>
-    </service>
+    <service ref="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
 
+    <bean id="switchConfig" class="org.apache.karaf.cellar.hazelcast.internal.HazelcastSwitchConfiguration">
+        <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>
+        <property name="pid" value="org.apache.karaf.cellar.node"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+    
+    <service ref="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
+
+    <bean id="syncRules" class="org.apache.karaf.cellar.hazelcast.internal.HazelcastSynchronizationRules">
+        <property name="pid" value="org.apache.karaf.cellar.groups"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+    </bean>
+    
+    <service ref="syncRules" interface="org.apache.karaf.cellar.core.SynchronizationRules"/>
+    
     <!-- Discovery Task -->
     <bean id="discoveryTask" class="org.apache.karaf.cellar.core.discovery.DiscoveryTask" init-method="init" destroy-method="destroy">
         <property name="discoveryServices" ref="discoveryServices"/>
@@ -91,7 +102,7 @@
     <!-- Cluster Event Transport Factory -->
     <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">
         <property name="dispatcher"  ref="dispatcher"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
         <property name="masterCluster"  ref="masterCluster"/>
     </bean>
     
@@ -102,13 +113,13 @@
           destroy-method="destroy">
         <property name="dispatcher" ref="dispatcher"/>
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
 
     <!-- Cluster Event Producer -->
     <bean id="eventProducer" class="org.apache.karaf.cellar.hazelcast.TopicProducer" init-method="init">
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
     
     <service ref="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
@@ -123,13 +134,13 @@
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
     
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
     
     <!-- Handler For Cluster Producer Switch Command Event -->
     <bean id="producerSwitchCommandHandler" class="org.apache.karaf.cellar.core.control.ProducerSwitchCommandHandler">
         <property name="producer" ref="eventProducer"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
     
     <service ref="producerSwitchCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
@@ -149,14 +160,6 @@
     
     <service ref="consumerSwitchCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
-    <bean id="synchronizationConfig" class="org.apache.karaf.cellar.hazelcast.internal.HazelcastSynchronizationConfiguration">
-        <cm:managed-properties persistent-id="cellar.synchronization.management" update-method="updated" update-strategy="component-managed"/>
-        <property name="pid" value="org.apache.karaf.cellar.node"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    
-    <service ref="synchronizationConfig" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
-
     <!-- Handler For Cluster Consumer Switch Result Event -->
     <bean id="consumerSwitchResultHandler" class="org.apache.karaf.cellar.core.control.ConsumerSwitchResultHandler">
         <property name="commandStore" ref="commandStore"/>
@@ -167,7 +170,7 @@
     <!-- Handler For Cluster Manage Handlers Command Event -->
     <bean id="manageHandlersCommandHandler" class="org.apache.karaf.cellar.core.control.ManageHandlersCommandHandler">
         <property name="producer" ref="eventProducer"/>
-        <property name="synchronizationConfig" ref="synchronizationConfig"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
 
     <service ref="manageHandlersCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>

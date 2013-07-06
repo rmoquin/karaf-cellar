@@ -20,7 +20,7 @@
     <!-- Local Features Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener" init-method="init"
           destroy-method="destroy">
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>        
+        <property name="switchConfig" ref="switchConfig"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
@@ -33,7 +33,7 @@
     <!-- Features/Repositories Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer"
           init-method="init" destroy-method="destroy">
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>        
+        <property name="switchConfig" ref="switchConfig"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
@@ -45,7 +45,7 @@
     <!-- Cluster Features Event Handler -->
     <bean id="featuresEventHandler" class="org.apache.karaf.cellar.features.FeaturesEventHandler"
           init-method="init" destroy-method="destroy">
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>        
+        <property name="switchConfig" ref="switchConfig"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
@@ -62,7 +62,7 @@
     <bean id="repositoryEventHandler" class="org.apache.karaf.cellar.features.RepositoryEventHandler"
           init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
-        <property name="synchronizationConfiguration" ref="synchronizationConfiguration"/>        
+        <property name="switchConfig" ref="switchConfig"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
@@ -71,10 +71,10 @@
     <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
-        <property name="synchronizationConfig" ref="synchronizationConfiguration"/>
+        <property name="switchConfig" ref="switchConfig"/>
     </bean>
 
-    <reference id="synchronizationConfiguration" interface="org.apache.karaf.cellar.core.SynchronizationConfiguration"/>
+    <reference id="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>

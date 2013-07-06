@@ -25,6 +25,7 @@ import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.SynchronizationRules;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.event.EventConsumer;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -35,7 +36,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
 import org.slf4j.Logger;
 
 /**
@@ -53,7 +53,8 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
     private ConfigurationAdmin configurationAdmin;
     private EventTransportFactory eventTransportFactory;
     private CellarCluster masterCluster;
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
+    private SynchronizationRules syncRules;
 
     public void init() {
         IMap groupConfiguration = (IMap) masterCluster.getMap(Configurations.GROUPS_SYNC_RULES_MAP);
@@ -87,10 +88,11 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         if (group == null) {
             group = new Group(groupName);
             groupMap.put(groupName, group);
+            syncRules.setProperty(groupName, group);
         }
         try {
             // store the group list to configuration admin
-            persist(groupMap);
+            syncRules.save();
         } catch (Exception e) {
             LOGGER.warn("CELLAR HAZELCAST: can't store cluster group list", e);
         }
@@ -103,30 +105,12 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
             Map<String, Group> groupMap = listGroups();
             groupMap.remove(groupName);
             try {
+                syncRules.removeProperty(groupName);
                 // store the group list to configuration admin
-                persist(groupMap);
+                syncRules.save();
             } catch (Exception e) {
                 LOGGER.warn("CELLAR HAZELCAST: can't store cluster group list", e);
             }
-        }
-    }
-
-    /**
-     * Store the group names in configuration admin.
-     *
-     * @param groups the list of group to store.
-     * @throws Exception in case of storage failure.
-     */
-    private void persist(Map<String, Group> groups) throws Exception {
-        // create group stored in configuration admin
-        Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP_SYNC_RULES_PID);
-        if (configuration != null) {
-            Dictionary<String, Object> properties = configuration.getProperties();
-            if (properties == null) {
-                properties = new Hashtable<String, Object>();
-            }
-            properties.put(Configurations.GROUPS_KEY, convertSetToString(groups.keySet()));
-            configuration.update(properties);
         }
     }
 
@@ -393,7 +377,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
 
     public void updated(Map<String, Object> properties) {
         if(properties != null) {
-        this.synchronizationConfig.update(properties);
+        this.switchConfig.updated(properties);
         Map groupConfiguration = masterCluster.getMap(Configurations.GROUPS_SYNC_RULES_MAP);
         String groups = (String) properties.get(Configurations.GROUPS_KEY);
                 Set<String> groupNames = convertStringToSet(groups);
@@ -498,16 +482,30 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
     }
 
     /**
-     * @return the synchronizationConfig
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfig the synchronizationConfig to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
+    }
+
+    /**
+     * @return the syncRules
+     */
+    public SynchronizationRules getSyncRules() {
+        return syncRules;
+    }
+
+    /**
+     * @param syncRules the syncRules to set
+     */
+    public void setSyncRules(SynchronizationRules syncRules) {
+        this.syncRules = syncRules;
     }
 }

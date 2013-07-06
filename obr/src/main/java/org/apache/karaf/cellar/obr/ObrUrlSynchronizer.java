@@ -34,7 +34,7 @@ import org.apache.karaf.cellar.core.SwitchConfiguration;
 public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
     private CellarSupport cellarSupport;
-    private SwitchConfiguration synchronizationConfiguration;
+    private SwitchConfiguration switchConfig;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     
@@ -117,22 +117,8 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
         String groupName = group.getName();
 
         String propertyKey = groupName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        String propertyValue = (String) this.synchronizationConfiguration.getProperty(propertyKey);
+        String propertyValue = (String) this.switchConfig.getProperty(propertyKey);
         return Boolean.parseBoolean(propertyValue);
-    }
-
-    /**
-     * @return the synchronizationConfiguration
-     */
-    public SwitchConfiguration getSynchronizationConfiguration() {
-        return synchronizationConfiguration;
-    }
-
-    /**
-     * @param synchronizationConfiguration the synchronizationConfiguration to set
-     */
-    public void setSynchronizationConfiguration(SwitchConfiguration synchronizationConfiguration) {
-        this.synchronizationConfiguration = synchronizationConfiguration;
     }
 
     /**
@@ -175,5 +161,19 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the switchConfig
+     */
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
+    }
+
+    /**
+     * @param switchConfig the switchConfig to set
+     */
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }

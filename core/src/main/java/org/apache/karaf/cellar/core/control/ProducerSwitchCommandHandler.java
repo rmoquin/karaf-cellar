@@ -26,7 +26,7 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ProducerSwitchCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration synchronizationConfig;
+    private SwitchConfiguration switchConfig;
 
     /**
      * Execute a producer switch command.
@@ -48,9 +48,9 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
                 producer.getSwitch().turnOff();
             }
             try {
-                if (this.synchronizationConfig != null) {
-                    this.synchronizationConfig.setProperty(Configurations.PRODUCER, statusValue);
-                    this.synchronizationConfig.save();
+                if (this.switchConfig != null) {
+                    this.switchConfig.setProperty(Configurations.PRODUCER, statusValue);
+                    this.switchConfig.save();
                 }
             } catch (Exception ex) {
                 LOGGER.warn("Error setting producer switch.", ex);
@@ -71,16 +71,16 @@ public class ProducerSwitchCommandHandler extends CommandHandler<ProducerSwitchC
     }
 
     /**
-     * @return the synchronizationConfig
+     * @return the switchConfig
      */
-    public SwitchConfiguration getSynchronizationConfig() {
-        return synchronizationConfig;
+    public SwitchConfiguration getSwitchConfig() {
+        return switchConfig;
     }
 
     /**
-     * @param synchronizationConfig the synchronizationConfig to set
+     * @param switchConfig the switchConfig to set
      */
-    public void setSynchronizationConfig(SwitchConfiguration synchronizationConfig) {
-        this.synchronizationConfig = synchronizationConfig;
+    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+        this.switchConfig = switchConfig;
     }
 }
