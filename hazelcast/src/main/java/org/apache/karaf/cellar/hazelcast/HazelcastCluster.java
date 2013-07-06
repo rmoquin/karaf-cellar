@@ -16,7 +16,6 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.hazelcast.core.DistributedObjectEvent;
 import com.hazelcast.core.DistributedObjectListener;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class HazelcastCluster implements CellarCluster, MembershipListener, DistributedObjectListener {
+public class HazelcastCluster implements CellarCluster, MembershipListener {
     @JsonIgnore
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
@@ -55,7 +54,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
     private HazelcastConfigurationManager configManager;
     private String name;
     private String memberListenerId;
-    private String doListenerId;
     private HazelcastNode localNode;
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
 
@@ -65,7 +63,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
             this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
             this.memberNodes.put(this.localNode.getId(), this.localNode);
             this.memberListenerId = instance.getCluster().addMembershipListener(this);
-            this.doListenerId = instance.addDistributedObjectListener(this);
         } catch (FileNotFoundException ex) {
             LOGGER.error("Error initializing hazelcast cluster.", ex);
         }
@@ -74,7 +71,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
     @Override
     public void shutdown() {
         instance.getCluster().removeMembershipListener(memberListenerId);
-        instance.removeDistributedObjectListener(doListenerId);
         if (instance != null) {
             instance.getLifecycleService().shutdown();
         }
@@ -186,16 +182,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener, Dist
             LOGGER.info("Node , " + uuid + ", left cluster, " + this.name + ".");
         }
         node.destroy();
-    }
-
-    @Override
-    public void distributedObjectCreated(DistributedObjectEvent event) {
-        LOGGER.info("A new distributed object was created: " + event.toString());
-    }
-
-    @Override
-    public void distributedObjectDestroyed(DistributedObjectEvent event) {
-        LOGGER.info("A distributed object was removed: " + event.toString());
     }
 
     @Override

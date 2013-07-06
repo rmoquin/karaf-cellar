@@ -53,7 +53,7 @@
         </service-properties>
     </service>
     
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
         <property name="switchConfig" ref="switchConfig"/>
     </bean>
 

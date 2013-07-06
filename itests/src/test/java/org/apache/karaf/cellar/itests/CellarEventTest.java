@@ -36,7 +36,7 @@ public class CellarEventTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
         
-        System.err.println(executeCommand("feature:install cellar-event"));
+        System.err.println(executeCommand("feature:install cellar-eventadmin"));
     }
 
     @After
