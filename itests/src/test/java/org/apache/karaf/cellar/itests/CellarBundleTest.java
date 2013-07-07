@@ -19,7 +19,6 @@ import static org.junit.Assert.assertEquals;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.features.FeaturesService;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;

@@ -22,7 +22,7 @@
 
     <ext:property-placeholder />
     
-    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
+<!--    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
@@ -31,10 +31,10 @@
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="bundleListener" ref="bundleListener"/>
-    </bean>
+    </bean>-->
     
     <bean id="configManager" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager">
-        <property name="hzClassLoader" ref="bundleClassLoader"/>
+        <!--<property name="hzClassLoader" ref="bundleClassLoader"/>-->
         <property name="xmlConfig" value="${karaf.home}/etc/hazelcast.xml"/>
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.discovery" update-strategy="component-managed"
                                update-method="update"/>
@@ -42,12 +42,13 @@
     
     <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="shutdown">
         <property name="name" value="default"/>
+        <property name="nodeName" value="${karaf.name}"/>
         <property name="configManager" ref="configManager"/>
     </bean>
     
     <service ref="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster">
         <service-properties>
-            <entry key="name" value="default"/>
+            <entry key="name" value="${karaf.name}"/>
             <entry key="type" value="master"/>
         </service-properties>
     </service>

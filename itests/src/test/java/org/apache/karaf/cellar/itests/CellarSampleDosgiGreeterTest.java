@@ -77,7 +77,7 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:group-set service-grp " + node2));
         Thread.sleep(10000);
         System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("instance:connect child2 osgi:list -t 0"));
+        System.err.println(executeCommand("child2 osgi:list -t 0"));
         System.err.println(executeCommand("cluster:list-services"));
         greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
         System.err.println(greetOutput);

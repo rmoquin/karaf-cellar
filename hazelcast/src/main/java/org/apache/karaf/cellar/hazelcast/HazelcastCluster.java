@@ -53,18 +53,19 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private HazelcastInstance instance;
     private HazelcastConfigurationManager configManager;
     private String name;
+    private String nodeName;
     private String memberListenerId;
     private HazelcastNode localNode;
     private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
 
     public void init() {
         try {
-            this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, name));        
-            this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-            this.memberNodes.put(this.localNode.getId(), this.localNode);
-            this.memberListenerId = instance.getCluster().addMembershipListener(this);
+                this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));        
+                this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
+                this.memberNodes.put(this.localNode.getId(), this.localNode);
+                this.memberListenerId = instance.getCluster().addMembershipListener(this);
         } catch (FileNotFoundException ex) {
-            LOGGER.error("Error initializing hazelcast cluster.", ex);
+            throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
         }
     }
 
@@ -315,5 +316,19 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      */
     public void setConfigManager(HazelcastConfigurationManager configManager) {
         this.configManager = configManager;
+    }
+
+    /**
+     * @return the nodeName
+     */
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    /**
+     * @param nodeName the nodeName to set
+     */
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 }

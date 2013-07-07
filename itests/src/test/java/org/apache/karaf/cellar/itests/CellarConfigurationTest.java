@@ -46,21 +46,21 @@ public class CellarConfigurationTest extends CellarTestSupport {
         String node2 = getNodeIdOfChild("child2");
         System.err.println(executeCommand("instance:list"));
 
-        String properties = executeCommand("instance:connect child1 config:proplist --pid " + TESTPID);
+        String properties = executeCommand("instance:connect -u karaf -p karaf child1 config:proplist --pid " + TESTPID);
         System.err.println(properties);
         assertFalse((properties.contains("myKey")));
 
         //Test configuration sync - add property
         System.err.println(executeCommand("config:propset --pid " + TESTPID + " myKey myValue"));
         Thread.sleep(5000);
-        properties = executeCommand("instance:connect child1 config:proplist --pid " + TESTPID);
+        properties = executeCommand("instance:connect -u karaf -p karaf child1 config:proplist --pid " + TESTPID);
         System.err.println(properties);
         assertTrue(properties.contains("myKey = myValue"));
 
         //Test configuration sync - remove property
         System.err.println(executeCommand("config:propdel --pid " + TESTPID + " myKey"));
         Thread.sleep(5000);
-        properties = executeCommand("instance:connect child1 config:proplist --pid " + TESTPID);
+        properties = executeCommand("instance:connect -u karaf -p karaf child1 config:proplist --pid " + TESTPID);
         System.err.println(properties);
         assertFalse(properties.contains("myKey"));
 
@@ -68,11 +68,11 @@ public class CellarConfigurationTest extends CellarTestSupport {
         //Test configuration sync - add property - join later
         System.err.println(executeCommand("cluster:group-set new-grp " + node1));
         Thread.sleep(5000);
-        System.err.println(executeCommand("instance:connect child1 config:propset --pid " + TESTPID + " myKey2 myValue2"));
-        properties = executeCommand("instance:connect child1 config:proplist --pid " + TESTPID);
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf child1 config:propset --pid " + TESTPID + " myKey2 myValue2"));
+        properties = executeCommand("instance:connect -u karaf -p karaf child1 config:proplist --pid " + TESTPID);
         Thread.sleep(5000);
         System.err.println(executeCommand("cluster:group-set new-grp " + node2));
-        properties = executeCommand("instance:connect child2 config:proplist --pid " + TESTPID);
+        properties = executeCommand("instance:connect -u karaf -p karaf child2 config:proplist --pid " + TESTPID);
         System.err.println(properties);
         assertTrue(properties.contains("myKey2 = myValue2"));
     }

@@ -71,12 +71,12 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("bundle:list"));
 
         System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("instance:connect child2 bundle:list -t 0"));
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf child2 bundle:list -t 0"));
 
         Thread.sleep(10000);
-        String output1 = executeCommand("instance:connect child1  log:display | grep \"Hallo Cellar\"");
+        String output1 = executeCommand("instance:connect -u karaf -p karaf child1  log:display | grep \"Hallo Cellar\"");
         System.err.println(output1);
-        String output2 = executeCommand("instance:connect child2  log:display | grep \"Hallo Cellar\"");
+        String output2 = executeCommand("instance:connect -u karaf -p karaf child2  log:display | grep \"Hallo Cellar\"");
         System.err.println(output2);
         assertTrue("Expected at least 1 lines", 1 <= countOutputEntires(output1));
         assertTrue("Expected at least 1 lines", 1 <= countOutputEntires(output2));

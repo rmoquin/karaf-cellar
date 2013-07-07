@@ -68,7 +68,9 @@ public class HazelcastConfigurationManager {
      */
     public Config createHazelcastConfig(String clusterName, String nodeName, BundleClassLoader hzClassLoader) throws FileNotFoundException {
         Config config = this.createHazelcastConfig(clusterName, nodeName);
-        config.setClassLoader(hzClassLoader);
+        if (hzClassLoader != null) {
+            config.setClassLoader(hzClassLoader);
+        }
         return config;
     }
 

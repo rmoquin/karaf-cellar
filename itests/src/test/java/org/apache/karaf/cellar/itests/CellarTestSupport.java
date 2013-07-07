@@ -165,6 +165,7 @@ public class CellarTestSupport {
     protected String getNodeIdOfChild(String name) {
         String node;
         String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, true);
+        System.err.println("Get node id of child response: " + nodesList);
         int stop = nodesList.indexOf(']');
         node = nodesList.substring(0, stop);
         int start = node.lastIndexOf('[');
@@ -181,9 +182,10 @@ public class CellarTestSupport {
 
     @Configuration
     public Option[] config() {
-        Option[] options = new Option[]{
+        Option[] options = new Option[] {
             cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
-                editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL())
+            editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
+            editConfigurationFileExtend("etc/custom.properties", "karaf.framework", "equinox")
         };
         String debug = System.getProperty("debugMain");
         if (debug != null) {
@@ -263,15 +265,18 @@ public class CellarTestSupport {
         FutureTask<String> commandFuture = new FutureTask<String>(
                 new Callable<String>() {
             public String call() {
-                try {
-                    for (String command : commands) {
+                for (String command : commands) {
+                    try {
                         System.err.println(command);
                         commandSession.execute(command);
+                    } catch (Exception e) {
+                        System.err.println("The following error occurred while waiting for command to complete: " + command);
+                        e.printStackTrace(System.err);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
                 }
-                return byteArrayOutputStream.toString();
+                String response = byteArrayOutputStream.toString();
+                System.err.println("Raw command response was: " + response);
+                return response;
             }
         });
 
