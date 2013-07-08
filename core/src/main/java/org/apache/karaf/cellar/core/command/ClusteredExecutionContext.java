@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.core.command;
 
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.Producer;
 import org.apache.karaf.cellar.core.exception.ProducerNotFoundException;
 import org.apache.karaf.cellar.core.exception.StoreNotFoundException;
@@ -58,7 +57,7 @@ public class ClusteredExecutionContext implements ExecutionContext {
     }
 
     @Override
-    public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
+    public <R extends Result, C extends Command<R>> Map<String, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
         if (command == null) {
             throw new StoreNotFoundException("Command store not found");
         } else {

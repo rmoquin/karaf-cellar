@@ -25,12 +25,12 @@ import org.apache.karaf.cellar.core.Group;
  *
  * @author rmoquin
  */
-public class GroupCellarSerializer implements ByteArraySerializer<Group> {
+public class CellarGroupSerializer implements ByteArraySerializer<Group> {
     private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
         
     protected int typeId;
 
-    public GroupCellarSerializer() {
+    public CellarGroupSerializer() {
         mapper.enableDefaultTyping();
     }
     

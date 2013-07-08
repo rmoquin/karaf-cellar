@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.core.command;
 
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +31,8 @@ public class Command<R extends Result> extends Event {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(Command.class);
 
     protected long timeout = 10000;
-    protected final BlockingQueue<Map<Node, R>> resultQueue = new LinkedBlockingQueue<Map<Node, R>>();
-    protected final Map<Node, R> nodeResults = new HashMap<Node, R>();
+    protected final BlockingQueue<Map<String, R>> resultQueue = new LinkedBlockingQueue<Map<String, R>>();
+    protected final Map<String, R> nodeResults = new HashMap<String, R>();
 
     public Command(String id) {
         super(id);
@@ -64,7 +63,7 @@ public class Command<R extends Result> extends Event {
     public void addResults(R... results) {
         if (results != null && results.length > 0) {
             for (R result : results) {
-                nodeResults.put(result.getSourceNode(), result);
+                nodeResults.put(result.getSourceNode().getId(), result);
             }
 
             if (getDestinations() == null || (nodeResults.size() == getDestinations().size())) {
@@ -84,8 +83,8 @@ public class Command<R extends Result> extends Event {
      * @return a map of results.
      * @throws Exception in case of interruption.
      */
-    public Map<Node, R> getResult() throws InterruptedException {
-        Map<Node, R> nodeResults = null;
+    public Map<String, R> getResult() throws InterruptedException {
+        Map<String, R> nodeResults = null;
         if (this.resultQueue != null) {
             nodeResults = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
         }
