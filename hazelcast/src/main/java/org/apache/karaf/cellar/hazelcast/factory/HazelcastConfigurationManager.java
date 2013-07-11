@@ -28,11 +28,13 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.ManageGroupCommand;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
-import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
+import org.apache.karaf.cellar.hazelcast.serialization.CellarGenericSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
-import org.apache.karaf.cellar.hazelcast.serialization.GroupCellarSerializer;
-import org.apache.karaf.cellar.hazelcast.serialization.NodeCellarSerializer;
+import org.apache.karaf.cellar.hazelcast.serialization.CellarGroupSerializer;
+import org.apache.karaf.cellar.hazelcast.serialization.CellarNodeSerializer;
+import org.apache.karaf.cellar.hazelcast.serialization.ManageGroupCommandSerializer;
 
 /**
  * Hazelcast configuration manager.
@@ -84,17 +86,19 @@ public class HazelcastConfigurationManager {
         cfg.setInstanceName(nodeName);
         cfg.getGroupConfig().setName(clusterName);
 
-        SerializerConfig sc = new SerializerConfig().setImplementation(new GroupCellarSerializer()).
-                setTypeClass(Group.class);
-        cfg.getSerializationConfig().addSerializerConfig(sc);
+        SerializerConfig sc = new SerializerConfig().setImplementation(new CellarGroupSerializer()).setTypeClass(Group.class);
 
-        SerializerConfig node = new SerializerConfig().setImplementation(new NodeCellarSerializer()).
-                setTypeClass(HazelcastNode.class);
+        SerializerConfig node = new SerializerConfig().setImplementation(new CellarNodeSerializer()).setTypeClass(HazelcastNode.class);
+
+        SerializerConfig manageGroupCommand = new SerializerConfig().setImplementation(new ManageGroupCommandSerializer()).setTypeClass(ManageGroupCommand.class);
+
+        cfg.getSerializationConfig().addSerializerConfig(sc);
         cfg.getSerializationConfig().addSerializerConfig(node);
+        cfg.getSerializationConfig().addSerializerConfig(manageGroupCommand);
 
         GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
-        globalConfig.setImplementation(new GenericCellarSerializer());
+        globalConfig.setImplementation(new CellarGenericSerializer());
         cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();

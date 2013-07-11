@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -57,7 +58,7 @@ public class ClusteredExecutionContext implements ExecutionContext {
     }
 
     @Override
-    public <R extends Result, C extends Command<R>> Map<String, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
+    public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
         if (command == null) {
             throw new StoreNotFoundException("Command store not found");
         } else {

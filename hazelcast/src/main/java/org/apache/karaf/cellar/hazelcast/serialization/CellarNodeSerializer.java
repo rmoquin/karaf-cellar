@@ -19,19 +19,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.hazelcast.nio.serialization.ByteArraySerializer;
 import java.io.IOException;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
 
 /**
  *
  * @author rmoquin
  */
-public class CellarNodeSerializer implements ByteArraySerializer<HazelcastNode> {
+public class CellarNodeSerializer implements ByteArraySerializer<Node> {
     private final ObjectMapper mapper = new ObjectMapper(new SmileFactory());
         
     protected int typeId;
 
     public void NodeCellarSerializer() {
-        mapper.enableDefaultTyping();
     }
     
     @Override
@@ -44,7 +44,7 @@ public class CellarNodeSerializer implements ByteArraySerializer<HazelcastNode> 
     }
 
     @Override
-    public byte[] write(HazelcastNode object) throws IOException {
+    public byte[] write(Node object) throws IOException {
         return mapper.writeValueAsBytes(object);
     }
 

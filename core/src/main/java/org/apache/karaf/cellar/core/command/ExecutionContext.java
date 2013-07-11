@@ -15,6 +15,7 @@ package org.apache.karaf.cellar.core.command;
 
 
 import java.util.Map;
+import org.apache.karaf.cellar.core.Node;
 
 /**
  * Command execution context.
@@ -30,6 +31,6 @@ public interface ExecutionContext {
      * @return
      * @throws Exception
      */
-    public <R extends Result, C extends Command<R>> Map<String, R> execute(C command) throws Exception;
+    public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws Exception;
 
 }

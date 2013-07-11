@@ -185,7 +185,7 @@ public class CellarTestSupport {
         Option[] options = new Option[] {
             cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
             editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
-            editConfigurationFileExtend("etc/custom.properties", "karaf.framework", "equinox")
+            editConfigurationFileExtend("etc/custom.properties", "karaf.framework", "felix")
         };
         String debug = System.getProperty("debugMain");
         if (debug != null) {

@@ -91,7 +91,7 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                     ManageGroupResult result = results.get(node);
                     if (result != null && result.getGroups() != null) {
                         for (Group g : result.getGroups()) {
-                            StringBuffer buffer = new StringBuffer();
+                            StringBuilder buffer = new StringBuilder();
                             if (g.getNodes() != null && !g.getNodes().isEmpty()) {
                                 String mark = " ";
                                 for (Node member : g.getNodes()) {

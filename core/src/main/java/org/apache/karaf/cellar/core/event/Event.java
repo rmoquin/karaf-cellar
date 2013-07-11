@@ -16,8 +16,6 @@ package org.apache.karaf.cellar.core.event;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
 
@@ -32,12 +30,11 @@ import org.apache.karaf.cellar.core.control.ManageGroupCommand;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.WRAPPER_ARRAY,
         property = "type")
-@JsonSubTypes({@Type(value = ManageGroupCommand.class, name = "managedGroup") })
+@JsonSubTypes({@Type(value = ManageGroupCommand.class, name = "managedGroupCommand") })
 public class Event {
     protected String id;
     protected Node sourceNode;
     protected Group sourceGroup;
-    @JsonDeserialize(contentAs = Node.class)
     protected Set<Node> destinations;
     protected Boolean force = Boolean.FALSE;
     protected Boolean postPublish = Boolean.FALSE;

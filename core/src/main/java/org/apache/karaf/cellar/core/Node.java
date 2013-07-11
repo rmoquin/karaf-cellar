@@ -13,9 +13,15 @@
  */
 package org.apache.karaf.cellar.core;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * Generic cluster node interface.
  */
+@JsonTypeInfo(
+        use = JsonTypeInfo.Id.CLASS,
+        include = JsonTypeInfo.As.PROPERTY,
+        property = "type")
 public interface Node {
 
     /**

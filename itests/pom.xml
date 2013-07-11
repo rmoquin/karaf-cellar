@@ -92,6 +92,7 @@
                 <version>2.9</version>
                 <configuration>
                     <useFile>false</useFile>
+                    <test>CellarGroupsTest</test>
                 </configuration>
             </plugin>
             <plugin>

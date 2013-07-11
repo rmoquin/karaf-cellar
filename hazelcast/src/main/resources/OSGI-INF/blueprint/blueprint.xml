@@ -22,7 +22,7 @@
 
     <ext:property-placeholder />
     
-<!--    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
+    <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
@@ -31,10 +31,10 @@
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="bundleListener" ref="bundleListener"/>
-    </bean>-->
+    </bean>
     
     <bean id="configManager" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager">
-        <!--<property name="hzClassLoader" ref="bundleClassLoader"/>-->
+        <property name="hzClassLoader" ref="bundleClassLoader"/>
         <property name="xmlConfig" value="${karaf.home}/etc/hazelcast.xml"/>
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.discovery" update-strategy="component-managed"
                                update-method="update"/>

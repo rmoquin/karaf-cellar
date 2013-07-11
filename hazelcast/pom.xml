@@ -42,7 +42,7 @@
             org.apache.karaf.features;version="[3,4)",
             org.osgi*,
             org.slf4j;resolution:=optional,
-	    *
+            *
         </osgi.import>
         <osgi.export>
             org.apache.karaf.cellar.hazelcast*;version="${project.version}"
@@ -90,6 +90,12 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.10</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

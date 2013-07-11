@@ -60,10 +60,10 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
 
     public void init() {
         try {
-                this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));        
-                this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-                this.memberNodes.put(this.localNode.getId(), this.localNode);
-                this.memberListenerId = instance.getCluster().addMembershipListener(this);
+            this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));
+            this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
+            this.memberNodes.put(this.localNode.getId(), this.localNode);
+            this.memberListenerId = instance.getCluster().addMembershipListener(this);
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
         }

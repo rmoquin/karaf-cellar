@@ -55,10 +55,10 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         }
 
         remoteServiceCall.setArguments(argumentList);
-        Map<Node,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall);
+        Map<String,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall);
 
         if(results != null) {
-            for(Map.Entry<Node,RemoteServiceResult> entry:results.entrySet()) {
+            for(Map.Entry<String,RemoteServiceResult> entry:results.entrySet()) {
                 RemoteServiceResult result = entry.getValue();
                 return result.getResult();
             }

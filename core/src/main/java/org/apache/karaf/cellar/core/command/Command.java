@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.cellar.core.command;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.karaf.cellar.core.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,17 +24,23 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.Node;
 
 /**
  * Command.
  */
+@JsonTypeName("managedGroupCommand")
 public class Command<R extends Result> extends Event {
-
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(Command.class);
-
     protected long timeout = 10000;
-    protected final BlockingQueue<Map<String, R>> resultQueue = new LinkedBlockingQueue<Map<String, R>>();
-    protected final Map<String, R> nodeResults = new HashMap<String, R>();
+    @JsonDeserialize(keyAs=Node.class, contentAs = Result.class)
+    protected final BlockingQueue resultQueue = new LinkedBlockingQueue();
+    @JsonDeserialize(keyAs=Node.class, contentAs = Result.class)
+    protected final Map<Node, R> nodeResults = new HashMap<Node, R>();
+
+    public Command() {
+        this.force = true;
+    }
 
     public Command(String id) {
         super(id);
@@ -63,7 +71,7 @@ public class Command<R extends Result> extends Event {
     public void addResults(R... results) {
         if (results != null && results.length > 0) {
             for (R result : results) {
-                nodeResults.put(result.getSourceNode().getId(), result);
+                nodeResults.put(result.getSourceNode(), result);
             }
 
             if (getDestinations() == null || (nodeResults.size() == getDestinations().size())) {
@@ -83,12 +91,12 @@ public class Command<R extends Result> extends Event {
      * @return a map of results.
      * @throws Exception in case of interruption.
      */
-    public Map<String, R> getResult() throws InterruptedException {
-        Map<String, R> nodeResults = null;
+    public Map<Node, R> getResult() throws InterruptedException {
+        Map<Node, R> results = null;
         if (this.resultQueue != null) {
-            nodeResults = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
+            results = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
         }
-        return nodeResults;
+        return results;
     }
 
     public long getTimeout() {
@@ -98,5 +106,4 @@ public class Command<R extends Result> extends Event {
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
-
 }

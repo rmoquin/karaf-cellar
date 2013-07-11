@@ -30,6 +30,7 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class CellarFeaturesTest extends CellarTestSupport {
+
     private static final String UNINSTALLED = "[uninstalled]";
     private static final String INSTALLED = "[installed  ]";
 
@@ -37,22 +38,14 @@ public class CellarFeaturesTest extends CellarTestSupport {
     //@Ignore
     public void testCellarFeaturesModule() throws InterruptedException {
         installCellar();
-        System.err.println(executeCommand("feature:list"));
         createCellarChild("child1");
         Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        //Test feature sync - install
-        System.err.println(executeCommand("feature:install eventadmin"));
-        Thread.sleep(5000);
-        String eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
-
         System.err.println(executeCommand("instance:list"));
-        Thread.sleep(5000);
-        eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
+
+        String eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
 

@@ -113,7 +113,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
             command.setHandlerName(null);
             command.setStatus(null);
 
-        Map<Node, ManageHandlersResult> results = executionContext.execute(command);
+        Map<String, ManageHandlersResult> results = executionContext.execute(command);
 
         CompositeType compositeType = new CompositeType("Event Handler", "Karaf Cellar cluster event handler",
                 new String[] { "node", "handler", "status", "local" },
@@ -123,17 +123,17 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
                 compositeType, new String[] { "node", "handler" });
         TabularDataSupport table = new TabularDataSupport(tableType);
 
-        for (Map.Entry<Node, ManageHandlersResult> handlersResultEntry : results.entrySet()) {
-            Node node = handlersResultEntry.getKey();
+        for (Map.Entry<String, ManageHandlersResult> handlersResultEntry : results.entrySet()) {
+            String nodeId = handlersResultEntry.getKey();
             ManageHandlersResult result = handlersResultEntry.getValue();
             if (result != null && result.getHandlers() != null) {
                 for (Map.Entry<String, String> handlerEntry : result.getHandlers().entrySet()) {
                     String handler = handlerEntry.getKey();
                     String status = handlerEntry.getValue();
-                    boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
+                    boolean local = (nodeId.equals(clusterManager.getMasterCluster().getLocalNode().getId()));
                     CompositeDataSupport data = new CompositeDataSupport(compositeType,
                             new String[]{"node", "handler", "status", "local"},
-                            new Object[]{node.getId(), handler, status, local});
+                            new Object[]{nodeId, handler, status, local});
                     table.put(data);
                 }
             }
@@ -187,7 +187,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         ConsumerSwitchCommand command = new ConsumerSwitchCommand(clusterManager.generateId());
         command.setStatus(null);
 
-        Map<Node, ConsumerSwitchResult> results = executionContext.execute(command);
+        Map<String, ConsumerSwitchResult> results = executionContext.execute(command);
 
         CompositeType compositeType = new CompositeType("Event Consumer", "Karaf Cellar cluster event consumer",
                 new String[] { "node", "status", "local" },
@@ -197,12 +197,12 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
                 compositeType, new String[] { "node" });
         TabularDataSupport table = new TabularDataSupport(tableType);
 
-        for (Node node : results.keySet()) {
-            boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
-            ConsumerSwitchResult consumerSwitchResult = results.get(node);
+        for (String nodeId : results.keySet()) {
+            boolean local = (nodeId.equals(clusterManager.getMasterCluster().getLocalNode()));
+            ConsumerSwitchResult consumerSwitchResult = results.get(nodeId);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
                     new String[]{"node", "status", "local"},
-                    new Object[]{node.getId(), consumerSwitchResult.getStatus(), local});
+                    new Object[]{nodeId, consumerSwitchResult.getStatus(), local});
             table.put(data);
         }
 
@@ -256,7 +256,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
         command.setStatus(null);
 
-        Map<Node, ProducerSwitchResult> results = executionContext.execute(command);
+        Map<String, ProducerSwitchResult> results = executionContext.execute(command);
 
         CompositeType compositeType = new CompositeType("Event Producer", "Karaf Cellar cluster event producer",
                 new String[] { "node", "status", "local" },
@@ -266,12 +266,12 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
                 compositeType, new String[] { "node" });
         TabularDataSupport table = new TabularDataSupport(tableType);
 
-        for (Node node : results.keySet()) {
-            boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
-            ProducerSwitchResult producerSwitchResult = results.get(node);
+        for (String nodeId : results.keySet()) {
+            boolean local = (nodeId.equals(clusterManager.getMasterCluster().getLocalNode()));
+            ProducerSwitchResult producerSwitchResult = results.get(nodeId);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
                     new String[]{"node", "status", "local"},
-                    new Object[]{node.getId(), producerSwitchResult.getStatus(), local});
+                    new Object[]{nodeId, producerSwitchResult.getStatus(), local});
             table.put(data);
         }
 
