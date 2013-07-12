@@ -13,10 +13,12 @@
  */
 package org.apache.karaf.cellar.samples.dosgi.greeter.api;
 
+import java.io.Serializable;
+
 /**
  * Object returned by the Greeter interface/service.
  */
-public class GreetResponse {
+public class GreetResponse implements Serializable {
 
     private Greet greet;
     private String response;

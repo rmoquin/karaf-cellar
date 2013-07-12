@@ -15,7 +15,6 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hazelcast.core.DistributedObjectListener;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -45,10 +44,8 @@ import org.slf4j.LoggerFactory;
  * @author rmoquin
  */
 public class HazelcastCluster implements CellarCluster, MembershipListener {
-    @JsonIgnore
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
-    @JsonIgnore
     private IdGenerator idgenerator;
     private HazelcastInstance instance;
     private HazelcastConfigurationManager configManager;

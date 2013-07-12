@@ -13,10 +13,12 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import java.io.Serializable;
+
 /**
  * OBR bundle info wrapper to be store in a cluster group.
  */
-public class ObrBundleInfo {
+public class ObrBundleInfo implements Serializable {
 
     private String presentationName;
     private String symbolicName;

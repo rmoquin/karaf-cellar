@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.event;
 
+import java.io.Serializable;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
@@ -27,7 +28,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupManager;
 
-public class LocalEventListener extends EventSupport implements EventHandler {
+public class LocalEventListener extends EventSupport implements EventHandler, Serializable {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalEventListener.class);
     private EventProducer eventProducer;
     private GroupManager groupManager;

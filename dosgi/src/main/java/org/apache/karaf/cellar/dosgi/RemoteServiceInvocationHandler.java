@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.ExecutionContext;
 
 import java.lang.reflect.InvocationHandler;
@@ -22,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.core.Node;
 
 /**
  * Handler for cluster remote service invocation event.
@@ -55,10 +55,10 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         }
 
         remoteServiceCall.setArguments(argumentList);
-        Map<String,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall);
+        Map<Node,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall);
 
         if(results != null) {
-            for(Map.Entry<String,RemoteServiceResult> entry:results.entrySet()) {
+            for(Map.Entry<Node,RemoteServiceResult> entry:results.entrySet()) {
                 RemoteServiceResult result = entry.getValue();
                 return result.getResult();
             }

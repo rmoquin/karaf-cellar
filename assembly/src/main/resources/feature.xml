@@ -17,13 +17,6 @@
 
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
     
-    <feature name="jackson-serialization" description="Jackson serialization support" version="${jackson.version}" resolver="(obr)">
-        <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
-        <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-        <bundle start-level="32">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle start-level="32">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-smile/${jackson.version}</bundle>
-    </feature>
-    
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
         <configfile finalname="/etc/org.apache.karaf.cellar.groups.cfg">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/groups
@@ -72,7 +65,6 @@
     </feature>
 
     <feature name="cellar" description="Karaf clustering" version="${project.version}" resolver="(obr)">
-        <feature version="${jackson.version}">jackson-serialization</feature>
         <feature version="${project.version}">cellar-hazelcast</feature>
         <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-config</feature>

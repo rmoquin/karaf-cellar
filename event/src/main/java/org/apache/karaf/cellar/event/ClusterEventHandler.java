@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.event;
 
+import java.io.Serializable;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -30,7 +31,7 @@ import org.apache.karaf.cellar.core.SwitchConfiguration;
 /**
  * Handler for cluster event.
  */
-public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent> {
+public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent>, Serializable {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);

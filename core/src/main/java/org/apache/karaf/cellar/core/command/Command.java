@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.cellar.core.command;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.apache.karaf.cellar.core.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +27,10 @@ import org.apache.karaf.cellar.core.Node;
 /**
  * Command.
  */
-@JsonTypeName("managedGroupCommand")
 public class Command<R extends Result> extends Event {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(Command.class);
     protected long timeout = 10000;
-    @JsonDeserialize(keyAs=Node.class, contentAs = Result.class)
-    protected final BlockingQueue resultQueue = new LinkedBlockingQueue();
-    @JsonDeserialize(keyAs=Node.class, contentAs = Result.class)
+    protected final BlockingQueue<Map<Node, R>> resultQueue = new LinkedBlockingQueue<Map<Node, R>>();
     protected final Map<Node, R> nodeResults = new HashMap<Node, R>();
 
     public Command() {
@@ -92,11 +87,11 @@ public class Command<R extends Result> extends Event {
      * @throws Exception in case of interruption.
      */
     public Map<Node, R> getResult() throws InterruptedException {
-        Map<Node, R> results = null;
+        Map<Node, R> nodeResults = null;
         if (this.resultQueue != null) {
-            results = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
+            nodeResults = resultQueue.poll(timeout, TimeUnit.MILLISECONDS);
         }
-        return results;
+        return nodeResults;
     }
 
     public long getTimeout() {
