@@ -16,6 +16,9 @@ package org.apache.karaf.cellar.core.event;
 import org.apache.karaf.cellar.core.Handler;
 import org.apache.karaf.cellar.core.HandlerRegistry;
 
+/**
+ * Description of a cluster event handlers registry.
+ */
 public interface EventHandlerRegistry<E extends Event> extends HandlerRegistry<E, Handler<E>> {
 
     /**

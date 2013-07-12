@@ -13,6 +13,9 @@
  */
 package org.apache.karaf.cellar.bundle.shell;
 
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
@@ -23,9 +26,6 @@ import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
 import org.osgi.framework.BundleEvent;
 
 import java.net.URL;
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-@Command(scope = "cluster", name = "bundle-install", description = "Install bundles in a cluster group")
+@Command(scope = "cluster", name = "bundle-install", description = "Install a bundle in a cluster group")
 public class InstallBundleCommand extends CellarCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
@@ -98,7 +98,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 event.setSourceGroup(group);
                 eventProducer.produce(event);
             } else {
-                System.err.println("Bundle location " + url + " is blocked outbound for cluster group " + groupName);
+                System.err.println("Bundle location " + url + " is blocked outbound in cluster group " + groupName);
             }
         }
 

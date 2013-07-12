@@ -13,9 +13,9 @@
  */
 package org.apache.karaf.cellar.core.command;
 
+import org.apache.karaf.cellar.core.Node;
 
 import java.util.Map;
-import org.apache.karaf.cellar.core.Node;
 
 /**
  * Command execution context.

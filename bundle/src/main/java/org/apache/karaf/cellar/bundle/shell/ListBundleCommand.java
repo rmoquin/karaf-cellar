@@ -13,14 +13,14 @@
  */
 package org.apache.karaf.cellar.bundle.shell;
 
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
 import org.osgi.framework.BundleEvent;
 
 import java.util.Map;
@@ -45,7 +45,7 @@ public class ListBundleCommand extends CellarCommandSupport {
         // check if the group exists
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
-            System.err.println("Cluster group " + groupName + " doesn't exist");
+            System.err.println("Cluster group " + groupName + " doesn't exist.");
             return null;
         }
 

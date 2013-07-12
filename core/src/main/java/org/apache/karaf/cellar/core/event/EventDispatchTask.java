@@ -60,12 +60,12 @@ public class EventDispatchTask<E extends Event> implements Runnable {
                     try {
                         Thread.sleep(interval);
                     } catch (InterruptedException e) {
-                        LOGGER.warn("Interrupted while waiting for cluster event handler", e);
+                    LOGGER.warn("Interrupted while waiting for event handler", e);
                     }
                 }
             }
             if (!dispatched) {
-                LOGGER.warn("Failed to retrieve handler for cluster event {}", event.getClass());
+            LOGGER.warn("Failed to retrieve handler for event {}", event.getClass());
             }
         } catch (Exception ex) {
             LOGGER.error("Error while dispatching task", ex);

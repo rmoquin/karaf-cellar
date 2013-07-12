@@ -59,10 +59,16 @@ public class ClusterFeaturesEvent extends Event {
         return noClean;
     }
 
+    public void setNoClean(Boolean noClean) {
+        this.noClean = noClean;
+    }
     public Boolean getNoRefresh() {
         return noRefresh;
     }
 
+    public void setNoRefresh(Boolean noRefresh) {
+        this.noRefresh = noRefresh;
+    }
     public EventType getType() {
         return type;
     }

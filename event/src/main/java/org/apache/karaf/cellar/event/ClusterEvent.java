@@ -24,9 +24,9 @@ import java.util.Map;
 public class ClusterEvent extends Event {
 
     private String topicName;
-    private Map<String, Object> properties;
+    private Map<String, Serializable> properties;
 
-    public ClusterEvent(String topicName, Map<String, Object> properties) {
+    public ClusterEvent(String topicName, Map<String, Serializable> properties) {
         super(topicName);
         this.topicName = topicName;
         this.properties = properties;
@@ -40,11 +40,11 @@ public class ClusterEvent extends Event {
         this.topicName = topicName;
     }
 
-    public Map<String, Object> getProperties() {
+    public Map<String, Serializable> getProperties() {
         return this.properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(Map<String, Serializable> properties) {
         this.properties = properties;
     }
 

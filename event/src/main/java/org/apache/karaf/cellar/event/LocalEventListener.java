@@ -28,7 +28,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupManager;
 
-public class LocalEventListener extends EventSupport implements EventHandler, Serializable {
+public class LocalEventListener extends EventSupport implements EventHandler {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalEventListener.class);
     private EventProducer eventProducer;
     private GroupManager groupManager;
@@ -69,7 +69,7 @@ public class LocalEventListener extends EventSupport implements EventHandler, Se
                 if (groups != null && !groups.isEmpty()) {
                     for (Group group : groups) {
                         String topicName = event.getTopic();
-                        Map<String, Object> properties = getEventProperties(event);
+                        Map<String, Serializable> properties = getEventProperties(event);
                         if (cellarSupport.isAllowed(group, Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);

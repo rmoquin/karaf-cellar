@@ -71,7 +71,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             try {
                 groups = groupManager.listLocalGroups();
             } catch (Exception ex) {
-                LOGGER.warn("Failed to list local groups. Is Cellar uninstalling ?", ex);
+                LOGGER.warn("CELLAR BUNDLE: failed to list local groups. Is Cellar uninstalling ?");
             }
 
             if (groups != null && !groups.isEmpty()) {
@@ -128,7 +128,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
     }
 
     public void init() {
-        getBundleContext().addBundleListener(this);
+        bundleContext.addBundleListener(this);
     }
 
     public void destroy() {

@@ -55,7 +55,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF for this node");
+            throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the bundle location is allowed
@@ -101,7 +101,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF for this node");
+            throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // update the cluster group
@@ -188,7 +188,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the producer is ON
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF for this node");
+            throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // update the cluster group

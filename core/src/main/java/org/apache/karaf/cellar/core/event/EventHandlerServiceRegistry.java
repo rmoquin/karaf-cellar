@@ -17,17 +17,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Event handler service registry.
+ * Default implementation of an event handler services registry.
  */
 public class EventHandlerServiceRegistry<E extends Event> implements EventHandlerRegistry<E> {
 
-    private Map<Class, EventHandler> eventHandlerMap = new ConcurrentHashMap<Class, EventHandler>();
+    private Map<Class,EventHandler> eventHandlerMap = new ConcurrentHashMap<Class,EventHandler>();
 
     /**
-     * Return the appropriate cluster {@code EventHandler} found inside the cluster {@code HandlerRegistry}.
+     * Get the handler which is able to handle a given cluster event.
      *
      * @param event the cluster event to handle.
-     * @return the corresponding cluster event handler to use.
+     * @return the handler which is able to handle the cluster event.
      */
     @Override
     public EventHandler<E> getHandler(E event) {
@@ -38,15 +38,26 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
         return null;
     }
 
+    /**
+     * Register a handler in the registry.
+     *
+     * @param handler the handler to register.
+     */
     public void bind(EventHandler handler) {
-        if (handler != null && handler.getType() != null) {
-            eventHandlerMap.put(handler.getType(), handler);
+        if(handler != null && handler.getType() != null) {
+            eventHandlerMap.put(handler.getType(),handler);
         }
     }
 
+    /**
+     * Un-register a handler from the registry.
+     *
+     * @param handler the handler to un-register.
+     */
     public void unbind(EventHandler handler) {
-        if (handler != null && handler.getType() != null) {
+         if(handler != null && handler.getType() != null) {
             eventHandlerMap.remove(handler.getType());
         }
     }
+
 }

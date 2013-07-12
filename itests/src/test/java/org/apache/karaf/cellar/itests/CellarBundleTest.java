@@ -32,8 +32,6 @@ public class CellarBundleTest extends CellarTestSupport {
     @Test
     //@Ignore
     public void testCellarBundleModule() throws Exception {
-    	FeaturesService featuresService = getOsgiService(FeaturesService.class);
-    	assertNotNull(featuresService);
     	
         installCellar();
         Thread.sleep(DEFAULT_TIMEOUT);

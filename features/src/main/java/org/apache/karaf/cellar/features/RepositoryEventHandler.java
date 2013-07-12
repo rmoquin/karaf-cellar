@@ -54,19 +54,13 @@ public class RepositoryEventHandler extends FeaturesSupport implements EventHand
     	
     	// check if the handler is ON
         if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.error("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID);
+            LOGGER.warn("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID);
             return;
-        }
-        
-        if (groupManager == null) {
-        	//in rare cases for example right after installation this happens!
-        	LOGGER.error("CELLAR FEATURES: retrieved event {} while groupManager is not available yet!", event);
-        	return;
         }
 
         // check if the group is local
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR FEATURES: node is not part of the event cluster group");
+            LOGGER.debug("CELLAR FEATURES: node is not part of the event cluster group {}", event.getSourceGroup().getName());
             return;
         }
         String uri = event.getId();
@@ -89,7 +83,7 @@ public class RepositoryEventHandler extends FeaturesSupport implements EventHand
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("CELLAR FEATURES: failed to add/remove repository URL {}", uri, e);
+            LOGGER.error("CELLAR FEATURES: failed to add/remove repository URI {}", uri, e);
         }
     }
 

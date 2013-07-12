@@ -39,6 +39,7 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
 
     private EventProducer eventProducer;
 
+    @Override
     public Object doExecute() throws Exception {
         // check if the group exists
         Group group = groupManager.findGroupByName(groupName);

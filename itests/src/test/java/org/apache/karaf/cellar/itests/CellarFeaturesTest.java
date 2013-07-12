@@ -51,22 +51,21 @@ public class CellarFeaturesTest extends CellarTestSupport {
 
         //Test feature command - install
         System.err.println(executeCommand("cluster:feature-install default eventadmin"));
-        Thread.sleep(5000);
+        Thread.sleep(2000);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
 
         //Test feature sync - uninstall
         System.err.println(executeCommand("feature:uninstall eventadmin"));
-        Thread.sleep(5000);
+        Thread.sleep(2000);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
 
         //Test feature command - install - before a node joins
-        System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
-        System.err.println(executeCommand("cluster:group-set testgroup " + getNodeIdOfChild("child1")));
-        Thread.sleep(5000);
+        System.err.println(executeCommand("cluster:feature-install default eventadmin"));
+        Thread.sleep(2000);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));

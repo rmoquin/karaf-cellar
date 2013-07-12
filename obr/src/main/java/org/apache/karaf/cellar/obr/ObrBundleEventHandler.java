@@ -53,7 +53,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         super.destroy();
     }
 
-    protected String[] getTarget(String bundle) {
+    private String[] getTarget(String bundle) {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
         if (idx > 0) {
@@ -64,7 +64,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         return target;
     }
 
-    public Resource selectNewestVersion(Resource[] resources) {
+    private Resource selectNewestVersion(Resource[] resources) {
         int idx = -1;
         Version v = null;
         for (int i = 0; (resources != null) && (i < resources.length); i++) {
@@ -82,7 +82,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         return (idx < 0) ? null : resources[idx];
     }
 
-    protected Resource[] searchRepository(String targetId, String targetVersion) throws InvalidSyntaxException {
+    private Resource[] searchRepository(String targetId, String targetVersion) throws InvalidSyntaxException {
         try {
             Bundle bundle = getBundleContext().getBundle(Long.parseLong(targetId));
             targetId = bundle.getSymbolicName();
@@ -120,10 +120,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
             return;
         }
 
-        if (groupManager == null) {
-        	LOGGER.error("CELLAR OBR: retrieved cluster event {} while groupManager is not available yet!", event);
-        	return;
-        }
+        // check if the group is local
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
             LOGGER.debug("CELLAR OBR: node is not part of the event cluster group {}", event.getSourceGroup().getName());
             return;
@@ -150,9 +147,9 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
                     Reason[] reqs = resolver.getUnsatisfiedRequirements();
                     if (reqs != null && reqs.length > 0) {
                         LOGGER.warn("CELLAR OBR: unsatisfied requirement(s): ");
-                        for (int reqIdx = 0; reqIdx < reqs.length; reqIdx++) {
-                            LOGGER.warn("  {}", reqs[reqIdx].getRequirement().getFilter());
-                            LOGGER.warn("    {}", reqs[reqIdx].getResource().getPresentationName());
+                        for (Reason reason : reqs) {
+                            LOGGER.warn("CELLAR OBR:    {}", reason.getRequirement().getFilter());
+                            LOGGER.warn("CELLAR OBR:      {}", reason.getResource().getPresentationName());
                         }
                     } else {
                         LOGGER.warn("CELLAR OBR: could not resolve targets");

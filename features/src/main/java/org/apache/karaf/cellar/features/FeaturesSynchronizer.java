@@ -65,9 +65,9 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR FEATURES: pulling features repositories and features from cluster group {}", groupName);
-            List<String> clusterRepositories = getClusterManager().getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
-            Map<FeatureInfo, Boolean> clusterFeatures = getClusterManager().getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
-            getClusterManager().getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+            clusterManager.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             // get the features repositories URLs from the cluster group
             if (clusterRepositories != null && !clusterRepositories.isEmpty()) {
                 for (String url : clusterRepositories) {
@@ -107,7 +107,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                                 LOGGER.debug("CELLAR FEATURES: installing feature {}/{}", info.getName(), info.getVersion());
                                 featuresService.installFeature(info.getName(), info.getVersion());
                             } catch (Exception e) {
-                                LOGGER.error("CELLAR FEATURES: failed to install feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
+                                LOGGER.warn("CELLAR FEATURES: failed to install feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
                             }
                             // if feature has to be uninstalled locally
                         } else if (!remotelyInstalled && locallyInstalled) {
@@ -115,7 +115,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                                 LOGGER.debug("CELLAR FEATURES: un-installing feature {}/{}", info.getName(), info.getVersion());
                                 featuresService.uninstallFeature(info.getName(), info.getVersion());
                             } catch (Exception e) {
-                                LOGGER.error("CELLAR FEATURES: failed to uninstall feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
+                                LOGGER.warn("CELLAR FEATURES: failed to uninstall feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
                             }
                         }
                     } else {
@@ -145,13 +145,14 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 repositoryList = featuresService.listRepositories();
                 featuresList = featuresService.listFeatures();
             } catch (Exception e) {
-                LOGGER.error("CELLAR FEATURES: error listing features", e);
+                LOGGER.warn("CELLAR FEATURES: unable to list features", e);
             }
 
             // push features repositories to the cluster group
             if (repositoryList != null && repositoryList.length > 0) {
                 for (Repository repository : repositoryList) {
                     pushRepository(repository, group);
+                    LOGGER.debug("CELLAR FEATURES: pushing repository {} in cluster group {}", repository.getName(), group.getName());
                 }
             }
 
@@ -159,6 +160,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
             if (featuresList != null && featuresList.length > 0) {
                 for (Feature feature : featuresList) {
                     pushFeature(feature, group);
+                    LOGGER.debug("CELLAR FEATURES: pushing feature {} in cluster group {}", feature.getName(), group.getName());
                 }
             }
         }
@@ -172,16 +174,11 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
      */
     @Override
     public Boolean isSyncEnabled(Group group) {
-        Boolean result = Boolean.FALSE;
         String groupName = group.getName();
 
-        try {
-            String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) this.getSwitchConfig().getProperty(propertyKey);
-            result = Boolean.parseBoolean(propertyValue);
-        } catch (Exception e) {
-            LOGGER.error("CELLAR FEATURES: error while checking if sync is enabled", e);
-        }
+        String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+        String propertyValue = (String) this.getSwitchConfig().getProperty(propertyKey);
+        Boolean result = Boolean.parseBoolean(propertyValue);
         return result;
     }
 }

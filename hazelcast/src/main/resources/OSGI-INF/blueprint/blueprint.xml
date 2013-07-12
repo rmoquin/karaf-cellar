@@ -129,7 +129,6 @@
     <bean id="executionContext" class="org.apache.karaf.cellar.core.command.ClusteredExecutionContext">
         <property name="producer" ref="eventProducer"/>
         <property name="commandStore" ref="commandStore"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
     
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>

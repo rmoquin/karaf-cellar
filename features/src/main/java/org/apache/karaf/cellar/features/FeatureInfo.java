@@ -23,8 +23,6 @@ public class FeatureInfo implements Serializable {
     private String name;
     private String version;
 
-    public FeatureInfo() {
-    }
 
     public FeatureInfo(String name, String version) {
         this.name = name;

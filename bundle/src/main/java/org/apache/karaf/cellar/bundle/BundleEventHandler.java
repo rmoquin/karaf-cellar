@@ -56,7 +56,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
         }
 
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR BUNDLE: node is not part of the event cluster group {}", event.getSourceGroup().getName());
+            LOGGER.info("CELLAR BUNDLE: node is not part of the event cluster group");
             return;
         }
         try {
@@ -71,24 +71,24 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
                     }
                 }
                 if (event.getType() == BundleEvent.INSTALLED) {
+                    LOGGER.debug("CELLAR BUNDLE: installing bundle {} from {}", event.getId(), event.getLocation());
                     installBundleFromLocation(event.getLocation());
-                    LOGGER.debug("CELLAR BUNDLE: installing {}/{}", event.getSymbolicName(), event.getVersion());
                 } else if (event.getType() == BundleEvent.UNINSTALLED) {
+                    LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}/{}", event.getSymbolicName(), event.getVersion());
                     uninstallBundle(event.getSymbolicName(), event.getVersion());
-                    LOGGER.debug("CELLAR BUNDLE: uninstalling {}/{}", event.getSymbolicName(), event.getVersion());
                 } else if (event.getType() == BundleEvent.STARTED) {
+                    LOGGER.debug("CELLAR BUNDLE: starting bundle {}/{}", event.getSymbolicName(), event.getVersion());
                     startBundle(event.getSymbolicName(), event.getVersion());
-                    LOGGER.debug("CELLAR BUNDLE: starting {}/{}", event.getSymbolicName(), event.getVersion());
                 } else if (event.getType() == BundleEvent.STOPPED) {
+                    LOGGER.debug("CELLAR BUNDLE: stopping bundle {}/{}", event.getSymbolicName(), event.getVersion());
                     stopBundle(event.getSymbolicName(), event.getVersion());
-                    LOGGER.debug("CELLAR BUNDLE: stopping {}/{}", event.getSymbolicName(), event.getVersion());
                 } else if (event.getType() == BundleEvent.UPDATED) {
+                    LOGGER.debug("CELLAR BUNDLE: updating bundle {}/{}", event.getSymbolicName(), event.getVersion());
                     updateBundle(event.getSymbolicName(), event.getVersion());
-                    LOGGER.debug("CELLAR BUNDLE: updating {}/{}", event.getSymbolicName(), event.getVersion());
                 }
-            } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", event.getSymbolicName(), event.getSourceGroup().getName());
+            } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", event.getLocation(), event.getSourceGroup().getName());
         } catch (BundleException e) {
-            LOGGER.error("CELLAR BUNDLE: failed to install bundle {}/{}.", new Object[] { event.getSymbolicName(), event.getVersion() }, e);
+            LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", e);
         } catch (Exception e) {
             LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", e);
         }

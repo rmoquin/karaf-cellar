@@ -36,7 +36,6 @@ public class ClusteredExecutionContext implements ExecutionContext {
     private Producer producer;
     private CommandStore commandStore;
     private ScheduledExecutorService timeoutScheduler = new ScheduledThreadPoolExecutor(10);
-    private BundleContext bundleContext;
 
     public ClusteredExecutionContext() {
         // nothing to do
@@ -47,16 +46,15 @@ public class ClusteredExecutionContext implements ExecutionContext {
         this.commandStore = commandStore;
     }
 
-    public void initProducer(ServiceReference<EventProducer> producerReference) {
-        LOGGER.warn("The event producer was bound." + this.producer);
-        this.producer = this.bundleContext.getService(producerReference);
-    }
-
-    public void removeProducer(ServiceReference<ExecutionContext> producer) {
-        LOGGER.warn("The event producer was removed.");
-        producer = null;
-    }
-
+    /**
+     * Execute a command in this context.
+     *
+     * @param command the command to execute.
+     * @return the result of the command execution.
+     * @throws StoreNotFoundException if the commands store is not found.
+     * @throws ProducerNotFoundException if no cluster event producer is found.
+     * @throws InterruptedException if the command execution has been interrupted.
+     */
     @Override
     public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
         if (command == null) {
@@ -75,29 +73,7 @@ public class ClusteredExecutionContext implements ExecutionContext {
         }
     }
 
-    public CommandStore getCommandStore() {
-        return commandStore;
-    }
-
-    public void setCommandStore(CommandStore commandStore) {
-        this.commandStore = commandStore;
-    }
-
-    /**
-     * @return the bundleContext
-     */
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    /**
-     * @param bundleContext the bundleContext to set
-     */
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
-    /**
+	/**
      * @return the producer
      */
     public Producer getProducer() {
@@ -109,5 +85,13 @@ public class ClusteredExecutionContext implements ExecutionContext {
      */
     public void setProducer(Producer producer) {
         this.producer = producer;
+    }
+	
+    public CommandStore getCommandStore() {
+        return commandStore;
+    }
+
+    public void setCommandStore(CommandStore commandStore) {
+        this.commandStore = commandStore;
     }
 }

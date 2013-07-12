@@ -17,10 +17,10 @@ import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.core.event.EventType;
 
 import java.util.Map;

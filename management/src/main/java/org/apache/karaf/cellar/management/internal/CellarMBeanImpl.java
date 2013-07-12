@@ -133,7 +133,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
                     boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
                     CompositeDataSupport data = new CompositeDataSupport(compositeType,
                             new String[]{"node", "handler", "status", "local"},
-                            new Object[]{node, handler, status, local});
+                            new Object[]{node.getId(), handler, status, local});
                     table.put(data);
                 }
             }
@@ -202,7 +202,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
             ConsumerSwitchResult consumerSwitchResult = results.get(node);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
                     new String[]{"node", "status", "local"},
-                    new Object[]{node, consumerSwitchResult.getStatus(), local});
+                    new Object[]{node.getId(), consumerSwitchResult.getStatus(), local});
             table.put(data);
         }
 
@@ -271,7 +271,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
             ProducerSwitchResult producerSwitchResult = results.get(node);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
                     new String[]{"node", "status", "local"},
-                    new Object[]{node, producerSwitchResult.getStatus(), local});
+                    new Object[]{node.getId(), producerSwitchResult.getStatus(), local});
             table.put(data);
         }
 

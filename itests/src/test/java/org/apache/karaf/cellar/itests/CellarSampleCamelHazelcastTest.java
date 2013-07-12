@@ -13,11 +13,6 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Set;
-
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
@@ -28,6 +23,9 @@ import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import java.util.Set;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
@@ -36,8 +34,8 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
     //@Ignore
     public void testCamelSampleApp() throws InterruptedException {
         installCellar();
-        createCellarChild("child1");
-        createCellarChild("child2");
+        createCellarChild("node1");
+        createCellarChild("node2");
         Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
@@ -49,16 +47,18 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:node-list"));
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
-        assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
+        assertTrue("There should be at least 3 Cellar nodes running", nodes.size() >= 3);
 
         Thread.sleep(DEFAULT_TIMEOUT);
 
-        String node1 = getNodeIdOfChild("child1");
-        String node2 = getNodeIdOfChild("child2");
+        String node1 = getNodeIdOfChild("node1");
+        String node2 = getNodeIdOfChild("node2");
 
-        System.err.println("Child1: " + node1);
-        System.err.println("Child2: " + node2);
+        System.err.println("Node 1: " + node1);
+        System.err.println("Node 2: " + node2);
 
+        executeCommand("cluster:group-create producer-grp");
+        executeCommand("cluster:group-create consumer-grp");
         System.err.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-set consumer-grp " + node1));
         System.err.println(executeCommand("cluster:group-set consumer-grp " + node2));
@@ -71,15 +71,15 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.err.println(executeCommand("bundle:list"));
 
         System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("instance:connect -u karaf -p karaf child2 bundle:list -t 0"));
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
 
         Thread.sleep(10000);
-        String output1 = executeCommand("instance:connect -u karaf -p karaf child1  log:display | grep \"Hallo Cellar\"");
+        String output1 = executeCommand("instance:connect -u karaf -p karaf node1  log:display | grep \"Hallo Cellar\"");
         System.err.println(output1);
-        String output2 = executeCommand("instance:connect -u karaf -p karaf child2  log:display | grep \"Hallo Cellar\"");
+        String output2 = executeCommand("instance:connect -u karaf -p karaf node2  log:display | grep \"Hallo Cellar\"");
         System.err.println(output2);
-        assertTrue("Expected at least 1 lines", 1 <= countOutputEntires(output1));
-        assertTrue("Expected at least 1 lines", 1 <= countOutputEntires(output2));
+        assertTrue("Expected at least lines", countOutputEntires(output1) >= 2);
+        assertTrue("Expected at least lines", countOutputEntires(output2) >= 2);
     }
 
     public int countOutputEntires(String output) {
@@ -90,10 +90,10 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
     @After
     public void tearDown() {
         try {
-            destroyCellarChild("child1");
-            destroyCellarChild("child2");
+            destroyCellarChild("node1");
+            destroyCellarChild("node2");
             unInstallCellar();
-        } catch (Exception ex) {
+        } catch (Exception e) {
             //Ignore
         }
     }

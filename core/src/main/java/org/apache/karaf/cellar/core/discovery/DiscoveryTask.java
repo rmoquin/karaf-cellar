@@ -43,13 +43,13 @@ public class DiscoveryTask implements Runnable {
     }
 
     public void destroy() {
-    	LOGGER.debug("CELLAR DISCOVERY: task is being destroyed");
+    	LOGGER.debug("CELLAR DISCOVERY: task is beeing destroyed");
         scheduler.shutdown();
     }
 
     @Override
     public void run() {
-        LOGGER.trace("CELLAR DISCOVERY: starting the discovery task");
+        LOGGER.trace("CELLAR DISCOVERY: Starting the discovery task.");
 
         if (configurationAdmin != null) {
             Set<String> members = new LinkedHashSet<String>();
@@ -58,7 +58,7 @@ public class DiscoveryTask implements Runnable {
                     service.refresh();
                     Set<String> discovered = service.discoverMembers();
                     members.addAll(discovered);
-                    LOGGER.trace("CELLAR DISCOVERY: service {} found members {}", service, discovered);
+                    LOGGER.trace("CELLAR DISCOVERY: Service {} found members {}", service, discovered);
                 }
                 try {
                 	LOGGER.trace("CELLAR DISCOVERY: retrieving configuration for PID={}", Discovery.PID);

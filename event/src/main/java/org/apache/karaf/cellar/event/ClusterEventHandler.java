@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.event;
 
-import java.io.Serializable;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -23,6 +22,7 @@ import org.apache.karaf.cellar.core.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Map;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -31,7 +31,8 @@ import org.apache.karaf.cellar.core.SwitchConfiguration;
 /**
  * Handler for cluster event.
  */
-public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent>, Serializable {
+public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent> {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
@@ -62,7 +63,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
 
         try {
             if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
-                Map<String, Object> properties = event.getProperties();
+                Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());

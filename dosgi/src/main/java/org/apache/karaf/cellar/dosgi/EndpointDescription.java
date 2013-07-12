@@ -13,13 +13,13 @@
  */
 package org.apache.karaf.cellar.dosgi;
 
-import java.io.Serializable;
 import org.apache.karaf.cellar.core.MultiNode;
 import org.apache.karaf.cellar.core.Node;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
+import java.io.Serializable;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * Description of an endpoint.
  */
-public class EndpointDescription implements MultiNode, Serializable {
+public class EndpointDescription implements MultiNode {
 
     //Id is {package}-{version}.
     private final String id;

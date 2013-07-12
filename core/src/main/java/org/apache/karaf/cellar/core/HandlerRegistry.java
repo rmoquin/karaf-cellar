@@ -13,10 +13,11 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.io.Serializable;
 /**
  * Handler registry interface.
  */
-public interface HandlerRegistry<T extends Object, H extends Handler<T>> {
+public interface HandlerRegistry<T extends Serializable, H extends Handler<T>> {
 
     /**
      * Get the handler that can handle a given cluster event.

@@ -80,27 +80,6 @@ public class CellarTestSupport {
     }
 
     /**
-     * This method configures Hazelcast TcpIp discovery for a given number of members.
-     * This configuration is required, when working with karaf instances.
-     *
-     * @param members
-     */
-    protected void configureLocalDiscovery(int members) {
-        StringBuilder membersBuilder = new StringBuilder();
-        membersBuilder.append("config:propset tcpIpMembers ");
-        membersBuilder.append("localhost:5701");
-        for (int i = 1; i < members; i++) {
-            membersBuilder.append(",").append("localhost:").append(String.valueOf(5701 + i));
-        }
-
-        String editCmd = "config:edit org.apache.karaf.cellar.discovery";
-        String propsetCmd = membersBuilder.toString();
-        String updateCmd = "config:update";
-
-        executeCommands(editCmd, propsetCmd, updateCmd);
-    }
-
-    /**
      * Installs the Cellar feature
      */
     protected void installCellar() {
@@ -191,7 +170,7 @@ public class CellarTestSupport {
         if (debug != null) {
             int l = options.length;
             options = Arrays.copyOf(options, l + 1);
-            options[l] = KarafDistributionOption.debugConfiguration("5005", true);
+            options[l] = KarafDistributionOption.debugConfiguration();
         }
         return options;
     }

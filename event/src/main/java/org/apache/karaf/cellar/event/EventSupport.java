@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.event;
 
+import java.io.Serializable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
@@ -34,16 +35,17 @@ public class EventSupport {
      * @param event the local event to read.
      * @return the map
      */
-    public Map<String, Object> getEventProperties(Event event) {
+    public Map<String, Serializable> getEventProperties(Event event) {
         String[] propertyNames = event.getPropertyNames();
 
-        Map<String, Object> properties = new HashMap<String, Object>();
+        Map<String, Serializable> properties = new HashMap<String, Serializable>();
 
         for (String propertyName : propertyNames) {
             // event property (org.osgi.framework.ServiceEvent for instance) contains non serializable objects (like source or service reference)
             if (!propertyName.equals("event")) {
                 Object property = event.getProperty(propertyName);
-                properties.put(propertyName, property);
+                if (property instanceof Serializable)
+                    properties.put(propertyName, (Serializable) property);
             }
         }
 
@@ -75,7 +77,7 @@ public class EventSupport {
      * @param topicName the topic name.
      * @param properties the event properties.
      */
-    public void postEvent(String topicName, Map<String, Object> properties) {
+    public void postEvent(String topicName, Map<String, Serializable> properties) {
         if (topicName == null) {
             LOGGER.error("CELLAR EVENT: failed to post event");
             return;
@@ -91,7 +93,7 @@ public class EventSupport {
      * @param topicName the topic name.
      * @param properties the event properties.
      */
-    public void sendEvent(String topicName, Map<String, Object> properties) {
+    public void sendEvent(String topicName, Map<String, Serializable> properties) {
         if (topicName == null) {
             LOGGER.error("CELLAR EVENT: failed to send event");
             return;

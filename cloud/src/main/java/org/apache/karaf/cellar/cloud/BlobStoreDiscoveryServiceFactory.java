@@ -94,7 +94,7 @@ public class BlobStoreDiscoveryServiceFactory implements ManagedServiceFactory {
 
     @Override
     public void deleted(String pid) {
-        LOGGER.debug("CELLAR CLOUD: deleting blob store discovery service {}", pid);
+        LOGGER.debug("CELLAR CLOUD: blob store discovery service deleted {}", pid);
         ServiceRegistration oldRegistration = registrations.remove(pid);
         if (oldRegistration != null) {
             oldRegistration.unregister();

@@ -34,7 +34,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
     String groupName;
 
-    @Argument(index = 1, name = "url", description = "The OBR URL.", required = true, multiValued = false)
+    @Argument(index = 1, name = "url", description = "The repository URL to register in the OBR service", required = true, multiValued = false)
     String url;
 
     private EventProducer eventProducer;
@@ -77,6 +77,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
+        event.setForce(true);
         event.setSourceGroup(group);
         eventProducer.produce(event);
 

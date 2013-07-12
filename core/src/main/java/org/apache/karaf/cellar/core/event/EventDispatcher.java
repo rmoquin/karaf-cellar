@@ -25,6 +25,7 @@ public interface EventDispatcher<E extends Event> extends Dispatcher<E> {
      *
      * @param event the cluster event to dispatch.
      */
+    @Override
     public void dispatch(E event);
 
 }

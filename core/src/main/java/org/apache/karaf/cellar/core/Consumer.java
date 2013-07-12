@@ -15,11 +15,12 @@ package org.apache.karaf.cellar.core;
 
 import org.apache.karaf.cellar.core.control.Switch;
 
+import java.io.Serializable;
 
 /**
  * Generic consumer interface.
  */
-public interface Consumer<T extends Object> {
+public interface Consumer<T extends Serializable> {
 
     /**
      * Consume an object.

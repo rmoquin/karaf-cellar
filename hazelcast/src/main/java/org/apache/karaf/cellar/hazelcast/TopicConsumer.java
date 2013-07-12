@@ -53,6 +53,11 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         stop();
     }
 
+    /**
+     * Consume a cluster event form the topic.
+     *
+     * @param event the cluster event.
+     */
     @Override
     public void consume(E event) {
         LOGGER.warn("Received a topic consumer message: " + event.toString());

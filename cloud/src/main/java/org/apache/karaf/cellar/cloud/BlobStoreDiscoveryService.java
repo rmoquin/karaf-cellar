@@ -183,9 +183,9 @@ public class BlobStoreDiscoveryService implements DiscoveryService {
             ois = new ObjectInputStream(is);
             result = ois.readObject();
         } catch (IOException e) {
-            LOGGER.warn("CELLAR CLOUD: error while reading blob", e);
+            LOGGER.warn("CELLAR CLOUD: failed to read blob", e);
         } catch (ClassNotFoundException e) {
-            LOGGER.warn("CELLAR CLOUD: error while reading blob", e);
+            LOGGER.warn("CELLAR CLOUD: failed to read blob", e);
         } finally {
             if (ois != null) {
                 try {
@@ -234,7 +234,7 @@ public class BlobStoreDiscoveryService implements DiscoveryService {
                 blob.setPayload(baos.toByteArray());
                 blobStore.putBlob(container, blob);
             } catch (IOException e) {
-                LOGGER.error("CELLAR CLOUD: error while writing blob", e);
+                LOGGER.error("CELLAR CLOUD: failed to write blob", e);
             } finally {
                 if (oos != null) {
                     try {
@@ -278,7 +278,7 @@ public class BlobStoreDiscoveryService implements DiscoveryService {
     	try {
 			return InetAddress.getLocalHost().getHostName();
 		} catch (UnknownHostException ex) {
-			LOGGER.error("CELLAR CLOUD: unable to determine host name of the node", ex);
+			LOGGER.error("CELLAR CLOUD: unable to determine host name of the local node", ex);
             return null;
 		}
     }

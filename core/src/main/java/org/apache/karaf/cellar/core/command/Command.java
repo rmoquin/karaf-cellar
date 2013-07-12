@@ -33,15 +33,17 @@ public class Command<R extends Result> extends Event {
     protected final BlockingQueue<Map<Node, R>> resultQueue = new LinkedBlockingQueue<Map<Node, R>>();
     protected final Map<Node, R> nodeResults = new HashMap<Node, R>();
 
-    public Command() {
-        this.force = true;
-    }
 
     public Command(String id) {
         super(id);
         this.force = true;
     }
 
+    /**
+     * Set the force flag for the execution of this command.
+     *
+     * @return true if the force flag is set, false else.
+     */
     @Override
     public Boolean getForce() {
         return true;

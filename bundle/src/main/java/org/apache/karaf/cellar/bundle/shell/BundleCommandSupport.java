@@ -13,9 +13,9 @@
  */
 package org.apache.karaf.cellar.bundle.shell;
 
+import org.apache.felix.gogo.commands.Argument;
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
-import org.apache.karaf.shell.commands.Argument;
 
 import java.util.Map;
 import java.util.regex.Matcher;

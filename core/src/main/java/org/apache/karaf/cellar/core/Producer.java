@@ -15,11 +15,12 @@ package org.apache.karaf.cellar.core;
 
 import org.apache.karaf.cellar.core.control.Switch;
 
+import java.io.Serializable;
 
 /**
  * Generic producer interface.
  */
-public interface Producer<T extends Object> {
+public interface Producer<T extends Serializable> {
 
     /**
      * Produce an object.

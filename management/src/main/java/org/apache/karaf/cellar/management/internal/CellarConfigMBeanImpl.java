@@ -80,7 +80,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         if (clusterConfigurations != null) {
             // update the cluster group
-            Properties properties = clusterConfigurations.remove(pid);
+            clusterConfigurations.remove(pid);
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);

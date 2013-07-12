@@ -31,8 +31,6 @@ public class Event implements Serializable {
     protected Boolean force = Boolean.FALSE;
     protected Boolean postPublish = Boolean.FALSE;
 
-    public Event() {
-    }
 
     public Event(String id) {
         this.id = id;

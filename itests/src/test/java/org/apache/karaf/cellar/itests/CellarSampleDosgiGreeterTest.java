@@ -13,22 +13,21 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.util.Set;
 
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.junit.ExamReactorStrategy;
 import org.ops4j.pax.exam.junit.JUnit4TestRunner;
 import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
@@ -37,15 +36,16 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
     //@Ignore
     public void testDosgiGreeter() throws InterruptedException {
         installCellar();
-        createCellarChild("child1");
-        createCellarChild("child2");
+        createCellarChild("node1");
+        createCellarChild("node2");
         Thread.sleep(DEFAULT_TIMEOUT);
-        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
-
-        System.err.println(executeCommand("instance:list"));
-
+        
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
+        
+        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        System.err.println(executeCommand("instance:list"));
+        
         System.err.println(executeCommand("cluster:node-list"));
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
@@ -53,8 +53,8 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
         Thread.sleep(DEFAULT_TIMEOUT);
 
-        String node1 = getNodeIdOfChild("child1");
-        String node2 = getNodeIdOfChild("child2");
+        String node1 = getNodeIdOfChild("node1");
+        String node2 = getNodeIdOfChild("node2");
 
         System.err.println("Node 1: " + node1);
         System.err.println("Node 2: " + node2);
@@ -77,7 +77,7 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:group-set service-grp " + node2));
         Thread.sleep(10000);
         System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("child2 osgi:list -t 0"));
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
         System.err.println(executeCommand("cluster:list-services"));
         greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
         System.err.println(greetOutput);
@@ -99,8 +99,8 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
     @After
     public void tearDown() {
         try {
-            destroyCellarChild("child1");
-            destroyCellarChild("child2");
+            destroyCellarChild("node1");
+            destroyCellarChild("node2");
             unInstallCellar();
         } catch (Exception ex) {
             //Ignore

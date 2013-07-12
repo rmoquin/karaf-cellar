@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.management.internal;
 
+import java.util.ArrayList;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -26,7 +27,6 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -35,8 +35,8 @@ import java.util.Set;
  */
 public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMBean {
     private ClusterManager clusterManager;
-    private GroupManager groupManager;
     private ExecutionContext executionContext;
+    private GroupManager groupManager;
 
     public CellarGroupMBeanImpl() throws NotCompliantMBeanException {
         super(CellarGroupMBean.class);
@@ -54,7 +54,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
     @Override
     public void delete(String name) throws Exception {
         Group g = groupManager.findGroupByName(name);
-        List<String> nodes = new LinkedList<String>();
+            List<String> nodes = new ArrayList<String>();
         if (g.getNodes() != null && !g.getNodes().isEmpty()) {
             for (Node n : g.getNodes()) {
                 nodes.add(n.getId());

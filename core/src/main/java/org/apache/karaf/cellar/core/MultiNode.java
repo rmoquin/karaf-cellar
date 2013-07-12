@@ -13,12 +13,13 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
  * Multiple nodes container (group) interface.
  */
-public interface MultiNode {
+public interface MultiNode extends Serializable {
 
     /**
      * Set the nodes hosted in the multi-node container.
