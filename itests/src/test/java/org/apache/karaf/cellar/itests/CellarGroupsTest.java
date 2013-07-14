@@ -46,9 +46,10 @@ public class CellarGroupsTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:node-list"));
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
-        assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
+        assertTrue("There should be at least 2 cellar nodes running", 2 >= nodes.size());
 
         System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:group-create testgroup "));
         System.err.println(executeCommand("cluster:group-set testgroup " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-list"));
 
@@ -57,7 +58,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         Set<Group> groups = groupManager.listAllGroups();
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 
-        System.err.println(executeCommand("cluster:group-delete testgroup "));
+        System.err.println(executeCommand("cluster:group-delete testgroup"));
         System.err.println(executeCommand("cluster:group-list"));
         groups = groupManager.listAllGroups();
         assertEquals("There should be a single cellar group", 1, groups.size());
