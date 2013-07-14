@@ -57,5 +57,6 @@
     <reference id="eventTransportFactory" interface="org.apache.karaf.cellar.core.event.EventTransportFactory"/>
     <reference id="commandStore" interface="org.apache.karaf.cellar.core.command.CommandStore"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-    
+    <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
+    <reference id="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
 </blueprint>
