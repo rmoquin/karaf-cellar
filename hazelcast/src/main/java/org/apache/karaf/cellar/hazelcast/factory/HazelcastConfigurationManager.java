@@ -42,7 +42,7 @@ public class HazelcastConfigurationManager {
      *
      * @param properties the updated configuration properties.
      */
-    public void update(Map properties) throws InterruptedException {
+    public void update(Map<String, Object> properties) {
         if (properties != null) {
             if (properties.containsKey(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME)) {
                 Set<String> newDiscoveredMemberSet = CellarUtils.createSetFromString((String) properties.get(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME));

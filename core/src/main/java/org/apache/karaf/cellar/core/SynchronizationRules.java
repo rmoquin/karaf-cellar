@@ -37,11 +37,6 @@ public interface SynchronizationRules {
      */
     public void setProperty(String name, Object value);
 
-    /**
-     * @return the properties
-     */
-    public Map<String, Object> getProperties();
-
     void updated(Map<String, Object> properties);
 
     void removeProperty(String name);

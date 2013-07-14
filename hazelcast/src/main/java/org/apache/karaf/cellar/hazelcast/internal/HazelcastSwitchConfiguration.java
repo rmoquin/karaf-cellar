@@ -33,7 +33,7 @@ public class HazelcastSwitchConfiguration implements SwitchConfiguration {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSwitchConfiguration.class);
     private Map<String, Object> properties;
     private ConfigurationAdmin configurationAdmin;
-    private String pid = Configurations.GROUP_SYNC_RULES_PID;
+    private String pid = Configurations.NODE_SYNC_RULES_PID;
 
     @Override
     public Object getProperty(String name) {

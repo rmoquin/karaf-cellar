@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @author rmoquin
  */
 public class HazelcastSynchronizationRules implements SynchronizationRules {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSwitchConfiguration.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSynchronizationRules.class);
     private Map<String, Object> properties;
     private ConfigurationAdmin configurationAdmin;
     private String pid;
@@ -96,10 +96,5 @@ public class HazelcastSynchronizationRules implements SynchronizationRules {
      */
     public void setPid(String pid) {
         this.pid = pid;
-    }
-
-    @Override
-    public Map<String, Object> getProperties() {
-        return properties;
     }
 }

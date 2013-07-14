@@ -19,11 +19,11 @@ package org.apache.karaf.cellar.core;
 public class Configurations {
 
     public static final String DEFAULT_GROUP_NAME = "default";
-    public static final String GROUP_ENTRIES = "cellar.groups.list";
-    public static final String GROUP_SYNC_RULES_PID = "org.apache.karaf.cellar.groups";
-    public static final String GROUPS_SYNC_RULES_MAP = "cellar.groups.rules";
+    public static final String GROUP_MEMBERSHIP_DETAILS_MAP_DO = "cellar.groups.list";
+    public static final String GROUP_MEMBERSHIP_DETAILS_PID = "org.apache.karaf.cellar.groups";
+    public static final String NODE_SYNC_RULES_MAP_DO = "cellar.groups.rules";
+    public static final String NODE_SYNC_RULES_PID = "org.apache.karaf.cellar.node";
     public static final String GROUPS_KEY = "groups";
-    public static final String NODE = "org.apache.karaf.cellar.node";
     public static final String PRODUCER = "producer";
     public static final String CONSUMER = "consumer";
     public static final String HANDLER = "handler";
