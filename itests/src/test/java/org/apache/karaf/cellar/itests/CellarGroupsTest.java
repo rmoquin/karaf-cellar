@@ -20,6 +20,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
+import static org.apache.karaf.cellar.itests.CellarTestSupport.DEFAULT_TIMEOUT;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +39,7 @@ public class CellarGroupsTest extends CellarTestSupport {
     //@Ignore
     public void testGroupsWithChildNodes() throws InterruptedException {
         installCellar();
+        Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("child1");
         Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);

@@ -33,20 +33,29 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: DOSGi</name>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.import>
-            org.apache.karaf.cellar.core*;version="${project.version}",
-            org.apache.felix.service.command,
-            org.apache.karaf.shell.commands,
-            org.apache.karaf.shell.console,
-            org.slf4j;resolution:=optional,
-            *
-        </osgi.import>
-        <osgi.export>
-            org.apache.karaf.cellar.dosgi*;version="${project.version}"
-        </osgi.export>
-    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.cellar.dosgi*;version="${project.version}"
+                        </Export-Package>
+                        <Import-Package>
+                            org.apache.karaf.cellar.core*;version="${project.version}",
+                            org.apache.felix.service.command,
+                            org.apache.karaf.shell.commands,
+                            org.apache.karaf.shell.console,
+                            org.slf4j;resolution:=optional,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <dependency>

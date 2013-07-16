@@ -33,24 +33,34 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Hazelcast</name>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.import>
-            com.hazelcast*,
-            org.apache.karaf.cellar.core*;version="${project.version}",
-            org.apache.karaf.cellar.utils.ping;version="${project.version}",
-            org.apache.karaf.features;version="[3,4)",
-            org.osgi*,
-            org.slf4j;resolution:=optional,
-            *
-        </osgi.import>
-        <osgi.export>
-            org.apache.karaf.cellar.hazelcast*;version="${project.version}"
-        </osgi.export>
-        <osgi.private>
-            org.apache.karaf.cellar.hazelcast.internal*;version="${project.version}"
-        </osgi.private>
-    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Private-Package>
+                            org.apache.karaf.cellar.hazelcast.internal*;version="${project.version}"
+                        </Private-Package>
+                        <Export-Package>
+                            org.apache.karaf.cellar.hazelcast*;version="${project.version}"
+                        </Export-Package>
+                        <Import-Package>
+                            com.hazelcast*,
+                            org.apache.karaf.cellar.core*;version="${project.version}",
+                            org.apache.karaf.cellar.utils.ping;version="${project.version}",
+                            org.apache.karaf.features;version="[3,4)",
+                            org.osgi*,
+                            org.slf4j;resolution:=optional,
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>

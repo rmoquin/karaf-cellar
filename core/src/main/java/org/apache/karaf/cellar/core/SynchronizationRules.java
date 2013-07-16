@@ -15,7 +15,7 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  *
@@ -23,21 +23,92 @@ import java.util.Map;
  */
 public interface SynchronizationRules {
     /**
-     * Saves any changes made to this configuration object.
+     * @return the inboundBundleBlacklist
      */
-    public void save();
+    List<String> getInboundBundleBlacklist();
 
     /**
-     * @param name the name of the property to set.
+     * @return the inboundBundleWhitelist
      */
-    public Object getProperty(String name);
+    List<String> getInboundBundleWhitelist();
 
     /**
-     * @return a single property
+     * @return the inboundConfigurationBlacklist
      */
-    public void setProperty(String name, Object value);
+    List<String> getInboundConfigurationBlacklist();
 
-    void updated(Map<String, Object> properties);
+    /**
+     * @return the inboundConfigurationWhitelist
+     */
+    List<String> getInboundConfigurationWhitelist();
 
-    void removeProperty(String name);
+    /**
+     * @return the inboundFeatureBlacklist
+     */
+    List<String> getInboundFeatureBlacklist();
+
+    /**
+     * @return the inboundFeatureWhitelist
+     */
+    List<String> getInboundFeatureWhitelist();
+
+    /**
+     * @return the name
+     */
+    String getName();
+
+    /**
+     * @return the outboundBundleBlacklist
+     */
+    List<String> getOutboundBundleBlacklist();
+
+    /**
+     * @return the outboundBundleWhitelist
+     */
+    List<String> getOutboundBundleWhitelist();
+
+    /**
+     * @return the outboundConfigurationBlacklist
+     */
+    List<String> getOutboundConfigurationBlacklist();
+
+    /**
+     * @return the outboundConfigurationWhitelist
+     */
+    List<String> getOutboundConfigurationWhitelist();
+
+    /**
+     * @return the outboundFeatureBlacklist
+     */
+    List<String> getOutboundFeatureBlacklist();
+
+    /**
+     * @return the outboundFeatureWhitelist
+     */
+    List<String> getOutboundFeatureWhitelist();
+
+    /**
+     * @return the syncConfiguration
+     */
+    boolean isSyncConfiguration();
+
+    /**
+     * @return the syncFeatureRepos
+     */
+    boolean isSyncFeatureRepos();
+
+    /**
+     * @return the syncFeatures
+     */
+    boolean isSyncFeatures();
+
+    /**
+     * @return the syncOBRBundles
+     */
+    boolean isSyncOBRBundles();
+
+    /**
+     * @return the syncOBRUrls
+     */
+    boolean isSyncOBRUrls();
 }

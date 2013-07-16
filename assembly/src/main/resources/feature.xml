@@ -17,13 +17,24 @@
 
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
     
+    <feature name="dependency" version="${project.version}" resolver="(obr)">
+        <bundle start-level="29">mvn:org.jledit/core/0.2.0</bundle>
+    </feature>
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-        <configfile finalname="/etc/org.apache.karaf.cellar.groups.cfg">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/groups
-        </configfile>
-        <configfile finalname="/etc/org.apache.karaf.cellar.node.cfg">
-            mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/cfg/node
-        </configfile>
+        <config name="org.apache.karaf.cellar.core.GroupMembershipConfig-1">
+            name=default
+        </config>
+        <config name="org.apache.karaf.cellar.core.NodeEventConfig">
+            producer = true
+            consumer = true
+            enableBundleEvents = true
+            enableConfigurationEvents = true
+            enableFeatureEvents = true
+            enableDOSGIEvents = true
+            enableClusterEvents = true
+            enableOBRBundleEvents = true
+            enableObrEvents = true
+        </config>
         <bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
@@ -65,6 +76,7 @@
     </feature>
 
     <feature name="cellar" description="Karaf clustering" version="${project.version}" resolver="(obr)">
+        <feature version="${project.version}">dependency</feature>
         <feature version="${project.version}">cellar-hazelcast</feature>
         <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-config</feature>

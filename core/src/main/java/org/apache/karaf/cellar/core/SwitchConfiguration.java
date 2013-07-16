@@ -15,32 +15,55 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Map;
-
 /**
  *
  * @author rmoquin
  */
 public interface SwitchConfiguration {
-    /**
-     * Saves any changes made to this configuration object.
-     */
-    public void save();
 
     /**
-     * @param name the name of the property to set.
+     * @return the consumer
      */
-    public Object getProperty(String name);
+    boolean isConsumer();
 
     /**
-     * @return a single property
+     * @return the enableBundleEvents
      */
-    public void setProperty(String name, Object value);
+    boolean isEnableBundleEvents();
 
     /**
-     * @return the properties
+     * @return the enableClusterEvents
      */
-    public Map<String, Object> getProperties();
+    boolean isEnableClusterEvents();
 
-    void updated(Map<String, Object> properties);
+    /**
+     * @return the enableConfigurationEvents
+     */
+    boolean isEnableConfigurationEvents();
+
+    /**
+     * @return the enableDOSGIEvents
+     */
+    boolean isEnableDOSGIEvents();
+
+    /**
+     * @return the enableFeatureEvents
+     */
+    boolean isEnableFeatureEvents();
+
+    /**
+     * @return the enableOBRBundleEvents
+     */
+    boolean isEnableOBRBundleEvents();
+
+    /**
+     * @return the enableObrEvents
+     */
+    boolean isEnableObrEvents();
+
+    /**
+     * @return the producer
+     */
+    boolean isProducer();
+
 }

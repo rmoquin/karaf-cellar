@@ -15,86 +15,315 @@
  */
 package org.apache.karaf.cellar.hazelcast.internal;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Map;
+import java.util.List;
 import org.apache.karaf.cellar.core.SynchronizationRules;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
 public class HazelcastSynchronizationRules implements SynchronizationRules {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSynchronizationRules.class);
-    private Map<String, Object> properties;
-    private ConfigurationAdmin configurationAdmin;
-    private String pid;
+    private String name;
+    private boolean syncConfiguration;
+    private List<String> inboundConfigurationWhitelist;
+    private List<String> outboundConfigurationWhitelist;
+    private List<String> inboundConfigurationBlacklist;
+    private List<String> outboundConfigurationBlacklist;
+    private boolean syncFeatures;
+    private boolean syncFeatureRepos;
+    private List<String> inboundFeatureWhitelist;
+    private List<String> outboundFeatureWhitelist;
+    private List<String> inboundFeatureBlacklist;
+    private List<String> outboundFeatureBlacklist;
+    private boolean syncBundles;
+    private List<String> inboundBundleWhitelist;
+    private List<String> outboundBundleWhitelist;
+    private List<String> inboundBundleBlacklist;
+    private List<String> outboundBundleBlacklist;
+    private boolean syncOBRUrls;
+    private boolean syncOBRBundles;
 
+    /**
+     * @return the name
+     */
     @Override
-    public Object getProperty(String name) {
-        LOGGER.warn("Attempting to retrieve sync value for property: " + name);
-        return properties.get(name);
-    }
-
-    @Override
-    public void setProperty(String name, Object value) {
-        this.properties.put(name, value);
-    }
-
-    @Override
-    public void removeProperty(String name) {
-        this.properties.remove(name);
-    }
-
-    @Override
-    public void updated(Map<String, Object> properties) {
-        this.properties = properties;
-    }
-
-    @Override
-    public void save() {
-        try {
-            LOGGER.info("Saving the synchronization configuration.");
-            Configuration configuration = this.configurationAdmin.getConfiguration(pid, "?");
-            Dictionary<String, Object> dictionary = configuration.getProperties();
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                dictionary.put(entry.getKey(), entry.getValue());
-            }
-            configuration.update(dictionary);
-        } catch (IOException ex) {
-            LOGGER.error("Error saving configuration " + pid, ex);
-        }
+    public String getName() {
+        return name;
     }
 
     /**
-     * @return the configurationAdmin
+     * @param name the name to set
      */
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
-     * @param configurationAdmin the configurationAdmin to set
+     * @return the syncConfiguration
      */
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    @Override
+    public boolean isSyncConfiguration() {
+        return syncConfiguration;
     }
 
     /**
-     * @return the pid
+     * @param syncConfiguration the syncConfiguration to set
      */
-    public String getPid() {
-        return pid;
+    public void setSyncConfiguration(boolean syncConfiguration) {
+        this.syncConfiguration = syncConfiguration;
     }
 
     /**
-     * @param pid the pid to set
+     * @return the inboundConfigurationWhitelist
      */
-    public void setPid(String pid) {
-        this.pid = pid;
+    @Override
+    public List<String> getInboundConfigurationWhitelist() {
+        return inboundConfigurationWhitelist;
+    }
+
+    /**
+     * @param inboundConfigurationWhitelist the inboundConfigurationWhitelist to set
+     */
+    public void setInboundConfigurationWhitelist(List<String> inboundConfigurationWhitelist) {
+        this.inboundConfigurationWhitelist = inboundConfigurationWhitelist;
+    }
+
+    /**
+     * @return the outboundConfigurationWhitelist
+     */
+    @Override
+    public List<String> getOutboundConfigurationWhitelist() {
+        return outboundConfigurationWhitelist;
+    }
+
+    /**
+     * @param outboundConfigurationWhitelist the outboundConfigurationWhitelist to set
+     */
+    public void setOutboundConfigurationWhitelist(List<String> outboundConfigurationWhitelist) {
+        this.outboundConfigurationWhitelist = outboundConfigurationWhitelist;
+    }
+
+    /**
+     * @return the inboundConfigurationBlacklist
+     */
+    @Override
+    public List<String> getInboundConfigurationBlacklist() {
+        return inboundConfigurationBlacklist;
+    }
+
+    /**
+     * @param inboundConfigurationBlacklist the inboundConfigurationBlacklist to set
+     */
+    public void setInboundConfigurationBlacklist(List<String> inboundConfigurationBlacklist) {
+        this.inboundConfigurationBlacklist = inboundConfigurationBlacklist;
+    }
+
+    /**
+     * @return the outboundConfigurationBlacklist
+     */
+    @Override
+    public List<String> getOutboundConfigurationBlacklist() {
+        return outboundConfigurationBlacklist;
+    }
+
+    /**
+     * @param outboundConfigurationBlacklist the outboundConfigurationBlacklist to set
+     */
+    public void setOutboundConfigurationBlacklist(List<String> outboundConfigurationBlacklist) {
+        this.outboundConfigurationBlacklist = outboundConfigurationBlacklist;
+    }
+
+    /**
+     * @return the syncFeatures
+     */
+    @Override
+    public boolean isSyncFeatures() {
+        return syncFeatures;
+    }
+
+    /**
+     * @param syncFeatures the syncFeatures to set
+     */
+    public void setSyncFeatures(boolean syncFeatures) {
+        this.syncFeatures = syncFeatures;
+    }
+
+    /**
+     * @return the syncFeatureRepos
+     */
+    @Override
+    public boolean isSyncFeatureRepos() {
+        return syncFeatureRepos;
+    }
+
+    /**
+     * @param syncFeatureRepos the syncFeatureRepos to set
+     */
+    public void setSyncFeatureRepos(boolean syncFeatureRepos) {
+        this.syncFeatureRepos = syncFeatureRepos;
+    }
+
+    /**
+     * @return the inboundFeatureWhitelist
+     */
+    @Override
+    public List<String> getInboundFeatureWhitelist() {
+        return inboundFeatureWhitelist;
+    }
+
+    /**
+     * @param inboundFeatureWhitelist the inboundFeatureWhitelist to set
+     */
+    public void setInboundFeatureWhitelist(List<String> inboundFeatureWhitelist) {
+        this.inboundFeatureWhitelist = inboundFeatureWhitelist;
+    }
+
+    /**
+     * @return the outboundFeatureWhitelist
+     */
+    @Override
+    public List<String> getOutboundFeatureWhitelist() {
+        return outboundFeatureWhitelist;
+    }
+
+    /**
+     * @param outboundFeatureWhitelist the outboundFeatureWhitelist to set
+     */
+    public void setOutboundFeatureWhitelist(List<String> outboundFeatureWhitelist) {
+        this.outboundFeatureWhitelist = outboundFeatureWhitelist;
+    }
+
+    /**
+     * @return the inboundFeatureBlacklist
+     */
+    @Override
+    public List<String> getInboundFeatureBlacklist() {
+        return inboundFeatureBlacklist;
+    }
+
+    /**
+     * @param inboundFeatureBlacklist the inboundFeatureBlacklist to set
+     */
+    public void setInboundFeatureBlacklist(List<String> inboundFeatureBlacklist) {
+        this.inboundFeatureBlacklist = inboundFeatureBlacklist;
+    }
+
+    /**
+     * @return the outboundFeatureBlacklist
+     */
+    @Override
+    public List<String> getOutboundFeatureBlacklist() {
+        return outboundFeatureBlacklist;
+    }
+
+    /**
+     * @param outboundFeatureBlacklist the outboundFeatureBlacklist to set
+     */
+    public void setOutboundFeatureBlacklist(List<String> outboundFeatureBlacklist) {
+        this.outboundFeatureBlacklist = outboundFeatureBlacklist;
+    }
+
+    /**
+     * @return the syncBundles
+     */
+    public boolean isSyncBundles() {
+        return syncBundles;
+    }
+
+    /**
+     * @param syncBundles the syncBundles to set
+     */
+    public void setSyncBundles(boolean syncBundles) {
+        this.syncBundles = syncBundles;
+    }
+
+    /**
+     * @return the inboundBundleWhitelist
+     */
+    @Override
+    public List<String> getInboundBundleWhitelist() {
+        return inboundBundleWhitelist;
+    }
+
+    /**
+     * @param inboundBundleWhitelist the inboundBundleWhitelist to set
+     */
+    public void setInboundBundleWhitelist(List<String> inboundBundleWhitelist) {
+        this.inboundBundleWhitelist = inboundBundleWhitelist;
+    }
+
+    /**
+     * @return the outboundBundleWhitelist
+     */
+    @Override
+    public List<String> getOutboundBundleWhitelist() {
+        return outboundBundleWhitelist;
+    }
+
+    /**
+     * @param outboundBundleWhitelist the outboundBundleWhitelist to set
+     */
+    public void setOutboundBundleWhitelist(List<String> outboundBundleWhitelist) {
+        this.outboundBundleWhitelist = outboundBundleWhitelist;
+    }
+
+    /**
+     * @return the inboundBundleBlacklist
+     */
+    @Override
+    public List<String> getInboundBundleBlacklist() {
+        return inboundBundleBlacklist;
+    }
+
+    /**
+     * @param inboundBundleBlacklist the inboundBundleBlacklist to set
+     */
+    public void setInboundBundleBlacklist(List<String> inboundBundleBlacklist) {
+        this.inboundBundleBlacklist = inboundBundleBlacklist;
+    }
+
+    /**
+     * @return the outboundBundleBlacklist
+     */
+    @Override
+    public List<String> getOutboundBundleBlacklist() {
+        return outboundBundleBlacklist;
+    }
+
+    /**
+     * @param outboundBundleBlacklist the outboundBundleBlacklist to set
+     */
+    public void setOutboundBundleBlacklist(List<String> outboundBundleBlacklist) {
+        this.outboundBundleBlacklist = outboundBundleBlacklist;
+    }
+
+    /**
+     * @return the syncOBRUrls
+     */
+    @Override
+    public boolean isSyncOBRUrls() {
+        return syncOBRUrls;
+    }
+
+    /**
+     * @param syncOBRUrls the syncOBRUrls to set
+     */
+    public void setSyncOBRUrls(boolean syncOBRUrls) {
+        this.syncOBRUrls = syncOBRUrls;
+    }
+
+    /**
+     * @return the syncOBRBundles
+     */
+    @Override
+    public boolean isSyncOBRBundles() {
+        return syncOBRBundles;
+    }
+
+    /**
+     * @param syncOBRBundles the syncOBRBundles to set
+     */
+    public void setSyncOBRBundles(boolean syncOBRBundles) {
+        this.syncOBRBundles = syncOBRBundles;
     }
 }

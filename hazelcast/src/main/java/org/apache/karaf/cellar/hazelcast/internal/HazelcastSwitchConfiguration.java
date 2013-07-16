@@ -15,86 +15,171 @@
  */
 package org.apache.karaf.cellar.hazelcast.internal;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Map;
-import org.apache.karaf.cellar.core.Configurations;
+import java.util.Set;
 import org.apache.karaf.cellar.core.SwitchConfiguration;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
 public class HazelcastSwitchConfiguration implements SwitchConfiguration {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastSwitchConfiguration.class);
-    private Map<String, Object> properties;
-    private ConfigurationAdmin configurationAdmin;
-    private String pid = Configurations.NODE_SYNC_RULES_PID;
+    private Set<String> groupNames;
+    private boolean producer;
+    private boolean consumer;
+    private boolean enableBundleEvents;
+    private boolean enableConfigurationEvents;
+    private boolean enableFeatureEvents;
+    private boolean enableDOSGIEvents;
+    private boolean enableClusterEvents;
+    private boolean enableOBRBundleEvents;
+    private boolean enableObrEvents;
 
+    /**
+     * @return the producer
+     */
     @Override
-    public Object getProperty(String name) {
-        return properties.get(name);
-    }
-
-    @Override
-    public void setProperty(String name, Object value) {
-        this.properties.put(name, value);
-    }
-
-    @Override
-    public void updated(Map<String, Object> properties) {
-        this.properties = properties;
-    }
-
-    @Override
-    public void save() {
-        try {
-            LOGGER.info("Saving the synchronization configuration.");
-            Configuration configuration = this.configurationAdmin.getConfiguration(pid, "?");
-            Dictionary<String, Object> dictionary = configuration.getProperties();
-            for (Map.Entry<String, Object> entry : properties.entrySet()) {
-                dictionary.put(entry.getKey(), entry.getValue());
-            }
-            configuration.update(dictionary);
-        } catch (IOException ex) {
-            LOGGER.error("Error saving configuration " + pid, ex);
-        }
+    public boolean isProducer() {
+        return producer;
     }
 
     /**
-     * @return the configurationAdmin
+     * @param producer the producer to set
      */
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    public void setProducer(boolean producer) {
+        this.producer = producer;
     }
 
     /**
-     * @param configurationAdmin the configurationAdmin to set
+     * @return the consumer
      */
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    /**
-     * @return the pid
-     */
-    public String getPid() {
-        return pid;
-    }
-
-    /**
-     * @param pid the pid to set
-     */
-    public void setPid(String pid) {
-        this.pid = pid;
-    }
-    
     @Override
-    public Map<String, Object> getProperties() {
-        return properties;
+    public boolean isConsumer() {
+        return consumer;
+    }
+
+    /**
+     * @param consumer the consumer to set
+     */
+    public void setConsumer(boolean consumer) {
+        this.consumer = consumer;
+    }
+
+    /**
+     * @return the enableBundleEvents
+     */
+    @Override
+    public boolean isEnableBundleEvents() {
+        return enableBundleEvents;
+    }
+
+    /**
+     * @param enableBundleEvents the enableBundleEvents to set
+     */
+    public void setEnableBundleEvents(boolean enableBundleEvents) {
+        this.enableBundleEvents = enableBundleEvents;
+    }
+
+    /**
+     * @return the enableConfigurationEvents
+     */
+    @Override
+    public boolean isEnableConfigurationEvents() {
+        return enableConfigurationEvents;
+    }
+
+    /**
+     * @param enableConfigurationEvents the enableConfigurationEvents to set
+     */
+    public void setEnableConfigurationEvents(boolean enableConfigurationEvents) {
+        this.enableConfigurationEvents = enableConfigurationEvents;
+    }
+
+    /**
+     * @return the enableFeatureEvents
+     */
+    @Override
+    public boolean isEnableFeatureEvents() {
+        return enableFeatureEvents;
+    }
+
+    /**
+     * @param enableFeatureEvents the enableFeatureEvents to set
+     */
+    public void setEnableFeatureEvents(boolean enableFeatureEvents) {
+        this.enableFeatureEvents = enableFeatureEvents;
+    }
+
+    /**
+     * @return the enableDOSGIEvents
+     */
+    @Override
+    public boolean isEnableDOSGIEvents() {
+        return enableDOSGIEvents;
+    }
+
+    /**
+     * @param enableDOSGIEvents the enableDOSGIEvents to set
+     */
+    public void setEnableDOSGIEvents(boolean enableDOSGIEvents) {
+        this.enableDOSGIEvents = enableDOSGIEvents;
+    }
+
+    /**
+     * @return the enableClusterEvents
+     */
+    @Override
+    public boolean isEnableClusterEvents() {
+        return enableClusterEvents;
+    }
+
+    /**
+     * @param enableClusterEvents the enableClusterEvents to set
+     */
+    public void setEnableClusterEvents(boolean enableClusterEvents) {
+        this.enableClusterEvents = enableClusterEvents;
+    }
+
+    /**
+     * @return the enableOBRBundleEvents
+     */
+    @Override
+    public boolean isEnableOBRBundleEvents() {
+        return enableOBRBundleEvents;
+    }
+
+    /**
+     * @param enableOBRBundleEvents the enableOBRBundleEvents to set
+     */
+    public void setEnableOBRBundleEvents(boolean enableOBRBundleEvents) {
+        this.enableOBRBundleEvents = enableOBRBundleEvents;
+    }
+
+    /**
+     * @return the enableObrEvents
+     */
+    @Override
+    public boolean isEnableObrEvents() {
+        return enableObrEvents;
+    }
+
+    /**
+     * @param enableObrEvents the enableObrEvents to set
+     */
+    public void setEnableObrEvents(boolean enableObrEvents) {
+        this.enableObrEvents = enableObrEvents;
+    }
+
+    /**
+     * @return the groupNames
+     */
+    public Set<String> getGroupNames() {
+        return groupNames;
+    }
+
+    /**
+     * @param groupNames the groupNames to set
+     */
+    public void setGroupNames(Set<String> groupNames) {
+        this.groupNames = groupNames;
     }
 }

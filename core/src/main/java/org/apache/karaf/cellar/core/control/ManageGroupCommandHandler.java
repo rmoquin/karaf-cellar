@@ -95,7 +95,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
             } else if (!targetGroup.getNodes().contains(node)) {
                 targetGroup.getNodes().add(node);
                 groupManager.listGroups().put(targetGroupName, targetGroup);
-                groupManager.registerGroup(targetGroup);
+                groupManager.registerGroup(targetGroupName);
             }
         }
     }
@@ -111,7 +111,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
             Group targetGroup = groups.get(targetGroupName);
             if (targetGroup.getNodes().contains(node)) {
                 targetGroup.getNodes().remove(node);
-                groupManager.unRegisterGroup(targetGroup);
+                groupManager.deRegisterNodeFromGroup(targetGroupName);
             }
         }
     }

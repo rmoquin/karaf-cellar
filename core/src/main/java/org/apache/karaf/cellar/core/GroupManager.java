@@ -108,13 +108,6 @@ public interface GroupManager {
     /**
      * Register the local node in a given cluster group.
      *
-     * @param group the cluster group to join.
-     */
-    public void registerGroup(Group group);
-
-    /**
-     * Register the locla node in a given cluster group.
-     *
      * @param groupName the cluster group name to join.
      */
     public void registerGroup(String groupName);
@@ -122,15 +115,7 @@ public interface GroupManager {
     /**
      * Un-register the local node from a given cluster group.
      *
-     * @param group the cluster group to quit.
+     * @param groupName the group to remove this node from.
      */
-    public void unRegisterGroup(Group group);
-
-    /**
-     * Un-register the local node from a given cluster group.
-     *
-     * @param groupName the cluster group name to quite.
-     */
-    public void unRegisterGroup(String groupName);
-
+    public void deRegisterNodeFromGroup(String groupName);
 }
