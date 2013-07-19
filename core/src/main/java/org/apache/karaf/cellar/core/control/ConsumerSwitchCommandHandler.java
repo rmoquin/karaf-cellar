@@ -13,10 +13,13 @@
  */
 package org.apache.karaf.cellar.core.control;
 
+import java.util.Dictionary;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Consumer;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +31,7 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.producer.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private Consumer consumer;
-    private SwitchConfiguration switchConfig;
+    private ConfigurationAdmin configurationAdmin;
 
     /**
      * Handle the {@code ConsumeSwitchCommand} command.
@@ -49,10 +52,10 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
                 consumer.getSwitch().turnOff();
             }
             try {
-                if (this.switchConfig != null) {
-                    this.switchConfig.setProperty(Configurations.CONSUMER, statusValue);
-                    this.switchConfig.save();
-                }
+                Configuration configuration = this.configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+                Dictionary properties = configuration.getProperties();
+                properties.put(Configurations.CONSUMER, statusValue);
+                configuration.update(properties);
             } catch (Exception ex) {
                 LOGGER.warn("Error setting consumer switch.", ex);
                 return new ConsumerSwitchResult(command.getId(), Boolean.FALSE, currentStatus);
@@ -80,16 +83,16 @@ public class ConsumerSwitchCommandHandler extends CommandHandler<ConsumerSwitchC
     }
 
     /**
-     * @return the switchConfig
+     * @return the configurationAdmin
      */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param configurationAdmin the configurationAdmin to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }

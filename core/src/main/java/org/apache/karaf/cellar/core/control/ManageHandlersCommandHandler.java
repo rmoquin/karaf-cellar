@@ -13,8 +13,9 @@
  */
 package org.apache.karaf.cellar.core.control;
 
+import java.util.Dictionary;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.osgi.framework.BundleContext;
@@ -24,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Manage handlers command handler.
@@ -32,7 +35,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageHandlersCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.listhandlers.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration switchConfig;
+    private ConfigurationAdmin configurationAdmin;
 
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
@@ -93,10 +96,9 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            if (this.switchConfig != null) {
-                this.switchConfig.setProperty(Configurations.HANDLER + "." + handler, switchStatus.getValue());
-
-            }
+            Configuration configuration = this.configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+            Dictionary properties = configuration.getProperties();
+            properties.put(Configurations.HANDLER + "." + handler, switchStatus.getValue());
         } catch (Exception e) {
             LOGGER.warn("Can't persist the handler " + handler + " status", e);
         }
@@ -113,16 +115,16 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     }
 
     /**
-     * @return the switchConfig
+     * @return the configurationAdmin
      */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param configurationAdmin the configurationAdmin to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }

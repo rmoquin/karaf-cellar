@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 
 public class LocalEventListener extends EventSupport implements EventHandler {
@@ -49,7 +50,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
         }
 
         try {
-            if (event != null && event.getTopic() != null) {
+            if (event.getTopic() != null) {
                 Set<Group> groups = null;
                 try {
                     groups = groupManager.listLocalGroups();
@@ -68,9 +69,12 @@ public class LocalEventListener extends EventSupport implements EventHandler {
 
                 if (groups != null && !groups.isEmpty()) {
                     for (Group group : groups) {
+                        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
                         String topicName = event.getTopic();
                         Map<String, Serializable> properties = getEventProperties(event);
-                        if (cellarSupport.isAllowed(group, Constants.CATEGORY, topicName, EventType.OUTBOUND)) {
+                        if (cellarSupport.isAllowed(topicName, whitelist, blacklist)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
                             clusterEvent.setSourceGroup(group);

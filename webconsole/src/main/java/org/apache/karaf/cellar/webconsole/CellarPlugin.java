@@ -79,7 +79,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         if (action == null) {
             success = true;
         } else if (action.equals("createGroup")) {
-            groupManager.createGroup(group);
+            groupManager.registerGroup(group);
             success = true;
         } else if (action.equals("deleteGroup")) {
             groupManager.deleteGroup(group);

@@ -41,6 +41,8 @@
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
         <felix.webconsole.version>4.0.0</felix.webconsole.version>
+        <felix.annotations.version>1.9.4</felix.annotations.version>
+        <felix.scr.plugin.version>1.9.4</felix.scr.plugin.version>
         <hazelcast.version>3.0-SNAPSHOT</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
@@ -210,6 +212,12 @@
                         <artifactId>org.osgi.compendium</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>org.apache.felix.scr.annotations</artifactId>
+                <version>${felix.annotations.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <!-- Hazelcast -->
@@ -382,10 +390,24 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <!-- scr annotations - e.g. for generating OSGi component descriptors -->
+                    <groupId>org.apache.felix</groupId>
+                    <artifactId>maven-scr-plugin</artifactId>
+                    <version>${felix.scr.plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>generate-scr-scrdescriptor</id>
+                            <goals>
+                                <goal>scr</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.4.0</version>
                     <extensions>true</extensions>
+                    <version>2.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>

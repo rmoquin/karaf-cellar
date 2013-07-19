@@ -70,7 +70,7 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
             System.out.println("No result received within given timeout");
         } else {
             System.out.println(String.format(HEADER_FORMAT, "Node", "Status", "Event Handler"));
-            for (Map.Entry<Node,ManageHandlersResult> handlersResultEntry : results.entrySet()) {
+            for (Map.Entry<Node, ManageHandlersResult> handlersResultEntry : results.entrySet()) {
                 Node node = handlersResultEntry.getKey();
                 String local = " ";
                 if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
@@ -79,8 +79,8 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
                 ManageHandlersResult result = handlersResultEntry.getValue();
                 if (result != null && result.getHandlers() != null) {
 
-                    for (Map.Entry<String,String>  handlerEntry: result.getHandlers().entrySet()) {
-                        String handler =  handlerEntry.getKey();
+                    for (Map.Entry<String, String> handlerEntry : result.getHandlers().entrySet()) {
+                        String handler = handlerEntry.getKey();
                         String s = handlerEntry.getValue();
                         System.out.println(String.format(OUTPUT_FORMAT, local, node.getId(), s, handler));
                     }

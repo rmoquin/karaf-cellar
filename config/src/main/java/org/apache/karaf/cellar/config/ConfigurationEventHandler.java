@@ -32,7 +32,7 @@ import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -46,7 +46,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
     private CellarSupport cellarSupport;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
 
     @Override
     public void handle(ClusterConfigurationEvent event) {
@@ -58,7 +58,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
         }
 
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR CONFIG: node is not part of the event cluster group {}",event.getSourceGroup().getName());
+            LOGGER.debug("CELLAR CONFIG: node is not part of the event cluster group {}", event.getSourceGroup().getName());
             return;
         }
         Group group = event.getSourceGroup();
@@ -96,7 +96,9 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
             } catch (IOException ex) {
                 LOGGER.error("CELLAR CONFIG: failed to read cluster configuration", ex);
             }
-        } else LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+        } else {
+            LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+        }
     }
 
     public void init() {
@@ -114,16 +116,11 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
      */
     @Override
     public Switch getSwitch() {
-        // load the switch status from the config
-        try {
-            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
-            if (status) {
-                eventSwitch.turnOn();
-            } else {
-                eventSwitch.turnOff();
-            }
-        } catch (Exception e) {
-            // nothing to do
+        boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }
@@ -192,19 +189,19 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }    
-
-    /**
-     * @return the switchConfig
-     */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @return the nodeConfiguration
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
+    }
+
+    /**
+     * @param nodeConfiguration the nodeConfiguration to set
+     */
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

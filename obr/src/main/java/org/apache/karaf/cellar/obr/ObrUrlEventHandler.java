@@ -16,7 +16,7 @@ package org.apache.karaf.cellar.obr;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -33,7 +33,7 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.urls.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private CellarSupport cellarSupport;
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration switchConfig;
     private GroupManager groupManager;
 
     @Override
@@ -140,14 +140,14 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     /**
      * @return the switchConfig
      */
-    public SwitchConfiguration getSwitchConfig() {
+    public NodeConfiguration getSwitchConfig() {
         return switchConfig;
     }
 
     /**
      * @param switchConfig the switchConfig to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+    public void setSwitchConfig(NodeConfiguration switchConfig) {
         this.switchConfig = switchConfig;
     }
 }

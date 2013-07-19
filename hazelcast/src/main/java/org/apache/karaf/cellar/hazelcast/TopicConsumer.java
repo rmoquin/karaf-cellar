@@ -17,9 +17,8 @@ import com.hazelcast.core.ITopic;
 import com.hazelcast.core.Message;
 import com.hazelcast.core.MessageListener;
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Dispatcher;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -37,14 +36,14 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private ITopic topic;
     private Dispatcher dispatcher;
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private CellarCluster masterCluster;
     private boolean isConsuming;
     private String listenerId;
 
     public void init() {
         if (topic == null) {
-            topic = ((HazelcastCluster)masterCluster).getTopic(Constants.TOPIC);
+            topic = ((HazelcastCluster) masterCluster).getTopic(Constants.TOPIC);
         }
         start();
     }
@@ -114,16 +113,10 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
 
     @Override
     public Switch getSwitch() {
-        // load the switch status from the config
-        try {
-            Boolean status = Boolean.parseBoolean((String) switchConfig.getProperty(Configurations.CONSUMER));
-            if (status) {
-                eventSwitch.turnOn();
-            } else {
-                eventSwitch.turnOff();
-            }
-        } catch (Exception e) {
-            // ignore
+        if (nodeConfiguration.isConsumer()) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }
@@ -143,16 +136,16 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 
 /**
  * Handler for cluster remote service call event.
@@ -39,7 +39,7 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     private final Switch dosgiSwitch = new BasicSwitch(SWITCH_ID);
     private BundleContext bundleContext;
     private EventTransportFactory eventTransportFactory;
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration switchConfig;
 
     /**
      * Handle a cluster remote service call event.
@@ -154,14 +154,14 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     /**
      * @return the switchConfig
      */
-    public SwitchConfiguration getSwitchConfig() {
+    public NodeConfiguration getSwitchConfig() {
         return switchConfig;
     }
 
     /**
      * @param switchConfig the switchConfig to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+    public void setSwitchConfig(NodeConfiguration switchConfig) {
         this.switchConfig = switchConfig;
     }
 }

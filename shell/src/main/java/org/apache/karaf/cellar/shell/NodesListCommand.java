@@ -30,8 +30,9 @@ public class NodesListCommand extends ClusterCommandSupport {
             System.out.println(String.format(HEADER_FORMAT, "ID", "Host Name", "Port"));
             for (Node node : nodes) {
                 String mark = " ";
-                if (node.equals(clusterManager.getMasterCluster().getLocalNode()))
+                if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
                     mark = "*";
+                }
                 System.out.println(String.format(OUTPUT_FORMAT, mark, node.getId(), node.getHost(), node.getPort()));
             }
         } else {

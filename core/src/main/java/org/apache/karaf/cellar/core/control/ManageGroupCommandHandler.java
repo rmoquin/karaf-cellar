@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.cellar.core.control;
 
+import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Node;
@@ -22,6 +24,9 @@ import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Manager cluster command handler.
@@ -32,11 +37,12 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
     private CellarCluster masterCluster;
     private GroupManager groupManager;
     private Node node;
+    private ConfigurationAdmin configurationAdmin;
     
     public void init() {
         this.node = this.masterCluster.getLocalNode();
     }
-    
+
     @Override
     public ManageGroupResult execute(ManageGroupCommand command) {
 
@@ -67,9 +73,9 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
     }
 
     /**
-     * Add the {@link Cluster} list to the result.
+     * Add the {@link Group} list to the result.
      *
-     * @param result the result where to add the cluster list.
+     * @param result the result where to add the group list.
      */
     public void addGroupListToResult(ManageGroupResult result) {
         Set<Group> groups = groupManager.listAllGroups();
@@ -82,20 +88,20 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
     }
 
     /**
-     * Add {@link Node} to the target {@link CellarCluster}.
+     * Add {@link Node} to the target {@link Group}.
      *
-     * @param targetClusterName the target cluster name where to add the node.
+     * @param targetGroupName the name of the group to join.
      */
     public void joinGroup(String targetGroupName) {
-        Map<String, Group> groups = groupManager.listGroups();
-        if (groups != null && !groups.isEmpty()) {
-            Group targetGroup = groups.get(targetGroupName);
-            if (targetGroup == null) {
-                groupManager.registerGroup(targetGroupName);
-            } else if (!targetGroup.getNodes().contains(node)) {
-                targetGroup.getNodes().add(node);
-                groupManager.listGroups().put(targetGroupName, targetGroup);
-                groupManager.registerGroup(targetGroupName);
+        Set<String> groupNames = groupManager.listGroupNames();
+        if (!groupNames.contains(targetGroupName)) {
+            try {
+                Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+                Dictionary<String, Object> properties = configuration.getProperties();
+                properties.put(Configurations.GROUP_NAME_PROP, targetGroupName);
+                configuration.update(properties);
+            } catch (IOException e) {
+                e.printStackTrace(System.err);
             }
         }
     }
@@ -103,29 +109,22 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
     /**
      * Leave the target {@link CellarCluster}.
      *
-     * @param targetClusterName the target cluster to leave.
+     * @param targetGroupName the target group to leave.
      */
     public void quitGroup(String targetGroupName) {
         Map<String, Group> groups = groupManager.listGroups();
-        if (groups != null && !groups.isEmpty()) {
-            Group targetGroup = groups.get(targetGroupName);
-            if (targetGroup.getNodes().contains(node)) {
-                targetGroup.getNodes().remove(node);
-                groupManager.deRegisterNodeFromGroup(targetGroupName);
-            }
+        Group targetGroup = groups.get(targetGroupName);
+        if (targetGroup.getNodes().contains(node)) {
+            targetGroup.getNodes().remove(node);
+            groupManager.deRegisterNodeFromGroup(targetGroupName);
         }
     }
 
     /**
-     * Remove {@link Node} from all {@link CellarCluster}s.
+     * Remove {@link Node} from all {@link Group}s.
      */
     public void purgeGroups() {
-        Set<String> groupNames = groupManager.listGroupNames(node);
-        if (groupNames != null && !groupNames.isEmpty()) {
-            for (String targetGroupName : groupNames) {
-                quitGroup(targetGroupName);
-            }
-        }
+        this.groupManager.deregisterFromAllGroups();
     }
 
     @Override
@@ -164,5 +163,19 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      */
     public void setMasterCluster(CellarCluster masterCluster) {
         this.masterCluster = masterCluster;
+    }
+
+    /**
+     * @return the configurationAdmin
+     */
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    /**
+     * @param configurationAdmin the configurationAdmin to set
+     */
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }

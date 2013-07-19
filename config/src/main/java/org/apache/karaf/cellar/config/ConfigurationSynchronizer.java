@@ -30,7 +30,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -46,7 +46,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
     private EventProducer eventProducer;
-    private SwitchConfiguration switchConfig;
 
     public ConfigurationSynchronizer() {
         // nothing to do
@@ -81,7 +80,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", groupName);
 
-            Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+            GroupConfiguration clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
             for (String clusterConfiguration : clusterConfigurations.keySet()) {
                 if (cellarSupport.isAllowed(group, Constants.CATEGORY, clusterConfiguration, EventType.INBOUND)) {
@@ -238,19 +237,5 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
-    }
-
-    /**
-     * @return the switchConfig
-     */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
-    }
-
-    /**
-     * @param switchConfig the switchConfig to set
-     */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
     }
 }

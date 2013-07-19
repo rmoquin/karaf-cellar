@@ -106,7 +106,9 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                                     }
                                 }
                                 System.out.println(String.format(OUTPUT_FORMAT, mark, g.getName(), buffer.toString()));
-                            } else System.out.println(String.format(OUTPUT_FORMAT, "", g.getName(), ""));
+                            } else {
+                                System.out.println(String.format(OUTPUT_FORMAT, "", g.getName(), ""));
+                            }
                         }
                     }
                 }

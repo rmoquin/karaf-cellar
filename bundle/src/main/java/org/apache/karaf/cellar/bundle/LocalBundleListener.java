@@ -17,7 +17,6 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
@@ -29,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 
 /**
@@ -86,8 +86,10 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                     String version = event.getBundle().getVersion().toString();
                     String bundleLocation = event.getBundle().getLocation();
                     int type = event.getType();
-
-                    if (cellarSupport.isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
+                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                    Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+                    if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                         try {
                             // update bundles in the cluster group
                             Map<String, BundleState> clusterBundles = masterCluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + group.getName());
@@ -106,9 +108,11 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
 
                             // check the features first
                             List<Feature> matchingFeatures = retrieveFeature(bundleLocation);
+                            Set<String> featuresWhitelist = groupConfig.getOutboundFeatureWhitelist();
+                            Set<String> featuresBlacklist = groupConfig.getOutboundFeatureBlacklist();
                             for (Feature feature : matchingFeatures) {
-            					if (!cellarSupport.isAllowed(group, "features", feature.getName(), EventType.OUTBOUND)) {
-            						LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, feature.getName(), group.getName());
+                                if (!cellarSupport.isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
+                                    LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, feature.getName(), group.getName());
                                     return;
                                 }
                             }
@@ -121,7 +125,9 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             LOGGER.error("CELLAR BUNDLE: failed to create bundle event", e);
                         }
 
-                    } else LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, group.getName());
+                    } else {
+                        LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, group.getName());
+                    }
                 }
             }
         }

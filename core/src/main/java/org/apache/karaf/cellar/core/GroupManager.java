@@ -29,27 +29,20 @@ public interface GroupManager {
     public Node getNode();
 
     /**
-     * Create a new cluster group.
-     *
-     * @param groupName the new cluster group name.
-     * @return the created cluster group.
-     */
-    public Group createGroup(String groupName);
-
-    /**
-     * Delete an existing cluster group.
-     *
-     * @param groupName the cluster group name to delete.
-     */
-    public void deleteGroup(String groupName);
-
-    /**
-     * Look for a cluster group with a given name.
+     * Look for a cluster group with the given name.
      *
      * @param groupName the cluster group name to look for.
      * @return the cluster group found, or null if no cluster group found.
      */
     public Group findGroupByName(String groupName);
+    
+    /**
+     * Look for a cluster group's configuration with the given name.
+     *
+     * @param groupName the cluster group name to look for.
+     * @return the cluster group found, or null if no cluster group found.
+     */
+    public GroupConfiguration findGroupConfigurationByName(String groupName);
 
     /**
      * Get the list of cluster groups.
@@ -118,4 +111,8 @@ public interface GroupManager {
      * @param groupName the group to remove this node from.
      */
     public void deRegisterNodeFromGroup(String groupName);
+
+    void deregisterFromAllGroups();
+
+    String getPidForGroup(String groupName);
 }

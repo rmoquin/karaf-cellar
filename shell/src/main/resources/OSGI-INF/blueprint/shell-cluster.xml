@@ -165,6 +165,7 @@
         </command>
         <command name="cluster/group-create">
             <action class="org.apache.karaf.cellar.shell.group.GroupCreateCommand">
+                <property name="configurationAdmin" ref="configurationAdmin"/>
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="executionContext" ref="executionContext"/>
@@ -172,6 +173,7 @@
         </command>
         <command name="cluster/group-delete">
             <action class="org.apache.karaf.cellar.shell.group.GroupDeleteCommand">
+                <property name="configurationAdmin" ref="configurationAdmin"/>
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="executionContext" ref="executionContext"/>
@@ -182,6 +184,7 @@
         </command>
     </command-bundle>
 
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>

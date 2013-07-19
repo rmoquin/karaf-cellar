@@ -70,10 +70,10 @@
     
     <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="currentGroups" ref="groupsList"/>
+        <property name="groupMemberships" ref="groupMemberships"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     
     <service ref="groupManager" auto-export="interfaces"/>
@@ -83,93 +83,85 @@
         <cm:managed-component class="org.apache.karaf.cellar.core.GroupMembershipConfig">
             <property name="syncConfiguration" value="true"/>
             <property name="inboundConfigurationWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundConfigurationWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundConfigurationBlacklist">
-                <list>
+                <set>
                     <value>org.apache.felix.fileinstall*</value>
                     <value>org.apache.karaf.cellar*</value>
                     <value>org.apache.karaf.management</value>
                     <value>org.apache.karaf.shell</value>
                     <value>org.ops4j.pax.logging</value>
                     <value>org.ops4j.pax.web</value>
-                </list>
+                </set>
             </property>
             <property name="outboundConfigurationBlacklist">
-                <list>
+                <set>
                     <value>org.apache.felix.fileinstall*</value>
                     <value>org.apache.karaf.cellar*</value>
                     <value>org.apache.karaf.management</value>
                     <value>org.apache.karaf.shell</value>
                     <value>org.ops4j.pax.logging</value>
                     <value>org.ops4j.pax.web</value>
-                </list>
+                </set>
             </property>
             <property name="syncFeatures" value="true"/>
             <property name="syncFeatureRepos" value="true"/>
             <property name="inboundFeatureWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundFeatureWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundFeatureBlacklist">
-                <list>
+                <set>
                     <value>config</value>
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundFeatureBlacklist">
-                <list>
+                <set>
                     <value>config</value>
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
-                </list>
+                </set>
             </property>
             <property name="syncBundles" value="true"/>
             <property name="inboundBundleWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundBundleWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundBundleBlacklist">
-                <list/>
+                <set/>
             </property>
             <property name="outboundBundleBlacklist">
-                <list/>
+                <set/>
             </property>
             <property name="syncOBRUrls" value="true"/>
             <property name="syncOBRBundles" value="true"/>
         </cm:managed-component>
     </cm:managed-service-factory>
     
-    <bean id="switchConfig" class="org.apache.karaf.cellar.hazelcast.internal.HazelcastSwitchConfiguration">
-        <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeEventConfig" update-method="updated" update-strategy="component-managed"/>
-        <property name="pid" value="org.apache.karaf.cellar.code.NodeEventConfig"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    
-    <service ref="switchConfig" auto-export="interfaces"/>
-
     <!-- Members Listener -->
     <bean id="membershipListener" class="org.apache.karaf.cellar.hazelcast.CellarMembershipListener" init-method="init">
         <property name="synchronizers" ref="synchronizers"/>
@@ -180,7 +172,7 @@
     <!-- Cluster Event Transport Factory -->
     <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">
         <property name="dispatcher"  ref="dispatcher"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="masterCluster"  ref="masterCluster"/>
     </bean>
     
@@ -191,13 +183,13 @@
           destroy-method="destroy">
         <property name="dispatcher" ref="dispatcher"/>
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
     </bean>
 
     <!-- Cluster Event Producer -->
     <bean id="eventProducer" class="org.apache.karaf.cellar.hazelcast.TopicProducer" init-method="init">
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
     </bean>
     
     <service ref="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
@@ -210,14 +202,12 @@
     
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
     
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
-        <property name="switchConfig" ref="switchConfig"/>
-    </bean>
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
     
     <!-- Handler For Cluster Producer Switch Command Event -->
     <bean id="producerSwitchCommandHandler" class="org.apache.karaf.cellar.core.control.ProducerSwitchCommandHandler">
         <property name="producer" ref="eventProducer"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
     
     <service ref="producerSwitchCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
@@ -247,7 +237,7 @@
     <!-- Handler For Cluster Manage Handlers Command Event -->
     <bean id="manageHandlersCommandHandler" class="org.apache.karaf.cellar.core.control.ManageHandlersCommandHandler">
         <property name="producer" ref="eventProducer"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
     <service ref="manageHandlersCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
@@ -263,6 +253,7 @@
     <bean id="manageGroupCommandHandler" class="org.apache.karaf.cellar.core.control.ManageGroupCommandHandler" init-method="init">
         <property name="masterCluster" ref="masterCluster"/>
         <property name="groupManager" ref="groupManager"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
 
     <service ref="manageGroupCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
@@ -284,11 +275,14 @@
         <property name="handlerRegistry" ref="registry"/>
     </bean>
 
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional">
+        
+    </reference>
     <reference id="registry" interface="org.apache.karaf.cellar.core.event.EventHandlerRegistry"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     
-    <reference-list id="groupsList" availability="optional" interface="org.apache.karaf.cellar.core.GroupMembershipConfig">
-        <reference-listener ref="groupManager" bind-method="joinLocalGroup" unbind-method="leaveLocalGroup"/>
+    <reference-list id="groupMemberships" availability="optional" interface="org.apache.karaf.cellar.core.GroupConfiguration" member-type="service-object">
+        <reference-listener ref="groupManager" bind-method="groupConfigured" unbind-method="groupRemoved"/>
     </reference-list>
 
     <reference-list id="discoveryServices" availability="optional"

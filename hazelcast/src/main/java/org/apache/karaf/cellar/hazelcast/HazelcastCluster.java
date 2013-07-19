@@ -280,7 +280,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     }
 
     /**
-     * @param clusterName the clusterName to set
+     * @param name the clusterName to set
      */
     public void setName(String name) {
         this.name = name;

@@ -26,7 +26,7 @@ import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 
 /**
  * OBR URL Synchronizer.
@@ -34,7 +34,7 @@ import org.apache.karaf.cellar.core.SwitchConfiguration;
 public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
     private CellarSupport cellarSupport;
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration switchConfig;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     
@@ -166,14 +166,14 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     /**
      * @return the switchConfig
      */
-    public SwitchConfiguration getSwitchConfig() {
+    public NodeConfiguration getSwitchConfig() {
         return switchConfig;
     }
 
     /**
      * @param switchConfig the switchConfig to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+    public void setSwitchConfig(NodeConfiguration switchConfig) {
         this.switchConfig = switchConfig;
     }
 }

@@ -13,20 +13,20 @@
  */
 package org.apache.karaf.cellar.event;
 
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 
 /**
  * Handler for cluster event.
@@ -36,7 +36,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration switchConfig;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
 
@@ -62,7 +62,10 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
         }
 
         try {
-            if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, event.getTopicName(), EventType.INBOUND)) {
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+            Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
+            Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
+            if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
                 Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
@@ -93,7 +96,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            boolean status = switchConfig.getEnabledEventHandlers().contains(this.getClass().getName());
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -146,14 +149,14 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     /**
      * @return the switchConfig
      */
-    public SwitchConfiguration getSwitchConfig() {
+    public NodeConfiguration getSwitchConfig() {
         return switchConfig;
     }
 
     /**
      * @param switchConfig the switchConfig to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
+    public void setSwitchConfig(NodeConfiguration switchConfig) {
         this.switchConfig = switchConfig;
     }
 }

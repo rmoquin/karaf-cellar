@@ -15,8 +15,7 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.IQueue;
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -33,7 +32,7 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(QueueProducer.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.queue.producer";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private IQueue<E> queue;
     private CellarCluster masterCluster;
 
@@ -63,15 +62,10 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        try {
-            Boolean status = Boolean.parseBoolean((String) switchConfig.getProperty(Configurations.PRODUCER));
-            if (status) {
-                eventSwitch.turnOn();
-            } else {
-                eventSwitch.turnOff();
-            }
-        } catch (Exception e) {
-            // ignore
+        if (nodeConfiguration.isProducer()) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }
@@ -99,16 +93,16 @@ public class QueueProducer<E extends Event> implements EventProducer<E> {
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

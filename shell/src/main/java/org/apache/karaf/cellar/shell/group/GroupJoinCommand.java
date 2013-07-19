@@ -37,7 +37,7 @@ public class GroupJoinCommand extends GroupSupport {
             return null;
         }
 
-        return doExecute(ManageGroupAction.JOIN, groupName, null, nodes,false);
+        return doExecute(ManageGroupAction.JOIN, groupName, null, nodes, false);
     }
 
 }

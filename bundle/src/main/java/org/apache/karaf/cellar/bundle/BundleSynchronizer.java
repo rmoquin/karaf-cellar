@@ -31,8 +31,9 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.SwitchConfiguration;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group.
@@ -41,11 +42,11 @@ import org.apache.karaf.cellar.core.SwitchConfiguration;
 public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
     private EventProducer eventProducer;
-    private SwitchConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarCluster masterCluster;
     private CellarSupport cellarSupport;
-    
+
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
@@ -67,7 +68,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     /**
      * Pull the bundles states from a cluster group.
      *
-     * @param cluster the cluster group where to get the bundles states.
+     * @param group the cluster group where to get the bundles states.
      */
     @Override
     public void pull(Group group) {
@@ -86,7 +87,10 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 if (tokens != null && tokens.length == 2) {
                     if (state != null) {
                         String bundleLocation = state.getLocation();
-                        if (cellarSupport.isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.INBOUND)) {
+                        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+                        Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+                        Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+                        if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {
                                     installBundleFromLocation(state.getLocation());
@@ -147,7 +151,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     // if there is no symbolic name, resort to location.
                     name = (name == null) ? bundle.getLocation() : name;
                     bundleState.setName(name);
-                        bundleState.setName(bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME));
+                    bundleState.setName(bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME));
                     bundleState.setLocation(bundleLocation);
 
                     if (status == Bundle.ACTIVE) {
@@ -205,7 +209,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
         try {
             String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) this.switchConfig.getProperty(propertyKey);
+            String propertyValue = (String) this.nodeConfiguration.getEnabledEventHandlers(.propertyKey);
             result = Boolean.parseBoolean(propertyValue);
         } catch (Exception e) {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
@@ -264,16 +268,16 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
-    public SwitchConfiguration getSwitchConfig() {
-        return switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(SwitchConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }
