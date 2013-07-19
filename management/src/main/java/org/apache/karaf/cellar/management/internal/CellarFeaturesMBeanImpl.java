@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
@@ -31,6 +30,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 
@@ -60,8 +60,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
-
-        if (!cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+        
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+        if (!cellarSupport.isAllowed(name, whitelist, blacklist)) {
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -142,7 +145,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        if (!cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+        if (!cellarSupport.isAllowed(name, whitelist, blacklist)) {
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
 

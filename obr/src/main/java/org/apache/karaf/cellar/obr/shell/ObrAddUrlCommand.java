@@ -19,7 +19,6 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.cellar.obr.ObrBundleInfo;
@@ -27,6 +26,7 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "obr-add-url", description = "Add an OBR URL in a cluster group")
 public class ObrAddUrlCommand extends ObrCommandSupport {
@@ -55,7 +55,10 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         }
 
         // check if the URL is allowed
-        if (!isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!isAllowed(url, whitelist, blacklist)) {
             System.err.println("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
             return null;
         }
@@ -65,11 +68,11 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         clusterUrls.add(url);
         // update the OBR bundles in the cluster group
         Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
-        synchronized(obrService) {
+        synchronized (obrService) {
             Repository repository = obrService.addRepository(url);
             Resource[] resources = repository.getResources();
             for (Resource resource : resources) {
-                ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(),resource.getSymbolicName(), resource.getVersion().toString());
+                ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());
                 clusterBundles.add(info);
             }
             obrService.removeRepository(url);

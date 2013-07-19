@@ -19,7 +19,6 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
@@ -111,7 +110,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!support.isAllowed(url, whitelist, blacklist)) {
             throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -152,7 +154,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.URLS_CONFIG_CATEGORY, url, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!support.isAllowed(url, whitelist, blacklist)) {
             throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -192,7 +197,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
         // check if the bundle ID is allowed outbound
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!support.isAllowed(bundleId, whitelist, blacklist)) {
             throw new IllegalArgumentException("OBR bundle " + bundleId + " is blocked outbound for cluster group " + groupName);
         }
 

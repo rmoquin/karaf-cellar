@@ -48,7 +48,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         if (group != null) {
             throw new IllegalArgumentException("Cluster group " + name + " already exists");
         }
-        groupManager.createGroup(name);
+        groupManager.registerGroup(name);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             command.setDestinations(recipientList);
             executionContext.execute(command);
         }
-        groupManager.deleteGroup(name);
+        groupManager.deregisterFromAllGroups();
     }
 
     @Override

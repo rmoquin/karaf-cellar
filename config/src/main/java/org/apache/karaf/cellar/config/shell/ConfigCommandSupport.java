@@ -13,9 +13,8 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 
 /**
@@ -33,7 +32,7 @@ public abstract class ConfigCommandSupport extends CellarCommandSupport {
      * @param type the cluster event type.
      * @return true if the cluster event type is allowed, false else.
      */
-    public boolean isAllowed(Group group, String category, String pid, EventType type) {
-        return support.isAllowed(group, category, pid, type);
+    public boolean isAllowed(String pid, Set<String> whitelist, Set<String> blacklist) {
+        return support.isAllowed(pid, whitelist, blacklist);
     }
 }

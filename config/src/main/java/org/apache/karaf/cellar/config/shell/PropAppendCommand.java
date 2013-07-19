@@ -21,10 +21,11 @@ import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.cellar.core.event.EventType;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
 public class PropAppendCommand extends ConfigCommandSupport {
@@ -59,7 +60,11 @@ public class PropAppendCommand extends ConfigCommandSupport {
         }
 
         // check if the config pid is allowed
-        if (!isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+
+        if (!isAllowed(pid, whitelist, blacklist)) {
             System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
             return null;
         }

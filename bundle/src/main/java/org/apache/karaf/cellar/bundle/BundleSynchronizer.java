@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -141,8 +140,10 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 String id = symbolicName + "/" + version;
 
                 // check if the pid is marked as local.
-                if (cellarSupport.isAllowed(group, Constants.CATEGORY, bundleLocation, EventType.OUTBOUND)) {
-
+                GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+                if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                     BundleState bundleState = new BundleState();
                     // get the bundle name or location.
                     String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
@@ -208,9 +209,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
         String groupName = group.getName();
 
         try {
-            String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            String propertyValue = (String) this.nodeConfiguration.getEnabledEventHandlers(.propertyKey);
-            result = Boolean.parseBoolean(propertyValue);
+            String propertyKey = Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+            result = this.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
         } catch (Exception e) {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
         }

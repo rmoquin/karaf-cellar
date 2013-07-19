@@ -68,37 +68,37 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
 
         String pid = event.getId();
 
-        if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, pid, EventType.INBOUND)) {
-
-            Properties clusterDictionary = clusterConfigurations.get(pid);
-            Configuration conf;
-            try {
-                conf = configurationAdmin.getConfiguration(pid, null);
-                if (event.getType() == ConfigurationEvent.CM_DELETED) {
-                    if (conf.getProperties() != null) {
-                        // delete the properties
-                        conf.delete();
-                        deleteStorage(pid);
-                    }
-                } else {
-                    if (clusterDictionary != null) {
-                        Dictionary localDictionary = conf.getProperties();
-                        if (localDictionary == null) {
-                            localDictionary = new Properties();
-                        }
-                        localDictionary = filter(localDictionary);
-                        if (!equals(clusterDictionary, localDictionary)) {
-                            conf.update((Dictionary) clusterDictionary);
-                            persistConfiguration(configurationAdmin, pid, clusterDictionary);
-                        }
-                    }
-                }
-            } catch (IOException ex) {
-                LOGGER.error("CELLAR CONFIG: failed to read cluster configuration", ex);
-            }
-        } else {
-            LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
-        }
+//        if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, pid, EventType.INBOUND)) {
+//
+//            Properties clusterDictionary = clusterConfigurations.get(pid);
+//            Configuration conf;
+//            try {
+//                conf = configurationAdmin.getConfiguration(pid, null);
+//                if (event.getType() == ConfigurationEvent.CM_DELETED) {
+//                    if (conf.getProperties() != null) {
+//                        // delete the properties
+//                        conf.delete();
+//                        deleteStorage(pid);
+//                    }
+//                } else {
+//                    if (clusterDictionary != null) {
+//                        Dictionary localDictionary = conf.getProperties();
+//                        if (localDictionary == null) {
+//                            localDictionary = new Properties();
+//                        }
+//                        localDictionary = filter(localDictionary);
+//                        if (!equals(clusterDictionary, localDictionary)) {
+//                            conf.update((Dictionary) clusterDictionary);
+//                            persistConfiguration(configurationAdmin, pid, clusterDictionary);
+//                        }
+//                    }
+//                }
+//            } catch (IOException ex) {
+//                LOGGER.error("CELLAR CONFIG: failed to read cluster configuration", ex);
+//            }
+//        } else {
+//            LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+//        }
     }
 
     public void init() {

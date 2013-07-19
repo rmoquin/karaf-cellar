@@ -17,7 +17,6 @@ import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +24,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 
@@ -34,7 +34,7 @@ import org.apache.karaf.cellar.core.NodeConfiguration;
 public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
     private CellarSupport cellarSupport;
-    private NodeConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     
@@ -93,9 +93,14 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
             String groupName = group.getName();
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
 
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {
-                if (cellarSupport.isAllowed(group, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
+                
+                if (cellarSupport.isAllowed(repository.getURI().toString(), whitelist, blacklist)) {
                     clusterUrls.add(repository.getURI().toString());
                     // update OBR bundles in the cluster group
                     Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
@@ -114,11 +119,8 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
 
     @Override
     public Boolean isSyncEnabled(Group group) {
-        String groupName = group.getName();
-
-        String propertyKey = groupName + Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        String propertyValue = (String) this.switchConfig.getProperty(propertyKey);
-        return Boolean.parseBoolean(propertyValue);
+        String propertyKey = Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
+        return this.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
     }
 
     /**
@@ -161,19 +163,5 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the switchConfig
-     */
-    public NodeConfiguration getSwitchConfig() {
-        return switchConfig;
-    }
-
-    /**
-     * @param switchConfig the switchConfig to set
-     */
-    public void setSwitchConfig(NodeConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
     }
 }

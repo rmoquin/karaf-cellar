@@ -36,7 +36,7 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
     </bean>
     
     <service ref="obrUrlSynchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
@@ -47,7 +47,7 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
         <property name="obrService" ref="repositoryAdmin"/>
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
     </bean>
 
     <service ref="obrUrlEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -63,5 +63,5 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
     <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
 </blueprint>

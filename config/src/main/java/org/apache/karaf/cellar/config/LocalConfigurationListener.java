@@ -17,7 +17,6 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.osgi.service.cm.ConfigurationAdmin;
 
@@ -67,11 +67,13 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         }
 
         Set<Group> groups = groupManager.listLocalGroups();
-
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
+                GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                Set<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
+                Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
                 // check if the pid is allowed for outbound.
-                if (cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
 
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
 
@@ -96,7 +98,9 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     } catch (Exception e) {
                         LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {}", pid, group.getName(), e);
                     }
-                } else LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, group.getName());
+                } else {
+                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, group.getName());
+                }
             }
         }
     }

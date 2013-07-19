@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.features;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
@@ -25,8 +24,10 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 
@@ -41,8 +42,8 @@ public class FeaturesSupport {
     protected ClusterManager clusterManager;
     protected CellarSupport cellarSupport;
     protected GroupManager groupManager;
-    private NodeConfiguration switchConfig;
-    
+    protected NodeConfiguration nodeConfiguration;
+
     public void init() {
         // nothing to do
     }
@@ -64,8 +65,9 @@ public class FeaturesSupport {
 
             if (localFeatures != null && localFeatures.length > 0) {
                 for (Feature localFeature : localFeatures) {
-                    if (localFeature.getName().equals(name) && (localFeature.getVersion().equals(version) || version == null))
+                    if (localFeature.getName().equals(name) && (localFeature.getVersion().equals(version) || version == null)) {
                         return true;
+                    }
                 }
             }
         }
@@ -98,15 +100,21 @@ public class FeaturesSupport {
         if (feature != null) {
             String groupName = group.getName();
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
-
-            if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+            if (cellarSupport.isAllowed(feature.getName(), whitelist, blacklist)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     Boolean installed = featuresService.isInstalled(feature);
                     clusterFeatures.put(info, installed);
                 }
-            } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
-        } else LOGGER.warn("CELLAR FEATURES: feature is null");
+            } else {
+                LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
+            }
+        } else {
+            LOGGER.warn("CELLAR FEATURES: feature is null");
+        }
     }
 
     /**
@@ -122,13 +130,20 @@ public class FeaturesSupport {
             String groupName = group.getName();
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, feature.getName(), EventType.OUTBOUND)) {
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+            if (cellarSupport.isAllowed(feature.getName(), whitelist, blacklist)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     clusterFeatures.put(info, force);
                 }
-            } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
-        } else LOGGER.warn("CELLAR FEATURES: feature is null");
+            } else {
+                LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
+            }
+        } else {
+            LOGGER.warn("CELLAR FEATURES: feature is null");
+        }
     }
 
     /**
@@ -221,16 +236,16 @@ public class FeaturesSupport {
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
-    public NodeConfiguration getSwitchConfig() {
-        return switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(NodeConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

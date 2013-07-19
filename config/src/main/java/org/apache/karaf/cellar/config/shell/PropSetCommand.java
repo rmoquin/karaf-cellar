@@ -25,6 +25,8 @@ import org.apache.karaf.cellar.core.event.EventType;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "config-propset", description = "Set a property value for a configuration in a cluster group")
 public class PropSetCommand extends ConfigCommandSupport {
@@ -59,7 +61,11 @@ public class PropSetCommand extends ConfigCommandSupport {
         }
 
         // check if the config pid is allowed
-        if (!isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+
+        if (!isAllowed(pid, whitelist, blacklist)) {
             System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
             return null;
         }

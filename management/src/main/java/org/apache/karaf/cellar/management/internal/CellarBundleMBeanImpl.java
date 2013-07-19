@@ -19,7 +19,6 @@ import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.management.CellarBundleMBean;
 import org.osgi.framework.BundleEvent;
 
@@ -28,6 +27,7 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.net.URL;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
@@ -60,7 +60,10 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the bundle location is allowed
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        if (!support.isAllowed(location, whitelist, blacklist)) {
             throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -121,7 +124,10 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the bundle location is allowed outbound
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        if (!support.isAllowed(location, whitelist, blacklist)) {
             throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -164,7 +170,10 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the bundle location is allowed
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        if (!support.isAllowed(location, whitelist, blacklist)) {
             throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -208,7 +217,10 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // check if the bundle location is allowed outbound
         CellarSupport support = new CellarSupport();
-        if (!support.isAllowed(group, Constants.CATEGORY, location, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        if (!support.isAllowed(location, whitelist, blacklist)) {
             throw new IllegalArgumentException("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
         }
 

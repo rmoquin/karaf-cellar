@@ -13,15 +13,15 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.urls.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private CellarSupport cellarSupport;
-    private NodeConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
 
     @Override
@@ -67,7 +67,10 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
         }
         String url = event.getUrl();
         try {
-            if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.URLS_CONFIG_CATEGORY, url, EventType.INBOUND) || event.getForce()) {
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+        Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
+            if (cellarSupport.isAllowed(url, whitelist, blacklist) || event.getForce()) {
                 LOGGER.debug("CELLAR OBR: received OBR URL {}", url);
                 if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
@@ -97,7 +100,7 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -138,16 +141,16 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
     public NodeConfiguration getSwitchConfig() {
-        return switchConfig;
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
     public void setSwitchConfig(NodeConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+        this.nodeConfiguration = switchConfig;
     }
 }

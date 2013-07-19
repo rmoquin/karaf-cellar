@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.features;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.slf4j.Logger;
@@ -27,6 +26,7 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
  * Features synchronizer.
@@ -89,7 +89,10 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 for (FeatureInfo info : clusterFeatures.keySet()) {
                     String name = info.getName();
                     // check if feature is blocked
-                    if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.INBOUND)) {
+                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                    Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+                    if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         Boolean remotelyInstalled = clusterFeatures.get(info);
                         Boolean locallyInstalled = isFeatureInstalledLocally(info.getName(), info.getVersion());
 
@@ -177,8 +180,6 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         String groupName = group.getName();
 
         String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        String propertyValue = (String) this.getSwitchConfig().getProperty(propertyKey);
-        Boolean result = Boolean.parseBoolean(propertyValue);
-        return result;
+        return super.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
     }
 }

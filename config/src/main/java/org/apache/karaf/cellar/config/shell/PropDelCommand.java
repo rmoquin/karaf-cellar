@@ -21,10 +21,11 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "config-propdel", description = "Delete a property from a configuration in a cluster group")
 public class PropDelCommand extends ConfigCommandSupport {
@@ -55,7 +56,11 @@ public class PropDelCommand extends ConfigCommandSupport {
         }
 
         // check if the configuration PID is allowed
-        if (!isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+
+        if (!isAllowed(pid, whitelist, blacklist)) {
             System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
             return null;
         }

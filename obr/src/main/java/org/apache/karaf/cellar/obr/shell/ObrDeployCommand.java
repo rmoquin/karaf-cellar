@@ -13,10 +13,11 @@
  */
 package org.apache.karaf.cellar.obr.shell;
 
+import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.shell.commands.Argument;
@@ -53,7 +54,10 @@ public class ObrDeployCommand extends ObrCommandSupport {
         }
 
         // check if the bundle is allowed
-        if (!isAllowed(group, Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        if (!isAllowed(bundleId, whitelist, blacklist)) {
             System.err.println("OBR bundle " + bundleId + " is blocked outbound for cluster group " + groupName);
             return null;
         }

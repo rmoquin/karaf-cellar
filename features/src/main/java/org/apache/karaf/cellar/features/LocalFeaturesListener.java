@@ -17,7 +17,6 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.RepositoryEvent;
@@ -26,6 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
  * Local features listener.
@@ -67,8 +67,10 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                     Feature feature = event.getFeature();
                     String name = feature.getName();
                     String version = feature.getVersion();
-
-                    if (cellarSupport.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND)) {
+                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                    Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+                    if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         FeatureEvent.EventType type = event.getType();
 
                         // update the features in the cluster group

@@ -13,10 +13,9 @@
  */
 package org.apache.karaf.cellar.obr.shell;
 
+import java.util.Set;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 
 /**
@@ -37,15 +36,14 @@ public abstract class ObrCommandSupport extends CellarCommandSupport {
     /**
      * Check if an OBR cluster event is allowed.
      *
-     * @param group the cluster group.
-     * @param category the OBR category name.
      * @param id the event ID.
-     * @param type the event type (inbound, outbound).
+     * @param whitelist
+     * @param blacklist
      * @return in case of check failure.
      */
-    public boolean isAllowed(Group group, String category, String id, EventType type) {
+    public boolean isAllowed(String id, Set<String> whitelist, Set<String> blacklist) {
         CellarSupport support = new CellarSupport();
-        return support.isAllowed(group, category, id, type);
+        return support.isAllowed(id, whitelist, blacklist);
     }
 
     @Override

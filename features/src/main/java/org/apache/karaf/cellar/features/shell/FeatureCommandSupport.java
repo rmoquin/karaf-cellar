@@ -22,11 +22,12 @@ import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
  * Abstract cluster feature shell command.
@@ -121,7 +122,11 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      */
     public boolean isAllowed(Group group, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
-        return support.isAllowed(group, Constants.FEATURES_CATEGORY, name, EventType.OUTBOUND);
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+
+        return support.isAllowed(name, whitelist, blacklist);
     }
 
     public FeaturesService getFeaturesService() {

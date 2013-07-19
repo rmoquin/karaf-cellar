@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.core.control;
 
 import java.util.Dictionary;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.event.EventHandler;
@@ -98,7 +97,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
         try {
             Configuration configuration = this.configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
             Dictionary properties = configuration.getProperties();
-            properties.put(Configurations.HANDLER + "." + handler, switchStatus.getValue());
+            properties.put(handler, switchStatus.getValue());
         } catch (Exception e) {
             LOGGER.warn("Can't persist the handler " + handler + " status", e);
         }

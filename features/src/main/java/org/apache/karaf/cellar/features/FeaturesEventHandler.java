@@ -13,18 +13,18 @@
  */
 package org.apache.karaf.cellar.features;
 
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.features.FeaturesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
+import java.util.Set;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
  * Handler for cluster features event.
@@ -32,7 +32,7 @@ import java.util.EnumSet;
 public class FeaturesEventHandler extends FeaturesSupport implements EventHandler<ClusterFeaturesEvent> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.features.handler";
-    private static final String SWITCH_HANDLER_NAME = Configurations.HANDLER + "." + FeaturesEventHandler.class.getName();
+    private static final String SWITCH_HANDLER_NAME = FeaturesEventHandler.class.getName();
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
@@ -64,7 +64,10 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
         }
         String name = event.getName();
         String version = event.getVersion();
-        if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.FEATURES_CATEGORY, name, EventType.INBOUND) || event.getForce()) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+                    Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+                    Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+        if (cellarSupport.isAllowed(name, whitelist, blacklist) || event.getForce()) {
             FeatureEvent.EventType type = event.getType();
             Boolean isInstalled = isFeatureInstalledLocally(name, version);
             try {
@@ -119,7 +122,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            boolean status = Boolean.parseBoolean((String) super.getSwitchConfig().getProperty(SWITCH_HANDLER_NAME));
+            Boolean status = super.nodeConfiguration.getEnabledEventHandlers().contains(SWITCH_HANDLER_NAME);
             if (status) {
                 eventSwitch.turnOn();
             } else {

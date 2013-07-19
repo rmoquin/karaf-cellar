@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.config;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
@@ -29,6 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -46,6 +46,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
     private EventProducer eventProducer;
+    private NodeConfiguration nodeConfiguration;
 
     public ConfigurationSynchronizer() {
         // nothing to do
@@ -72,7 +73,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     /**
      * Pull the configuration from a cluster group to update the local ones.
      *
-     * @param cluster the cluster group where to get the configurations.
+     * @param group the cluster group where to get the configurations.
      */
     @Override
     public void pull(Group group) {
@@ -80,31 +81,33 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", groupName);
 
-            GroupConfiguration clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
-
-            for (String clusterConfiguration : clusterConfigurations.keySet()) {
-                if (cellarSupport.isAllowed(group, Constants.CATEGORY, clusterConfiguration, EventType.INBOUND)) {
-                    Dictionary clusterDictionary = clusterConfigurations.get(clusterConfiguration);
-                    try {
-                        // update the local configuration if needed
-                        Configuration localConfiguration = configurationAdmin.getConfiguration(clusterConfiguration, null);
-                        Dictionary localDictionary = localConfiguration.getProperties();
-                        if (localDictionary == null) {
-                            localDictionary = new Properties();
-                        }
-
-                        localDictionary = filter(localDictionary);
-                        if (!equals(localDictionary, clusterDictionary)) {
-                            localConfiguration.update(localDictionary);
-                            persistConfiguration(configurationAdmin, clusterConfiguration, localDictionary);
-                        }
-                    } catch (IOException ex) {
-                        LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
-                    }
-                } else {
-                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", clusterConfiguration, groupName);
-                }
-            }
+//            GroupConfiguration clusterConfigurations = (GroupConfiguration) clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+//            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+//            Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+//            Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+//            for (String clusterConfiguration : clusterConfigurations.keySet()) {
+//                if (cellarSupport.isAllowed(clusterConfiguration, whitelist,blacklist)) {
+//                    Dictionary clusterDictionary = clusterConfigurations.get(clusterConfiguration);
+//                    try {
+//                        // update the local configuration if needed
+//                        Configuration localConfiguration = configurationAdmin.getConfiguration(clusterConfiguration, null);
+//                        Dictionary localDictionary = localConfiguration.getProperties();
+//                        if (localDictionary == null) {
+//                            localDictionary = new Properties();
+//                        }
+//
+//                        localDictionary = filter(localDictionary);
+//                        if (!equals(localDictionary, clusterDictionary)) {
+//                            localConfiguration.update(localDictionary);
+//                            persistConfiguration(configurationAdmin, clusterConfiguration, localDictionary);
+//                        }
+//                    } catch (IOException ex) {
+//                        LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
+//                    }
+//                } else {
+//                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", clusterConfiguration, groupName);
+//                }
+//            }
         }
     }
 
@@ -133,7 +136,11 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                 for (Configuration localConfiguration : localConfigurations) {
                     String pid = localConfiguration.getPid();
                     // check if the pid is marked as local.
-                    if (cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+                    Set<String> bundleWhitelist = groupConfig.getOutboundBundleWhitelist();
+                    Set<String> bundleBlacklist = groupConfig.getOutboundBundleBlacklist();
+
+                    if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                         Dictionary localDictionary = localConfiguration.getProperties();
                         localDictionary = filter(localDictionary);
                         // update the configurations in the cluster group
@@ -157,7 +164,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     /**
      * Check if configuration sync flag is enabled for a cluster group.
      *
-     * @param cluster the cluster group.
+     * @param group the cluster group.
      * @return true if the configuration sync flag is enabled for the cluster group, false else.
      */
     @Override
@@ -165,8 +172,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         String groupName = group.getName();
 
         String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        String propertyValue = (String) this.switchConfig.getProperty(propertyKey);
-        return Boolean.parseBoolean(propertyValue);
+        return this.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
     }
 
     /**
@@ -237,5 +243,19 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     public void setEventProducer(EventProducer eventProducer) {
         this.eventProducer = eventProducer;
+    }
+
+    /**
+     * @return the nodeconfiguration
+     */
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
+    }
+
+    /**
+     * @param nodeConfiguration the nodeConfiguration to set
+     */
+    public void setNodeconfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

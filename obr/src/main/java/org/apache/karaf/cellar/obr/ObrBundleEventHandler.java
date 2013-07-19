@@ -13,18 +13,18 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import java.util.Set;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.Version;
@@ -40,7 +40,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.bundles.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private CellarSupport cellarSupport;
-    private NodeConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
 
     @Override
@@ -127,7 +127,10 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         }
         String bundleId = event.getBundleId();
         try {
-            if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.BUNDLES_CONFIG_CATEGORY, bundleId, EventType.INBOUND)) {
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+                    Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+                    if (cellarSupport.isAllowed(bundleId, whitelist, blacklist)) {
                 Resolver resolver = obrService.resolver();
                 String[] target = getTarget(bundleId);
                 Resource resource = selectNewestVersion(searchRepository(target[0], target[1]));
@@ -172,7 +175,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
             if (status) {
                 eventSwitch.turnOn();
             } else {

@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.dosgi;
 
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -39,7 +38,7 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     private final Switch dosgiSwitch = new BasicSwitch(SWITCH_ID);
     private BundleContext bundleContext;
     private EventTransportFactory eventTransportFactory;
-    private NodeConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
 
     /**
      * Handle a cluster remote service call event.
@@ -123,7 +122,7 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = Boolean.parseBoolean((String) this.switchConfig.getProperty(Configurations.HANDLER + "." + this.getClass().getName()));
+            Boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
             if (status) {
                 dosgiSwitch.turnOn();
             } else {
@@ -152,16 +151,16 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
-    public NodeConfiguration getSwitchConfig() {
-        return switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(NodeConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

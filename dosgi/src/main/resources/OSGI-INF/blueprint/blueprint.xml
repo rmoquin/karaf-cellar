@@ -36,7 +36,7 @@
     <bean id="remoteServiceCallHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler">
         <property name="eventTransportFactory" ref="eventTransportFactory"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="switchConfig" ref="switchConfig"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
     </bean>
     
     <service ref="remoteServiceCallHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -58,5 +58,5 @@
     <reference id="commandStore" interface="org.apache.karaf.cellar.core.command.CommandStore"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
-    <reference id="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
 </blueprint>

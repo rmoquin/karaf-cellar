@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.management.internal;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.management.CellarConfigMBean;
 import org.osgi.service.cm.ConfigurationEvent;
 
@@ -73,7 +72,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the PID is allowed outbound
-        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -132,7 +134,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -168,7 +173,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Cluster event producer is OFF");
         }
         
-        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
@@ -211,7 +219,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalStateException("Cluster event producer is OFF");
         }
 
-        if (!cellarSupport.isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
 
