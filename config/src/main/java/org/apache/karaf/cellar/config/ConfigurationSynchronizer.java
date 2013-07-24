@@ -255,7 +255,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     /**
      * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setNodeconfiguration(NodeConfiguration nodeConfiguration) {
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
         this.nodeConfiguration = nodeConfiguration;
     }
 }

@@ -34,9 +34,11 @@ public class CellarConfigurationTest extends CellarTestSupport {
 
     @Test
     //@Ignore
-    public void testCellarFeaturesModule() throws InterruptedException {
+    public void testCellarFeaturesModule() throws Exception {
         installCellar();
+                Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("child1");
+                Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("child2");
         Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);

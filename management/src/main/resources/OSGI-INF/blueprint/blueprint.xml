@@ -98,11 +98,9 @@
         </service-properties>
     </service>
     
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport">
-        <property name="switchConfig" ref="switchConfig"/>
-    </bean>
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
     
-    <reference id="switchConfig" interface="org.apache.karaf.cellar.core.SwitchConfiguration"/>
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>

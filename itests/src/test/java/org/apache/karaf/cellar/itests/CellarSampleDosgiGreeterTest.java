@@ -34,8 +34,9 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
     @Test
     //@Ignore
-    public void testDosgiGreeter() throws InterruptedException {
+    public void testDosgiGreeter() throws Exception {
         installCellar();
+                Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("node1");
         createCellarChild("node2");
         Thread.sleep(DEFAULT_TIMEOUT);

@@ -143,14 +143,14 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
     /**
      * @return the nodeConfiguration
      */
-    public NodeConfiguration getSwitchConfig() {
+    public NodeConfiguration getNodeConfiguration() {
         return nodeConfiguration;
     }
 
     /**
      * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(NodeConfiguration switchConfig) {
-        this.nodeConfiguration = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

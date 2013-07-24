@@ -19,14 +19,9 @@ import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
-import org.apache.karaf.cellar.core.event.EventType;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarSupport;

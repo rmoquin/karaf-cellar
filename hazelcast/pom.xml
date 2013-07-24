@@ -36,22 +36,39 @@
     <build>
         <plugins>
             <plugin>
+                <!-- scr annotations - e.g. for generating OSGi component descriptors -->
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-descriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                        <configuration>
+                            <generateSeparateDescriptors>false</generateSeparateDescriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
                         <Private-Package>
-                            org.apache.karaf.cellar.hazelcast.internal*;version="${project.version}"
+                            org.apache.karaf.cellar.hazelcast.internal;version="${project.version}"
                         </Private-Package>
                         <Export-Package>
-                            org.apache.karaf.cellar.hazelcast*;version="${project.version}"
+                            org.apache.karaf.cellar.hazelcast;version="${project.version}",
+                            org.apache.karaf.cellar.hazelcast.*;version="${project.version}",
                         </Export-Package>
                         <Import-Package>
                             com.hazelcast*,
                             org.apache.karaf.cellar.core*;version="${project.version}",
                             org.apache.karaf.cellar.utils.ping;version="${project.version}",
                             org.apache.karaf.features;version="[3,4)",
-                            org.osgi*,
                             org.slf4j;resolution:=optional,
                             *
                         </Import-Package>
@@ -75,6 +92,10 @@
             <artifactId>hazelcast</artifactId>
         </dependency>
         <!-- Internal Dependencies -->
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>

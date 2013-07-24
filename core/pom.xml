@@ -40,11 +40,12 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <_metatype>org.apache.karaf.cellar.core*</_metatype>
-                        <Export-Package>org.apache.karaf.cellar.core*;version="${project.version}"</Export-Package>
+                        <Export-Package>
+                            org.apache.karaf.cellar.core;version="${project.version}",
+                            org.apache.karaf.cellar.core.*;version="${project.version}"
+                        </Export-Package>
                         <Import-Package>
                             org.apache.karaf.shell.console*;version="[3,4)",
-                            org.osgi*,
                             org.slf4j;resolution:=optional,
                             *
                         </Import-Package>
@@ -63,10 +64,6 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.shell</groupId>

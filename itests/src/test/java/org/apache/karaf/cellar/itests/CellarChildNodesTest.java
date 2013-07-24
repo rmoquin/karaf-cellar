@@ -33,10 +33,10 @@ public class CellarChildNodesTest extends CellarTestSupport {
 
     @Test
     //@Ignore
-    public void testClusterWithChildNodes() throws InterruptedException {
+    public void testClusterWithChildNodes() throws Exception {
         installCellar();
-        createCellarChild("child1");
         Thread.sleep(DEFAULT_TIMEOUT);
+        createCellarChild("child1");
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 

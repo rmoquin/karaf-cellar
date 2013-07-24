@@ -26,15 +26,18 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 import java.util.Set;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
     @Test
     //@Ignore
-    public void testCamelSampleApp() throws InterruptedException {
+    public void testCamelSampleApp() throws Exception {
         installCellar();
+        Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("node1");
+        Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("node2");
         Thread.sleep(DEFAULT_TIMEOUT);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);

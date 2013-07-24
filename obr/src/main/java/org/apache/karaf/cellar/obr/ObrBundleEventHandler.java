@@ -214,4 +214,18 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
     }
+
+    /**
+     * @return the nodeConfiguration
+     */
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
+    }
+
+    /**
+     * @param nodeConfiguration the nodeConfiguration to set
+     */
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
+    }
 }

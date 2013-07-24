@@ -15,19 +15,52 @@
  */
 package org.apache.karaf.cellar.hazelcast.internal;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.PropertyOption;
+import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
+@Component(name = "org.apache.karaf.cellar.core.NodeConfiguration", configurationFactory = false, label = "Node Configuration", ds = false,
+        metatype = true, description = "The list of groups that the current node belongs to and control of which configurations will be synced to or from it.")
 public class NodeConfigurationImpl implements NodeConfiguration {
-    private Map<String, Object> properties;
+    private static Logger LOGGER = LoggerFactory.getLogger(NodeConfigurationImpl.class);
+    @Property(label = "Groups", unbounded = PropertyUnbounded.ARRAY, description = "The names of the groups this node belongs to.")
+    static final String GROUPS_PROPERTY = "groups";
 
-    public void update(Map<String, Object> properties) {
-        this.properties = properties;
+    @Property(label = "Produces Events", unbounded = PropertyUnbounded.ARRAY, description = "Whether or not this node will send synchronization events to other nodes in it's group.")
+    static final String PRODUCER_PROPERTY = "producer";
+
+    @Property(label = "Consumes Events", unbounded = PropertyUnbounded.ARRAY, description = "Whether or not this node will consume synchronization events sent from other nodes in it's group.")
+    static final String CONSUMER_PROPERTY = "consumer";
+
+    @Property(label = "Enabled Events", options = {
+        @PropertyOption(name = "org.apache.karaf.cellar.bundle.BundleEventHandler", value = "Bundle Events"),
+        @PropertyOption(name = "org.apache.karaf.cellar.config.ConfigurationEventHandler", value = "Configuration Events"),
+        @PropertyOption(name = "org.apache.karaf.cellar.features.FeaturesEventHandler", value = "Feature Events"),
+        @PropertyOption(name = "org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler", value = "DOSGi Events"),
+        @PropertyOption(name = "org.apache.karaf.cellar.event.ClusterEventHandler", value = "Cluster Events"),
+        @PropertyOption(name = "org.apache.karaf.cellar.obr.ObrBundleEventHandler", value = "OBR Bundle Events"),
+        @PropertyOption(name = "org.apache.karaf.cellar.obr.ObrUrlEventHandler", value = "OBR Events")
+    })
+    static final String ENABLE_EVENTS_PROPERTY = "enable.events";
+
+    private final Map<String, Object> properties = new HashMap<String, Object>();
+
+    public void updated(Map<String, Object> properties) {
+        LOGGER.warn("Node Configuration update properties was called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11111111111" + properties);
+        if (this.properties != null) {
+            this.properties.putAll(properties);
+        }
     }
 
     /**
@@ -35,14 +68,14 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      */
     @Override
     public Set<String> getGroupNames() {
-        return (Set<String>) this.properties.get(NodeConfiguration.GROUPS_PROPERTY);
+        return (Set<String>) this.properties.get(GROUPS_PROPERTY);
     }
 
     /**
      * @param groupNames the groupNames to set
      */
     public void setGroupNames(Set<String> groupNames) {
-        this.properties.put(NodeConfiguration.GROUPS_PROPERTY, groupNames);
+        this.properties.put(GROUPS_PROPERTY, groupNames);
     }
 
     /**
@@ -50,14 +83,14 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      */
     @Override
     public boolean isProducer() {
-        return (Boolean) this.properties.get(NodeConfiguration.PRODUCER_PROPERTY);
+        return (Boolean) this.properties.get(PRODUCER_PROPERTY);
     }
 
     /**
      * @param producer the producer to set
      */
     public void setProducer(boolean producer) {
-        this.properties.put(NodeConfiguration.PRODUCER_PROPERTY, producer);
+        this.properties.put(PRODUCER_PROPERTY, producer);
     }
 
     /**
@@ -65,14 +98,14 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      */
     @Override
     public boolean isConsumer() {
-        return (Boolean) this.properties.get(NodeConfiguration.CONSUMER_PROPERTY);
+        return (Boolean) this.properties.get(CONSUMER_PROPERTY);
     }
 
     /**
      * @param consumer the consumer to set
      */
     public void setConsumer(boolean consumer) {
-        this.properties.put(NodeConfiguration.CONSUMER_PROPERTY, consumer);
+        this.properties.put(CONSUMER_PROPERTY, consumer);
     }
 
     /**
@@ -80,14 +113,13 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      */
     @Override
     public Set<String> getEnabledEventHandlers() {
-        return (Set<String>) this.properties.get(NodeConfiguration.ENABLED_EVENTS_PROPERTY);
+        return (Set<String>) this.properties.get(ENABLE_EVENTS_PROPERTY);
     }
 
     /**
      * @param enabledEventHandlers the enabledEventHandlers to set
      */
     public void setEnabledEventHandlers(Set<String> enabledEventHandlers) {
-        this.properties.put(NodeConfiguration.ENABLED_EVENTS_PROPERTY, enabledEventHandlers);
+        this.properties.put(ENABLE_EVENTS_PROPERTY, enabledEventHandlers);
     }
-
 }

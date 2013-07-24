@@ -87,29 +87,31 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         return masterCluster.getLocalNode();
     }
 
-    public void nodeMembershipsReceived(NodeConfiguration nodeConfiguration) {
-        LOGGER.warn("A NODE MEMBERSHIP CONFIGURATION WAS REGISTERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    public void nodeMembershipsReceived(NodeConfiguration nodeConfiguration, Map<String, Object> properties) {
+        LOGGER.warn("A NODE MEMBERSHIP CONFIGURATION WAS REGISTERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + properties);
         this.nodeConfiguration = nodeConfiguration;
     }
 
-    public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) {
-        LOGGER.warn("A NODE MEMBERSHIP CONFIGURATION WAS REMOVED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration, Map<String, Object> properties) {
+        LOGGER.warn("A NODE MEMBERSHIP CONFIGURATION WAS REMOVED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + properties);
         this.nodeConfiguration = null;
     }
 
     public void groupConfigured(GroupConfiguration group, Map<String, Object> properties) {
-        LOGGER.warn("A NEW GROUP WAS REGISTERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + properties.get(org.osgi.framework.Constants.SERVICE_PID));
+        LOGGER.warn("A NEW GROUP WAS REGISTERED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + properties);
         String servicePid = (String) properties.get(org.osgi.framework.Constants.SERVICE_PID);
-        pidGroupNameMap.put(servicePid, group.getGroupName());
-        registerGroup(group.getGroupName());
+        pidGroupNameMap.put(servicePid, group.getName());
+        registerGroup(group.getName());
     }
 
     public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) {
-        LOGGER.warn("A GROUP Configuration was removed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + properties.get(org.osgi.framework.Constants.SERVICE_PID));
+        LOGGER.warn("A GROUP Configuration was removed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + properties);
         String servicePid = (String) properties.get(org.osgi.framework.Constants.SERVICE_PID);
         pidGroupNameMap.remove(servicePid);
-        if (this.nodeConfiguration.getGroupNames().contains(group.getGroupName())) {
-            deRegisterNodeFromGroup(group.getGroupName());
+        if (this.nodeConfiguration != null) {
+            if (this.nodeConfiguration.getGroupNames().contains(group.getName())) {
+                deRegisterNodeFromGroup(group.getName());
+            }
         }
     }
 
@@ -139,12 +141,13 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         Map<String, Group> groupMap = listGroups();
         return groupMap.get(groupName);
     }
-    
+
     @Override
     public GroupConfiguration findGroupConfigurationByName(String groupName) {
         for (GroupConfiguration groupConfiguration : groupMemberships) {
-            if(groupConfiguration.getGroupName().equals(groupName))
+            if (groupConfiguration.getName().equals(groupName)) {
                 return groupConfiguration;
+            }
         }
         return null;
     }

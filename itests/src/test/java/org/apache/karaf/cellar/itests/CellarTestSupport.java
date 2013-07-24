@@ -13,10 +13,10 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.editConfigurationFileExtend;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.karafDistributionConfiguration;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.keepRuntimeFolder;
-import static org.apache.karaf.tooling.exam.options.KarafDistributionOption.logLevel;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.logLevel;
 import static org.ops4j.pax.exam.CoreOptions.maven;
 
 import java.io.ByteArrayOutputStream;
@@ -25,11 +25,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,13 +43,18 @@ import javax.inject.Inject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
-import org.apache.karaf.tooling.exam.options.KarafDistributionOption;
-import org.apache.karaf.tooling.exam.options.LogLevelOption;
-import org.ops4j.pax.exam.MavenUtils;
+import org.apache.karaf.features.BootFinished;
+import org.apache.karaf.features.Feature;
+import org.apache.karaf.features.FeaturesService;
+import org.junit.Assert;
+import static org.junit.Assert.assertTrue;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.junit.Configuration;
 import org.ops4j.pax.exam.junit.ProbeBuilder;
+import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
+import org.ops4j.pax.exam.karaf.options.LogLevelOption;
+import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -59,15 +67,24 @@ import org.osgi.util.tracker.ServiceTracker;
 public class CellarTestSupport {
     static final Long COMMAND_TIMEOUT = 10000L;
     static final Long DEFAULT_TIMEOUT = 10000L;
-    static final Long SERVICE_TIMEOUT = 15000L;
+    static final Long SERVICE_TIMEOUT = 30000L;
+    static final String KARAF_VERSION = "3.0.0-SNAPSHOT";
+    public static final String RMI_SERVER_PORT = "44445";
+    public static final String HTTP_PORT = "9081";
+    public static final String RMI_REG_PORT = "1100";
     static final String GROUP_ID = "org.apache.karaf";
     static final String ARTIFACT_ID = "apache-karaf";
     static final String INSTANCE_STARTED = "Started";
     static final String INSTANCE_STARTING = "Starting";
     static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
+    protected String cellarFeatureURI;
     ExecutorService executor = Executors.newCachedThreadPool();
     @Inject
     protected BundleContext bundleContext;
+    @Inject
+    protected FeaturesService featureService;
+    @Inject
+    BootFinished bootFinished;
 
     /**
      * @param probe
@@ -83,14 +100,21 @@ public class CellarTestSupport {
      * Installs the Cellar feature
      */
     protected void installCellar() {
-        System.err.println(executeCommand("feature:repo-add " + System.getProperty("cellar.feature.url")));
-        System.err.println(executeCommand("feature:repo-list"));
-        System.err.println(executeCommand("feature:list"));
-        executeCommand("feature:install cellar");
+        try {
+            cellarFeatureURI = maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version(KARAF_VERSION).classifier("features").type("xml").getURL();
+            featureService.addRepository(new URI(cellarFeatureURI), false);
+            featureService.installFeature("cellar");
+        } catch (Exception ex) {
+            throw new RuntimeException("Error installing cellar feature", ex);
+        }
     }
 
     protected void unInstallCellar() {
-        System.err.println(executeCommand("feature:uninstall cellar"));
+        try {
+            featureService.uninstallFeature("cellar");
+        } catch (Exception ex) {
+            throw new RuntimeException("Error uninstalling cellar feature", ex);
+        }
     }
 
     /**
@@ -102,7 +126,7 @@ public class CellarTestSupport {
 
     protected void createCellarChild(String name, boolean debug, int port) {
         int instances = 0;
-        String createCommand = "instance:create --featureURL " + System.getProperty("cellar.feature.url") + " --feature cellar ";
+        String createCommand = "instance:create --featureURL " + cellarFeatureURI + " --feature cellar ";
         if (debug && port > 0) {
             createCommand = createCommand + String.format(DEBUG_OPTS, port);
         }
@@ -116,7 +140,7 @@ public class CellarTestSupport {
             instances = Integer.parseInt(response.trim());
             System.err.print(".");
             try {
-                Thread.sleep(1000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 //Ignore
             }
@@ -153,18 +177,17 @@ public class CellarTestSupport {
         return node;
     }
 
-    protected Option cellarDistributionConfiguration() {
-        return karafDistributionConfiguration().frameworkUrl(
-                maven().groupId(GROUP_ID).artifactId(ARTIFACT_ID).versionAsInProject().type("zip"))
-                .karafVersion(MavenUtils.getArtifactVersion(GROUP_ID, ARTIFACT_ID)).name("Apache Karaf").unpackDirectory(new File("target/paxexam/"));
-    }
-
     @Configuration
     public Option[] config() {
+        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("zip");
         Option[] options = new Option[] {
-            cellarDistributionConfiguration(), keepRuntimeFolder(), logLevel(LogLevelOption.LogLevel.INFO),
-            editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").versionAsInProject().classifier("features").type("xml").getURL()),
-            editConfigurationFileExtend("etc/custom.properties", "karaf.framework", "felix")
+            karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+            keepRuntimeFolder(),
+            logLevel(LogLevelOption.LogLevel.INFO),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
+            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
         };
         String debug = System.getProperty("debugMain");
         if (debug != null) {
@@ -203,68 +226,26 @@ public class CellarTestSupport {
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
         FutureTask<String> commandFuture = new FutureTask<String>(
                 new Callable<String>() {
-            public String call() {
-                try {
-                    if (!silent) {
-                        System.err.println(command);
+                    @Override
+                    public String call() throws Exception {
+                        try {
+                            if (!silent) {
+                                System.err.println(command);
+                            }
+                            commandSession.execute(command);
+                        } finally {
+                            printStream.flush();
+                        }
+                        return byteArrayOutputStream.toString();
                     }
-                    commandSession.execute(command);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-                printStream.flush();
-                return byteArrayOutputStream.toString();
-            }
-        });
+                });
 
         try {
             executor.submit(commandFuture);
             response = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            response = "SHELL COMMAND TIMED OUT: ";
-        }
-
-        return response;
-    }
-
-    /**
-     * Executes multiple commands inside a Single Session.
-     * Commands have a default timeout of 10 seconds.
-     *
-     * @param commands
-     * @return
-     */
-    protected String executeCommands(final String... commands) {
-        String response;
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final PrintStream printStream = new PrintStream(byteArrayOutputStream);
-        final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
-        final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
-        FutureTask<String> commandFuture = new FutureTask<String>(
-                new Callable<String>() {
-            public String call() {
-                for (String command : commands) {
-                    try {
-                        System.err.println(command);
-                        commandSession.execute(command);
-                    } catch (Exception e) {
-                        System.err.println("The following error occurred while waiting for command to complete: " + command);
-                        e.printStackTrace(System.err);
-                    }
-                }
-                String response = byteArrayOutputStream.toString();
-                System.err.println("Raw command response was: " + response);
-                return response;
-            }
-        });
-
-        try {
-            executor.submit(commandFuture);
-            response = commandFuture.get(COMMAND_TIMEOUT, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            response = "SHELL COMMAND TIMED OUT: ";
+            response = "SHELL COMMAND TIMED OUT for command: " + command;
         }
 
         return response;
@@ -396,5 +377,51 @@ public class CellarTestSupport {
      */
     private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
         return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
+    }
+
+    public void assertFeatureInstalled(String featureName) {
+        Feature[] features = featureService.listInstalledFeatures();
+        for (Feature feature : features) {
+            if (featureName.equals(feature.getName())) {
+                return;
+            }
+        }
+        Assert.fail("Feature " + featureName + " should be installed but is not");
+    }
+
+    public void assertFeaturesInstalled(String... expectedFeatures) {
+        Set<String> expectedFeaturesSet = new HashSet<String>(Arrays.asList(expectedFeatures));
+        Feature[] features = featureService.listInstalledFeatures();
+        Set<String> installedFeatures = new HashSet<String>();
+        for (Feature feature : features) {
+            installedFeatures.add(feature.getName());
+        }
+        String msg = "Expecting the following features to be installed : " + expectedFeaturesSet + " but found " + installedFeatures;
+        Assert.assertTrue(msg, installedFeatures.containsAll(expectedFeaturesSet));
+    }
+
+    public void assertContains(String expectedPart, String actual) {
+        assertTrue("Should contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
+    }
+
+    public void assertContainsNot(String expectedPart, String actual) {
+        Assert.assertFalse("Should not contain '" + expectedPart + "' but was : " + actual, actual.contains(expectedPart));
+    }
+
+    protected void assertBundleInstalled(String name) {
+        Assert.assertTrue("Bundle " + name + " should be installed", isBundleInstalled(name));
+    }
+
+    protected void assertBundleNotInstalled(String name) {
+        Assert.assertFalse("Bundle " + name + " should not be installed", isBundleInstalled(name));
+    }
+
+    private boolean isBundleInstalled(String symbolicName) {
+        for (Bundle bundle : bundleContext.getBundles()) {
+            if (bundle.getSymbolicName().equals(symbolicName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

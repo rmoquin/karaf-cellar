@@ -37,7 +37,7 @@ public class CellarGroupsTest extends CellarTestSupport {
 
     @Test
     //@Ignore
-    public void testGroupsWithChildNodes() throws InterruptedException {
+    public void testGroupsWithChildNodes() throws Exception {
         installCellar();
         Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("child1");

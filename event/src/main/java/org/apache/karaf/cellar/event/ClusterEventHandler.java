@@ -36,7 +36,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private NodeConfiguration switchConfig;
+    private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
 
@@ -96,7 +96,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            boolean status = switchConfig.getEnabledEventHandlers().contains(this.getClass().getName());
+            boolean status = nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
             if (status) {
                 eventSwitch.turnOn();
             } else {
@@ -147,16 +147,16 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     }
 
     /**
-     * @return the switchConfig
+     * @return the nodeConfiguration
      */
-    public NodeConfiguration getSwitchConfig() {
-        return switchConfig;
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
     /**
-     * @param switchConfig the switchConfig to set
+     * @param nodeConfiguration the nodeConfiguration to set
      */
-    public void setSwitchConfig(NodeConfiguration switchConfig) {
-        this.switchConfig = switchConfig;
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

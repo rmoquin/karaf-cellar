@@ -29,11 +29,11 @@ public class CellarInstallationTest extends CellarTestSupport {
 
     @Test
     //@Ignore
-    public void testInstallation() throws InterruptedException {
+    public void testInstallation() throws Exception {
         installCellar();
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
-        Thread.sleep(20000);
+                Thread.sleep(DEFAULT_TIMEOUT);
         System.err.println(executeCommand("bundle:list"));
         System.err.println(executeCommand("cluster:node-list"));
     }

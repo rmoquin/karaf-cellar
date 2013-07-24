@@ -19,7 +19,7 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
     <bean id="obrBundleEventHandler" class="org.apache.karaf.cellar.obr.ObrBundleEventHandler"
             init-method="init" destroy-method="destroy">
         <property name="obrService" ref="repositoryAdmin"/>
-        <property name="clusterManager" ref="clusterManager"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
     </bean>
 
@@ -56,9 +56,7 @@ xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.o
         </service-properties>
     </service>
     
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.cellarSupport">
-        <property name="switchConfig" ref="switchConfig"/>
-    </bean>
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
 
     <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>

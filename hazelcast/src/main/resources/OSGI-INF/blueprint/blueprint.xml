@@ -38,7 +38,7 @@
         <property name="discoveryServices" ref="discoveryServices"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
-            
+    
     <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="shutdown">
         <property name="name" value="default"/>
         <property name="nodeName" value="${karaf.name}"/>
@@ -53,10 +53,10 @@
     </service>
     
     <bean id="configManager" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager">
+        <cm:managed-properties persistent-id="org.apache.karaf.cellar.discovery" update-strategy="component-managed"
+                                       update-method="update"/>
         <property name="hzClassLoader" ref="bundleClassLoader"/>
         <property name="xmlConfig" value="${karaf.home}/etc/hazelcast.xml"/>
-        <cm:managed-properties persistent-id="org.apache.karaf.cellar.discovery" update-strategy="component-managed"
-                               update-method="update"/>
     </bean>
     
     <service ref="configManager" auto-export="interfaces"/>
@@ -78,9 +78,36 @@
     
     <service ref="groupManager" auto-export="interfaces"/>
     
-    <cm:managed-service-factory id="groupFactory" factory-pid="org.apache.karaf.cellar.core.GroupMembershipConfig" 
-                                interface="org.apache.karaf.cellar.core.GroupMembershipConfig">
-        <cm:managed-component class="org.apache.karaf.cellar.core.GroupMembershipConfig">
+    <bean id="nodeConfiguration" class="org.apache.karaf.cellar.hazelcast.internal.NodeConfigurationImpl">
+        <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeConfiguration" update-strategy="component-managed"
+                               update-method="update"/>
+        <property name="groupNames">
+            <set>
+                <value>default</value>
+            </set>
+        </property>
+        <property name="producer" value="true"/>
+        <property name="consumer" value="true"/>
+        <property name="enabledEventHandlers">
+            <set>
+                <value>org.apache.karaf.cellar.bundle.BundleEventHandler</value>
+                <value>org.apache.karaf.cellar.config.ConfigurationEventHandler</value>
+                <value>org.apache.karaf.cellar.features.FeaturesEventHandler</value>
+                <value>org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler</value>
+                <value>org.apache.karaf.cellar.event.ClusterEventHandler</value>
+                <value>org.apache.karaf.cellar.bundle.BundleEventHandler</value>
+                <value>org.apache.karaf.cellar.obr.ObrBundleEventHandler</value>
+                <value>org.apache.karaf.cellar.obr.ObrUrlEventHandler</value>
+            </set>
+        </property>
+    </bean>
+
+    <service ref="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
+
+    <cm:managed-service-factory id="groupFactory" factory-pid="org.apache.karaf.cellar.core.GroupConfiguration" 
+                                auto-export="interfaces">
+        <cm:managed-component class="org.apache.karaf.cellar.hazelcast.internal.GroupConfigurationImpl">
+            <cm:managed-properties persistent-id="" update-strategy="component-managed" update-method="update"/>
             <property name="syncConfiguration" value="true"/>
             <property name="inboundConfigurationWhitelist">
                 <set>
@@ -152,10 +179,14 @@
                 </set>
             </property>
             <property name="inboundBundleBlacklist">
-                <set/>
+                <set>
+                    <value>none</value>
+                </set>
             </property>
             <property name="outboundBundleBlacklist">
-                <set/>
+                <set>
+                    <value>none</value>
+                </set>
             </property>
             <property name="syncOBRUrls" value="true"/>
             <property name="syncOBRBundles" value="true"/>
@@ -275,9 +306,6 @@
         <property name="handlerRegistry" ref="registry"/>
     </bean>
 
-    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional">
-        
-    </reference>
     <reference id="registry" interface="org.apache.karaf.cellar.core.event.EventHandlerRegistry"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     

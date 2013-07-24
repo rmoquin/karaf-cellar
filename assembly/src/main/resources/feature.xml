@@ -21,20 +21,6 @@
         <bundle start-level="29">mvn:org.jledit/core/0.2.0</bundle>
     </feature>
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-        <config name="org.apache.karaf.cellar.core.GroupMembershipConfig-1">
-            name=default
-        </config>
-        <config name="org.apache.karaf.cellar.core.NodeEventConfig">
-            producer = true
-            consumer = true
-            enableBundleEvents = true
-            enableConfigurationEvents = true
-            enableFeatureEvents = true
-            enableDOSGIEvents = true
-            enableClusterEvents = true
-            enableOBRBundleEvents = true
-            enableObrEvents = true
-        </config>
         <bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
@@ -50,6 +36,12 @@
         <feature version="${hazelcast.version}">hazelcast</feature>
         <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="33">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
+        <config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
+            name=default
+        </config>
+        <config name="org.apache.karaf.cellar.core.NodeConfiguration">
+            groupNames=default
+        </config>
     </feature>    
     <feature name="cellar-config" description="ConfigAdmin cluster support" version="${project.version}" resolver="(obr)">
         <feature version="${project.version}">cellar-core</feature>
@@ -83,6 +75,7 @@
         <feature version="${project.version}">cellar-bundle</feature>
         <feature version="${project.version}">cellar-features</feature>
         <feature version="${project.version}">cellar-management</feature>
+        <feature version="${project.version}">cellar-eventadmin</feature>
     </feature>
 
     <feature name="cellar-dosgi" description="DOSGi support" version="${project.version}" resolver="(obr)">
