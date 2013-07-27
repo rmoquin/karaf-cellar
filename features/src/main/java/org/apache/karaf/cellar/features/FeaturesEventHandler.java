@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
-import java.util.Set;
+import java.util.List;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
@@ -65,8 +65,8 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
         String name = event.getName();
         String version = event.getVersion();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-                    Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
-                    Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+        List<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+        List<String> blacklist = groupConfig.getInboundFeatureBlacklist();
         if (cellarSupport.isAllowed(name, whitelist, blacklist) || event.getForce()) {
             FeatureEvent.EventType type = event.getType();
             Boolean isInstalled = isFeatureInstalledLocally(name, version);
@@ -100,7 +100,9 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
             } catch (Exception e) {
                 LOGGER.error("CELLAR FEATURES: failed to handle cluster feature event", e);
             }
-        } else LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, event.getSourceGroup().getName());
+        } else {
+            LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, event.getSourceGroup().getName());
+        }
     }
 
     /**
@@ -122,7 +124,7 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = super.nodeConfiguration.getEnabledEventHandlers().contains(SWITCH_HANDLER_NAME);
+            Boolean status = super.nodeConfiguration.getEnabledEvents().contains(SWITCH_HANDLER_NAME);
             if (status) {
                 eventSwitch.turnOn();
             } else {

@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Set;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,7 +28,7 @@ public class CellarSupport {
      * @param whiteList the whitelisted items for a particular event.
      * @param blackList the blacklisted items for a particular event.
      */
-    public boolean isAllowed(String url, Set<String> whiteList, Set<String> blackList) {
+    public boolean isAllowed(String url, List<String> whiteList, List<String> blackList) {
         boolean result = true;
         
         // if no white listed items we assume all are accepted.

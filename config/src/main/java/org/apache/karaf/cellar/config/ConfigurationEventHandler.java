@@ -111,7 +111,7 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
      */
     @Override
     public Switch getSwitch() {
-        boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
+        boolean status = this.nodeConfiguration.getEnabledEvents().contains(this.getClass().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

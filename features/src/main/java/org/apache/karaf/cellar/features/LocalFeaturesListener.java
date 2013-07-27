@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.features;
 
+import java.util.List;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -68,8 +69,8 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                     String name = feature.getName();
                     String version = feature.getVersion();
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                    Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+                    List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+                    List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
                     if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         FeatureEvent.EventType type = event.getType();
 

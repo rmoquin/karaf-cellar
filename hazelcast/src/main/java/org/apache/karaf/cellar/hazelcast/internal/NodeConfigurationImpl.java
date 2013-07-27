@@ -16,8 +16,8 @@
 package org.apache.karaf.cellar.hazelcast.internal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
@@ -34,14 +34,14 @@ import org.slf4j.LoggerFactory;
         metatype = true, description = "The list of groups that the current node belongs to and control of which configurations will be synced to or from it.")
 public class NodeConfigurationImpl implements NodeConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(NodeConfigurationImpl.class);
-    @Property(label = "Groups", unbounded = PropertyUnbounded.ARRAY, description = "The names of the groups this node belongs to.")
-    static final String GROUPS_PROPERTY = "groups";
+    @Property(label = "Groups", unbounded = PropertyUnbounded.VECTOR, description = "The names of the groups this node belongs to.")
+    public static final String GROUPS_PROPERTY = "groups";
 
-    @Property(label = "Produces Events", unbounded = PropertyUnbounded.ARRAY, description = "Whether or not this node will send synchronization events to other nodes in it's group.")
-    static final String PRODUCER_PROPERTY = "producer";
+    @Property(label = "Produces Events", boolValue = true, description = "Whether or not this node will send synchronization events to other nodes in it's group.")
+    public static final String PRODUCER_PROPERTY = "producer";
 
-    @Property(label = "Consumes Events", unbounded = PropertyUnbounded.ARRAY, description = "Whether or not this node will consume synchronization events sent from other nodes in it's group.")
-    static final String CONSUMER_PROPERTY = "consumer";
+    @Property(label = "Consumes Events", boolValue = true, description = "Whether or not this node will consume synchronization events sent from other nodes in it's group.")
+    public static final String CONSUMER_PROPERTY = "consumer";
 
     @Property(label = "Enabled Events", options = {
         @PropertyOption(name = "org.apache.karaf.cellar.bundle.BundleEventHandler", value = "Bundle Events"),
@@ -52,9 +52,9 @@ public class NodeConfigurationImpl implements NodeConfiguration {
         @PropertyOption(name = "org.apache.karaf.cellar.obr.ObrBundleEventHandler", value = "OBR Bundle Events"),
         @PropertyOption(name = "org.apache.karaf.cellar.obr.ObrUrlEventHandler", value = "OBR Events")
     })
-    static final String ENABLE_EVENTS_PROPERTY = "enable.events";
+    public static final String ENABLE_EVENTS_PROPERTY = "enabledEvents";
 
-    private final Map<String, Object> properties = new HashMap<String, Object>();
+    private Map<String, Object> properties = new HashMap<String, Object>();
 
     public void updated(Map<String, Object> properties) {
         LOGGER.warn("Node Configuration update properties was called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11111111111" + properties);
@@ -67,15 +67,15 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      * @return the groupNames
      */
     @Override
-    public Set<String> getGroupNames() {
-        return (Set<String>) this.properties.get(GROUPS_PROPERTY);
+    public List<String> getGroups() {
+        return (List<String>) this.properties.get(GROUPS_PROPERTY);
     }
 
     /**
-     * @param groupNames the groupNames to set
+     * @param groups the groupNames to set
      */
-    public void setGroupNames(Set<String> groupNames) {
-        this.properties.put(GROUPS_PROPERTY, groupNames);
+    public void setGroups(List<String> groups) {
+        this.properties.put(GROUPS_PROPERTY, groups);
     }
 
     /**
@@ -112,14 +112,29 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      * @return the enabledEventHandlers
      */
     @Override
-    public Set<String> getEnabledEventHandlers() {
-        return (Set<String>) this.properties.get(ENABLE_EVENTS_PROPERTY);
+    public List<String> getEnabledEvents() {
+        return (List<String>) this.properties.get(ENABLE_EVENTS_PROPERTY);
     }
 
     /**
-     * @param enabledEventHandlers the enabledEventHandlers to set
+     * @param enabledEvents the enabledEventHandlers to set
      */
-    public void setEnabledEventHandlers(Set<String> enabledEventHandlers) {
-        this.properties.put(ENABLE_EVENTS_PROPERTY, enabledEventHandlers);
+    public void setEnabledEvents(List<String> enabledEvents) {
+        this.properties.put(ENABLE_EVENTS_PROPERTY, enabledEvents);
+    }
+
+    /**
+     * @return the properties
+     */
+    @Override
+    public Map<String, Object> getProperties() {
+        return properties;
+    }
+
+    /**
+     * @param properties the properties to set
+     */
+    public void setProperties(Map<String, Object> properties) {
+        this.properties = properties;
     }
 }

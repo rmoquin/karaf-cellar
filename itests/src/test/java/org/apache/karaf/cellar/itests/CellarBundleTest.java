@@ -13,11 +13,6 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
-
-import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.features.FeaturesService;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,20 +23,12 @@ import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 @RunWith(JUnit4TestRunner.class)
 @ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
 public class CellarBundleTest extends CellarTestSupport {
-
     @Test
     //@Ignore
     public void testCellarBundleModule() throws Exception {
-    	
+
         installCellar();
-        Thread.sleep(DEFAULT_TIMEOUT);
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);
-		System.err.println(executeCommand("cluster:bundle-list default"));
-        assertEquals(1, clusterManager.getClusters().size());
-        assertEquals(1, clusterManager.getMasterCluster().listNodes().size());
-        assertNotNull(clusterManager.getMasterCluster().getLocalNode());
-        assertEquals(clusterManager.getMasterCluster().getLocalNode(), clusterManager.getMasterCluster().listNodes().toArray()[0]);
+        System.err.println(executeCommand("cluster:bundle-list default"));
     }
 
     @After
@@ -52,5 +39,4 @@ public class CellarBundleTest extends CellarTestSupport {
             //Ignore
         }
     }
-
 }

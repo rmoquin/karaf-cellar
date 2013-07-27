@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import java.util.List;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
@@ -37,7 +38,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     private NodeConfiguration nodeConfiguration;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    
+
     @Override
     public void init() {
         super.init();
@@ -94,12 +95,12 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
 
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
-        
+            List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+            List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {
-                
+
                 if (cellarSupport.isAllowed(repository.getURI().toString(), whitelist, blacklist)) {
                     clusterUrls.add(repository.getURI().toString());
                     // update OBR bundles in the cluster group
@@ -120,7 +121,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     @Override
     public Boolean isSyncEnabled(Group group) {
         String propertyKey = Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        return this.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
+        return this.nodeConfiguration.getEnabledEvents().contains(propertyKey);
     }
 
     /**

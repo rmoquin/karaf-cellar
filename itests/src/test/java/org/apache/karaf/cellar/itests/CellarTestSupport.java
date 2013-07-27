@@ -136,11 +136,11 @@ public class CellarTestSupport {
         //Wait till the node is listed as Starting
         System.err.print("Waiting for " + name + " to start ");
         for (int i = 0; i < 5 && instances == 0; i++) {
-            String response = executeCommand("instance:list | grep " + name + " | grep -c " + INSTANCE_STARTED, COMMAND_TIMEOUT, true);
+            String response = executeCommand("instance:list | grep " + name + " | grep -c " + INSTANCE_STARTED, COMMAND_TIMEOUT, false);
             instances = Integer.parseInt(response.trim());
             System.err.print(".");
             try {
-                Thread.sleep(2000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 //Ignore
             }
@@ -167,7 +167,7 @@ public class CellarTestSupport {
      */
     protected String getNodeIdOfChild(String name) {
         String node;
-        String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, true);
+        String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, false);
         System.err.println("Get node id of child response: " + nodesList);
         int stop = nodesList.indexOf(']');
         node = nodesList.substring(0, stop);
@@ -181,9 +181,9 @@ public class CellarTestSupport {
     public Option[] config() {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("zip");
         Option[] options = new Option[] {
-            karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
-            keepRuntimeFolder(),
+            karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),            
             logLevel(LogLevelOption.LogLevel.INFO),
+            keepRuntimeFolder(),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),

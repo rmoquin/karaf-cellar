@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -62,11 +61,11 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
         try {
             // check if the pid is marked as local.
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-            Set<String> bundleWhitelist = groupConfig.getInboundBundleWhitelist();
-            Set<String> bundleBlacklist = groupConfig.getInboundBundleBlacklist();
+            List<String> bundleWhitelist = groupConfig.getInboundBundleWhitelist();
+            List<String> bundleBlacklist = groupConfig.getInboundBundleBlacklist();
 
-            Set<String> featuresWhitelist = groupConfig.getInboundFeatureWhitelist();
-            Set<String> featuresBlacklist = groupConfig.getInboundFeatureBlacklist();
+            List<String> featuresWhitelist = groupConfig.getInboundFeatureWhitelist();
+            List<String> featuresBlacklist = groupConfig.getInboundFeatureBlacklist();
             if (cellarSupport.isAllowed(event.getLocation(), bundleWhitelist, bundleBlacklist)) {
                 // check the features first
                 List<Feature> matchingFeatures = retrieveFeature(event.getLocation());
@@ -117,7 +116,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
      */
     @Override
     public Switch getSwitch() {
-        boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
+        boolean status = this.nodeConfiguration.getEnabledEvents().contains(this.getClass().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

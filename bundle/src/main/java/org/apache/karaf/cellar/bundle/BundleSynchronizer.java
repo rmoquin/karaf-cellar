@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.bundle;
 
+import java.util.List;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
@@ -87,8 +88,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     if (state != null) {
                         String bundleLocation = state.getLocation();
                         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                        Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
-                        Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+                        List<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+                        List<String> blacklist = groupConfig.getInboundFeatureBlacklist();
                         if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {
@@ -141,8 +142,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
                 // check if the pid is marked as local.
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-                Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+                List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
                 if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                     BundleState bundleState = new BundleState();
                     // get the bundle name or location.
@@ -210,7 +211,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
         try {
             String propertyKey = Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            result = this.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
+            result = this.nodeConfiguration.getEnabledEvents().contains(propertyKey);
         } catch (Exception e) {
             LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
         }

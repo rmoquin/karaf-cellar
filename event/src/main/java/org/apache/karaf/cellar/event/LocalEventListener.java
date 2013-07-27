@@ -14,10 +14,10 @@
 package org.apache.karaf.cellar.event;
 
 import java.io.Serializable;
+import java.util.List;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -70,8 +70,8 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                 if (groups != null && !groups.isEmpty()) {
                     for (Group group : groups) {
                         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-                        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+                        List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                        List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
                         String topicName = event.getTopic();
                         Map<String, Serializable> properties = getEventProperties(event);
                         if (cellarSupport.isAllowed(topicName, whitelist, blacklist)) {

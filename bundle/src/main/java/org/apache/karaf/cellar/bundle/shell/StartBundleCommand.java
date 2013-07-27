@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.bundle.shell;
 
+import java.util.List;
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
@@ -21,12 +22,10 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
 
 import java.util.Map;
-import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "bundle-start", description = "Start a bundle in a cluster group")
@@ -69,8 +68,8 @@ public class StartBundleCommand extends BundleCommandSupport {
             // check if the bundle is allowed
             CellarSupport support = new CellarSupport();
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
         if (!support.isAllowed(location, whitelist, blacklist)) {
                 System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
                 return null;

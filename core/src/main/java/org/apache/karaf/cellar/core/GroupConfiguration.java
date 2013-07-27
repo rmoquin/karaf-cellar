@@ -15,7 +15,7 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  *
@@ -26,35 +26,35 @@ public interface GroupConfiguration {
     
     boolean isSyncConfiguration();
 
-    Set<String> getInboundConfigurationWhitelist();
+    List<String> getInboundConfigurationWhitelist();
 
-    Set<String> getOutboundConfigurationWhitelist();
+    List<String> getOutboundConfigurationWhitelist();
 
-    Set<String> getInboundConfigurationBlacklist();
+    List<String> getInboundConfigurationBlacklist();
 
-    Set<String> getOutboundConfigurationBlacklist();
+    List<String> getOutboundConfigurationBlacklist();
 
     boolean isSyncFeatures();
 
     boolean isSyncFeatureRepos();
 
-    Set<String> getInboundFeatureWhitelist();
+    List<String> getInboundFeatureWhitelist();
 
-    Set<String> getOutboundFeatureWhitelist();
+    List<String> getOutboundFeatureWhitelist();
 
-    Set<String> getInboundFeatureBlacklist();
+    List<String> getInboundFeatureBlacklist();
 
-    Set<String> getOutboundFeatureBlacklist();
+    List<String> getOutboundFeatureBlacklist();
 
     boolean isSyncBundles();
 
-    Set<String> getInboundBundleWhitelist();
+    List<String> getInboundBundleWhitelist();
 
-    Set<String> getOutboundBundleWhitelist();
+    List<String> getOutboundBundleWhitelist();
 
-    Set<String> getInboundBundleBlacklist();
+    List<String> getInboundBundleBlacklist();
 
-    Set<String> getOutboundBundleBlacklist();
+    List<String> getOutboundBundleBlacklist();
 
     boolean isSyncOBRUrls();
 

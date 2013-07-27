@@ -122,7 +122,7 @@ public class RemoteServiceCallHandler implements EventHandler<RemoteServiceCall>
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
+            Boolean status = this.nodeConfiguration.getEnabledEvents().contains(this.getClass().getName());
             if (status) {
                 dosgiSwitch.turnOn();
             } else {

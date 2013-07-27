@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -137,8 +138,8 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                     String pid = localConfiguration.getPid();
                     // check if the pid is marked as local.
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    Set<String> bundleWhitelist = groupConfig.getOutboundBundleWhitelist();
-                    Set<String> bundleBlacklist = groupConfig.getOutboundBundleBlacklist();
+                    List<String> bundleWhitelist = groupConfig.getOutboundBundleWhitelist();
+                    List<String> bundleBlacklist = groupConfig.getOutboundBundleBlacklist();
 
                     if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                         Dictionary localDictionary = localConfiguration.getProperties();
@@ -172,7 +173,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         String groupName = group.getName();
 
         String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        return this.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
+        return this.nodeConfiguration.getEnabledEvents().contains(propertyKey);
     }
 
     /**

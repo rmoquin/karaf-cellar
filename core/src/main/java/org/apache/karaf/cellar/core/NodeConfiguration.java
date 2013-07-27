@@ -15,18 +15,24 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.Set;
+import java.util.List;
+import java.util.Map;
 
 /**
  *
  * @author rmoquin
  */
 public interface NodeConfiguration {
-    Set<String> getGroupNames();
+    List<String> getGroups();
 
     boolean isProducer();
 
     boolean isConsumer();
 
-    Set<String> getEnabledEventHandlers();
+    List<String> getEnabledEvents();
+
+    /**
+     * @return the properties
+     */
+    Map<String, Object> getProperties();
 }

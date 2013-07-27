@@ -13,8 +13,11 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.osgi.service.cm.ConfigurationException;
 
 /**
  * Generic cluster group manager interface.
@@ -88,7 +91,7 @@ public interface GroupManager {
      *
      * @return the set of cluster group names "hosting" the local node.
      */
-    public Set<String> listGroupNames();
+    public List<String> listGroupNames();
 
     /**
      * Get the cluster group names "hosting" a given node.
@@ -96,7 +99,7 @@ public interface GroupManager {
      * @param node the node.
      * @return the set of cluster group names "hosting" the given node.
      */
-    public Set<String> listGroupNames(Node node);
+    public List<String> listGroupNames(Node node);
 
     /**
      * Register the local node in a given cluster group.
@@ -110,9 +113,13 @@ public interface GroupManager {
      *
      * @param groupName the group to remove this node from.
      */
-    public void deRegisterNodeFromGroup(String groupName);
+    void deRegisterNodeFromGroup(String groupName);
 
     void deregisterFromAllGroups();
 
     String getPidForGroup(String groupName);
+
+    void createGroup(String groupName) throws IOException, ConfigurationException;
+
+    void joinGroup(String groupName);
 }

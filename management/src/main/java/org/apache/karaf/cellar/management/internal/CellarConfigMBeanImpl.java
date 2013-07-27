@@ -30,12 +30,11 @@ import org.apache.karaf.cellar.core.event.EventProducer;
  * Implementation of the Cellar Config MBean.
  */
 public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfigMBean {
-
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private EventProducer eventProducer;
     private CellarSupport cellarSupport;
-    
+
     public CellarConfigMBeanImpl() throws NotCompliantMBeanException {
         super(CellarConfigMBean.class);
     }
@@ -73,8 +72,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
         // check if the PID is allowed outbound
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -98,13 +97,13 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     public TabularData listProperties(String groupName, String pid) throws Exception {
 
         CompositeType compositeType = new CompositeType("Property", "Cellar Config Property",
-                new String[]{"key", "value"},
-                new String[]{"Property key", "Property value"},
-                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
+                new String[] { "key", "value" },
+                new String[] { "Property key", "Property value" },
+                new OpenType[] { SimpleType.STRING, SimpleType.STRING });
         TabularType tableType = new TabularType("Properties", "Table of all properties in the configuration PID",
-                compositeType, new String[]{"key"});
+                compositeType, new String[] { "key" });
         TabularData table = new TabularDataSupport(tableType);
-        
+
         Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
         Properties clusterProperties = clusterConfigurations.get(pid);
         if (clusterProperties != null) {
@@ -113,8 +112,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
                 String key = (String) propertyNames.nextElement();
                 String value = (String) clusterProperties.get(key);
                 CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                        new String[]{"key", "value"},
-                        new String[]{key, value});
+                        new String[] { "key", "value" },
+                        new String[] { key, value });
                 table.put(data);
             }
         }
@@ -135,8 +134,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -172,10 +171,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
-        
+
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -220,8 +219,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -250,9 +249,11 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
     }
+
     public GroupManager getGroupManager() {
         return groupManager;
     }
+
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
     }

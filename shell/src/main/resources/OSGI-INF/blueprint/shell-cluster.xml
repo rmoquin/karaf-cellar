@@ -165,7 +165,6 @@
         </command>
         <command name="cluster/group-create">
             <action class="org.apache.karaf.cellar.shell.group.GroupCreateCommand">
-                <property name="configurationAdmin" ref="configurationAdmin"/>
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="executionContext" ref="executionContext"/>

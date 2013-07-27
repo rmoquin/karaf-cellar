@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import java.util.Set;
+import java.util.List;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
@@ -128,9 +128,9 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         String bundleId = event.getBundleId();
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-                    Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
-                    if (cellarSupport.isAllowed(bundleId, whitelist, blacklist)) {
+            List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+            List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+            if (cellarSupport.isAllowed(bundleId, whitelist, blacklist)) {
                 Resolver resolver = obrService.resolver();
                 String[] target = getTarget(bundleId);
                 Resource resource = selectNewestVersion(searchRepository(target[0], target[1]));
@@ -142,9 +142,11 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
                 if ((resolver.getAddedResources() != null) &&
                         (resolver.getAddedResources().length > 0)) {
                     if (resolver.resolve()) {
-                        if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE)
+                        if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE) {
                             resolver.deploy(Resolver.START);
-                        else resolver.deploy(0);
+                        } else {
+                            resolver.deploy(0);
+                        }
                     }
                 } else {
                     Reason[] reqs = resolver.getUnsatisfiedRequirements();
@@ -175,7 +177,7 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Boolean status = this.nodeConfiguration.getEnabledEventHandlers().contains(this.getClass().getName());
+            Boolean status = this.nodeConfiguration.getEnabledEvents().contains(this.getClass().getName());
             if (status) {
                 eventSwitch.turnOn();
             } else {

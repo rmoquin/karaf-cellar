@@ -13,9 +13,6 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import java.io.IOException;
-import java.util.Dictionary;
-import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.CommandHandler;
@@ -24,8 +21,6 @@ import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -38,7 +33,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
     private GroupManager groupManager;
     private Node node;
     private ConfigurationAdmin configurationAdmin;
-    
+
     public void init() {
         this.node = this.masterCluster.getLocalNode();
     }
@@ -93,17 +88,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the name of the group to join.
      */
     public void joinGroup(String targetGroupName) {
-        Set<String> groupNames = groupManager.listGroupNames();
-        if (!groupNames.contains(targetGroupName)) {
-            try {
-                Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-                Dictionary<String, Object> properties = configuration.getProperties();
-                properties.put(Configurations.GROUP_NAME_PROP, targetGroupName);
-                configuration.update(properties);
-            } catch (IOException e) {
-                e.printStackTrace(System.err);
-            }
-        }
+        groupManager.joinGroup(targetGroupName);
     }
 
     /**
@@ -112,12 +97,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the target group to leave.
      */
     public void quitGroup(String targetGroupName) {
-        Map<String, Group> groups = groupManager.listGroups();
-        Group targetGroup = groups.get(targetGroupName);
-        if (targetGroup.getNodes().contains(node)) {
-            targetGroup.getNodes().remove(node);
-            groupManager.deRegisterNodeFromGroup(targetGroupName);
-        }
+        groupManager.deRegisterNodeFromGroup(targetGroupName);
     }
 
     /**

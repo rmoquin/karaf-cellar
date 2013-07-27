@@ -30,7 +30,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 
@@ -60,10 +59,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             throw new IllegalStateException("Cluster event producer is OFF");
         }
-        
+
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+        List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+        List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
         if (!cellarSupport.isAllowed(name, whitelist, blacklist)) {
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }
@@ -146,8 +145,8 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+        List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+        List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
         if (!cellarSupport.isAllowed(name, whitelist, blacklist)) {
             throw new IllegalArgumentException("Feature " + name + " is blocked outbound for cluster group " + groupName);
         }

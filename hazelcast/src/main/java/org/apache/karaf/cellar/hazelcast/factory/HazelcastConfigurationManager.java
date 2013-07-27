@@ -54,29 +54,13 @@ public class HazelcastConfigurationManager {
         }
     }
 
-    /**
-     * Build a Hazelcast {@link com.hazelcast.config.Config}.
-     *
-     * @return the Hazelcast configuration.
-     */
-    public Config createHazelcastConfig(String clusterName, String nodeName, BundleClassLoader hzClassLoader) throws FileNotFoundException {
-        Config config = this.createHazelcastConfig(clusterName, nodeName);
-        if (hzClassLoader != null) {
-            config.setClassLoader(hzClassLoader);
-        }
-        return config;
-    }
-
-    /**
-     * Build a Hazelcast {@link com.hazelcast.config.Config}.
-     *
-     * @return the Hazelcast configuration.
-     */
     public Config createHazelcastConfig(String clusterName, String nodeName) throws FileNotFoundException {
         Config cfg = new FileSystemXmlConfig(xmlConfig);
         cfg.setInstanceName(nodeName);
         cfg.getGroupConfig().setName(clusterName);
-
+        if (hzClassLoader != null) {
+            cfg.setClassLoader(hzClassLoader);
+        }
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);

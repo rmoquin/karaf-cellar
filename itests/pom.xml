@@ -114,7 +114,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <useFile>false</useFile>
-                    <test>CellarBundleTest</test>
+                    <test>CellarGroupsTest</test>
                 </configuration>
             </plugin>
         </plugins>

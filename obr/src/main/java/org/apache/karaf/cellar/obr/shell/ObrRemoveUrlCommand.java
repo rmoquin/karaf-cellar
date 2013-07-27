@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.obr.shell;
 
+import java.util.List;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
@@ -56,8 +57,8 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
 
         // check if the URL is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!isAllowed(url, whitelist, blacklist)) {
             System.err.println("OBR URL " + url + " is blocked outbound");
             return null;

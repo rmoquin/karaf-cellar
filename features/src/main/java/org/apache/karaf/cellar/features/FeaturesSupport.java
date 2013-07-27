@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
@@ -101,8 +100,8 @@ public class FeaturesSupport {
             String groupName = group.getName();
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+            List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
             if (cellarSupport.isAllowed(feature.getName(), whitelist, blacklist)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
@@ -131,8 +130,8 @@ public class FeaturesSupport {
             Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+            List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
             if (cellarSupport.isAllowed(feature.getName(), whitelist, blacklist)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());

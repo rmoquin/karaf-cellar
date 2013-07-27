@@ -13,19 +13,19 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
+import java.util.List;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 @Command(scope = "cluster", name = "config-propset", description = "Set a property value for a configuration in a cluster group")
 public class PropSetCommand extends ConfigCommandSupport {
@@ -61,8 +61,8 @@ public class PropSetCommand extends ConfigCommandSupport {
 
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-            Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+            List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+            List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
 
         if (!isAllowed(pid, whitelist, blacklist)) {
             System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);

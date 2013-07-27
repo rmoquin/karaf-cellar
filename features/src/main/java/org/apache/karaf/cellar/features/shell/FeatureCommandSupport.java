@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.features.shell;
 
+import java.util.List;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
@@ -26,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
@@ -123,8 +123,8 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public boolean isAllowed(Group group, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-            Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-            Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+            List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+            List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
 
         return support.isAllowed(name, whitelist, blacklist);
     }

@@ -90,8 +90,8 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                     String name = info.getName();
                     // check if feature is blocked
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                    Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-                    Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+                    List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+                    List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
                     if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         Boolean remotelyInstalled = clusterFeatures.get(info);
                         Boolean locallyInstalled = isFeatureInstalledLocally(info.getName(), info.getVersion());
@@ -180,6 +180,6 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         String groupName = group.getName();
 
         String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        return super.nodeConfiguration.getEnabledEventHandlers().contains(propertyKey);
+        return super.nodeConfiguration.getEnabledEvents().contains(propertyKey);
     }
 }

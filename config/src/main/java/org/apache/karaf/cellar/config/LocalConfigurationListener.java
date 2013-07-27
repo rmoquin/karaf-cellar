@@ -70,8 +70,8 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                Set<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
-                Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
+                List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
+                List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
                 // check if the pid is allowed for outbound.
                 if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
 

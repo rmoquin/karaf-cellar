@@ -16,12 +16,13 @@
 package org.apache.karaf.cellar.hazelcast.internal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,65 +36,65 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(GroupConfigurationImpl.class);
 
     @Property(label = "Group Name", description = "The name of this group.")
-    static final String GROUP_NAME_PROPERTY = "group.name";
+    public static final String GROUP_NAME_PROPERTY = "name";
 
-    @Property(label = "Whitelisted Configurations (Inbound)", unbounded = PropertyUnbounded.ARRAY, description = "The set of configurations this node will accept synchronization changes for from other group nodes.")
-    static final String CONFIG_WHITELIST_INBOUND_PROPERTY = "config.whitelist.inbound";
+    @Property(label = "Whitelisted Configurations (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of configurations this node will accept synchronization changes for from other group nodes.")
+    public static final String CONFIG_WHITELIST_INBOUND_PROPERTY = "configWhitelistInbound";
 
-    @Property(label = "Whitelisted Configurations (Outbound)", unbounded = PropertyUnbounded.ARRAY, description = "The set of configurations this node will send synchronization events for to other group nodes.")
-    static final String CONFIG_WHITELIST_OUTBOUND_PROPERTY = "config.whitelist.outbound";
+    @Property(label = "Whitelisted Configurations (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of configurations this node will send synchronization events for to other group nodes.")
+    public static final String CONFIG_WHITELIST_OUTBOUND_PROPERTY = "configWhitelistOutbound";
 
-    @Property(label = "Whitelisted Configurations (Inbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of configurations this node will accept synchronization events for from other group nodes.")
-    static final String CONFIG_BLACKLIST_INBOUND_PROPERTY = "config.blacklist.inbound";
+    @Property(label = "Whitelisted Configurations (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of configurations this node will accept synchronization events for from other group nodes.")
+    public static final String CONFIG_BLACKLIST_INBOUND_PROPERTY = "configBlacklistInbound";
 
-    @Property(label = "Whitelisted Configurations (Outbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of configurations this node will not send synchronization events for to other group nodes.")
-    static final String CONFIG_BLACKLIST_OUTBOUND_PROPERTY = "config.blacklist.outbound";
+    @Property(label = "Whitelisted Configurations (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of configurations this node will not send synchronization events for to other group nodes.")
+    public static final String CONFIG_BLACKLIST_OUTBOUND_PROPERTY = "configBlacklistOutbound";
 
     @Property(label = "Sync Configurations", boolValue = true, description = "Enable synchronizing configuration changes to and from other nodes in the same group.")
-    static final String SYNC_CONFIGURATIONS_PROPERTY = "configs.sync";
+    public static final String SYNC_CONFIGURATIONS_PROPERTY = "configsSync";
 
-    @Property(label = "Whitelisted Features (Inbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of configurations this node will not send synchronization events for to other group nodes.")
-    static final String FEATURES_WHITELIST_INBOUND_PROPERTY = "features.whitelist.inbound";
+    @Property(label = "Whitelisted Features (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of configurations this node will not send synchronization events for to other group nodes.")
+    public static final String FEATURES_WHITELIST_INBOUND_PROPERTY = "featuresWhitelistInbound";
 
-    @Property(label = "Whitelisted Features (Outbound)", unbounded = PropertyUnbounded.ARRAY, description = "The set of features this node will accept synchronization changes for from other group nodes.")
-    static final String FEATURES_WHITELIST_OUTBOUND_PROPERTY = "features.whitelist.outbound";
+    @Property(label = "Whitelisted Features (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of features this node will accept synchronization changes for from other group nodes.")
+    public static final String FEATURES_WHITELIST_OUTBOUND_PROPERTY = "featuresWhitelistOutbound";
 
-    @Property(label = "Blacklisted Features (Inbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of features this node will not accept synchronization events for from other group nodes.")
-    static final String FEATURES_BLACKLIST_INBOUND_PROPERTY = "features.blacklist.inbound";
+    @Property(label = "Blacklisted Features (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of features this node will not accept synchronization events for from other group nodes.")
+    public static final String FEATURES_BLACKLIST_INBOUND_PROPERTY = "featuresBlacklistInbound";
 
-    @Property(label = "Blacklisted Features (Outbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of features this node will not send synchronization events for to other group nodes.")
-    static final String FEATURES_BLACKLIST_OUTBOUND_PROPERTY = "features.blacklist.outbound";
+    @Property(label = "Blacklisted Features (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of features this node will not send synchronization events for to other group nodes.")
+    public static final String FEATURES_BLACKLIST_OUTBOUND_PROPERTY = "featuresBlacklistOutbound";
 
     @Property(label = "Sync Features", boolValue = true, description = "Enable synchronizing features changes to and from other nodes in the same group.")
-    static final String SYNC_FEATURES_PROPERTY = "features.sync";
+    public static final String SYNC_FEATURES_PROPERTY = "featuresSync";
 
     @Property(label = "Sync Feature Repos", boolValue = true, description = "Enable synchronizing feature repository changes to and from other nodes in the same group.")
-    static final String SYNC_FEATURE_REPOS_PROPERTY = "features.repositories.sync";
+    public static final String SYNC_FEATURE_REPOS_PROPERTY = "featuresRepositoriesSync";
 
-    @Property(label = "Whitelisted Bundles (Inbound)", unbounded = PropertyUnbounded.ARRAY, description = "The set of bundles this node will accept synchronization changes for from other group nodes.")
-    static final String BUNDLES_WHITELIST_INBOUND_PROPERTY = "bundles.whitelist.inbound";
+    @Property(label = "Whitelisted Bundles (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of bundles this node will accept synchronization changes for from other group nodes.")
+    public static final String BUNDLES_WHITELIST_INBOUND_PROPERTY = "bundlesWhitelistInbound";
 
-    @Property(label = "Whitelisted Bundles (Outbound)", unbounded = PropertyUnbounded.ARRAY, description = "The set of bundles this node will send synchronization events for to other group nodes.")
-    static final String BUNDLES_WHITELIST_OUTBOUND_PROPERTY = "bundles.whitelist.outbound";
+    @Property(label = "Whitelisted Bundles (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of bundles this node will send synchronization events for to other group nodes.")
+    public static final String BUNDLES_WHITELIST_OUTBOUND_PROPERTY = "bundlesWhitelistOutbound";
 
-    @Property(label = "Blacklisted Bundles (Inbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of bundles this node will not accept synchronization events for from other group nodes.")
-    static final String BUNDLES_BLACKLIST_INBOUND_PROPERTY = "bundles.blacklist.inbound";
+    @Property(label = "Blacklisted Bundles (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of bundles this node will not accept synchronization events for from other group nodes.")
+    public static final String BUNDLES_BLACKLIST_INBOUND_PROPERTY = "bundlesBlacklistInbound";
 
-    @Property(label = "Blacklisted Bundles (Outbound)", unbounded = PropertyUnbounded.ARRAY, description = "The list of bundles this node will not send synchronization events for to other group nodes.")
-    static final String BUNDLES_BLACKLIST_OUTBOUND_PROPERTY = "bundles.blacklist.outbound";
+    @Property(label = "Blacklisted Bundles (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of bundles this node will not send synchronization events for to other group nodes.")
+    public static final String BUNDLES_BLACKLIST_OUTBOUND_PROPERTY = "bundlesBlacklistOutbound";
 
     @Property(label = "Sync Bundles", boolValue = true, description = "Enable synchronizing bundle changes to and from other nodes in the same group.")
-    static final String SYNC_BUNDLES_PROPERTY = "bundles.sync";
+    public static final String SYNC_BUNDLES_PROPERTY = "bundlesSync";
 
     @Property(label = "Sync OBR Urls", boolValue = true, description = "Enable synchronizing OBR url changes to and from other nodes in the same group.")
-    static final String SYNC_OBR_URLS_PROPERTY = "obr.urls.sync";
+    public static final String SYNC_OBR_URLS_PROPERTY = "obrUrlsSync";
 
     @Property(label = "Sync OBR Bundles", boolValue = true, description = "Enable synchronizing OBR bundle changes to and from other nodes in the same group.")
-    static final String SYNC_OBR_BUNDLES_PROPERTY = "obr.bundles.sync";
+    public static final String SYNC_OBR_BUNDLES_PROPERTY = "obrBundlesSync";
 
     private Map<String, Object> properties = new HashMap<String, Object>();
 
-    public void update(Map<String, Object> properties) {
+    public void updated(Map<String, Object> properties) throws ConfigurationException {
         LOGGER.warn("Group Configuration Impl properties were received!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11111111111" + properties);
         if (properties != null) {
             this.properties.putAll(properties);
@@ -134,14 +135,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundConfigurationWhitelist
      */
     @Override
-    public Set<String> getInboundConfigurationWhitelist() {
-        return (Set<String>) this.properties.get(CONFIG_WHITELIST_INBOUND_PROPERTY);
+    public List<String> getInboundConfigurationWhitelist() {
+        return (List<String>) this.properties.get(CONFIG_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundConfigurationWhitelist the inboundConfigurationWhitelist to set
      */
-    public void setInboundConfigurationWhitelist(Set<String> inboundConfigurationWhitelist) {
+    public void setInboundConfigurationWhitelist(List<String> inboundConfigurationWhitelist) {
         this.properties.put(CONFIG_WHITELIST_INBOUND_PROPERTY, inboundConfigurationWhitelist);
     }
 
@@ -149,14 +150,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundConfigurationWhitelist
      */
     @Override
-    public Set<String> getOutboundConfigurationWhitelist() {
-        return (Set<String>) this.properties.get(CONFIG_WHITELIST_OUTBOUND_PROPERTY);
+    public List<String> getOutboundConfigurationWhitelist() {
+        return (List<String>) this.properties.get(CONFIG_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundConfigurationWhitelist the outboundConfigurationWhitelist to set
      */
-    public void setOutboundConfigurationWhitelist(Set<String> outboundConfigurationWhitelist) {
+    public void setOutboundConfigurationWhitelist(List<String> outboundConfigurationWhitelist) {
         this.properties.put(CONFIG_WHITELIST_OUTBOUND_PROPERTY, outboundConfigurationWhitelist);
     }
 
@@ -164,14 +165,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundConfigurationBlacklist
      */
     @Override
-    public Set<String> getInboundConfigurationBlacklist() {
-        return (Set<String>) this.properties.get(CONFIG_BLACKLIST_INBOUND_PROPERTY);
+    public List<String> getInboundConfigurationBlacklist() {
+        return (List<String>) this.properties.get(CONFIG_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundConfigurationBlacklist the inboundConfigurationBlacklist to set
      */
-    public void setInboundConfigurationBlacklist(Set<String> inboundConfigurationBlacklist) {
+    public void setInboundConfigurationBlacklist(List<String> inboundConfigurationBlacklist) {
         this.properties.put(CONFIG_BLACKLIST_INBOUND_PROPERTY, inboundConfigurationBlacklist);
     }
 
@@ -179,14 +180,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundConfigurationBlacklist
      */
     @Override
-    public Set<String> getOutboundConfigurationBlacklist() {
-        return (Set<String>) this.properties.get(CONFIG_BLACKLIST_OUTBOUND_PROPERTY);
+    public List<String> getOutboundConfigurationBlacklist() {
+        return (List<String>) this.properties.get(CONFIG_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundConfigurationBlacklist the outboundConfigurationBlacklist to set
      */
-    public void setOutboundConfigurationBlacklist(Set<String> outboundConfigurationBlacklist) {
+    public void setOutboundConfigurationBlacklist(List<String> outboundConfigurationBlacklist) {
         this.properties.put(CONFIG_BLACKLIST_OUTBOUND_PROPERTY, outboundConfigurationBlacklist);
     }
 
@@ -224,14 +225,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundFeatureWhitelist
      */
     @Override
-    public Set<String> getInboundFeatureWhitelist() {
-        return (Set<String>) this.properties.get(FEATURES_WHITELIST_INBOUND_PROPERTY);
+    public List<String> getInboundFeatureWhitelist() {
+        return (List<String>) this.properties.get(FEATURES_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundFeatureWhitelist the inboundFeatureWhitelist to set
      */
-    public void setInboundFeatureWhitelist(Set<String> inboundFeatureWhitelist) {
+    public void setInboundFeatureWhitelist(List<String> inboundFeatureWhitelist) {
         this.properties.put(FEATURES_WHITELIST_INBOUND_PROPERTY, inboundFeatureWhitelist);
     }
 
@@ -239,14 +240,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundFeatureWhitelist
      */
     @Override
-    public Set<String> getOutboundFeatureWhitelist() {
-        return (Set<String>) this.properties.get(FEATURES_WHITELIST_OUTBOUND_PROPERTY);
+    public List<String> getOutboundFeatureWhitelist() {
+        return (List<String>) this.properties.get(FEATURES_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundFeatureWhitelist the outboundFeatureWhitelist to set
      */
-    public void setOutboundFeatureWhitelist(Set<String> outboundFeatureWhitelist) {
+    public void setOutboundFeatureWhitelist(List<String> outboundFeatureWhitelist) {
         this.properties.put(FEATURES_WHITELIST_OUTBOUND_PROPERTY, outboundFeatureWhitelist);
     }
 
@@ -254,14 +255,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundFeatureBlacklist
      */
     @Override
-    public Set<String> getInboundFeatureBlacklist() {
-        return (Set<String>) this.properties.get(FEATURES_BLACKLIST_INBOUND_PROPERTY);
+    public List<String> getInboundFeatureBlacklist() {
+        return (List<String>) this.properties.get(FEATURES_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundFeatureBlacklist the inboundFeatureBlacklist to set
      */
-    public void setInboundFeatureBlacklist(Set<String> inboundFeatureBlacklist) {
+    public void setInboundFeatureBlacklist(List<String> inboundFeatureBlacklist) {
         this.properties.put(FEATURES_BLACKLIST_INBOUND_PROPERTY, inboundFeatureBlacklist);
     }
 
@@ -269,14 +270,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundFeatureBlacklist
      */
     @Override
-    public Set<String> getOutboundFeatureBlacklist() {
-        return (Set<String>) this.properties.get(FEATURES_BLACKLIST_OUTBOUND_PROPERTY);
+    public List<String> getOutboundFeatureBlacklist() {
+        return (List<String>) this.properties.get(FEATURES_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundFeatureBlacklist the outboundFeatureBlacklist to set
      */
-    public void setOutboundFeatureBlacklist(Set<String> outboundFeatureBlacklist) {
+    public void setOutboundFeatureBlacklist(List<String> outboundFeatureBlacklist) {
         this.properties.put(FEATURES_BLACKLIST_OUTBOUND_PROPERTY, outboundFeatureBlacklist);
     }
 
@@ -299,14 +300,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundBundleWhitelist
      */
     @Override
-    public Set<String> getInboundBundleWhitelist() {
-        return (Set<String>) this.properties.get(BUNDLES_WHITELIST_INBOUND_PROPERTY);
+    public List<String> getInboundBundleWhitelist() {
+        return (List<String>) this.properties.get(BUNDLES_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundBundleWhitelist the inboundBundleWhitelist to set
      */
-    public void setInboundBundleWhitelist(Set<String> inboundBundleWhitelist) {
+    public void setInboundBundleWhitelist(List<String> inboundBundleWhitelist) {
         this.properties.put(BUNDLES_WHITELIST_INBOUND_PROPERTY, inboundBundleWhitelist);
     }
 
@@ -314,14 +315,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundBundleWhitelist
      */
     @Override
-    public Set<String> getOutboundBundleWhitelist() {
-        return (Set<String>) this.properties.get(BUNDLES_WHITELIST_OUTBOUND_PROPERTY);
+    public List<String> getOutboundBundleWhitelist() {
+        return (List<String>) this.properties.get(BUNDLES_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundBundleWhitelist the outboundBundleWhitelist to set
      */
-    public void setOutboundBundleWhitelist(Set<String> outboundBundleWhitelist) {
+    public void setOutboundBundleWhitelist(List<String> outboundBundleWhitelist) {
         this.properties.put(BUNDLES_WHITELIST_OUTBOUND_PROPERTY, outboundBundleWhitelist);
     }
 
@@ -329,14 +330,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundBundleBlacklist
      */
     @Override
-    public Set<String> getInboundBundleBlacklist() {
-        return (Set<String>) this.properties.get(BUNDLES_BLACKLIST_INBOUND_PROPERTY);
+    public List<String> getInboundBundleBlacklist() {
+        return (List<String>) this.properties.get(BUNDLES_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundBundleBlacklist the inboundBundleBlacklist to set
      */
-    public void setInboundBundleBlacklist(Set<String> inboundBundleBlacklist) {
+    public void setInboundBundleBlacklist(List<String> inboundBundleBlacklist) {
         this.properties.put(BUNDLES_BLACKLIST_INBOUND_PROPERTY, inboundBundleBlacklist);
     }
 
@@ -344,14 +345,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundBundleBlacklist
      */
     @Override
-    public Set<String> getOutboundBundleBlacklist() {
-        return (Set<String>) this.properties.get(BUNDLES_BLACKLIST_OUTBOUND_PROPERTY);
+    public List<String> getOutboundBundleBlacklist() {
+        return (List<String>) this.properties.get(BUNDLES_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundBundleBlacklist the outboundBundleBlacklist to set
      */
-    public void setOutboundBundleBlacklist(Set<String> outboundBundleBlacklist) {
+    public void setOutboundBundleBlacklist(List<String> outboundBundleBlacklist) {
         this.properties.put(BUNDLES_BLACKLIST_OUTBOUND_PROPERTY, outboundBundleBlacklist);
     }
 
@@ -390,13 +391,5 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      */
     public Map<String, Object> getProperties() {
         return properties;
-    }
-
-    /**
-     * @param properties the properties to set
-     */
-    public void setProperties(Map<String, Object> properties) {
-        LOGGER.warn("Group configuration set properties was called!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1" + properties);
-        this.properties = properties;
     }
 }
