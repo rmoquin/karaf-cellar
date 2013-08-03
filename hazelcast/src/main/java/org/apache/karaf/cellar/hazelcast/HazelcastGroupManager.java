@@ -61,10 +61,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
      * @param properties the node service properties.
      */
     public void nodeMembershipsReceived(NodeConfiguration nodeConfiguration) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.warn("Node cnfiguration-------------------------------------------: " + nodeConfiguration.getGroups());
-        }
-
         this.nodeConfiguration = nodeConfiguration;
         List<String> groupList = this.nodeConfiguration.getGroups();
         for (Iterator<String> it = groupList.iterator(); it.hasNext();) {
