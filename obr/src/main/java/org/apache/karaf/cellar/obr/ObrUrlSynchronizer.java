@@ -45,11 +45,19 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
+                if (group.getNodes().size() > 1) {
+                    if (isSyncEnabled(group)) {
+                        pull(group);
+                        push(group);
+                    } else {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
+                        }
+                    }
                 } else {
-                    LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("CELLAR BUNDLE: Group only has 1 member, synchronization will be skipped: {}", group.getName());
+                    }
                 }
             }
         }
@@ -120,8 +128,8 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
 
     @Override
     public Boolean isSyncEnabled(Group group) {
-        String propertyKey = Configurations.SEPARATOR + Constants.URLS_CONFIG_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        return this.nodeConfiguration.getEnabledEvents().contains(propertyKey);
+        String groupName = group.getName();
+        return this.groupManager.findGroupConfigurationByName(groupName).isSyncOBRUrls();
     }
 
     /**

@@ -67,6 +67,12 @@
                         <Import-Package>
                             com.hazelcast*,
                             org.apache.karaf.cellar.core*;version="${project.version}",
+                            org.apache.karaf.cellar.bundle;version="${project.version}",
+                            org.apache.karaf.cellar.bundle.*;version="${project.version}",
+                            org.apache.karaf.cellar.features;version="${project.version}",
+                            org.apache.karaf.cellar.features.*;version="${project.version}",
+                            org.apache.karaf.cellar.config;version="${project.version}",
+                            org.apache.karaf.cellar.config.*;version="${project.version}",
                             org.apache.karaf.cellar.utils.ping;version="${project.version}",
                             org.apache.karaf.features;version="[3,4)",
                             org.slf4j;resolution:=optional,

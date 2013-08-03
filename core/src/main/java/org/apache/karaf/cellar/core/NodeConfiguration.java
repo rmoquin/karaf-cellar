@@ -15,8 +15,8 @@
  */
 package org.apache.karaf.cellar.core;
 
+import java.util.Dictionary;
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -34,5 +34,5 @@ public interface NodeConfiguration {
     /**
      * @return the properties
      */
-    Map<String, Object> getProperties();
+    Dictionary<String, Object> getProperties();
 }

@@ -20,10 +20,8 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.BundleReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,13 +47,19 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups) {
+        for (Group group : groups) {
+            if (group.getNodes().size() > 1) {
                 if (isSyncEnabled(group)) {
                     pull(group);
                     push(group);
                 } else {
-                    LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
+                    }
+                }
+            } else {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("CELLAR BUNDLE: Group only has 1 member, synchronization will be skipped: {}", group.getName());
                 }
             }
         }
@@ -129,10 +133,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
             LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
             Map<String, BundleState> clusterBundles = masterCluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-            Bundle[] bundles;
-            BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
-
-            bundles = bundleContext.getBundles();
+            Bundle[] bundles = super.bundleContext.getBundles();
             for (Bundle bundle : bundles) {
                 String symbolicName = bundle.getSymbolicName();
                 String version = bundle.getVersion().toString();
@@ -206,16 +207,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
      */
     @Override
     public Boolean isSyncEnabled(Group group) {
-        Boolean result = Boolean.FALSE;
         String groupName = group.getName();
-
-        try {
-            String propertyKey = Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-            result = this.nodeConfiguration.getEnabledEvents().contains(propertyKey);
-        } catch (Exception e) {
-            LOGGER.error("CELLAR BUNDLE: error while checking if sync is enabled", e);
-        }
-        return result;
+        return this.groupManager.findGroupConfigurationByName(groupName).isSyncBundles();
     }
 
     public EventProducer getEventProducer() {

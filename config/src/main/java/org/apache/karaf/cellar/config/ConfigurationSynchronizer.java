@@ -57,11 +57,19 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
+                if (group.getNodes().size() > 1) {
+                    if (isSyncEnabled(group)) {
+                        pull(group);
+                        push(group);
+                    } else {
+                        if (LOGGER.isWarnEnabled()) {
+                            LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
+                        }
+                    }
                 } else {
-                    LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("CELLAR CONFIG: Group only has 1 member, synchronization will be skipped: {}", group.getName());
+                    }
                 }
             }
         }
@@ -171,9 +179,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     @Override
     public Boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
-
-        String propertyKey = groupName + Configurations.SEPARATOR + Constants.CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        return this.nodeConfiguration.getEnabledEvents().contains(propertyKey);
+        return this.groupManager.findGroupConfigurationByName(groupName).isSyncConfiguration();
     }
 
     /**

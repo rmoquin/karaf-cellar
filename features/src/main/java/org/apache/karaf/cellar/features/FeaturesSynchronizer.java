@@ -40,11 +40,17 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
+                if (group.getNodes().size() > 1) {
+                    if (isSyncEnabled(group)) {
+                        pull(group);
+                        push(group);
+                    } else {
+                        LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
+                    }
                 } else {
-                    LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("CELLAR FEATURES: Group only has 1 member, synchronization will be skipped: {}", group.getName());
+                    }
                 }
             }
         }
@@ -89,7 +95,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 for (FeatureInfo info : clusterFeatures.keySet()) {
                     String name = info.getName();
                     // check if feature is blocked
-                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
                     List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
                     List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
                     if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
@@ -178,8 +184,6 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     @Override
     public Boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
-
-        String propertyKey = groupName + Configurations.SEPARATOR + Constants.FEATURES_CATEGORY + Configurations.SEPARATOR + Configurations.SYNC;
-        return super.nodeConfiguration.getEnabledEvents().contains(propertyKey);
+        return this.groupManager.findGroupConfigurationByName(groupName).isSyncFeatures();
     }
 }

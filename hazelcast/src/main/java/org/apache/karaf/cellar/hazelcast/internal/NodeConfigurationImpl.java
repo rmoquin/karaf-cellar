@@ -15,7 +15,9 @@
  */
 package org.apache.karaf.cellar.hazelcast.internal;
 
+import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import org.apache.felix.scr.annotations.Component;
@@ -36,14 +38,11 @@ public class NodeConfigurationImpl implements NodeConfiguration {
     private static Logger LOGGER = LoggerFactory.getLogger(NodeConfigurationImpl.class);
     @Property(label = "Groups", unbounded = PropertyUnbounded.VECTOR, description = "The names of the groups this node belongs to.")
     public static final String GROUPS_PROPERTY = "groups";
-
     @Property(label = "Produces Events", boolValue = true, description = "Whether or not this node will send synchronization events to other nodes in it's group.")
     public static final String PRODUCER_PROPERTY = "producer";
-
     @Property(label = "Consumes Events", boolValue = true, description = "Whether or not this node will consume synchronization events sent from other nodes in it's group.")
     public static final String CONSUMER_PROPERTY = "consumer";
-
-    @Property(label = "Enabled Events", options = {
+    @Property(label = "Enabled Events", unbounded = PropertyUnbounded.VECTOR, options = {
         @PropertyOption(name = "org.apache.karaf.cellar.bundle.BundleEventHandler", value = "Bundle Events"),
         @PropertyOption(name = "org.apache.karaf.cellar.config.ConfigurationEventHandler", value = "Configuration Events"),
         @PropertyOption(name = "org.apache.karaf.cellar.features.FeaturesEventHandler", value = "Feature Events"),
@@ -53,7 +52,6 @@ public class NodeConfigurationImpl implements NodeConfiguration {
         @PropertyOption(name = "org.apache.karaf.cellar.obr.ObrUrlEventHandler", value = "OBR Events")
     })
     public static final String ENABLE_EVENTS_PROPERTY = "enabledEvents";
-
     private Map<String, Object> properties = new HashMap<String, Object>();
 
     public void updated(Map<String, Object> properties) {
@@ -127,8 +125,10 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      * @return the properties
      */
     @Override
-    public Map<String, Object> getProperties() {
-        return properties;
+    public Dictionary<String, Object> getProperties() {
+        Hashtable ht = new Hashtable();
+        ht.putAll(properties);
+        return ht;
     }
 
     /**

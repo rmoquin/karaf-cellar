@@ -59,4 +59,16 @@ public interface GroupConfiguration {
     boolean isSyncOBRUrls();
 
     boolean isSyncOBRBundles();
+
+    /**
+     * Registers this node for producing and consuming messages between nodes in the group.
+     *
+     * @return the group object this configuration represents.
+     */
+    Group register();
+
+    /**
+     * @return the group
+     */
+    Group getGroup();
 }

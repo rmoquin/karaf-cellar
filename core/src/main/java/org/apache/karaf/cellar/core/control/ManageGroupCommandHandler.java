@@ -22,20 +22,22 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manager cluster command handler.
  */
 public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand, ManageGroupResult> {
+    private static Logger LOGGER = LoggerFactory.getLogger(ManageGroupCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.managegroup.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
     private CellarCluster masterCluster;
     private GroupManager groupManager;
-    private Node node;
     private ConfigurationAdmin configurationAdmin;
 
     public void init() {
-        this.node = this.masterCluster.getLocalNode();
     }
 
     @Override
@@ -45,23 +47,25 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
         ManageGroupAction action = command.getAction();
 
         String targetGroupName = command.getGroupName();
-
-        if (ManageGroupAction.JOIN.equals(action)) {
-            joinGroup(targetGroupName);
-        } else if (ManageGroupAction.QUIT.equals(action)) {
-            quitGroup(targetGroupName);
-            if (groupManager.listLocalGroups().isEmpty()) {
+        try {
+            if (ManageGroupAction.JOIN.equals(action)) {
+                joinGroup(targetGroupName);
+            } else if (ManageGroupAction.QUIT.equals(action)) {
+                quitGroup(targetGroupName);
+                if (groupManager.listLocalGroups().isEmpty()) {
+                    joinGroup(Configurations.DEFAULT_GROUP_NAME);
+                }
+            } else if (ManageGroupAction.PURGE.equals(action)) {
+                purgeGroups();
                 joinGroup(Configurations.DEFAULT_GROUP_NAME);
+            } else if (ManageGroupAction.SET.equals(action)) {
+                Group localGroup = groupManager.listLocalGroups().iterator().next();
+                quitGroup(localGroup.getName());
+                joinGroup(targetGroupName);
             }
-        } else if (ManageGroupAction.PURGE.equals(action)) {
-            purgeGroups();
-            joinGroup(Configurations.DEFAULT_GROUP_NAME);
-        } else if (ManageGroupAction.SET.equals(action)) {
-            Group localGroup = groupManager.listLocalGroups().iterator().next();
-            quitGroup(localGroup.getName());
-            joinGroup(targetGroupName);
+        } catch (Exception ex) {
+            LOGGER.error("Error handlibg manage group command.", ex);
         }
-
         addGroupListToResult(result);
 
         return result;
@@ -87,7 +91,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      *
      * @param targetGroupName the name of the group to join.
      */
-    public void joinGroup(String targetGroupName) {
+    public void joinGroup(String targetGroupName) throws ConfigurationException {
         groupManager.joinGroup(targetGroupName);
     }
 
@@ -97,14 +101,14 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the target group to leave.
      */
     public void quitGroup(String targetGroupName) {
-        groupManager.deRegisterNodeFromGroup(targetGroupName);
+        groupManager.deregisterNodeFromGroup(targetGroupName);
     }
 
     /**
      * Remove {@link Node} from all {@link Group}s.
      */
     public void purgeGroups() {
-        this.groupManager.deregisterFromAllGroups();
+        this.groupManager.deregisterNodeFromAllGroups();
     }
 
     @Override

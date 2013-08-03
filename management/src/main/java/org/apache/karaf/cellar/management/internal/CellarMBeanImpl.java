@@ -80,27 +80,31 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
     public GroupManager getGroupManager() {
         return groupManager;
     }
+
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
     }
+
     @Override
     public void sync() throws Exception {
         Set<Group> localGroups = groupManager.listLocalGroups();
         for (Group group : localGroups) {
-            try {
-                ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
-                if (serviceReferences != null && serviceReferences.length > 0) {
-                    for (ServiceReference ref : serviceReferences) {
-                        Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                        if (synchronizer.isSyncEnabled(group)) {
-                            synchronizer.pull(group);
-                            synchronizer.push(group);
+            if (group.getNodes().size() > 1) {
+                try {
+                    ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
+                    if (serviceReferences != null && serviceReferences.length > 0) {
+                        for (ServiceReference ref : serviceReferences) {
+                            Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
+                            if (synchronizer.isSyncEnabled(group)) {
+                                synchronizer.pull(group);
+                                synchronizer.push(group);
+                            }
+                            bundleContext.ungetService(ref);
                         }
-                        bundleContext.ungetService(ref);
                     }
+                } catch (InvalidSyntaxException e) {
+                    // ignore
                 }
-            } catch (InvalidSyntaxException e) {
-                // ignore
             }
         }
     }
@@ -110,8 +114,8 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         ManageHandlersCommand command = new ManageHandlersCommand(clusterManager.generateId());
 
         command.setDestinations(clusterManager.listNodes());
-            command.setHandlerName(null);
-            command.setStatus(null);
+        command.setHandlerName(null);
+        command.setStatus(null);
 
         Map<Node, ManageHandlersResult> results = executionContext.execute(command);
 
@@ -132,8 +136,8 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
                     String status = handlerEntry.getValue();
                     boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
                     CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                            new String[]{"node", "handler", "status", "local"},
-                            new Object[]{node.getId(), handler, status, local});
+                            new String[] { "node", "handler", "status", "local" },
+                            new Object[] { node.getId(), handler, status, local });
                     table.put(data);
                 }
             }
@@ -201,8 +205,8 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
             boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
             ConsumerSwitchResult consumerSwitchResult = results.get(node);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                    new String[]{"node", "status", "local"},
-                    new Object[]{node.getId(), consumerSwitchResult.getStatus(), local});
+                    new String[] { "node", "status", "local" },
+                    new Object[] { node.getId(), consumerSwitchResult.getStatus(), local });
             table.put(data);
         }
 
@@ -270,8 +274,8 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
             boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
             ProducerSwitchResult producerSwitchResult = results.get(node);
             CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                    new String[]{"node", "status", "local"},
-                    new Object[]{node.getId(), producerSwitchResult.getStatus(), local});
+                    new String[] { "node", "status", "local" },
+                    new Object[] { node.getId(), producerSwitchResult.getStatus(), local });
             table.put(data);
         }
 

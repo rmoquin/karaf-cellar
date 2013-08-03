@@ -23,7 +23,6 @@ import org.osgi.service.cm.ConfigurationException;
  * Generic cluster group manager interface.
  */
 public interface GroupManager {
-
     /**
      * Get the local node.
      *
@@ -38,7 +37,7 @@ public interface GroupManager {
      * @return the cluster group found, or null if no cluster group found.
      */
     public Group findGroupByName(String groupName);
-    
+
     /**
      * Look for a cluster group's configuration with the given name.
      *
@@ -72,26 +71,26 @@ public interface GroupManager {
     public boolean isLocalGroup(String groupName);
 
     /**
-     * Get the list of all cluster groups "hosting" the local node.
+     * Get the list of all known cellar groups in the cluster.
      *
-     * @return the list of all cluster groups "hosting" the local node.
+     * @return the list cluster groups.
      */
     public Set<Group> listAllGroups();
 
     /**
-     * Get the cluster groups where a given node is belonging.
+     * Get the cellar groups a specific node is belongs to.
      *
      * @param node the node.
-     * @return the set of cluster groups "hosting" the node.
+     * @return the set of cellar groups.
      */
     public Set<Group> listGroups(Node node);
 
     /**
-     * Get the cluster group names "hosting" the local node.
+     * Get the the names of the cellar groups the local node belongs to.
      *
-     * @return the set of cluster group names "hosting" the local node.
+     * @return the set of cellar group names.
      */
-    public List<String> listGroupNames();
+    public List<String> getJoinedGroupNames();
 
     /**
      * Get the cluster group names "hosting" a given node.
@@ -99,27 +98,31 @@ public interface GroupManager {
      * @param node the node.
      * @return the set of cluster group names "hosting" the given node.
      */
-    public List<String> listGroupNames(Node node);
+    public Set<String> listGroupNames(Node node);
 
     /**
-     * Register the local node in a given cluster group.
-     *
-     * @param groupName the cluster group name to join.
-     */
-    public void registerGroup(String groupName);
-
-    /**
-     * Un-register the local node from a given cluster group.
+     * Removes the specified cellar group from the local nodes configuration which triggers the appropriate
+     * deregistration actions to be done.
      *
      * @param groupName the group to remove this node from.
      */
-    void deRegisterNodeFromGroup(String groupName);
+    void deregisterNodeFromGroup(String groupName);
 
-    void deregisterFromAllGroups();
+    /**
+     * Removes all the groups from this nodes configuration which triggers the appropriate deregistration actions to be
+     * done.
+     */
+    void deregisterNodeFromAllGroups();
 
+    /**
+     * Gets the pid that identifies this group's configuration from the others.
+     *
+     * @param groupName the group name.
+     * @return the persistent id.
+     */
     String getPidForGroup(String groupName);
 
     void createGroup(String groupName) throws IOException, ConfigurationException;
 
-    void joinGroup(String groupName);
+    void joinGroup(String groupName) throws ConfigurationException;
 }

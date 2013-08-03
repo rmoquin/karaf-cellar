@@ -44,6 +44,11 @@ public class Event implements Serializable {
         this.id = id;
     }
 
+    @Override
+    public String toString() {
+        return "Event{" + "id=" + id + ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup + ", destinations=" + destinations + ", force=" + force + ", postPublish=" + postPublish + '}';
+    }
+
     public Node getSourceNode() {
         return sourceNode;
     }

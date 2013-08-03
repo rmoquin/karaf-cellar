@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Set;
+import org.osgi.service.cm.ConfigurationException;
 
 /**
  * WebConsole plugin for Cellar cluster.
@@ -79,10 +80,14 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         if (action == null) {
             success = true;
         } else if (action.equals("createGroup")) {
-            groupManager.registerGroup(group);
+            try {
+                groupManager.createGroup(group);
+            } catch (ConfigurationException ex) {
+                throw new ServletException("Error creating group: " + group, ex);
+            }
             success = true;
         } else if (action.equals("deleteGroup")) {
-            groupManager.deRegisterNodeFromGroup(group);
+            groupManager.deregisterNodeFromGroup(group);
             success = true;
         }
 

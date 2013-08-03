@@ -60,28 +60,15 @@
     </bean>
     
     <service ref="configManager" auto-export="interfaces"/>
-    
-    <!-- Cluster Manager --> 
-    <bean id="clusterManager" class="org.apache.karaf.cellar.hazelcast.HazelcastClusterManager" init-method="init" destroy-method="destroy">
-        <property name="masterCluster" ref="masterCluster"/>
-    </bean>
-    
-    <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    
-    <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
-        <property name="masterCluster" ref="masterCluster"/>
-        <property name="eventTransportFactory" ref="eventTransportFactory"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="groupMemberships" ref="groupMemberships"/>
-        <property name="nodeConfiguration" ref="nodeConfiguration"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    
-    <service ref="groupManager" auto-export="interfaces"/>
 
     <bean id="nodeConfiguration" class="org.apache.karaf.cellar.hazelcast.internal.NodeConfigurationImpl">
-        <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeConfiguration" update-strategy="component-managed"
+        <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeConfiguration" update-strategy="container-managed"
                                update-method="updated"/>
+        <property name="groups">
+            <list>
+                <value>default</value>
+            </list>
+        </property>
         <property name="producer" value="true"/>
         <property name="consumer" value="true"/>
         <property name="enabledEvents">
@@ -100,10 +87,10 @@
 
     <service ref="nodeConfiguration" auto-export="interfaces"/>
 
-    <cm:managed-service-factory id="groupFactory" factory-pid="org.apache.karaf.cellar.core.GroupConfiguration" 
+    <cm:managed-service-factory id="groupFactory" factory-pid="org.apache.karaf.cellar.core.GroupConfiguration"
                                 auto-export="interfaces">
         <cm:managed-component class="org.apache.karaf.cellar.hazelcast.internal.GroupConfigurationImpl">
-            <cm:managed-properties persistent-id="" update-strategy="component-managed" update-method="update"/>
+            <cm:managed-properties persistent-id="" update-strategy="container-managed" update-method="update"/>
             <property name="syncConfiguration" value="true"/>
             <property name="inboundConfigurationWhitelist">
                 <list>
@@ -186,8 +173,27 @@
             </property>
             <property name="syncOBRUrls" value="true"/>
             <property name="syncOBRBundles" value="true"/>
+            <property name="masterCluster" ref="masterCluster"/>
+            <property name="eventTransportFactory" ref="eventTransportFactory"/>
+            <property name="bundleContext" ref="blueprintBundleContext"/>
         </cm:managed-component>
     </cm:managed-service-factory>
+
+    <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
+        <property name="masterCluster" ref="masterCluster"/>
+        <property name="groupMemberships" ref="groupMemberships"/>
+        <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="nodeConfiguration" ref="nodeConfigRef"/>
+    </bean>
+
+    <service ref="groupManager" auto-export="interfaces"/>
+
+    <!-- Cluster Manager -->
+    <bean id="clusterManager" class="org.apache.karaf.cellar.hazelcast.HazelcastClusterManager" init-method="init" destroy-method="destroy">
+        <property name="masterCluster" ref="masterCluster"/>
+    </bean>
+
+    <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     
     <!-- Members Listener -->
     <bean id="membershipListener" class="org.apache.karaf.cellar.hazelcast.CellarMembershipListener" init-method="init">
@@ -305,8 +311,8 @@
     <reference id="registry" interface="org.apache.karaf.cellar.core.event.EventHandlerRegistry"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
-    <reference availability="optional" interface="org.apache.karaf.cellar.core.NodeConfiguration">
-         <reference-listener ref="groupManager" bind-method="nodeMembershipsReceived" unbind-method="nodeMembershipsRemoved"/>
+    <reference id="nodeConfigRef" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional">
+        <reference-listener ref="groupManager" bind-method="nodeMembershipsReceived" unbind-method="nodeMembershipsRemoved"/>
     </reference>
 
     <reference-list id="groupMemberships" availability="optional" interface="org.apache.karaf.cellar.core.GroupConfiguration" member-type="service-object">

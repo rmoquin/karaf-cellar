@@ -65,4 +65,9 @@ public class ClusterBundleEvent extends Event {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        super.toString();
+        return "ClusterBundleEvent{" + "symbolicName=" + symbolicName + ", version=" + version + ", location=" + location + ", type=" + type + '}';
+    }
 }
