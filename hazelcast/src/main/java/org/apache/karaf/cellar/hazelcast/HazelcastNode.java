@@ -48,7 +48,7 @@ public class HazelcastNode implements Node {
 
     @Override
     public String getId() {
-        return this.member.getUuid();
+        return this.id;
     }
 
     @Override

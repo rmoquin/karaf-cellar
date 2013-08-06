@@ -74,12 +74,11 @@ public class CellarGroupsTest extends CellarTestSupport {
 //        String[] lines = nodesList.split("\\[");
 //        assertEquals(3, lines.length);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        Node localNode = clusterManager.getMasterCluster().getLocalNode();
         System.err.println(executeCommand("cluster:group-list"));
         Thread.sleep(COMMAND_TIMEOUT);
         System.err.println(executeCommand("cluster:group-create testgroup "));
         Thread.sleep(COMMAND_TIMEOUT);
-        System.err.println(executeCommand("cluster:group-set testgroup " + localNode.getId()));
+        System.err.println(executeCommand("cluster:group-set testgroup " + clusterManager.getMasterCluster().getLocalNode().getHost() + ":5702"));
         Thread.sleep(COMMAND_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
 

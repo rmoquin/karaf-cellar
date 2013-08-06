@@ -15,6 +15,7 @@ package org.apache.karaf.cellar.hazelcast.factory;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
+import com.hazelcast.config.GlobalSerializerConfig;
 import com.hazelcast.config.TcpIpConfig;
 import java.io.FileNotFoundException;
 import org.apache.karaf.cellar.core.discovery.Discovery;
@@ -25,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.hazelcast.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 
 /**

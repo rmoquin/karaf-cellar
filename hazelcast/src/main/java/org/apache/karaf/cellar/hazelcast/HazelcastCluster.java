@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author rmoquin
  */
 public class HazelcastCluster implements CellarCluster, MembershipListener {
-    private static Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
     private IdGenerator idgenerator;
     private HazelcastInstance instance;
@@ -53,13 +53,15 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private String nodeName;
     private String memberListenerId;
     private HazelcastNode localNode;
-    private Map<String, HazelcastNode> memberNodes = new ConcurrentHashMap<String, HazelcastNode>();
+    private final Map<String, HazelcastNode> memberNodesByName = new ConcurrentHashMap<String, HazelcastNode>();
+    private final Map<String, HazelcastNode> memberNodesById = new ConcurrentHashMap<String, HazelcastNode>();
 
     public void init() {
         try {
             this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));
             this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-            this.memberNodes.put(this.localNode.getName(), this.localNode);
+            this.memberNodesByName.put(this.localNode.getName(), this.localNode);
+            this.memberNodesById.put(this.localNode.getId(), this.localNode);
             this.memberListenerId = instance.getCluster().addMembershipListener(this);
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
@@ -72,7 +74,8 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         if (instance != null) {
             instance.getLifecycleService().shutdown();
         }
-        this.memberNodes.clear();
+        this.memberNodesByName.clear();
+        this.memberNodesById.clear();
         instance = null;
     }
 
@@ -100,22 +103,21 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public Set<Node> listNodes() {
         Set<Node> nodes = new HashSet<Node>();
-        nodes.addAll(this.memberNodes.values());
+        nodes.addAll(this.memberNodesByName.values());
         return nodes;
     }
 
     /**
-     * Get the nodes with given IDs.
+     * Get the nodes with given namess.
      *
-     * @param ids a collection of IDs to look for.
-     * @return a Set containing the nodes.
+     * @param names
      */
     @Override
     public Set<Node> listNodes(Collection<String> names) {
         Set<Node> nodes = new HashSet<Node>();
         if (names != null && !names.isEmpty()) {
-            for (String name : names) {
-                Node node = this.memberNodes.get(name);
+            for (String n : names) {
+                Node node = this.memberNodesByName.get(n);
                 if (node != null) {
                     nodes.add(node);
                 }
@@ -133,7 +135,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public Node findNodeById(String id) {
         if (id != null) {
-            return this.memberNodes.get(id);
+            return this.memberNodesById.get(id);
         }
         return null;
     }
@@ -144,9 +146,10 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      * @param name the node name.
      * @return the node.
      */
+    @Override
     public Node findNodeByName(String name) {
         if (name != null) {
-            return this.memberNodes.get(name);
+            return this.memberNodesByName.get(name);
         }
         return null;
     }
@@ -160,7 +163,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public boolean hasNodeWithId(String id) {
         if (id != null) {
-            return this.memberNodes.containsKey(id);
+            return this.memberNodesById.containsKey(id);
         }
         return false;
     }
@@ -174,7 +177,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public boolean hasNodeWithName(String name) {
         if (name != null) {
-            return this.memberNodes.containsKey(name);
+            return this.memberNodesByName.containsKey(name);
         }
         return false;
     }
@@ -196,23 +199,17 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
         HazelcastNode newNode = new HazelcastNode(member);
-        this.memberNodes.put(newNode.getName(), newNode);
+        this.memberNodesByName.put(newNode.getName(), newNode);
+        this.memberNodesById.put(newNode.getId(), newNode);
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         String uuid = membershipEvent.getMember().getUuid();
-        HazelcastNode node = null;
-        for (Map.Entry<String, HazelcastNode> entry : memberNodes.entrySet()) {
-            String string = entry.getKey();
-            HazelcastNode hazelcastNode = entry.getValue();
-            if(uuid.equals(node.getId())) {
-                node = hazelcastNode;
-            }
-        }
-        this.memberNodes.remove(node.getName());
+        HazelcastNode node = this.memberNodesById.remove(uuid);
+        this.memberNodesByName.remove(node.getName());
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Node , " + uuid + ", left cluster, " + this.name + ".");
+            LOGGER.info("Node , " + node.getName() + ", left cluster, " + this.name + ".");
         }
         node.destroy();
     }

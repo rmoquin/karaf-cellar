@@ -119,10 +119,13 @@ public class HazelcastClusterManager implements ClusterManager {
     public Set<Node> listNodes(Collection<String> ids) {
         Set<Node> nodeList = new HashSet<Node>();
         if (ids != null && !ids.isEmpty()) {
-            Set<Node> nodes = this.masterCluster.listNodes();
-            for (Node node : nodes) {
-                if (ids.contains(node.getId())) {
-                    nodeList.add(node);
+            for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
+                CellarCluster cellarCluster = it.next();
+                Set<Node> nodes = cellarCluster.listNodes();
+                for (Node node : nodes) {
+                    if (ids.contains(node.getId())) {
+                        nodeList.add(node);
+                    }
                 }
             }
         }
@@ -132,17 +135,20 @@ public class HazelcastClusterManager implements ClusterManager {
     /**
      * Get the nodes with given names.
      *
-     * @param names a collection of IDs to look for.
+     * @param names a collection of names to look for.
      * @return a Set containing the nodes.
      */
     @Override
     public Set<Node> listNodesByName(Collection<String> names) {
         Set<Node> nodeList = new HashSet<Node>();
         if (names != null && !names.isEmpty()) {
-            Set<Node> nodes = this.masterCluster.listNodes();
-            for (Node node : nodes) {
-                if (names.contains(node.getName())) {
-                    nodeList.add(node);
+            for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
+                CellarCluster cellarCluster = it.next();
+                Set<Node> nodes = cellarCluster.listNodes();
+                for (Node node : nodes) {
+                    if (names.contains(node.getName())) {
+                        nodeList.add(node);
+                    }
                 }
             }
         }
@@ -165,7 +171,7 @@ public class HazelcastClusterManager implements ClusterManager {
     public Node findNodeByName(String nodeName) {
         for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
             CellarCluster cellarCluster = it.next();
-            Node node = cellarCluster.findNodeById(nodeName);
+            Node node = cellarCluster.findNodeByName(nodeName);
             if (node != null) {
                 return node;
             }

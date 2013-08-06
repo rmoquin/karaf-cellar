@@ -22,6 +22,13 @@
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
 
+    <feature name="jackson" description="Jackson JSON parser" version="${jackson.version}" resolver="(obr)">
+        <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-smile/${jackson.version}</bundle>
+        <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+    </feature>
+    
     <feature name="hazelcast" description="In memory data grid" version="${hazelcast.version}" resolver="(obr)">
         <configfile finalname="/etc/hazelcast.xml">
             mvn:org.apache.karaf.cellar/apache-karaf-cellar/${project.version}/xml/hazelcast
@@ -33,6 +40,7 @@
         <config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
             name=default
         </config>
+        <feature version="${jackson.version}">jackson</feature>
         <feature version="${hazelcast.version}">hazelcast</feature>
         <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="33">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
