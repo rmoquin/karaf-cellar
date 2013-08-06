@@ -66,12 +66,12 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
-        if (event != null && event.getBundle() != null) {
+        if (event.getBundle() != null) {
             Set<Group> groups = null;
             try {
                 groups = groupManager.listLocalGroups();
             } catch (Exception ex) {
-                LOGGER.warn("CELLAR BUNDLE: failed to list local groups. Is Cellar uninstalling ?");
+                LOGGER.warn("CELLAR BUNDLE: failed to list local groups. Is Cellar uninstalling ?", ex);
             }
 
             if (groups != null && !groups.isEmpty()) {
@@ -190,5 +190,4 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
     }
-
 }

@@ -13,6 +13,9 @@
  */
 package org.apache.karaf.cellar.config;
 
+import java.io.IOException;
+import java.util.Dictionary;
+import java.util.List;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -26,9 +29,12 @@ import java.util.Map;
 import java.util.Properties;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
+import org.osgi.service.cm.ConfigurationEvent;
 
 /**
  * ConfigurationEventHandler handles received configuration cluster event.
@@ -59,41 +65,44 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
         Group group = event.getSourceGroup();
         String groupName = group.getName();
 
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
-
         String pid = event.getId();
 
-//        if (cellarSupport.isAllowed(event.getSourceGroup(), Constants.CATEGORY, pid, EventType.INBOUND)) {
-//
-//            Properties clusterDictionary = clusterConfigurations.get(pid);
-//            Configuration conf;
-//            try {
-//                conf = configurationAdmin.getConfiguration(pid, null);
-//                if (event.getType() == ConfigurationEvent.CM_DELETED) {
-//                    if (conf.getProperties() != null) {
-//                        // delete the properties
-//                        conf.delete();
-//                        deleteStorage(pid);
-//                    }
-//                } else {
-//                    if (clusterDictionary != null) {
-//                        Dictionary localDictionary = conf.getProperties();
-//                        if (localDictionary == null) {
-//                            localDictionary = new Properties();
-//                        }
-//                        localDictionary = filter(localDictionary);
-//                        if (!equals(clusterDictionary, localDictionary)) {
-//                            conf.update((Dictionary) clusterDictionary);
-//                            persistConfiguration(configurationAdmin, pid, clusterDictionary);
-//                        }
-//                    }
-//                }
-//            } catch (IOException ex) {
-//                LOGGER.error("CELLAR CONFIG: failed to read cluster configuration", ex);
-//            }
-//        } else {
-//            LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
-//        }
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+        List<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
+        List<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
+        if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
+
+            Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+
+            Properties clusterDictionary = clusterConfigurations.get(pid);
+            Configuration conf;
+            try {
+                conf = configurationAdmin.getConfiguration(pid, null);
+                if (event.getType() == ConfigurationEvent.CM_DELETED) {
+                    if (conf.getProperties() != null) {
+                        // delete the properties
+                        conf.delete();
+                        deleteStorage(pid);
+                    }
+                } else {
+                    if (clusterDictionary != null) {
+                        Dictionary localDictionary = conf.getProperties();
+                        if (localDictionary == null) {
+                            localDictionary = new Properties();
+                        }
+                        localDictionary = filter(localDictionary);
+                        if (!equals(clusterDictionary, localDictionary)) {
+                            conf.update((Dictionary) clusterDictionary);
+                            persistConfiguration(configurationAdmin, pid, clusterDictionary);
+                        }
+                    }
+                }
+            } catch (IOException ex) {
+                LOGGER.error("CELLAR CONFIG: failed to read cluster configuration", ex);
+            }
+        } else {
+            LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+        }
     }
 
     public void init() {

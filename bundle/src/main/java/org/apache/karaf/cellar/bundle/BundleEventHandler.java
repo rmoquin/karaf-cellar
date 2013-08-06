@@ -53,9 +53,9 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
             LOGGER.warn("CELLAR BUNDLE: {} switch is OFF, cluster event is not handled", SWITCH_ID);
             return;
         }
-
+        
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.info("CELLAR BUNDLE: node will ignore event since it's part of the source cluster.");
+            LOGGER.debug("CELLAR BUNDLE: node is not part of the event cluster group {}", event.getSourceGroup().getName());
             return;
         }
         try {
@@ -92,7 +92,7 @@ public class BundleEventHandler extends BundleSupport implements EventHandler<Cl
                     updateBundle(event.getSymbolicName(), event.getVersion());
                 }
             } else {
-                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", event.getLocation(), event.getSourceGroup().getName());
+                LOGGER.info("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", event.getLocation(), event.getSourceGroup().getName());
             }
         } catch (BundleException e) {
             LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", e);

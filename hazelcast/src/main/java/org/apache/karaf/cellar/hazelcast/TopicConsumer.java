@@ -59,14 +59,13 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
      */
     @Override
     public void consume(E event) {
-        LOGGER.warn("Received a topic consumer message: " + event.toString());
         // check if event has a specified destination.
         if ((event.getDestinations() == null || event.getDestinations().contains(masterCluster.getLocalNode())) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
             dispatcher.dispatch(event);
+        } else if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR HAZELCAST: {} switch is OFF, cluster event is not consumed", SWITCH_ID);
         } else {
-            if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
-                LOGGER.warn("CELLAR HAZELCAST: {} switch is OFF, cluster event is not consumed", SWITCH_ID);
-            }
+            LOGGER.warn("The received event will not be processed: " + event.toString());
         }
     }
 

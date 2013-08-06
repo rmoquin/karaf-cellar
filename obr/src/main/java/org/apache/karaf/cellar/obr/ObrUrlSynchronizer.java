@@ -45,18 +45,12 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if (group.getNodes().size() > 1) {
-                    if (isSyncEnabled(group)) {
-                        pull(group);
-                        push(group);
-                    } else {
-                        if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
-                        }
-                    }
+                if (isSyncEnabled(group)) {
+                    pull(group);
+                    push(group);
                 } else {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("CELLAR BUNDLE: Group only has 1 member, synchronization will be skipped: {}", group.getName());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("CELLAR OBR: sync is disabled for group {}", group.getName());
                     }
                 }
             }
@@ -103,8 +97,8 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
 
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-            List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-            List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+            List<String> whitelist = groupConfig.getOutboundOBRUrlsWhitelist();
+            List<String> blacklist = groupConfig.getOutboundOBRUrlsBlacklist();
 
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {

@@ -88,6 +88,9 @@
             Number of async backups. 0 means no backup.
         -->
         <async-backup-count>0</async-backup-count>
+        <empty-queue-ttl>-1</empty-queue-ttl>
+
+
     </queue>
     <map name="default">
         <!--
@@ -108,8 +111,7 @@
         <!--
             Number of async backups. 0 means no backup.
         -->
-        <async-backup-count>1</async-backup-count>
-
+        <async-backup-count>0</async-backup-count>
         <!--
 			Maximum number of seconds for each entry to stay in the map. Entries that are
 			older than <time-to-live-seconds> and not updated for <time-to-live-seconds>

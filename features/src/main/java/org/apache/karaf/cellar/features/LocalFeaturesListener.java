@@ -64,7 +64,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
-
                     Feature feature = event.getFeature();
                     String name = feature.getName();
                     String version = feature.getVersion();
@@ -112,56 +111,56 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
-                    ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
-                    clusterRepositoryEvent.setSourceGroup(group);
-                    RepositoryEvent.EventType type = event.getType();
-                    ClassLoader priorClassLoader = Thread.currentThread().getContextClassLoader();
+                        ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
+                        clusterRepositoryEvent.setSourceGroup(group);
+                        RepositoryEvent.EventType type = event.getType();
+                        ClassLoader priorClassLoader = Thread.currentThread().getContextClassLoader();
 
-                    try {
-                        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-                        // update the features repositories in the cluster group
-                        if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
-                            pushRepository(event.getRepository(), group);
-                            // update the features in the cluster group
+                        try {
+                            Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+                            // update the features repositories in the cluster group
+                            if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
+                                pushRepository(event.getRepository(), group);
+                                // update the features in the cluster group
 
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
-                            try {
-                                for (Feature feature : event.getRepository().getFeatures()) {
-                                    // check the feature in the distributed map
-                                    FeatureInfo featureInfo = null;
-                                    for (FeatureInfo clusterFeature : clusterFeatures.keySet()) {
-                                        if (clusterFeature.getName().equals(feature.getName()) && clusterFeature.getVersion().equals(feature.getVersion())) {
-                                            featureInfo = clusterFeature;
-                                            break;
+                                Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
+                                try {
+                                    for (Feature feature : event.getRepository().getFeatures()) {
+                                        // check the feature in the distributed map
+                                        FeatureInfo featureInfo = null;
+                                        for (FeatureInfo clusterFeature : clusterFeatures.keySet()) {
+                                            if (clusterFeature.getName().equals(feature.getName()) && clusterFeature.getVersion().equals(feature.getVersion())) {
+                                                featureInfo = clusterFeature;
+                                                break;
+                                            }
+                                        }
+                                        if (featureInfo == null) {
+                                            featureInfo = new FeatureInfo(feature.getName(), feature.getVersion());
+                                            clusterFeatures.put(featureInfo, false);
                                         }
                                     }
-                                    if (featureInfo == null) {
-                                        featureInfo = new FeatureInfo(feature.getName(), feature.getVersion());
-                                        clusterFeatures.put(featureInfo, false);
+                                } catch (Exception e) {
+                                    LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
+                                }
+                            } else {
+                                removeRepository(event.getRepository(), group);
+                                // update the features in the cluster group
+                                Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
+                                try {
+                                    for (Feature feature : event.getRepository().getFeatures()) {
+                                        FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
+                                        clusterFeatures.remove(info);
                                     }
+                                } catch (Exception e) {
+                                    LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
                                 }
-                            } catch (Exception e) {
-                                LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
                             }
-                        } else {
-                            removeRepository(event.getRepository(), group);
-                            // update the features in the cluster group
-                            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group.getName());
-                            try {
-                                for (Feature feature : event.getRepository().getFeatures()) {
-                                    FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
-                                    clusterFeatures.remove(info);
-                                }
-                            } catch (Exception e) {
-                                LOGGER.warn("CELLAR FEATURES: failed to update the cluster group", e);
-                            }
-                        }
 
-                    } finally {
-                        Thread.currentThread().setContextClassLoader(priorClassLoader);
-                    }
-                    // broadcast the cluster event
-                    eventProducer.produce(clusterRepositoryEvent);
+                        } finally {
+                            Thread.currentThread().setContextClassLoader(priorClassLoader);
+                        }
+                        // broadcast the cluster event
+                        eventProducer.produce(clusterRepositoryEvent);
                 }
             }
         }

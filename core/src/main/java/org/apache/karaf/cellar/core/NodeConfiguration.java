@@ -17,13 +17,14 @@ package org.apache.karaf.cellar.core;
 
 import java.util.Dictionary;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
  * @author rmoquin
  */
 public interface NodeConfiguration {
-    List<String> getGroups();
+    Set<String> getGroups();
 
     boolean isProducer();
 

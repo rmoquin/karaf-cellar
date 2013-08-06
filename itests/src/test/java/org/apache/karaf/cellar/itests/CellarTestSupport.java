@@ -43,6 +43,8 @@ import javax.inject.Inject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -179,19 +181,18 @@ public class CellarTestSupport {
 
     @Configuration
     public Option[] config() {
-        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("zip");
+        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
         Option[] options = new Option[] {
-            karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),            
+            karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
             logLevel(LogLevelOption.LogLevel.INFO),
             keepRuntimeFolder(),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
-//            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.aries.blueprint", "DEBUG"),
-//            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar", "DEBUG"),
-            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN"),
-        };
+            //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.aries.blueprint", "DEBUG"),
+            //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar", "DEBUG"),
+            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN"), };
         String debug = System.getProperty("debugMain");
         if (debug != null) {
             int l = options.length;
@@ -199,6 +200,42 @@ public class CellarTestSupport {
             options[l] = KarafDistributionOption.debugConfiguration();
         }
         return options;
+    }
+
+    protected boolean waitForInstanceToCluster(final int desiredTotal) {
+        return waitForInstanceToCluster(desiredTotal, 15000L);
+    }
+
+    protected boolean waitForInstanceToCluster(final int desiredTotal, final Long timeout) {
+        final FutureTask<Boolean> commandFuture = new FutureTask<Boolean>(
+                new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                ClusterManager manager = CellarTestSupport.this.getOsgiService(ClusterManager.class, timeout);
+                boolean found = false;
+                while (!found) {
+                    Set<Node> nodes = manager.listNodes();
+                    if (nodes.size() >= desiredTotal) {
+                        return true;
+                    }
+                    Thread.sleep(1000);
+                    if (Thread.interrupted()) {
+                        return false;
+                    }
+                }
+                return false;
+            }
+        });
+
+        try {
+            executor.submit(commandFuture);
+            boolean result = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
+            System.out.println("Total nodes found successfully: " + desiredTotal);
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            return false;
+        }
     }
 
     /**
@@ -229,19 +266,19 @@ public class CellarTestSupport {
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
         FutureTask<String> commandFuture = new FutureTask<String>(
                 new Callable<String>() {
-                    @Override
-                    public String call() throws Exception {
-                        try {
-                            if (!silent) {
-                                System.err.println(command);
-                            }
-                            commandSession.execute(command);
-                        } finally {
-                            printStream.flush();
-                        }
-                        return byteArrayOutputStream.toString();
+            @Override
+            public String call() throws Exception {
+                try {
+                    if (!silent) {
+                        System.err.println(command);
                     }
-                });
+                    commandSession.execute(command);
+                } finally {
+                    printStream.flush();
+                }
+                return byteArrayOutputStream.toString();
+            }
+        });
 
         try {
             executor.submit(commandFuture);

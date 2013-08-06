@@ -66,7 +66,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             command.setDestinations(recipientList);
             executionContext.execute(command);
         }
-        groupManager.deregisterNodeFromAllGroups();
+        groupManager.deregisterNode();
     }
 
     @Override

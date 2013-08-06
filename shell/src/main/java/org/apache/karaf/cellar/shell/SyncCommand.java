@@ -23,7 +23,6 @@ import java.util.Set;
 
 @Command(scope = "cluster", name = "sync", description = "Force the call of all cluster synchronizers available")
 public class SyncCommand extends ClusterCommandSupport {
-
     @Override
     protected Object doExecute() throws Exception {
         Set<Group> localGroups = groupManager.listLocalGroups();
@@ -49,5 +48,4 @@ public class SyncCommand extends ClusterCommandSupport {
         }
         return null;
     }
-
 }

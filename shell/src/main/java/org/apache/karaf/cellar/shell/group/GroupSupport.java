@@ -24,17 +24,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.Configurations;
 
 /**
  * Generic cluster group shell command support.
  */
 public abstract class GroupSupport extends ClusterCommandSupport {
-
     protected static final String HEADER_FORMAT = "   %-20s   %s";
     protected static final String OUTPUT_FORMAT = "%1s [%-20s] [%s]";
 
     protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodes) throws Exception {
-        return doExecute(action, group, source, nodes, true);
+        return doExecute(action, group, source, nodes, false);
     }
 
     /**
@@ -50,6 +50,9 @@ public abstract class GroupSupport extends ClusterCommandSupport {
     protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodeIds, Boolean suppressOutput) throws Exception {
 
         ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
+        if (source == null) {
+            source = super.groupManager.findGroupByName(Configurations.DEFAULT_GROUP_NAME);
+        }
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
@@ -90,26 +93,7 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                 for (Node node : results.keySet()) {
                     ManageGroupResult result = results.get(node);
                     if (result != null && result.getGroups() != null) {
-                        for (Group g : result.getGroups()) {
-                            StringBuilder buffer = new StringBuilder();
-                            if (g.getNodes() != null && !g.getNodes().isEmpty()) {
-                                String mark = " ";
-                                for (Node member : g.getNodes()) {
-                                    // display only up and running nodes in the cluster
-                                    if (clusterManager.findNodeById(member.getId()) != null) {
-                                        buffer.append(member.getId());
-                                        if (member.equals(clusterManager.getMasterCluster().getLocalNode())) {
-                                            mark = "*";
-                                            buffer.append(mark);
-                                        }
-                                        buffer.append(" ");
-                                    }
-                                }
-                                System.out.println(String.format(OUTPUT_FORMAT, mark, g.getName(), buffer.toString()));
-                            } else {
-                                System.out.println(String.format(OUTPUT_FORMAT, "", g.getName(), ""));
-                            }
-                        }
+                        printGroups(result.getGroups());
                     }
                 }
             }
@@ -117,4 +101,27 @@ public abstract class GroupSupport extends ClusterCommandSupport {
         return null;
     }
 
+    protected Object printGroups(Set<Group> groups) {
+        for (Group g : groups) {
+            StringBuilder buffer = new StringBuilder();
+            if (g.getNodes() != null && !g.getNodes().isEmpty()) {
+                String mark = " ";
+                for (Node member : g.getNodes()) {
+                    // display only up and running nodes in the cluster
+                    if (clusterManager.findNodeById(member.getId()) != null) {
+                        buffer.append(member.getId());
+                        if (member.equals(clusterManager.getMasterCluster().getLocalNode())) {
+                            mark = "*";
+                            buffer.append(mark);
+                        }
+                        buffer.append(" ");
+                    }
+                }
+                System.out.println(String.format(OUTPUT_FORMAT, mark, g.getName(), buffer.toString()));
+            } else {
+                System.out.println(String.format(OUTPUT_FORMAT, "", g.getName(), ""));
+            }
+        }
+        return null;
+    }
 }

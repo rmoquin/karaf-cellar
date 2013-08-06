@@ -90,7 +90,7 @@ public interface GroupManager {
      *
      * @return the set of cellar group names.
      */
-    public List<String> getJoinedGroupNames();
+    public Set<String> getJoinedGroupNames();
 
     /**
      * Get the cluster group names "hosting" a given node.
@@ -112,7 +112,7 @@ public interface GroupManager {
      * Removes all the groups from this nodes configuration which triggers the appropriate deregistration actions to be
      * done.
      */
-    void deregisterNodeFromAllGroups();
+    void deregisterNode();
 
     /**
      * Gets the pid that identifies this group's configuration from the others.

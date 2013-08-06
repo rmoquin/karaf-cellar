@@ -14,12 +14,13 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import java.net.URL;
+import java.util.ArrayList;
 import org.osgi.framework.*;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import org.slf4j.LoggerFactory;
 public class HazelcastBundleListener implements SynchronousBundleListener {
     private static Logger LOGGER = LoggerFactory.getLogger(HazelcastBundleListener.class);
     private BundleContext bundleContext;
-    private Map<String, Vector<URL>> loadedResources = new ConcurrentHashMap<String, Vector<URL>>();
+    private Map<String, List<URL>> loadedResources = new ConcurrentHashMap<String, List<URL>>();
 
     public void init() {
         bundleContext.addBundleListener(this);
@@ -84,9 +85,9 @@ public class HazelcastBundleListener implements SynchronousBundleListener {
                         String urlString = url.toString();
                         int i = urlString.lastIndexOf("/");
                         urlString = urlString.substring(i + 1);
-                        Vector<URL> resources = loadedResources.get(urlString);
+                        List<URL> resources = loadedResources.get(urlString);
                         if (resources == null) {
-                            resources = new Vector<URL>();
+                            resources = new ArrayList<URL>();
                             loadedResources.put(urlString, resources);
                         }
                         resources.add(url);
@@ -108,9 +109,9 @@ public class HazelcastBundleListener implements SynchronousBundleListener {
     }
 
     private void emptyResources() {
-        for (Map.Entry<String, Vector<URL>> entry : loadedResources.entrySet()) {
-            Vector<URL> vector = entry.getValue();
-            vector.clear();
+        for (Map.Entry<String, List<URL>> entry : loadedResources.entrySet()) {
+            List<URL> list = entry.getValue();
+            list.clear();
         }
     }
 
@@ -131,7 +132,7 @@ public class HazelcastBundleListener implements SynchronousBundleListener {
     /**
      * @return the loadedResources
      */
-    public Map<String, Vector<URL>> getResources() {
+    public Map<String, List<URL>> getResources() {
         return loadedResources;
     }
 }

@@ -52,8 +52,6 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
 
-        Thread.sleep(DEFAULT_TIMEOUT);
-
         String node1 = getNodeIdOfChild("node1");
         String node2 = getNodeIdOfChild("node2");
 

@@ -79,6 +79,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     public static final String BUNDLES_BLACKLIST_OUTBOUND_PROPERTY = "bundlesBlacklistOutbound";
     @Property(label = "Sync Bundles", boolValue = true, description = "Enable synchronizing bundle changes to and from other nodes in the same group.")
     public static final String SYNC_BUNDLES_PROPERTY = "syncBundles";
+    @Property(label = "Whitelisted OBR URLs (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of OBR urls this node will accept synchronization changes for from other group nodes.")
+    public static final String OBR_URLS_WHITELIST_INBOUND_PROPERTY = "obrUrlsWhitelistInbound";
+    @Property(label = "Whitelisted OBR URLs (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The set of OBR urls this node will send synchronization events for to other group nodes.")
+    public static final String OBR_URLS_WHITELIST_OUTBOUND_PROPERTY = "obrUrlsWhitelistOutbound";
+    @Property(label = "Blacklisted OBR URLs (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of OBR urls this node will not accept synchronization events for from other group nodes.")
+    public static final String OBR_URLS_BLACKLIST_INBOUND_PROPERTY = "obrUrlsBlacklistInbound";
+    @Property(label = "Blacklisted OBR URLs (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of OBR urls this node will not send synchronization events for to other group nodes.")
+    public static final String OBR_URLS_BLACKLIST_OUTBOUND_PROPERTY = "obrUrlsBlacklistOutbound";
     @Property(label = "Sync OBR Urls", boolValue = true, description = "Enable synchronizing OBR url changes to and from other nodes in the same group.")
     public static final String SYNC_OBR_URLS_PROPERTY = "syncOBRUrls";
     @Property(label = "Sync OBR Bundles", boolValue = true, description = "Enable synchronizing OBR bundle changes to and from other nodes in the same group.")
@@ -144,24 +152,20 @@ public class GroupConfigurationImpl implements GroupConfiguration {
 
     public void synchronizeNodes() {
         Group group = (Group) masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE).get(this.getName());
-        if (group.getNodes().size() > 1) {
-            try {
-                ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences(Synchronizer.class.getCanonicalName(), null);
-                if (serviceReferences != null && serviceReferences.length > 0) {
-                    for (ServiceReference ref : serviceReferences) {
-                        Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                        if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
-                            synchronizer.pull(group);
-                            synchronizer.push(group);
-                        }
-                        bundleContext.ungetService(ref);
+        try {
+            ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences(Synchronizer.class.getCanonicalName(), null);
+            if (serviceReferences != null && serviceReferences.length > 0) {
+                for (ServiceReference ref : serviceReferences) {
+                    Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
+                    if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
+                        synchronizer.pull(group);
+                        synchronizer.push(group);
                     }
+                    bundleContext.ungetService(ref);
                 }
-            } catch (InvalidSyntaxException e) {
-                LOGGER.error("CELLAR HAZELCAST: failed to lookup available synchronizers", e);
             }
-        } else {
-            LOGGER.info("Group " + this.getName() + " doesn't have at least 2 groups, so no synchronization won't be performed.");
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error("CELLAR HAZELCAST: failed to lookup available synchronizers", e);
         }
     }
 
@@ -436,6 +440,66 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     }
 
     /**
+     * @return the inboundOBRUrlsBlacklist
+     */
+    @Override
+    public List<String> getInboundOBRUrlsWhitelist() {
+        return (List<String>) this.properties.get(OBR_URLS_WHITELIST_INBOUND_PROPERTY);
+    }
+
+    /**
+     * @param inboundOBRUrlsWhitelist the inboundBundleBlacklist to set
+     */
+    public void setInboundOBRUrlsWhitelist(List<String> inboundOBRUrlsWhitelist) {
+        this.properties.put(OBR_URLS_WHITELIST_INBOUND_PROPERTY, inboundOBRUrlsWhitelist);
+    }
+
+    /**
+     * @return the outboundOBRUrlsBlacklist
+     */
+    @Override
+    public List<String> getOutboundOBRUrlsWhitelist() {
+        return (List<String>) this.properties.get(OBR_URLS_WHITELIST_OUTBOUND_PROPERTY);
+    }
+
+    /**
+     * @param outboundOBRUrlsWhitelist the outboundBundleWhitelist to set
+     */
+    public void setOutboundOBRUrlsWhitelist(List<String> outboundOBRUrlsWhitelist) {
+        this.properties.put(OBR_URLS_WHITELIST_OUTBOUND_PROPERTY, outboundOBRUrlsWhitelist);
+    }
+
+    /**
+     * @return the inboundOBRUrlsBlacklist
+     */
+    @Override
+    public List<String> getInboundOBRUrlsBlacklist() {
+        return (List<String>) this.properties.get(OBR_URLS_BLACKLIST_INBOUND_PROPERTY);
+    }
+
+    /**
+     * @param inboundOBRUrlsBlacklist the inboundBundleBlacklist to set
+     */
+    public void setInboundOBRUrlsBlacklist(List<String> inboundOBRUrlsBlacklist) {
+        this.properties.put(OBR_URLS_BLACKLIST_INBOUND_PROPERTY, inboundOBRUrlsBlacklist);
+    }
+
+    /**
+     * @return the outboundOBRUrlsBlacklist
+     */
+    @Override
+    public List<String> getOutboundOBRUrlsBlacklist() {
+        return (List<String>) this.properties.get(OBR_URLS_BLACKLIST_OUTBOUND_PROPERTY);
+    }
+
+    /**
+     * @param outboundOBRUrlsBlacklist the outboundBundleBlacklist to set
+     */
+    public void setOutboundOBRUrlsBlacklist(List<String> outboundOBRUrlsBlacklist) {
+        this.properties.put(OBR_URLS_BLACKLIST_OUTBOUND_PROPERTY, outboundOBRUrlsBlacklist);
+    }
+
+    /**
      * @return the syncOBRBundles
      */
     @Override
@@ -497,13 +561,5 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      */
     public void setEventTransportFactory(EventTransportFactory eventTransportFactory) {
         this.eventTransportFactory = eventTransportFactory;
-    }
-
-    /**
-     * @return the group
-     */
-    @Override
-    public Group getGroup() {
-        return (Group) masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE).get(this.getName());
     }
 }

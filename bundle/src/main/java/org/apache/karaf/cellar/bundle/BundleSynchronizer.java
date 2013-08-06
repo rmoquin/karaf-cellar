@@ -48,18 +48,12 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
         for (Group group : groups) {
-            if (group.getNodes().size() > 1) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
-                } else {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
-                    }
-                }
+            if (isSyncEnabled(group)) {
+                pull(group);
+                push(group);
             } else {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("CELLAR BUNDLE: Group only has 1 member, synchronization will be skipped: {}", group.getName());
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
                 }
             }
         }
@@ -92,8 +86,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     if (state != null) {
                         String bundleLocation = state.getLocation();
                         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                        List<String> whitelist = groupConfig.getInboundFeatureWhitelist();
-                        List<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+                        List<String> whitelist = groupConfig.getInboundBundleWhitelist();
+                        List<String> blacklist = groupConfig.getInboundBundleBlacklist();
                         if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {

@@ -60,15 +60,18 @@ public interface GroupConfiguration {
 
     boolean isSyncOBRBundles();
 
+    List<String> getInboundOBRUrlsWhitelist();
+
+    List<String> getOutboundOBRUrlsWhitelist();
+
+    List<String> getInboundOBRUrlsBlacklist();
+
+    List<String> getOutboundOBRUrlsBlacklist();
+
     /**
      * Registers this node for producing and consuming messages between nodes in the group.
      *
      * @return the group object this configuration represents.
      */
     Group register();
-
-    /**
-     * @return the group
-     */
-    Group getGroup();
 }

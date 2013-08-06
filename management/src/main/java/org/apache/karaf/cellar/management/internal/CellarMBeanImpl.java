@@ -89,22 +89,20 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
     public void sync() throws Exception {
         Set<Group> localGroups = groupManager.listLocalGroups();
         for (Group group : localGroups) {
-            if (group.getNodes().size() > 1) {
-                try {
-                    ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
-                    if (serviceReferences != null && serviceReferences.length > 0) {
-                        for (ServiceReference ref : serviceReferences) {
-                            Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                            if (synchronizer.isSyncEnabled(group)) {
-                                synchronizer.pull(group);
-                                synchronizer.push(group);
-                            }
-                            bundleContext.ungetService(ref);
+            try {
+                ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
+                if (serviceReferences != null && serviceReferences.length > 0) {
+                    for (ServiceReference ref : serviceReferences) {
+                        Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
+                        if (synchronizer.isSyncEnabled(group)) {
+                            synchronizer.pull(group);
+                            synchronizer.push(group);
                         }
+                        bundleContext.ungetService(ref);
                     }
-                } catch (InvalidSyntaxException e) {
-                    // ignore
                 }
+            } catch (InvalidSyntaxException e) {
+                // ignore
             }
         }
     }

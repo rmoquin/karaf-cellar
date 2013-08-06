@@ -65,9 +65,9 @@
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeConfiguration" update-strategy="container-managed"
                                update-method="updated"/>
         <property name="groups">
-            <list>
+            <set>
                 <value>default</value>
-            </list>
+            </set>
         </property>
         <property name="producer" value="true"/>
         <property name="consumer" value="true"/>
@@ -172,6 +172,26 @@
                 </list>
             </property>
             <property name="syncOBRUrls" value="true"/>
+            <property name="inboundOBRUrlsWhitelist">
+                <list>
+                    <value>*</value>
+                </list>
+            </property>
+            <property name="outboundOBRUrlsWhitelist">
+                <list>
+                    <value>*</value>
+                </list>
+            </property>
+            <property name="inboundOBRUrlsBlacklist">
+                <list>
+                    <value>none</value>
+                </list>
+            </property>
+            <property name="outboundOBRUrlsBlacklist">
+                <list>
+                    <value>none</value>
+                </list>
+            </property>
             <property name="syncOBRBundles" value="true"/>
             <property name="masterCluster" ref="masterCluster"/>
             <property name="eventTransportFactory" ref="eventTransportFactory"/>

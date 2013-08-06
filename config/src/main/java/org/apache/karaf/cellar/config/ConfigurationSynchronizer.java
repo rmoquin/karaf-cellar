@@ -57,18 +57,12 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if (group.getNodes().size() > 1) {
-                    if (isSyncEnabled(group)) {
-                        pull(group);
-                        push(group);
-                    } else {
-                        if (LOGGER.isWarnEnabled()) {
-                            LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
-                        }
-                    }
+                if (isSyncEnabled(group)) {
+                    pull(group);
+                    push(group);
                 } else {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("CELLAR CONFIG: Group only has 1 member, synchronization will be skipped: {}", group.getName());
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
                     }
                 }
             }
@@ -90,33 +84,33 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pulling configurations from cluster group {}", groupName);
 
-//            GroupConfiguration clusterConfigurations = (GroupConfiguration) clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
-//            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-//            Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-//            Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
-//            for (String clusterConfiguration : clusterConfigurations.keySet()) {
-//                if (cellarSupport.isAllowed(clusterConfiguration, whitelist,blacklist)) {
-//                    Dictionary clusterDictionary = clusterConfigurations.get(clusterConfiguration);
-//                    try {
-//                        // update the local configuration if needed
-//                        Configuration localConfiguration = configurationAdmin.getConfiguration(clusterConfiguration, null);
-//                        Dictionary localDictionary = localConfiguration.getProperties();
-//                        if (localDictionary == null) {
-//                            localDictionary = new Properties();
-//                        }
-//
-//                        localDictionary = filter(localDictionary);
-//                        if (!equals(localDictionary, clusterDictionary)) {
-//                            localConfiguration.update(localDictionary);
-//                            persistConfiguration(configurationAdmin, clusterConfiguration, localDictionary);
-//                        }
-//                    } catch (IOException ex) {
-//                        LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
-//                    }
-//                } else {
-//                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", clusterConfiguration, groupName);
-//                }
-//            }
+            Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            List<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
+            List<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
+            for (String pid : clusterConfigurations.keySet()) {
+                if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
+                    Dictionary clusterDictionary = clusterConfigurations.get(pid);
+                    try {
+                        // update the local configuration if needed
+                        Configuration localConfiguration = configurationAdmin.getConfiguration(pid, null);
+                        Dictionary localDictionary = localConfiguration.getProperties();
+                        if (localDictionary == null) {
+                            localDictionary = new Properties();
+                        }
+
+                        localDictionary = filter(localDictionary);
+                        if (!equals(localDictionary, clusterDictionary)) {
+                            localConfiguration.update(localDictionary);
+                            persistConfiguration(configurationAdmin, pid, localDictionary);
+                        }
+                    } catch (IOException ex) {
+                        LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
+                    }
+                } else {
+                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+                }
+            }
         }
     }
 
@@ -139,15 +133,15 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);
             Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
 
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Configuration[] localConfigurations;
             try {
                 localConfigurations = configurationAdmin.listConfigurations(null);
                 for (Configuration localConfiguration : localConfigurations) {
                     String pid = localConfiguration.getPid();
                     // check if the pid is marked as local.
-                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    List<String> bundleWhitelist = groupConfig.getOutboundBundleWhitelist();
-                    List<String> bundleBlacklist = groupConfig.getOutboundBundleBlacklist();
+                    List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
 
                     if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                         Dictionary localDictionary = localConfiguration.getProperties();

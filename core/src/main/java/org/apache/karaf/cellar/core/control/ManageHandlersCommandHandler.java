@@ -76,7 +76,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
                 }
             }
         } catch (InvalidSyntaxException e) {
-            LOGGER.error("Syntax error looking up service {} using filter {}", EventHandler.class.getName(), EventHandler.MANAGED_FILTER);
+            LOGGER.error("Syntax error looking up service {} using filter {}", EventHandler.class.getName(), EventHandler.MANAGED_FILTER, e);
         } finally {
             if (references != null) {
                 for (ServiceReference ref : references) {
@@ -84,6 +84,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
                 }
             }
         }
+        LOGGER.warn("Manage handlers response, {}", result);
         return result;
     }
 

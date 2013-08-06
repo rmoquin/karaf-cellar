@@ -40,17 +40,11 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if (group.getNodes().size() > 1) {
-                    if (isSyncEnabled(group)) {
-                        pull(group);
-                        push(group);
-                    } else {
-                        LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
-                    }
+                if (isSyncEnabled(group)) {
+                    pull(group);
+                    push(group);
                 } else {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("CELLAR FEATURES: Group only has 1 member, synchronization will be skipped: {}", group.getName());
-                    }
+                    LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
                 }
             }
         }
@@ -96,8 +90,8 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                     String name = info.getName();
                     // check if feature is blocked
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-                    List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+                    List<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+                    List<String> blacklist = groupConfig.getInboundFeatureBlacklist();
                     if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         Boolean remotelyInstalled = clusterFeatures.get(info);
                         Boolean locallyInstalled = isFeatureInstalledLocally(info.getName(), info.getVersion());

@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.shell.group;
 
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -27,7 +26,7 @@ public class GroupListCommand extends GroupSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        return doExecute(ManageGroupAction.LIST, null, null, nodes, false);
+        return super.printGroups(super.getGroupManager().listAllGroups());
     }
 
 }

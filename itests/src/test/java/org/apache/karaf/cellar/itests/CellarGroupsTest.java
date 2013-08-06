@@ -20,6 +20,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
+import static org.apache.karaf.cellar.itests.CellarTestSupport.COMMAND_TIMEOUT;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -40,7 +41,7 @@ public class CellarGroupsTest extends CellarTestSupport {
     @Test
     @Ignore
     public void testGroupManagerService() throws Exception {
-        System.out.println("############################## Starting Test: testGroupManagerService ##################################################" );
+        System.out.println("############################## Starting Test: testGroupManagerService ##################################################");
         installCellar();
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
@@ -61,21 +62,27 @@ public class CellarGroupsTest extends CellarTestSupport {
 
     @Test
     public void testGroupsWithChildNodes() throws Exception {
-        System.out.println("############################## Starting Test: testGroupsWithChildNodes ##################################################" );
+        System.out.println("############################## Starting Test: testGroupsWithChildNodes ##################################################");
         installCellar();
         createdChildren = true;
         createCellarChild("child1");
+        if (!waitForInstanceToCluster(2)) {
+            throw new Exception("Failed waiting for second node to connect to cluster..");
+        }
+        String nodesList = executeCommand("instance:connect -u karaf -p karaf child1 cluster:node-list", COMMAND_TIMEOUT, false);
+        System.out.println("Nodes list from other instance " + nodesList);
+        String[] lines = nodesList.split("\\[");
+        assertEquals(3, lines.length);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);
-
         System.err.println(executeCommand("cluster:node-list"));
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
-        Set<Node> nodes = clusterManager.listNodes();
-        assertTrue("There should be at least 2 cellar nodes running", 2 >= nodes.size());
 
         System.err.println(executeCommand("cluster:group-list"));
+        Thread.sleep(COMMAND_TIMEOUT);
         System.err.println(executeCommand("cluster:group-create testgroup "));
+        Thread.sleep(COMMAND_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set testgroup " + localNode.getId()));
+        Thread.sleep(COMMAND_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
 
         GroupManager groupManager = getOsgiService(GroupManager.class);
@@ -84,6 +91,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 
         System.err.println(executeCommand("cluster:group-delete testgroup"));
+        Thread.sleep(COMMAND_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
         groups = groupManager.listAllGroups();
         assertEquals("There should be a single cellar group", 1, groups.size());

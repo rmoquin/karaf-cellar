@@ -58,7 +58,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Dictionary localDictionary = null;
         if (event.getType() != ConfigurationEvent.CM_DELETED) {
             try {
-                Configuration conf = configurationAdmin.getConfiguration(pid, "?");
+                Configuration conf = configurationAdmin.getConfiguration(pid, null);
                 localDictionary = conf.getProperties();
             } catch (Exception e) {
                 LOGGER.error("CELLAR CONFIG: can't retrieve configuration with PID {}", pid, e);
@@ -69,31 +69,37 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
+                if(LOGGER.isInfoEnabled()) {
+                    LOGGER.info("CELLAR CONFIG LISTENER: Retrieving configuration for received group." + group.getName());
+                }
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                 List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
                 List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
                 // check if the pid is allowed for outbound.
                 if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
-
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
-
                     try {
-                        ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                        clusterConfigurationEvent.setSourceGroup(group);
-                        clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
                             // update the configurations in the cluster group
                             clusterConfigurations.remove(pid);
                             // broadcast the cluster event
+							ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                             clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
+							clusterConfigurationEvent.setSourceGroup(group);
+                        	clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+							eventProducer.produce(clusterConfigurationEvent);
                         } else {
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
                             if (!equals(localDictionary, distributedDictionary)) {
                                 // update the configurations in the cluster group
                                 clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
+								ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
+                            clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
+							clusterConfigurationEvent.setSourceGroup(group);
+                        	clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+								eventProducer.produce(clusterConfigurationEvent);
                             }
-                            eventProducer.produce(clusterConfigurationEvent);
                         }
                     } catch (Exception e) {
                         LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {}", pid, group.getName(), e);

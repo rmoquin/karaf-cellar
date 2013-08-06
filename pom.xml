@@ -43,7 +43,7 @@
         <felix.webconsole.version>4.0.0</felix.webconsole.version>
         <felix.annotations.version>1.9.4</felix.annotations.version>
         <felix.scr.plugin.version>1.9.0</felix.scr.plugin.version>
-        <hazelcast.version>3.0-SNAPSHOT</hazelcast.version>
+        <hazelcast.version>3.0</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>

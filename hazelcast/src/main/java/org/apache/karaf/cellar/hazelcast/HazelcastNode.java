@@ -22,20 +22,24 @@ import org.apache.karaf.cellar.core.Node;
  */
 public class HazelcastNode implements Node {
     private String id;
+    private String name;
     private String host;
     private int port;
+    private Member member;
 
     public HazelcastNode() {
     }
     
-    public HazelcastNode(Member hzMember) {
-        this.init(hzMember);
+    public HazelcastNode(Member member) {
+        this.member = member;
+        this.init(member);
     }
 
     public void init(Member hzMember) {
         this.id = hzMember.getUuid();
         this.host = hzMember.getInetSocketAddress().getHostString();
         this.port = hzMember.getInetSocketAddress().getPort();
+        this.name = this.host + ":" + this.port;
     }
 
     public void destroy() {
@@ -96,5 +100,19 @@ public class HazelcastNode implements Node {
      */
     public void setId(String id) {
         this.id = id;
+    }
+
+    /**
+     * @return the member
+     */
+    public Member getMember() {
+        return member;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
     }
 }

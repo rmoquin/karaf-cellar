@@ -17,6 +17,7 @@ package org.apache.karaf.cellar.hazelcast.internal;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Enumeration;
 import org.apache.karaf.cellar.hazelcast.HazelcastBundleListener;
 import org.osgi.framework.Bundle;
@@ -79,8 +80,8 @@ public class BundleClassLoader extends ClassLoader {
         String metainfClazz = name.substring(length);
         LOGGER.warn(metainfClazz);
         if (bundleListener.getResources().containsKey(metainfClazz)) {
-            return bundleListener.getResources().get(metainfClazz).elements();
-        } else {
+            return Collections.enumeration(bundleListener.getResources().get(metainfClazz));
+       } else {
             return bundle.findEntries(name, "*", false);
         }
     }

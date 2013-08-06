@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyOption;
@@ -65,14 +66,14 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      * @return the groupNames
      */
     @Override
-    public List<String> getGroups() {
-        return (List<String>) this.properties.get(GROUPS_PROPERTY);
+    public Set<String> getGroups() {
+        return (Set<String>) this.properties.get(GROUPS_PROPERTY);
     }
 
     /**
      * @param groups the groupNames to set
      */
-    public void setGroups(List<String> groups) {
+    public void setGroups(Set<String> groups) {
         this.properties.put(GROUPS_PROPERTY, groups);
     }
 

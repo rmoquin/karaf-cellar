@@ -17,12 +17,14 @@ import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Handler for the cluster result events.
  */
 public class ResultHandler<R extends Result> implements EventHandler<R> {
-
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ResultHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.result.handler";
 
     private Switch handlerSwitch = new BasicSwitch(SWITCH_ID);
@@ -35,10 +37,11 @@ public class ResultHandler<R extends Result> implements EventHandler<R> {
      */
     @Override
     public void handle(R result) {
+        LOGGER.warn("In result handle seeing if there is a pending result to handle.");
         if (commandStore != null && commandStore.getPending() != null) {
             String id = result.getId();
             Command command = commandStore.getPending().get(id);
-
+            LOGGER.warn("Retrieved pending command, handler status is {} and command is {}.", handlerSwitch.getStatus(), command);
             if (command != null && handlerSwitch.getStatus().equals(SwitchStatus.ON)) {
                 command.addResults(result);
             }
