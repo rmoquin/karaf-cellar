@@ -52,10 +52,10 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
     }
 
     @Override
-    public long pingNode(String nodeId) throws Exception {
-        Node node = clusterManager.findNodeById(nodeId);
+    public long pingNode(String nodeName) throws Exception {
+        Node node = clusterManager.findNodeByName(nodeName);
         if (node == null) {
-            throw new IllegalArgumentException("Cluster group " + nodeId + " doesn't exist");
+            throw new IllegalArgumentException("Cluster group " + nodeName + " doesn't exist");
         }
         Long start = System.currentTimeMillis();
         Ping ping = new Ping(clusterManager.generateId());

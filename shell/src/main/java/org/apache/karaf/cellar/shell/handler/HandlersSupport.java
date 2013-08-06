@@ -32,17 +32,17 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
     protected static final String HEADER_FORMAT = "   %-30s   %-5s  %s";
     protected static final String OUTPUT_FORMAT = "%1s [%-30s] [%-5s] %s";
 
-    protected Object doExecute(String handlerName, List<String> nodeIds, Boolean status) throws Exception {
+    protected Object doExecute(String handlerName, List<String> nodeNames, Boolean status) throws Exception {
 
         ManageHandlersCommand command = new ManageHandlersCommand(clusterManager.generateId());
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
-        if (nodeIds != null && !nodeIds.isEmpty()) {
-            for (String nodeId : nodeIds) {
-                Node node = clusterManager.findNodeById(nodeId);
+        if (nodeNames != null && !nodeNames.isEmpty()) {
+            for (String nodeName : nodeNames) {
+                Node node = clusterManager.findNodeByName(nodeName);
                 if (node == null) {
-                    System.err.println("Cluster node " + nodeId + " doesn't exist");
+                    System.err.println("Cluster node " + nodeName + " doesn't exist");
                 } else {
                     recipientList.add(node);
                 }
@@ -82,7 +82,7 @@ public abstract class HandlersSupport extends ClusterCommandSupport {
                     for (Map.Entry<String, String> handlerEntry : result.getHandlers().entrySet()) {
                         String handler = handlerEntry.getKey();
                         String s = handlerEntry.getValue();
-                        System.out.println(String.format(OUTPUT_FORMAT, local, node.getId(), s, handler));
+                        System.out.println(String.format(OUTPUT_FORMAT, local, node.getName(), s, handler));
                     }
                 }
             }

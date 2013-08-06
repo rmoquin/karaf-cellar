@@ -339,11 +339,9 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
 
         Map<String, Group> groupMap = listGroups();
         Collection<Group> groupCollection = groupMap.values();
-        if (groupCollection != null && !groupCollection.isEmpty()) {
-            for (Group group : groupCollection) {
-                if (group.getNodes().contains(node)) {
-                    result.add(group);
-                }
+        for (Group group : groupCollection) {
+            if (group.getNodes().contains(node)) {
+                result.add(group);
             }
         }
         return result;
@@ -359,11 +357,9 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         Set<String> names = new HashSet<String>();
         Map<String, Group> groups = listGroups();
 
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups.values()) {
-                if (group.getNodes().contains(node)) {
-                    names.add(group.getName());
-                }
+        for (Group group : groups.values()) {
+            if (group.getNodes().contains(node)) {
+                names.add(group.getName());
             }
         }
         return names;

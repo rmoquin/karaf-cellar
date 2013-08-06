@@ -43,11 +43,12 @@ public class HazelcastNode implements Node {
     }
 
     public void destroy() {
+        this.member = null;
     }
 
     @Override
     public String getId() {
-        return this.id;
+        return this.member.getUuid();
     }
 
     @Override

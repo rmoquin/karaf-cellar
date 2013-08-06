@@ -25,7 +25,6 @@ import java.util.Set;
  * @author rmoquin
  */
 public interface CellarCluster {
-
     /**
      * Get a map in the cluster.
      *
@@ -74,13 +73,29 @@ public interface CellarCluster {
     public Node findNodeById(String id);
 
     /**
+     * Get a node identified by a given name.
+     *
+     * @param name the name of the node to look for.
+     * @return the node.
+     */
+    public Node findNodeByName(String name);
+
+    /**
      * Returns whether or not this cluster contains a node with the specified id.
      *
      * @param id the node ID.
      * @return true if there is a node with that id.
      */
     public boolean hasNodeWithId(String id);
-            
+
+    /**
+     * Returns whether or not this cluster contains a node with the specified name.
+     *
+     * @param name the node name.
+     * @return true if there is a node with that name.
+     */
+    boolean hasNodeWithName(String name);
+
     /**
      * Get the local node.
      *
@@ -99,6 +114,6 @@ public interface CellarCluster {
      * @return the cluster Name
      */
     public String getName();
-    
+
     void shutdown();
 }

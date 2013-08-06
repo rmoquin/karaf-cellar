@@ -37,11 +37,10 @@ public class ResultHandler<R extends Result> implements EventHandler<R> {
      */
     @Override
     public void handle(R result) {
-        LOGGER.warn("In result handle seeing if there is a pending result to handle.");
         if (commandStore != null && commandStore.getPending() != null) {
             String id = result.getId();
             Command command = commandStore.getPending().get(id);
-            LOGGER.warn("Retrieved pending command, handler status is {} and command is {}.", handlerSwitch.getStatus(), command);
+
             if (command != null && handlerSwitch.getStatus().equals(SwitchStatus.ON)) {
                 command.addResults(result);
             }

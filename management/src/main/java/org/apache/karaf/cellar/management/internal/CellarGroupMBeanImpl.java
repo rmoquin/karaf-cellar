@@ -54,10 +54,10 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
     @Override
     public void delete(String name) throws Exception {
         Group g = groupManager.findGroupByName(name);
-            List<String> nodes = new ArrayList<String>();
+        List<String> nodes = new ArrayList<String>();
         if (g.getNodes() != null && !g.getNodes().isEmpty()) {
             for (Node n : g.getNodes()) {
-                nodes.add(n.getId());
+                nodes.add(n.getName());
             }
             ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
             command.setAction(ManageGroupAction.QUIT);
@@ -70,15 +70,15 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
     }
 
     @Override
-    public void join(String groupName, String nodeId) throws Exception {
+    public void join(String groupName, String nodeName) throws Exception {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-        Node node = clusterManager.findNodeById(nodeId);
+        Node node = clusterManager.findNodeByName(nodeName);
         if (node == null) {
-            throw new IllegalArgumentException("Cluster node " + nodeId + " doesn't exist");
+            throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
         }
         Set<Node> nodes = new HashSet<Node>();
         nodes.add(node);
@@ -92,15 +92,15 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
     }
 
     @Override
-    public void quit(String groupName, String nodeId) throws Exception {
+    public void quit(String groupName, String nodeName) throws Exception {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-        Node node = clusterManager.findNodeById(nodeId);
+        Node node = clusterManager.findNodeByName(nodeName);
         if (node == null) {
-            throw new IllegalArgumentException("Cluster node " + nodeId + " doesn't exist");
+            throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
         }
         Set<Node> nodes = new HashSet<Node>();
         nodes.add(node);
@@ -130,8 +130,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             StringBuilder members = new StringBuilder();
             for (Node node : group.getNodes()) {
                 // display only up and running nodes in the cluster
-                if (clusterManager.findNodeById(node.getId()) != null) {
-                    members.append(node.getId());
+                if (clusterManager.findNodeByName(node.getName()) != null) {
+                    members.append(node.getName());
                     members.append(" ");
                 }
             }
@@ -159,11 +159,11 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
     public void setExecutionContext(ExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
-    
+
     public GroupManager getGroupManager() {
         return this.groupManager;
     }
-    
+
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
     }

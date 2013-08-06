@@ -69,9 +69,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                if(LOGGER.isInfoEnabled()) {
-                    LOGGER.info("CELLAR CONFIG LISTENER: Retrieving configuration for received group." + group.getName());
-                }
+                    LOGGER.info("CELLAR CONFIG LISTENER: Retrieving configuration for received group {}", group.getName());
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                 List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
                 List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();

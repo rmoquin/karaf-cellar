@@ -192,7 +192,7 @@ public class CellarTestSupport {
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
             //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.aries.blueprint", "DEBUG"),
             //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar", "DEBUG"),
-            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN"), };
+            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN") };
         String debug = System.getProperty("debugMain");
         if (debug != null) {
             int l = options.length;

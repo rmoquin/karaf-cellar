@@ -59,7 +59,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         try {
             this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));
             this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-            this.memberNodes.put(this.localNode.getId(), this.localNode);
+            this.memberNodes.put(this.localNode.getName(), this.localNode);
             this.memberListenerId = instance.getCluster().addMembershipListener(this);
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
@@ -111,11 +111,11 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      * @return a Set containing the nodes.
      */
     @Override
-    public Set<Node> listNodes(Collection<String> ids) {
+    public Set<Node> listNodes(Collection<String> names) {
         Set<Node> nodes = new HashSet<Node>();
-        if (ids != null && !ids.isEmpty()) {
-            for (String id : ids) {
-                Node node = this.memberNodes.get(id);
+        if (names != null && !names.isEmpty()) {
+            for (String name : names) {
+                Node node = this.memberNodes.get(name);
                 if (node != null) {
                     nodes.add(node);
                 }
@@ -139,6 +139,19 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     }
 
     /**
+     * Get a node with a given name..
+     *
+     * @param name the node name.
+     * @return the node.
+     */
+    public Node findNodeByName(String name) {
+        if (name != null) {
+            return this.memberNodes.get(name);
+        }
+        return null;
+    }
+
+    /**
      * Returns whether or not this cluster contains a node with the specified id.
      *
      * @param id the node ID.
@@ -148,6 +161,20 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public boolean hasNodeWithId(String id) {
         if (id != null) {
             return this.memberNodes.containsKey(id);
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether or not this cluster contains a node with the specified name.
+     *
+     * @param name the node name.
+     * @return true if there is a node with that name.
+     */
+    @Override
+    public boolean hasNodeWithName(String name) {
+        if (name != null) {
+            return this.memberNodes.containsKey(name);
         }
         return false;
     }
@@ -169,13 +196,21 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
         HazelcastNode newNode = new HazelcastNode(member);
-        this.memberNodes.put(newNode.getId(), newNode);
+        this.memberNodes.put(newNode.getName(), newNode);
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         String uuid = membershipEvent.getMember().getUuid();
-        HazelcastNode node = this.memberNodes.remove(uuid);
+        HazelcastNode node = null;
+        for (Map.Entry<String, HazelcastNode> entry : memberNodes.entrySet()) {
+            String string = entry.getKey();
+            HazelcastNode hazelcastNode = entry.getValue();
+            if(uuid.equals(node.getId())) {
+                node = hazelcastNode;
+            }
+        }
+        this.memberNodes.remove(node.getName());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Node , " + uuid + ", left cluster, " + this.name + ".");
         }

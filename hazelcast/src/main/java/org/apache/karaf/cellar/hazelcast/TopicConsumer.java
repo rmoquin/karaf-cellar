@@ -63,9 +63,9 @@ public class TopicConsumer<E extends Event> implements EventConsumer<E>, Message
         if ((event.getDestinations() == null || event.getDestinations().contains(masterCluster.getLocalNode())) && (this.getSwitch().getStatus().equals(SwitchStatus.ON) || event.getForce())) {
             dispatcher.dispatch(event);
         } else if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR HAZELCAST: {} switch is OFF, cluster event is not consumed", SWITCH_ID);
+            LOGGER.warn("CELLAR HAZELCAST: {} switch is OFF, cluster event is not consumed {}", SWITCH_ID);
         } else {
-            LOGGER.warn("The received event will not be processed: " + event.toString());
+            LOGGER.warn("The received event will not be processed {}", event.toString());
         }
     }
 

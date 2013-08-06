@@ -42,12 +42,12 @@ public abstract class GroupSupport extends ClusterCommandSupport {
      *
      * @param action the group action to perform.
      * @param group the cluster group name.
-     * @param nodeIds the node IDs.
+     * @param nodeNames the node IDs.
      * @param suppressOutput true to display command output, false else.
      * @return the Object resulting of the command execution.
      * @throws Exception in case of execution failure.
      */
-    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodeIds, Boolean suppressOutput) throws Exception {
+    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodeNames, Boolean suppressOutput) throws Exception {
 
         ManageGroupCommand command = new ManageGroupCommand(clusterManager.generateId());
         if (source == null) {
@@ -56,11 +56,11 @@ public abstract class GroupSupport extends ClusterCommandSupport {
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
-        if (nodeIds != null && !nodeIds.isEmpty()) {
-            for (String nodeId : nodeIds) {
-                Node node = clusterManager.findNodeById(nodeId);
+        if (nodeNames != null && !nodeNames.isEmpty()) {
+            for (String nodeName : nodeNames) {
+                Node node = clusterManager.findNodeByName(nodeName);
                 if (node == null) {
-                    System.err.println("Cluster node " + nodeId + " doesn't exist");
+                    System.err.println("Cluster node " + nodeName + " doesn't exist");
                 } else {
                     recipientList.add(node);
                 }
@@ -108,8 +108,8 @@ public abstract class GroupSupport extends ClusterCommandSupport {
                 String mark = " ";
                 for (Node member : g.getNodes()) {
                     // display only up and running nodes in the cluster
-                    if (clusterManager.findNodeById(member.getId()) != null) {
-                        buffer.append(member.getId());
+                    if (clusterManager.findNodeByName(member.getName()) != null) {
+                        buffer.append(member.getName());
                         if (member.equals(clusterManager.getMasterCluster().getLocalNode())) {
                             mark = "*";
                             buffer.append(mark);

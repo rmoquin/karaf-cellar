@@ -33,9 +33,9 @@ public abstract class NodeCompleterSupport implements Completer {
         try {
             for (Node node : clusterManager.listNodes()) {
                 if (acceptsNode(node)) {
-                    String id = node.getId();
-                    if (delegate.getStrings() != null && !delegate.getStrings().contains(id)) {
-                        delegate.getStrings().add(id);
+                    String name = node.getName();
+                    if (delegate.getStrings() != null && !delegate.getStrings().contains(name)) {
+                        delegate.getStrings().add(name);
                     }
                 }
             }

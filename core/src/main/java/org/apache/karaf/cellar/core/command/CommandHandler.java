@@ -39,7 +39,7 @@ public abstract class CommandHandler<C extends Command<R>, R extends Result> imp
     public void handle(C command) {
         if (producer != null) {
             R result = execute(command);
-            LOGGER.info("Command handler result: " + result + " and source node: " + command.getSourceNode());
+
             Set<Node> destination = new HashSet<Node>();
             destination.add(command.getSourceNode());
 

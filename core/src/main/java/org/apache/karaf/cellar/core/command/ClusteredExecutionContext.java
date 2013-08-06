@@ -57,18 +57,15 @@ public class ClusteredExecutionContext implements ExecutionContext {
      */
     @Override
     public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws StoreNotFoundException, ProducerNotFoundException, InterruptedException {
-        LOGGER.warn("In execute method with command: " + command);
         if (command == null) {
             throw new StoreNotFoundException("Command store not found");
         } else {
-            LOGGER.warn("Putting into command store if pending: {} " + commandStore.getPending().get(command.getId()), commandStore.getPending().get(command.getId()));
             commandStore.getPending().put(command.getId(), command);
             TimeoutTask timeoutTask = new TimeoutTask(command, commandStore);
             timeoutScheduler.schedule(timeoutTask, command.getTimeout(), TimeUnit.MILLISECONDS);
         }
 
         if (producer != null) {
-            LOGGER.warn("Sending command via producer: " + command);
             producer.produce(command);
             return command.getResult();
         } else {

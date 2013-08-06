@@ -129,11 +129,43 @@ public class HazelcastClusterManager implements ClusterManager {
         return nodeList;
     }
 
+    /**
+     * Get the nodes with given names.
+     *
+     * @param names a collection of IDs to look for.
+     * @return a Set containing the nodes.
+     */
+    @Override
+    public Set<Node> listNodesByName(Collection<String> names) {
+        Set<Node> nodeList = new HashSet<Node>();
+        if (names != null && !names.isEmpty()) {
+            Set<Node> nodes = this.masterCluster.listNodes();
+            for (Node node : nodes) {
+                if (names.contains(node.getName())) {
+                    nodeList.add(node);
+                }
+            }
+        }
+        return nodeList;
+    }
+
     @Override
     public Node findNodeById(String nodeId) {
         for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
             CellarCluster cellarCluster = it.next();
             Node node = cellarCluster.findNodeById(nodeId);
+            if (node != null) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Node findNodeByName(String nodeName) {
+        for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
+            CellarCluster cellarCluster = it.next();
+            Node node = cellarCluster.findNodeById(nodeName);
             if (node != null) {
                 return node;
             }

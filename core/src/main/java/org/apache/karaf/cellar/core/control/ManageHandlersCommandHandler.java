@@ -84,7 +84,6 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
                 }
             }
         }
-        LOGGER.warn("Manage handlers response, {}", result);
         return result;
     }
 

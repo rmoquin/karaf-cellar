@@ -75,6 +75,14 @@ public interface ClusterManager {
     public Node findNodeById(String id);
 
     /**
+     * Get a node identified by a given name.
+     *
+     * @param name the name of the node to look for.
+     * @return the node.
+     */
+    public Node findNodeByName(String name);
+
+    /**
      * Look for a cluster with a given name.
      *
      * @param clusterName the cluster name to look for.
@@ -93,4 +101,12 @@ public interface ClusterManager {
      * @return the masterCluster
      */
     CellarCluster getMasterCluster();
+
+    /**
+     * Get the nodes with given names.
+     *
+     * @param names a collection of IDs to look for.
+     * @return a Set containing the nodes.
+     */
+    Set<Node> listNodesByName(Collection<String> names);
 }

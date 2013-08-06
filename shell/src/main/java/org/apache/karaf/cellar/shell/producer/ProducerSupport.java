@@ -32,17 +32,17 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
     protected static final String HEADER_FORMAT = "   %-30s   %-5s";
     protected static final String OUTPUT_FORMAT = "%1s [%-30s] [%-5s]";
 
-    protected Object doExecute(List<String> nodeIds, SwitchStatus status) throws Exception {
+    protected Object doExecute(List<String> nodeNames, SwitchStatus status) throws Exception {
 
         ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
-        if (nodeIds != null && !nodeIds.isEmpty()) {
-            for (String nodeId : nodeIds) {
-                Node node = clusterManager.findNodeById(nodeId);
+        if (nodeNames != null && !nodeNames.isEmpty()) {
+            for (String nodeName : nodeNames) {
+                Node node = clusterManager.findNodeByName(nodeName);
                 if (node == null) {
-                    System.err.println("Cluster node " + nodeId + " doesn't exist");
+                    System.err.println("Cluster node " + nodeName + " doesn't exist");
                 } else {
                     recipientList.add(node);
                 }
@@ -79,7 +79,7 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
                 if (result.getStatus()) {
                     statusString = "ON";
                 }
-                System.out.println(String.format(OUTPUT_FORMAT, local, node.getId(), statusString));
+                System.out.println(String.format(OUTPUT_FORMAT, local, node.getName(), statusString));
             }
         }
         return null;

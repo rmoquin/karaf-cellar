@@ -61,6 +61,10 @@ public class HazelcastConfigurationManager {
         if (hzClassLoader != null) {
             cfg.setClassLoader(hzClassLoader);
         }
+		GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
+        globalConfig.setClassName("java.lang.Object");
+        globalConfig.setImplementation(new GenericCellarSerializer());
+        cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);

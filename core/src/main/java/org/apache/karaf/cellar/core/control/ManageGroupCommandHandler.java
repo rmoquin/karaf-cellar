@@ -42,7 +42,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
 
     @Override
     public ManageGroupResult execute(ManageGroupCommand command) {
-        LOGGER.warn("Executing managed group command: " + command);
+
         ManageGroupResult result = new ManageGroupResult(command.getId());
         ManageGroupAction action = command.getAction();
 
@@ -78,7 +78,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      */
     public void addGroupListToResult(ManageGroupResult result) {
         Set<Group> groups = groupManager.listAllGroups();
-        LOGGER.info("Groups to add to manage group command result list: " + groups);
+
         for (Group g : groups) {
             if (g.getName() != null && !g.getName().isEmpty()) {
                 result.getGroups().add(g);
@@ -108,7 +108,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * Remove {@link Node} from all {@link Group}s.
      */
     public void purgeGroups() {
-        this.groupManager.deregisterNodeFromAllGroups();
+        this.groupManager.deregisterNode();;
     }
 
     @Override

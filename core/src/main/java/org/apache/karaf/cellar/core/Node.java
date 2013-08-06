@@ -41,4 +41,9 @@ public interface Node extends Serializable {
      */
     public int getPort();
 
+    /**
+     * @return the name
+     */
+    String getName();
+
 }
