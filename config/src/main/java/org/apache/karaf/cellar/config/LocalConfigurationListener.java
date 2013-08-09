@@ -71,6 +71,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
             for (Group group : groups) {
                     LOGGER.info("CELLAR CONFIG LISTENER: Retrieving configuration for received group {}", group.getName());
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                if(groupConfig == null) {
                 List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
                 List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
                 // check if the pid is allowed for outbound.
@@ -100,10 +101,13 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             }
                         }
                     } catch (Exception e) {
-                        LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {}", pid, group.getName(), e);
+                        LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {} {}", pid, group.getName(), e);
                     }
                 } else {
-                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, group.getName());
+                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {} {}", pid, group.getName());
+                }
+                } else {
+                    LOGGER.error("CELLAR CONFIG: No configuration is available yet for group {} {} ", pid, group.getName());
                 }
             }
         }

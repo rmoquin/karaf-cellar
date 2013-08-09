@@ -349,7 +349,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Attempting to delete group configuration: " + groupName);
         }
-        Configuration[] configurations = configurationAdmin.listConfigurations("service.pid = " + pid);
+        Configuration[] configurations = configurationAdmin.listConfigurations("service.pid = (" + pid + ")");
         //Shouldn't ever be more than one but just in case.
         for (Configuration configuration : configurations) {
             configuration.delete();
