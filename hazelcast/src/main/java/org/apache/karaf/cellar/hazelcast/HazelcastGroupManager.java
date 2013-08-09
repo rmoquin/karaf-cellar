@@ -19,7 +19,6 @@ import java.util.*;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.EntryListener;
 import com.hazelcast.core.IMap;
-import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
@@ -43,7 +42,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
     private NodeConfiguration nodeConfiguration;
     private List<GroupConfiguration> groupMemberships;
     private final Map<String, String> pidGroupNameMap = new HashMap<String, String>();
-    private CellarCluster masterCluster;
+    private HazelcastCluster masterCluster;
     private ConfigurationAdmin configurationAdmin;
 
     public void init() {
@@ -52,12 +51,10 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
     }
 
     public void destroy() {
-        Map<String, Group> groupMap = listGroups();
-        for (Map.Entry<String, Group> entry : groupMap.entrySet()) {
-            Group group = entry.getValue();
-            if (group.getNodes().remove(this.getNode())) {
-                this.updateGroupInStore(group);
-            }
+        try {
+            this.removeNodeFromAllGroups(false);
+        } catch (IOException ex) {
+            LOGGER.error("Error trying to deregister node from all groups for shutdown.", ex);
         }
     }
 
@@ -74,7 +71,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
             for (Iterator<String> it = groupList.iterator(); it.hasNext();) {
                 String groupName = it.next();
                 if (this.pidGroupNameMap.containsKey(groupName)) {
-                    registerNodeToGroup(groupName);
+                    addNodeToGroupStore(groupName);
                 } else {
                     LOGGER.warn("No configuration exists yet for group {}, node will be added when it does.", groupName);
                 }
@@ -90,10 +87,14 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
      * @param node the node configuration.
      * @param properties the node service properties.
      */
-    public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) {
+    public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) throws ConfigurationException {
         if (this.nodeConfiguration != null) {
+            try {
+                removeAllGroupsFromNodeConfiguration();
+            } catch (IOException ex) {
+                throw new ConfigurationException(null, "Error when attempting to deregister node from all groups.", ex);
+            }
             this.nodeConfiguration = null;
-            this.deregisterNode();
         } else {
             LOGGER.info("No node was configured to remove, skipping.");
         }
@@ -113,9 +114,9 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         pidGroupNameMap.put(groupName, servicePid);
         LOGGER.warn("A new group is being registered: {}", groupName);
         if (nodeConfiguration != null) {
-            if (!nodeConfiguration.getGroups().contains(groupName)) {
+            if (nodeConfiguration.getGroups().contains(groupName)) {
                 try {
-                    registerNodeToGroup(groupName);
+                    this.addNodeToGroupStore(groupName);
                 } catch (Exception ex) {
                     throw new ConfigurationException(null, "Error when attempting to register the node to group " + groupName, ex);
                 }
@@ -137,34 +138,25 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         } else {
             LOGGER.info("Group to remove has null pid, skipping.");
         }
-        if (group != null) {
-            deregisterNodeFromGroup(group.getName());
+        if (group != null && nodeConfiguration.getGroups().contains(group.getName())) {
+            removeNodeFromGroupStore(group.getName());
         } else {
             LOGGER.info("Group to remove was so can't deregister it, skipping.");
         }
     }
 
-    /**
-     * Creates a group configuration which will trigger an update that will actually create the group.
-     *
-     * @param groupName the name of the group.
-     * @throws IOException
-     * @throws ConfigurationException
-     */
     @Override
     public void createGroup(String groupName) throws IOException, ConfigurationException {
         if (pidGroupNameMap.containsKey(groupName)) {
             LOGGER.warn("Group can't be created because it already exists: + " + groupName);
             throw new ConfigurationException(GroupConfigurationImpl.GROUP_NAME_PROPERTY, "The group cannot be created because one already exists with name: " + groupName);
         }
+        this.createNewGroupConfiguration(groupName);
+    }
 
-        Configuration configuration = configurationAdmin.createFactoryConfiguration(GroupConfiguration.class.getCanonicalName(), "?");
-        Dictionary<String, Object> properties = configuration.getProperties();
-        if (properties == null) {
-            properties = new Hashtable<String, Object>();
-            properties.put(GroupConfigurationImpl.GROUP_NAME_PROPERTY, groupName);
-            configuration.update(properties);
-        }
+    @Override
+    public void deleteGroup(String groupName) throws IOException, InvalidSyntaxException {
+        this.deleteGroupConfiguration(groupName);
     }
 
     /**
@@ -175,43 +167,167 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
     @Override
     public void joinGroup(String groupName) {
         try {
-            if (!nodeConfiguration.getGroups().contains(groupName)) {
-                this.registerNodeToGroup(groupName);
-            }
+            this.addNodeToGroupStore(groupName);
         } catch (IOException e) {
             LOGGER.error("CELLAR HAZELCAST: failed to join local node to group, " + groupName, e);
         }
     }
 
-    protected void registerNodeToGroup(String groupName) throws IOException {
-        nodeConfiguration.getGroups().add(groupName);
-        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-        configuration.update(nodeConfiguration.getProperties());
-        Group group = listGroups().get(groupName);
-        if (!group.getNodes().contains(this.getNode())) {
-            group.getNodes().add(this.getNode());
-            this.updateGroupInStore(group);
-        }
-    }
-
-    protected void removeNodeFromAllGroups() {
-        Map<String, Group> groupMap = listGroups();
-        for (Map.Entry<String, Group> entry : groupMap.entrySet()) {
-            Group group = entry.getValue();
-            if (group.getNodes().remove(this.getNode())) {
-                this.updateGroupInStore(group);
-            }
-        }
+    /**
+     * Removes all the groups from the this nodes configuration which triggers the appropriate deregistration actions to
+     * be done.
+     *
+     * @param groupName
+     */
+    @Override
+    public void deregisterNodeFromGroup(String groupName) throws IOException {
+        this.removeGroupFromNodeConfiguration(groupName);
     }
 
     /**
-     * Removes a group from the Configuration Admin, which will trigger this node to be removed from the node.
-     *
-     * @param groupName the group name
-     * @throws IOException if an IO exception occurs.
-     * @throws InvalidSyntaxException if the group cannot be found using specified filter.
+     * Removes all the groups from this nodes configuration which triggers the appropriate deregistration actions to be
+     * done.
      */
-    protected void removeGroup(String groupName) throws IOException, InvalidSyntaxException {
+    @Override
+    public void deregisterNodeFromAllGroups() throws IOException {
+        this.removeNodeFromAllGroups(false);
+    }
+
+    @Override
+    public Node getNode() {
+        return masterCluster.getLocalNode();
+    }
+
+    @Override
+    public Set<Group> listLocalGroups() {
+        return listGroups(getNode());
+    }
+
+    protected Group addGrouptoStore(Group group) {
+        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+        return map.putIfAbsent(group.getName(), group);
+    }
+
+    protected void addNodeToGroupStore(String groupName) throws IOException {
+        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+        map.lock(groupName);
+        Group group = map.get(groupName);
+        group.addNode(getNode());
+        map.unlock(groupName);
+        this.addGroupToNodeConfiguration(groupName);
+    }
+
+    protected void removeNodeFromGroupStore(String groupName) {
+        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+        map.lock(groupName);
+        Group group = map.get(groupName);
+        group.removeNode(getNode());
+        map.unlock(groupName);
+    }
+
+    protected void removeNodeFromAllGroups(boolean saveNodeConfig) throws IOException {
+        IMap<String, Group> map = getGroupMapStore();
+        Set<String> groupNames = nodeConfiguration.getGroups();
+        for (Iterator<String> it = groupNames.iterator(); it.hasNext();) {
+            String groupName = it.next();
+            map.lock(groupName);
+            Group group = map.get(groupName);
+            group.addNode(getNode());
+            map.unlock(groupName);
+        }
+        if (saveNodeConfig) {
+            this.removeAllGroupsFromNodeConfiguration();
+        }
+    }
+
+    @Override
+    public boolean isLocalGroup(String groupName) {
+        return nodeConfiguration.getGroups().contains(groupName);
+    }
+
+    @Override
+    public Set<Group> listAllGroups() {
+        return new HashSet<Group>(getGroupMapStore().values());
+    }
+
+    @Override
+    public Group findGroupByName(String groupName) {
+        IMap<String, Group> map = getGroupMapStore();
+        return map.get(groupName);
+    }
+
+    @Override
+    public GroupConfiguration findGroupConfigurationByName(String groupName) {
+        for (GroupConfiguration groupConfiguration : groupMemberships) {
+            if (groupConfiguration.getName().equals(groupName)) {
+                return groupConfiguration;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Map<String, Group> listGroups() {
+        return getGroupMapStore();
+    }
+
+    @Override
+    public Set<Group> listGroups(Node node) {
+        Set<Group> result = new HashSet<Group>();
+
+        IMap<String, Group> map = getGroupMapStore();
+        Set<String> groupNames = nodeConfiguration.getGroups();
+        for (Iterator<String> it = groupNames.iterator(); it.hasNext();) {
+            String groupName = it.next();
+            Group group = map.get(groupName);
+            result.add(group);
+        }
+        return result;
+    }
+
+    @Override
+    public Set<String> getJoinedGroupNames() {
+        return this.nodeConfiguration.getGroups();
+    }
+
+    @Override
+    public Set<String> listGroupNames(Node node) {
+        return nodeConfiguration.getGroups();
+    }
+
+    private IMap<String, Group> getGroupMapStore() {
+        return masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+    }
+
+    private void addGroupToNodeConfiguration(String groupName) throws IOException {
+        nodeConfiguration.getGroups().add(groupName);
+        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+        configuration.update(nodeConfiguration.getProperties());
+    }
+
+    private void removeGroupFromNodeConfiguration(String groupName) throws IOException {
+        nodeConfiguration.getGroups().remove(groupName);
+        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+        configuration.update(nodeConfiguration.getProperties());
+    }
+
+    private void removeAllGroupsFromNodeConfiguration() throws IOException {
+        nodeConfiguration.getGroups().clear();
+        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+        configuration.update(nodeConfiguration.getProperties());
+    }
+
+    protected void createNewGroupConfiguration(String groupName) throws IOException {
+        Configuration configuration = configurationAdmin.createFactoryConfiguration(GroupConfiguration.class.getCanonicalName(), "?");
+        Dictionary<String, Object> properties = configuration.getProperties();
+        if (properties == null) {
+            properties = new Hashtable<String, Object>();
+            properties.put(GroupConfigurationImpl.GROUP_NAME_PROPERTY, groupName);
+            configuration.update(properties);
+        }
+    }
+
+    protected void deleteGroupConfiguration(String groupName) throws IOException, InvalidSyntaxException {
         String pid = pidGroupNameMap.get(groupName);
         if (pid == null) {
             LOGGER.warn("Group can't be deleted because it doesn't exist: + " + groupName);
@@ -228,148 +344,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         pidGroupNameMap.remove(pid);
     }
 
-    /**
-     * Removes all the groups from the this nodes configuration which triggers the appropriate deregistration actions to
-     * be done.
-     *
-     * @param groupName
-     */
-    @Override
-    public void deregisterNodeFromGroup(String groupName) {
-        if (Configurations.DEFAULT_GROUP_NAME.equals(groupName)) {
-            LOGGER.warn("Cannot deregister node from the default group.");
-            return;
-        }
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-            nodeConfiguration.getGroups().remove(groupName);
-            configuration.update(nodeConfiguration.getProperties());
-            Group group = listGroups().get(groupName);
-            if (group.getNodes().remove(this.getNode())) {
-                this.updateGroupInStore(group);
-            }
-        } catch (IOException e) {
-            LOGGER.error("CELLAR HAZELCAST: failed to remove node from group being removed " + groupName, e);
-        }
-    }
-
-    /**
-     * Removes all the groups from this nodes configuration which triggers the appropriate deregistration actions to be
-     * done.
-     */
-    @Override
-    public void deregisterNode() {
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-            nodeConfiguration.getGroups().clear();
-            nodeConfiguration.getGroups().add(Configurations.DEFAULT_GROUP_NAME);
-            configuration.update(nodeConfiguration.getProperties());
-
-            this.removeNodeFromAllGroups();
-        } catch (IOException e) {
-            LOGGER.error("CELLAR HAZELCAST: failed to remove local node from all it's groups", e);
-        }
-    }
-
-    @Override
-    public String getPidForGroup(String groupName) {
-        return this.pidGroupNameMap.get(groupName);
-    }
-
-    @Override
-    public Node getNode() {
-        return masterCluster.getLocalNode();
-    }
-
-    @Override
-    public Set<Group> listLocalGroups() {
-        return listGroups(getNode());
-    }
-
-    protected void addGrouptoStore(Group group) {
-        masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE).put(group.getName(), group);
-    }
-
-    protected void updateGroupInStore(Group group) {
-        masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE).put(group.getName(), group);
-    }
-
-    protected void removeGroupFromStore(Group group) {
-        masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE).remove(group.getName());
-    }
-
-    protected Map<String, Group> getGroupsFromStore() {
-        return masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
-    }
-
-    @Override
-    public boolean isLocalGroup(String groupName) {
-        return nodeConfiguration.getGroups().contains(groupName);
-    }
-
-    @Override
-    public Set<Group> listAllGroups() {
-        return new HashSet<Group>(listGroups().values());
-    }
-
-    @Override
-    public Group findGroupByName(String groupName) {
-        Map<String, Group> groupMap = listGroups();
-        return groupMap.get(groupName);
-    }
-
-    @Override
-    public GroupConfiguration findGroupConfigurationByName(String groupName) {
-        for (GroupConfiguration groupConfiguration : groupMemberships) {
-            if (groupConfiguration.getName().equals(groupName)) {
-                return groupConfiguration;
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Map<String, Group> listGroups() {
-        return getGroupsFromStore();
-    }
-
-    @Override
-    public Set<Group> listGroups(Node node) {
-        Set<Group> result = new HashSet<Group>();
-
-        Map<String, Group> groupMap = listGroups();
-        Collection<Group> groupCollection = groupMap.values();
-        for (Group group : groupCollection) {
-            if (group.getNodes().contains(node)) {
-                result.add(group);
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public Set<String> getJoinedGroupNames() {
-        return this.nodeConfiguration.getGroups();
-    }
-
-    @Override
-    public Set<String> listGroupNames(Node node) {
-        Set<String> names = new HashSet<String>();
-        Map<String, Group> groups = listGroups();
-
-        for (Group group : groups.values()) {
-            if (group.getNodes().contains(node)) {
-                names.add(group.getName());
-            }
-        }
-        return names;
-    }
-
-    /**
-     * Invoked when an entry is added.
-     *
-     * @param entryEvent entry event
-     */
     @Override
     public void entryAdded(EntryEvent entryEvent) {
         if (LOGGER.isInfoEnabled()) {
@@ -377,11 +351,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         }
     }
 
-    /**
-     * Invoked when an entry is removed.
-     *
-     * @param entryEvent entry event
-     */
     @Override
     public void entryRemoved(EntryEvent entryEvent) {
         if (LOGGER.isInfoEnabled()) {
@@ -389,11 +358,6 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         }
     }
 
-    /**
-     * Invoked when an entry is updated.
-     *
-     * @param entryEvent entry event
-     */
     @Override
     public void entryUpdated(EntryEvent entryEvent) {
         if (LOGGER.isInfoEnabled()) {
@@ -401,68 +365,39 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         }
     }
 
-    /**
-     * Invoked when an entry is evicted.
-     *
-     * @param entryEvent entry event
-     */
     @Override
     public void entryEvicted(EntryEvent entryEvent) {
         entryUpdated(entryEvent);
     }
 
-    /**
-     * @return the masterCluster
-     */
-    public CellarCluster getMasterCluster() {
+    public HazelcastCluster getMasterCluster() {
         return masterCluster;
     }
 
-    /**
-     * @param masterCluster the masterCluster to set
-     */
-    public void setMasterCluster(CellarCluster masterCluster) {
+    public void setMasterCluster(HazelcastCluster masterCluster) {
         this.masterCluster = masterCluster;
     }
 
-    /**
-     * @return the groupMemberships
-     */
     public List<GroupConfiguration> getGroupMemberships() {
         return groupMemberships;
     }
 
-    /**
-     * @param groupMemberships the groupMemberships to set
-     */
     public void setGroupMemberships(List<GroupConfiguration> groupMemberships) {
         this.groupMemberships = groupMemberships;
     }
 
-    /**
-     * @return the configurationAdmin
-     */
     public ConfigurationAdmin getConfigurationAdmin() {
         return configurationAdmin;
     }
 
-    /**
-     * @param configurationAdmin the configurationAdmin to set
-     */
     public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
         this.configurationAdmin = configurationAdmin;
     }
 
-    /**
-     * @return the nodeConfiguration
-     */
     public NodeConfiguration getNodeConfiguration() {
         return nodeConfiguration;
     }
 
-    /**
-     * @param nodeConfiguration the nodeConfiguration to set
-     */
     public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
         this.nodeConfiguration = nodeConfiguration;
     }

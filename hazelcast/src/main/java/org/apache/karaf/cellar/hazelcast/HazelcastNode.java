@@ -20,7 +20,7 @@ import org.apache.karaf.cellar.core.Node;
 /**
  * Cluster node powered by Hazelcast.
  */
-public class HazelcastNode implements Node {
+public class HazelcastNode implements Node<Member> {
     private String id;
     private String name;
     private String host;
@@ -104,16 +104,15 @@ public class HazelcastNode implements Node {
     }
 
     /**
-     * @return the member
-     */
-    public Member getMember() {
-        return member;
-    }
-
-    /**
      * @return the name
      */
+    @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public Member getSource() {
+        return member;
     }
 }

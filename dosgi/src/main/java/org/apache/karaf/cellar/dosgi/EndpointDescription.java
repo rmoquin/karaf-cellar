@@ -19,7 +19,6 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 
-import java.io.Serializable;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -89,6 +88,16 @@ public class EndpointDescription implements MultiNode {
     @Override
     public Set<Node> getNodes() {
         return nodes;
+    }
+
+    @Override
+    public void addNode(Node node){
+        this.nodes.add(node);
+    }
+
+    @Override
+    public boolean removeNode(Node node){
+        return this.nodes.remove(node);
     }
 
     @Override

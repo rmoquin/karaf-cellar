@@ -117,7 +117,7 @@
             <action class="org.apache.karaf.cellar.shell.group.GroupJoinCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -128,7 +128,7 @@
             <action class="org.apache.karaf.cellar.shell.group.GroupQuitCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
             <completers>
                 <ref component-id="localGroupCompleter"/>
@@ -139,7 +139,7 @@
             <action class="org.apache.karaf.cellar.shell.group.GroupSetCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -150,7 +150,7 @@
             <action class="org.apache.karaf.cellar.shell.group.GroupPickCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -160,14 +160,14 @@
             <action class="org.apache.karaf.cellar.shell.group.GroupListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
         </command>
         <command name="cluster/group-create">
             <action class="org.apache.karaf.cellar.shell.group.GroupCreateCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
         </command>
         <command name="cluster/group-delete">
@@ -175,7 +175,7 @@
                 <property name="configurationAdmin" ref="configurationAdmin"/>
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
+                <property name="commandExecutionContext" ref="commandExecutionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -187,6 +187,7 @@
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
+    <reference id="commandExecutionContext" interface="org.apache.karaf.cellar.core.command.CommandExecutionContext"/>
 
     <bean id="allNodesCompleter" class="org.apache.karaf.cellar.core.shell.completer.AllNodesCompleter">
         <property name="clusterManager" ref="clusterManager"/>

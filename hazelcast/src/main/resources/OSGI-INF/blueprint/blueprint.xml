@@ -254,6 +254,14 @@
     </bean>
     
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
+
+    <bean id="commandExecutionContext" class="org.apache.karaf.cellar.hazelcast.internal.CommandExecutionContextImpl"
+          init-method="init" destroy-method="destroy">
+        <property name="name" value="commandExecution"/>
+        <property name="cluster" ref="masterCluster"/>
+    </bean>
+
+    <service ref="commandExecutionContext" interface="org.apache.karaf.cellar.core.command.CommandExecutionContext"/>
     
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
     

@@ -16,6 +16,7 @@ package org.apache.karaf.cellar.hazelcast.factory;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
 import com.hazelcast.config.GlobalSerializerConfig;
+import com.hazelcast.config.SerializerConfig;
 import com.hazelcast.config.TcpIpConfig;
 import java.io.FileNotFoundException;
 import org.apache.karaf.cellar.core.discovery.Discovery;
@@ -26,8 +27,10 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.hazelcast.GenericCellarSerializer;
+import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
+import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
+import org.apache.karaf.cellar.hazelcast.serialization.ManageGroupTaskSerializer;
 
 /**
  * Hazelcast configuration manager.
@@ -63,7 +66,12 @@ public class HazelcastConfigurationManager {
         if (hzClassLoader != null) {
             cfg.setClassLoader(hzClassLoader);
         }
-		GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
+        SerializerConfig serializerConfig = new SerializerConfig();
+        serializerConfig.setImplementation(new ManageGroupTaskSerializer());
+        serializerConfig.setTypeClass(ManageGroupTask.class);
+        cfg.getSerializationConfig().addSerializerConfig(serializerConfig);
+
+        GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
         globalConfig.setImplementation(new GenericCellarSerializer());
         cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);

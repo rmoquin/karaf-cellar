@@ -35,6 +35,26 @@ public class Group implements MultiNode, Serializable {
     public void setName(String name) {
         this.name = name;
     }
+    /**
+     * Removes a node from this group.
+     *
+     * @param node the node to remove
+     * @return true if it was removed (meaning existed), false if not
+     */
+    @Override
+    public boolean removeNode(Node node) {
+        return this.nodes.remove(node);
+    }
+
+    /**
+     * Adds a node to the specified group.
+     *
+     * @param node the node to add
+     */
+    @Override
+    public void addNode(Node node) {
+        this.nodes.add(node);
+    }
 
     @Override
     public Set<Node> getNodes() {

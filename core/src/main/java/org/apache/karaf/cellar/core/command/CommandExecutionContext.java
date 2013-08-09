@@ -1,9 +1,11 @@
 /*
+ * Copyright 2013 The Apache Software Foundation.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,22 +15,23 @@
  */
 package org.apache.karaf.cellar.core.command;
 
-import org.apache.karaf.cellar.core.Node;
-
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Future;
+import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.tasks.GroupTaskResult;
+import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
 
 /**
- * Command execution context.
+ *
+ * @author rmoquin
  */
-public interface ExecutionContext {
+public interface CommandExecutionContext {
 
     /**
-     * Execute {@link Command} and retrieve {@link Result}.
-     *
-     * @param command the command to execute
-     * @return
-     * @throws Exception
+     * @return the name
      */
-    public <R extends Result, C extends Command<R>> Map<Node, R> execute(C command) throws Exception;
+    String getName();
 
+    public Map<Node, Future<GroupTaskResult>> execute(ManageGroupTask command, Set<Node> destinations);
 }

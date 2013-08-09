@@ -24,6 +24,7 @@ import org.apache.karaf.shell.console.completer.StringsCompleter;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.SortedSet;
 
 /**
  * Command completer for the configuration from the cluster.
@@ -42,9 +43,10 @@ public class ClusterConfigCompleter implements Completer {
                 for (String groupName : groups.keySet()) {
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
                     if (clusterConfigurations != null && !clusterConfigurations.isEmpty()) {
+                        SortedSet<String> sortedSet = delegate.getStrings();
                         for (String clusterConfiguration : clusterConfigurations.keySet()) {
-                            if (delegate.getStrings() != null && !delegate.getStrings().contains(clusterConfiguration)) {
-                                delegate.getStrings().add(clusterConfiguration);
+                            if (sortedSet != null && !sortedSet.contains(clusterConfiguration)) {
+                                sortedSet.add(clusterConfiguration);
                             }
                         }
                     }

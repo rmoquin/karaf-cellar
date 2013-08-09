@@ -35,4 +35,18 @@ public interface MultiNode extends Serializable {
      */
     public Set<Node> getNodes();
 
+    /**
+     * Removes a node from this group.
+     *
+     * @param node the node to remove
+     * @return true if it was removed (meaning existed), false if not
+     */
+    public boolean removeNode(Node node);
+
+    /**
+     * Adds a node to the specified group.
+     *
+     * @param node the node to add
+     */
+    public void addNode(Node node);
 }

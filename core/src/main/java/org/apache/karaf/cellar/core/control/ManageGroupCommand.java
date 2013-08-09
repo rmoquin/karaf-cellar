@@ -41,35 +41,4 @@ public class ManageGroupCommand extends Command<ManageGroupResult> {
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
-
-    @Override
-    public int hashCode() {
-        int hash = 3;
-        hash = 97 * hash + (this.action != null ? this.action.hashCode() : 0);
-        hash = 97 * hash + (this.groupName != null ? this.groupName.hashCode() : 0);
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ManageGroupCommand other = (ManageGroupCommand) obj;
-        if (this.action != other.action) {
-            return false;
-        }
-        if ((this.groupName == null) ? (other.groupName != null) : !this.groupName.equals(other.groupName)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "ManageGroupCommand{" + "action=" + action + ", groupName=" + groupName + '}';
-    }
 }

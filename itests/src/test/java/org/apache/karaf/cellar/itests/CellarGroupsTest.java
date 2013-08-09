@@ -19,7 +19,6 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.Node;
 import static org.apache.karaf.cellar.itests.CellarTestSupport.COMMAND_TIMEOUT;
 import org.junit.After;
 import org.junit.Test;
@@ -50,7 +49,6 @@ public class CellarGroupsTest extends CellarTestSupport {
         assertNotNull(clusterManager.getMasterCluster().getLocalNode());
         assertEquals(clusterManager.getMasterCluster().getLocalNode(), clusterManager.getMasterCluster().listNodes().toArray()[0]);
         GroupManager groupManager = getOsgiService(GroupManager.class);
-        assertNotNull(groupManager.getPidForGroup("default"));
         assertTrue(groupManager.getJoinedGroupNames().contains("default"));
         assertTrue(groupManager.isLocalGroup("default"));
         assertNotNull(groupManager.findGroupConfigurationByName("default"));

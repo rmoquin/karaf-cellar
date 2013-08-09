@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.core.control;
 
+import java.io.IOException;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.CommandHandler;
@@ -101,14 +102,18 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the target group to leave.
      */
     public void quitGroup(String targetGroupName) {
-        groupManager.deregisterNodeFromGroup(targetGroupName);
+        try {
+            groupManager.deregisterNodeFromGroup(targetGroupName);
+        } catch (IOException ex) {
+            LOGGER.error("Error while attempting to remove node from group.", ex);
+        }
     }
 
     /**
      * Remove {@link Node} from all {@link Group}s.
      */
-    public void purgeGroups() {
-        this.groupManager.deregisterNode();;
+    public void purgeGroups() throws IOException {
+        this.groupManager.deregisterNodeFromAllGroups();
     }
 
     @Override

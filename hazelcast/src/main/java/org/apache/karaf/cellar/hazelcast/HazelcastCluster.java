@@ -15,12 +15,17 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
+import com.hazelcast.core.ClientService;
 import com.hazelcast.core.DistributedObjectListener;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.ICountDownLatch;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.IList;
+import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.IQueue;
+import com.hazelcast.core.ISemaphore;
 import com.hazelcast.core.ISet;
 import com.hazelcast.core.ITopic;
 import com.hazelcast.core.IdGenerator;
@@ -33,6 +38,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager;
@@ -193,6 +199,30 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
             idgenerator = instance.getIdGenerator(GENERATOR_ID);
         }
         return String.valueOf(idgenerator.newId());
+    }
+
+    public ILock getLock(Object o) {
+        return instance.getLock(o);
+    }
+
+    public IExecutorService getExecutorService(String name) {
+        return instance.getExecutorService(name);
+    }
+
+    public ICountDownLatch getCountDownLatch(String name) {
+        return instance.getCountDownLatch(name);
+    }
+
+    public ISemaphore getSemaphore(String name) {
+        return instance.getSemaphore(name);
+    }
+
+    public ClientService getClientService() {
+        return instance.getClientService();
+    }
+
+    public ConcurrentMap<String, Object> getUserContext() {
+        return instance.getUserContext();
     }
 
     @Override

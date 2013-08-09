@@ -14,9 +14,9 @@
 package org.apache.karaf.cellar.core;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.ConfigurationException;
 
 /**
@@ -106,23 +106,13 @@ public interface GroupManager {
      *
      * @param groupName the group to remove this node from.
      */
-    void deregisterNodeFromGroup(String groupName);
+    public void deregisterNodeFromGroup(String groupName) throws IOException;
 
-    /**
-     * Removes all the groups from this nodes configuration which triggers the appropriate deregistration actions to be
-     * done.
-     */
-    void deregisterNode();
-
-    /**
-     * Gets the pid that identifies this group's configuration from the others.
-     *
-     * @param groupName the group name.
-     * @return the persistent id.
-     */
-    String getPidForGroup(String groupName);
+    public void deregisterNodeFromAllGroups() throws IOException;
 
     void createGroup(String groupName) throws IOException, ConfigurationException;
 
     void joinGroup(String groupName) throws ConfigurationException;
+
+    void deleteGroup(String groupName) throws IOException, InvalidSyntaxException;
 }
