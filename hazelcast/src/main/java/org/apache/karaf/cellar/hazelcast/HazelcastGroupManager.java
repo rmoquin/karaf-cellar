@@ -213,6 +213,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         map.lock(groupName);
         Group group = map.get(groupName);
         group.addNode(getNode());
+        map.put(groupName, group);
         map.unlock(groupName);
         this.addGroupToNodeConfiguration(groupName);
     }
@@ -222,6 +223,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         map.lock(groupName);
         Group group = map.get(groupName);
         group.removeNode(getNode());
+        map.put(groupName, group);
         map.unlock(groupName);
     }
 
@@ -233,6 +235,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
             map.lock(groupName);
             Group group = map.get(groupName);
             group.addNode(getNode());
+            map.put(groupName, group);
             map.unlock(groupName);
         }
         if (saveNodeConfig) {
@@ -300,27 +303,37 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
     }
 
     private void addGroupToNodeConfiguration(String groupName) throws IOException {
-        nodeConfiguration.getGroups().add(groupName);
-        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-        configuration.update(nodeConfiguration.getProperties());
+        if (!nodeConfiguration.getGroups().contains(groupName)) {
+            nodeConfiguration.getGroups().add(groupName);
+            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+            configuration.update(nodeConfiguration.getProperties());
+        }
     }
 
     private void removeGroupFromNodeConfiguration(String groupName) throws IOException {
-        nodeConfiguration.getGroups().remove(groupName);
-        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-        configuration.update(nodeConfiguration.getProperties());
+        if (nodeConfiguration.getGroups().contains(groupName)) {
+            nodeConfiguration.getGroups().remove(groupName);
+            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
+                    .getCanonicalName(), "?");
+            configuration.update(nodeConfiguration.getProperties());
+        }
     }
 
     private void removeAllGroupsFromNodeConfiguration() throws IOException {
-        nodeConfiguration.getGroups().clear();
-        Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-        configuration.update(nodeConfiguration.getProperties());
+        if (nodeConfiguration.getGroups().size() > 0) {
+            nodeConfiguration.getGroups().clear();
+            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
+                    .getCanonicalName(), "?");
+            configuration.update(nodeConfiguration.getProperties());
+        }
     }
 
     protected void createNewGroupConfiguration(String groupName) throws IOException {
-        Configuration configuration = configurationAdmin.createFactoryConfiguration(GroupConfiguration.class.getCanonicalName(), "?");
+        Configuration configuration = configurationAdmin.createFactoryConfiguration(GroupConfiguration.class
+                .getCanonicalName(), "?");
         Dictionary<String, Object> properties = configuration.getProperties();
-        if (properties == null) {
+        if (properties ==
+                null) {
             properties = new Hashtable<String, Object>();
             properties.put(GroupConfigurationImpl.GROUP_NAME_PROPERTY, groupName);
             configuration.update(properties);
