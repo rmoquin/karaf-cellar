@@ -13,14 +13,13 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
  * Cellar cluster group.
  */
-public class Group implements MultiNode, Serializable {
+public class Group implements MultiNode {
     private String name;
     private Set<Node> nodes = new HashSet<Node>();
 
@@ -54,6 +53,16 @@ public class Group implements MultiNode, Serializable {
     @Override
     public void addNode(Node node) {
         this.nodes.add(node);
+    }
+
+    /**
+     * Checks if a node is part of the specified group.
+     *
+     * @param node the node to check
+     */
+    @Override
+    public boolean containsNode(Node node) {
+        return this.nodes.contains(node);
     }
 
     @Override

@@ -49,4 +49,11 @@ public interface MultiNode extends Serializable {
      * @param node the node to add
      */
     public void addNode(Node node);
+
+    /**
+     * Checks if a node is part of the specified group.
+     *
+     * @param node the node to check
+     */
+    public boolean containsNode(Node node);
 }

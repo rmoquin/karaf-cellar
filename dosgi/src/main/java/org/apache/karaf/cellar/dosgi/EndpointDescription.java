@@ -96,6 +96,11 @@ public class EndpointDescription implements MultiNode {
     }
 
     @Override
+    public boolean containsNode(Node node) {
+        return this.nodes.add(node);
+    }
+
+    @Override
     public boolean removeNode(Node node){
         return this.nodes.remove(node);
     }

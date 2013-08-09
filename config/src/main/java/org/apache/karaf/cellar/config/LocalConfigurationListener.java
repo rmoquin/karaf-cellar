@@ -69,45 +69,43 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                    LOGGER.info("CELLAR CONFIG LISTENER: Retrieving configuration for received group {}", group.getName());
+                LOGGER.info("CELLAR CONFIG LISTENER: Retrieving configuration for received group {}", group.getName());
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                if(groupConfig == null) {
-                List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
-                List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
-                // check if the pid is allowed for outbound.
-                if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
-                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
-                    try {
-                        if (event.getType() == ConfigurationEvent.CM_DELETED) {
-                            // update the configurations in the cluster group
-                            clusterConfigurations.remove(pid);
-                            // broadcast the cluster event
-							ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                            clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
-							clusterConfigurationEvent.setSourceGroup(group);
-                        	clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-							eventProducer.produce(clusterConfigurationEvent);
-                        } else {
-                            localDictionary = filter(localDictionary);
-                            Properties distributedDictionary = clusterConfigurations.get(pid);
-                            if (!equals(localDictionary, distributedDictionary)) {
+                if (groupConfig != null) {
+                    List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
+                    // check if the pid is allowed for outbound.
+                    if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
+                        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
+                        try {
+                            if (event.getType() == ConfigurationEvent.CM_DELETED) {
                                 // update the configurations in the cluster group
-                                clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
-								ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                            clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
-							clusterConfigurationEvent.setSourceGroup(group);
-                        	clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-								eventProducer.produce(clusterConfigurationEvent);
+                                clusterConfigurations.remove(pid);
+                                // broadcast the cluster event
+                                ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
+                                clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
+                                clusterConfigurationEvent.setSourceGroup(group);
+                                clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+                                eventProducer.produce(clusterConfigurationEvent);
+                            } else {
+                                localDictionary = filter(localDictionary);
+                                Properties distributedDictionary = clusterConfigurations.get(pid);
+                                if (!equals(localDictionary, distributedDictionary)) {
+                                    // update the configurations in the cluster group
+                                    clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
+                                    ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
+                                    clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
+                                    clusterConfigurationEvent.setSourceGroup(group);
+                                    clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+                                    eventProducer.produce(clusterConfigurationEvent);
+                                }
                             }
+                        } catch (Exception e) {
+                            LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {} {}", pid, group.getName(), e);
                         }
-                    } catch (Exception e) {
-                        LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {} {}", pid, group.getName(), e);
+                    } else {
+                        LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {} {}", pid, group.getName());
                     }
-                } else {
-                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {} {}", pid, group.getName());
-                }
-                } else {
-                    LOGGER.error("CELLAR CONFIG: No configuration is available yet for group {} {} ", pid, group.getName());
                 }
             }
         }

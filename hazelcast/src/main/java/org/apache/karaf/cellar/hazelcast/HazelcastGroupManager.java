@@ -279,10 +279,9 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         Set<Group> result = new HashSet<Group>();
 
         IMap<String, Group> map = getGroupMapStore();
-        Set<String> groupNames = nodeConfiguration.getGroups();
-        for (Iterator<String> it = groupNames.iterator(); it.hasNext();) {
-            String groupName = it.next();
-            Group group = map.get(groupName);
+        for (Iterator<Group> it = map.values().iterator(); it.hasNext();) {
+            Group group = it.next();
+            if(group.containsNode(node))
             result.add(group);
         }
         return result;
@@ -349,7 +348,7 @@ public class HazelcastGroupManager implements GroupManager, EntryListener {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Attempting to delete group configuration: " + groupName);
         }
-        Configuration[] configurations = configurationAdmin.listConfigurations("service.pid = (" + pid + ")");
+        Configuration[] configurations = configurationAdmin.listConfigurations("(service.factoryPid = " + pid + ")");
         //Shouldn't ever be more than one but just in case.
         for (Configuration configuration : configurations) {
             configuration.delete();
