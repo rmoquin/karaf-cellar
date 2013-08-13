@@ -100,6 +100,10 @@ public interface GroupManager {
      */
     public Set<String> listGroupNames(Node node);
 
+    public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException;
+
+    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties);
+
     /**
      * Removes the specified cellar group from the local nodes configuration which triggers the appropriate
      * deregistration actions to be done.
