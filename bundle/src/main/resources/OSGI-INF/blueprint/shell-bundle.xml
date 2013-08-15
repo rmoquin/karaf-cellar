@@ -18,6 +18,7 @@
         <command name="cluster/bundle-list">
             <action class="org.apache.karaf.cellar.bundle.shell.ListBundleCommand">
                 <property name="groupManager" ref="groupManager"/>
+                <property name="clusterManager" ref="clusterManager"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>

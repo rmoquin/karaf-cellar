@@ -17,33 +17,48 @@ package org.apache.karaf.cellar.hazelcast.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import com.hazelcast.nio.serialization.ByteArraySerializer;
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.StreamSerializer;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  *
  * @author rmoquin
  */
-public class GenericCellarSerializer implements ByteArraySerializer<Object> {
-    SmileFactory f = new SmileFactory();
-    ObjectMapper mapper = new ObjectMapper(f);
+public class GenericCellarSerializer<T> implements StreamSerializer<T> {
+    protected static final SmileFactory f = new SmileFactory();
+    protected static final ObjectMapper mapper = new ObjectMapper(f);
+    protected Class<T> clazz;
+    private final int typeId;
+
+    public GenericCellarSerializer(int typeId, Class<T> clazz) {
+        this.clazz = clazz;
+//        mapper.registerModule(new AfterburnerModule().setUseValueClassLoader(false));
+        mapper.registerModule(new CellarTypesModule());
+        this.typeId = typeId;
+    }
 
     @Override
     public int getTypeId() {
-        return 10;
+        return typeId;
+    }
+
+    @Override
+    public void write(ObjectDataOutput out, T object) throws IOException {
+        final OutputStream outputStream = (OutputStream) out;
+        mapper.writeValue(outputStream, object);
+    }
+
+    @Override
+    public T read(ObjectDataInput in) throws IOException {
+        final InputStream inputStream = (InputStream) in;
+        return mapper.readValue(inputStream, clazz);
     }
 
     @Override
     public void destroy() {
-    }
-
-    @Override
-    public byte[] write(Object object) throws IOException {
-        return mapper.writeValueAsBytes(object);
-    }
-
-    @Override
-    public Object read(byte[] buffer) throws IOException {
-        return mapper.readValue(buffer, Object.class);
     }
 }

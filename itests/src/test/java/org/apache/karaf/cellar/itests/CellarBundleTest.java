@@ -14,21 +14,22 @@
 package org.apache.karaf.cellar.itests;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.junit.PaxExam;
 
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class CellarBundleTest extends CellarTestSupport {
     @Test
     //@Ignore
     public void testCellarBundleModule() throws Exception {
 
         installCellar();
-        System.err.println(executeCommand("cluster:bundle-list default"));
+        System.out.println(executeCommand("cluster:bundle-list default"));
     }
 
     @After

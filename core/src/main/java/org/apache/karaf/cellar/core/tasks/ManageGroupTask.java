@@ -26,12 +26,14 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
+import org.slf4j.Logger;
 
 /**
  *
  * @author rmoquin
  */
 public class ManageGroupTask implements Callable<GroupTaskResult> {
+    private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ManageGroupTask.class);
     private ManageGroupAction action;
     private String groupName;
     private Node sourceNode;
@@ -50,6 +52,7 @@ public class ManageGroupTask implements Callable<GroupTaskResult> {
 //        if (Thread.currentThread().isInterrupted()) {
 //            return 0;
 //        }
+        LOGGER.info("Starting execution of the manage group task received from node {}", sourceNode.getName());
         Bundle bundle = FrameworkUtil.getBundle(this.getClass());
         BundleContext bundleContext = bundle.getBundleContext();
         ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences(GroupManager.class.getCanonicalName(), null);

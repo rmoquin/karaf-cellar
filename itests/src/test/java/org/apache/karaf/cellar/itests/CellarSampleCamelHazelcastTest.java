@@ -18,69 +18,65 @@ import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 import java.util.Set;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.junit.PaxExam;
 
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
     @Test
     //@Ignore
     public void testCamelSampleApp() throws Exception {
         installCellar();
-        Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("node1");
-        Thread.sleep(DEFAULT_TIMEOUT);
+        if (!waitForInstanceToCluster(2)) {
+            throw new Exception("Failed waiting for second node to connect to cluster..");
+        }
         createCellarChild("node2");
-        Thread.sleep(DEFAULT_TIMEOUT);
+        if (!waitForInstanceToCluster(3)) {
+            throw new Exception("Failed waiting for third node to connect to cluster..");
+        }
+
+        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/3.0.0-SNAPSHOT/xml/features"));
+        System.out.println(executeCommand("instance:list"));
+        System.out.println(executeCommand("cluster:node-list"));
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
-
-        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/3.0.0-SNAPSHOT/xml/features"));
-
-        System.err.println(executeCommand("instance:list"));
-
-        System.err.println(executeCommand("cluster:node-list"));
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 Cellar nodes running", nodes.size() >= 3);
 
-        Thread.sleep(DEFAULT_TIMEOUT);
-
         String node1 = getNodeIdOfChild("node1");
         String node2 = getNodeIdOfChild("node2");
 
-        System.err.println("Node 1: " + node1);
-        System.err.println("Node 2: " + node2);
-
         executeCommand("cluster:group-create producer-grp");
         executeCommand("cluster:group-create consumer-grp");
-        System.err.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
-        System.err.println(executeCommand("cluster:group-set consumer-grp " + node1));
-        System.err.println(executeCommand("cluster:group-set consumer-grp " + node2));
-        System.err.println(executeCommand("cluster:group-list"));
+        System.out.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
+        System.out.println(executeCommand("cluster:group-set consumer-grp " + node1));
+        System.out.println(executeCommand("cluster:group-set consumer-grp " + node2));
+        System.out.println(executeCommand("cluster:group-list"));
 
-        System.err.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
-        System.err.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
+        System.out.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
+        System.out.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
         Thread.sleep(10000);
-        System.err.println(executeCommand("feature:list"));
-        System.err.println(executeCommand("bundle:list"));
+        System.out.println(executeCommand("feature:list"));
+        System.out.println(executeCommand("bundle:list"));
 
-        System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
+        System.out.println(executeCommand("cluster:group-list"));
+        System.out.println(executeCommand(generateSSH("node2", "bundle:list -t 0")));
 
         Thread.sleep(10000);
-        String output1 = executeCommand("instance:connect -u karaf -p karaf node1  log:display | grep \"Hallo Cellar\"");
-        System.err.println(output1);
-        String output2 = executeCommand("instance:connect -u karaf -p karaf node2  log:display | grep \"Hallo Cellar\"");
-        System.err.println(output2);
+        String output1 = executeCommand(generateSSH("node1", "log:display | grep \"Hallo Cellar\""));
+        System.out.println(output1);
+        String output2 = executeCommand(generateSSH("node2", "log:display | grep \"Hallo Cellar\""));
+        System.out.println(output2);
         assertTrue("Expected at least lines", countOutputEntires(output1) >= 2);
         assertTrue("Expected at least lines", countOutputEntires(output2) >= 2);
     }

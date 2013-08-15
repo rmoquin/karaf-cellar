@@ -17,25 +17,23 @@ package org.apache.karaf.cellar.itests;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 import static org.junit.Assert.assertNotNull;
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.junit.PaxExam;
+
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class CellarInstallationTest extends CellarTestSupport {
 
     @Test
     //@Ignore
     public void testInstallation() throws Exception {
         installCellar();
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);
-                Thread.sleep(DEFAULT_TIMEOUT);
-        System.err.println(executeCommand("bundle:list"));
-        System.err.println(executeCommand("cluster:node-list"));
+        System.out.println(executeCommand("bundle:list"));
+        System.out.println(executeCommand("cluster:node-list"));
     }
 
 }

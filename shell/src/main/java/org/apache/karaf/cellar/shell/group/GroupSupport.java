@@ -59,13 +59,20 @@ public abstract class GroupSupport extends ClusterCommandSupport {
         ManageGroupTask command = new ManageGroupTask();
         if (source == null) {
             source = super.groupManager.findGroupByName(Configurations.DEFAULT_GROUP_NAME);
+            command.setSourceGroup(source);
         }
+        command.setAction(action);
+        command.setSourceNode(groupManager.getNode());
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
         if (nodeNames != null && !nodeNames.isEmpty()) {
             for (String nodeName : nodeNames) {
                 Node node = clusterManager.findNodeByName(nodeName);
+                //If null, see if it's the node id.
+                if (node == null) {
+                    node = clusterManager.findNodeById(nodeName);
+                }
                 if (node == null) {
                     System.err.println("Cluster node " + nodeName + " doesn't exist and won't be included in this command execution.");
                 } else {
@@ -81,14 +88,8 @@ public abstract class GroupSupport extends ClusterCommandSupport {
             return null;
         }
 
-        command.setAction(action);
-
         if (group != null) {
             command.setGroupName(group);
-        }
-
-        if (source != null) {
-            command.setSourceGroup(source);
         }
 
         Map<Node, Future<GroupTaskResult>> future = commandExecutionContext.execute(command, recipientList);

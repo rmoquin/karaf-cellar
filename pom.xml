@@ -40,14 +40,13 @@
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
-        <felix.webconsole.version>4.0.0</felix.webconsole.version>
+        <felix.webconsole.version>4.2.0</felix.webconsole.version>
         <felix.annotations.version>1.9.4</felix.annotations.version>
         <felix.scr.plugin.version>1.9.0</felix.scr.plugin.version>
         <hazelcast.version>3.0</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
-        <junit.bundle.version>4.10_1</junit.bundle.version>
         <karaf.version>3.0.0-SNAPSHOT</karaf.version>
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>4.3.1</osgi.compendium.version>
@@ -180,6 +179,17 @@
                 <version>${project.version}</version>
                 <type>xml</type>
                 <classifier>features</classifier>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.karaf.instance</groupId>
+                <artifactId>org.apache.karaf.instance.core</artifactId>
+                <version>${karaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.instance</groupId>
+                <artifactId>org.apache.karaf.instance.command</artifactId>
+                <version>${karaf.version}</version>
             </dependency>
 
             <!-- Felix -->

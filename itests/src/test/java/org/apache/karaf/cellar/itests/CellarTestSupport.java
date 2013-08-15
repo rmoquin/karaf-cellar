@@ -21,10 +21,7 @@ import static org.ops4j.pax.exam.CoreOptions.maven;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,6 +29,7 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -40,20 +38,26 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.management.remote.JMXConnector;
+import javax.management.remote.JMXConnectorFactory;
+import javax.management.remote.JMXServiceURL;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.instance.core.Instance;
+import org.apache.karaf.instance.core.InstanceService;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
+import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
+import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
-import org.ops4j.pax.exam.junit.Configuration;
-import org.ops4j.pax.exam.junit.ProbeBuilder;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.karaf.options.LogLevelOption;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
@@ -85,6 +89,8 @@ public class CellarTestSupport {
     protected BundleContext bundleContext;
     @Inject
     protected FeaturesService featureService;
+    @Inject
+    protected InstanceService instanceService;
     @Inject
     BootFinished bootFinished;
 
@@ -132,8 +138,8 @@ public class CellarTestSupport {
         if (debug && port > 0) {
             createCommand = createCommand + String.format(DEBUG_OPTS, port);
         }
-        System.err.println(executeCommand(createCommand + " " + name));
-        System.err.println(executeCommand("instance:start " + name));
+        System.out.println(executeCommand(createCommand + " " + name));
+        System.out.println(executeCommand("instance:start " + name));
 
         //Wait till the node is listed as Starting
         System.err.print("Waiting for " + name + " to start ");
@@ -149,9 +155,9 @@ public class CellarTestSupport {
         }
 
         if (instances > 0) {
-            System.err.println(".Started!");
+            System.out.println(".Started!");
         } else {
-            System.err.println(".Timed Out!");
+            System.out.println(".Timed Out!");
         }
 
     }
@@ -160,19 +166,19 @@ public class CellarTestSupport {
      * Destroys the child node.
      */
     protected void destroyCellarChild(String name) {
-        System.err.println(executeCommand("instance:connect -u karaf -p karaf " + name + " feature:uninstall cellar"));
-        System.err.println(executeCommand("instance:stop " + name));
+        System.out.println(executeCommand(generateSSH(name, "feature:uninstall cellar")));
+        System.out.println(executeCommand("instance:stop " + name));
     }
 
     /**
      * Returns the node id of a specific child instance.
+     *
+     * @param name
      */
     protected String getNodeIdOfChild(String name) {
-        String node;
-        String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, false);
-        System.err.println("Get node id of child response: " + nodesList);
+        String nodesList = executeCommand(generateSSH(name, " cluster:node-list | grep \\\\*"), COMMAND_TIMEOUT, false);
         int stop = nodesList.indexOf(']');
-        node = nodesList.substring(0, stop);
+        String node = nodesList.substring(0, stop);
         int start = node.lastIndexOf('[');
         node = node.substring(start + 1);
         node = node.trim();
@@ -181,18 +187,19 @@ public class CellarTestSupport {
 
     @Configuration
     public Option[] config() {
-        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
+        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
         Option[] options = new Option[] {
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
-            logLevel(LogLevelOption.LogLevel.INFO),
             keepRuntimeFolder(),
-            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
+            logLevel(LogLevelOption.LogLevel.INFO),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
-            //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.aries.blueprint", "DEBUG"),
-            //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar", "DEBUG"),
-            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN") };
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
+        //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.aries.blueprint", "DEBUG"),
+        //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar", "DEBUG"),
+        //editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN") 
+        };
         String debug = System.getProperty("debugMain");
         if (debug != null) {
             int l = options.length;
@@ -209,23 +216,23 @@ public class CellarTestSupport {
     protected boolean waitForInstanceToCluster(final int desiredTotal, final Long timeout) {
         final FutureTask<Boolean> commandFuture = new FutureTask<Boolean>(
                 new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                ClusterManager manager = CellarTestSupport.this.getOsgiService(ClusterManager.class, timeout);
-                boolean found = false;
-                while (!found) {
-                    Set<Node> nodes = manager.listNodes();
-                    if (nodes.size() >= desiredTotal) {
-                        return true;
-                    }
-                    Thread.sleep(1000);
-                    if (Thread.interrupted()) {
+                    @Override
+                    public Boolean call() throws Exception {
+                        ClusterManager manager = CellarTestSupport.this.getOsgiService(ClusterManager.class, timeout);
+                        boolean found = false;
+                        while (!found) {
+                            Set<Node> nodes = manager.listNodes();
+                            if (nodes.size() >= desiredTotal) {
+                                return true;
+                            }
+                            Thread.sleep(1000);
+                            if (Thread.interrupted()) {
+                                return false;
+                            }
+                        }
                         return false;
                     }
-                }
-                return false;
-            }
-        });
+                });
 
         try {
             executor.submit(commandFuture);
@@ -236,6 +243,11 @@ public class CellarTestSupport {
             e.printStackTrace(System.err);
             return false;
         }
+    }
+
+    public String generateSSH(String instanceName, String command) {
+        int port = instanceService.getInstance(instanceName).getSshPort();
+        return "ssh:ssh -q -l karaf -P karaf -p " + port + " 127.0.0.1 " + command;
     }
 
     /**
@@ -258,6 +270,15 @@ public class CellarTestSupport {
      * @param silent Specifies if the command should be displayed in the screen.
      * @return
      */
+    /**
+     * Executes a shell command and returns output as a String.
+     * Commands have a default timeout of 10 seconds.
+     *
+     * @param command The command to execute.
+     * @param timeout The amount of time in millis to wait for the command to execute.
+     * @param silent Specifies if the command should be displayed in the screen.
+     * @return
+     */
     protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -266,26 +287,26 @@ public class CellarTestSupport {
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
         FutureTask<String> commandFuture = new FutureTask<String>(
                 new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                try {
-                    if (!silent) {
-                        System.err.println(command);
+                    public String call() {
+                        try {
+                            if (!silent) {
+                                System.out.println(command);
+                            }
+                            commandSession.execute(command);
+                        } catch (Exception e) {
+                            e.printStackTrace(System.err);
+                        }
+                        printStream.flush();
+                        return byteArrayOutputStream.toString();
                     }
-                    commandSession.execute(command);
-                } finally {
-                    printStream.flush();
-                }
-                return byteArrayOutputStream.toString();
-            }
-        });
+                });
 
         try {
             executor.submit(commandFuture);
             response = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            response = "SHELL COMMAND TIMED OUT for command: " + command;
+            response = "SHELL COMMAND TIMED OUT for command " + command;
         }
 
         return response;
@@ -298,25 +319,9 @@ public class CellarTestSupport {
             }
         }
         for (Bundle b : bundleContext.getBundles()) {
-            System.err.println("Bundle: " + b.getSymbolicName());
+            System.out.println("Bundle: " + b.getSymbolicName());
         }
         throw new RuntimeException("Bundle " + symbolicName + " does not exist");
-    }
-
-    /**
-     * Explodes the dictionary into a ,-delimited list of key=value pairs
-     */
-    private static String explode(Dictionary dictionary) {
-        Enumeration keys = dictionary.keys();
-        StringBuilder result = new StringBuilder();
-        while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
-            result.append(String.format("%s=%s", key, dictionary.get(key)));
-            if (keys.hasMoreElements()) {
-                result.append(", ");
-            }
-        }
-        return result.toString();
     }
 
     protected <T> T getOsgiService(Class<T> type, long timeout) {
@@ -327,6 +332,7 @@ public class CellarTestSupport {
         return getOsgiService(type, null, SERVICE_TIMEOUT);
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected <T> T getOsgiService(Class<T> type, String filter, long timeout) {
         ServiceTracker tracker = null;
         try {
@@ -348,14 +354,14 @@ public class CellarTestSupport {
             Object svc = type.cast(tracker.waitForService(timeout));
             if (svc == null) {
                 Dictionary dic = bundleContext.getBundle().getHeaders();
-                System.err.println("Test bundle headers: " + explode(dic));
+                System.out.println("Test bundle headers: " + explode(dic));
 
                 for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
-                    System.err.println("ServiceReference: " + ref);
+                    System.out.println("ServiceReference: " + ref);
                 }
 
                 for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
-                    System.err.println("Filtered ServiceReference: " + ref);
+                    System.out.println("Filtered ServiceReference: " + ref);
                 }
 
                 throw new RuntimeException("Gave up waiting for service " + flt);
@@ -368,55 +374,38 @@ public class CellarTestSupport {
         }
     }
 
-    /**
-     * Finds a free port starting from the give port numner.
-     *
-     * @return
-     */
-    protected int getFreePort(int port) {
-        while (!isPortAvailable(port)) {
-            port++;
-        }
-        return port;
-    }
-
-    /**
-     * Returns true if port is available for use.
-     *
-     * @param port
-     * @return
-     */
-    public static boolean isPortAvailable(int port) {
-        ServerSocket ss = null;
-        DatagramSocket ds = null;
-        try {
-            ss = new ServerSocket(port);
-            ss.setReuseAddress(true);
-            ds = new DatagramSocket(port);
-            ds.setReuseAddress(true);
-            return true;
-        } catch (IOException e) {
-        } finally {
-            if (ds != null) {
-                ds.close();
-            }
-
-            if (ss != null) {
-                try {
-                    ss.close();
-                } catch (IOException e) {
-                    /* should not be thrown */
-                }
-            }
-        }
-        return false;
-    }
-
     /*
+     * Explode the dictionary into a ,-delimited list of key=value pairs
+     */
+    @SuppressWarnings("rawtypes")
+    private static String explode(Dictionary dictionary) {
+        Enumeration keys = dictionary.keys();
+        StringBuilder result = new StringBuilder();
+        while (keys.hasMoreElements()) {
+            Object key = keys.nextElement();
+            result.append(String.format("%s=%s", key, dictionary.get(key)));
+            if (keys.hasMoreElements()) {
+                result.append(", ");
+            }
+        }
+        return result.toString();
+    }
+
+    /**
      * Provides an iterable collection of references, even if the original array is null
      */
+    @SuppressWarnings("rawtypes")
     private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
         return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
+    }
+
+    public JMXConnector getJMXConnector() throws Exception {
+        JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + RMI_REG_PORT + "/karaf-root");
+        Hashtable<String, Object> env = new Hashtable<String, Object>();
+        String[] credentials = new String[] { "karaf", "karaf" };
+        env.put("jmx.remote.credentials", credentials);
+        JMXConnector connector = JMXConnectorFactory.connect(url, env);
+        return connector;
     }
 
     public void assertFeatureInstalled(String featureName) {

@@ -13,73 +13,70 @@
  */
 package org.apache.karaf.cellar.itests;
 
-
-import java.util.Set;
-
-import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+import org.junit.runner.RunWith;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.junit.PaxExam;
+
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
     @Test
     //@Ignore
     public void testDosgiGreeter() throws Exception {
         installCellar();
-                Thread.sleep(DEFAULT_TIMEOUT);
-        createCellarChild("node1");
-        createCellarChild("node2");
         Thread.sleep(DEFAULT_TIMEOUT);
-        
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
+        createCellarChild("node1");
+        if (!waitForInstanceToCluster(2)) {
+            throw new Exception("Failed waiting for second node to connect to cluster..");
+        }
+        createCellarChild("node2");
+        if (!waitForInstanceToCluster(3)) {
+            throw new Exception("Failed waiting for third node to connect to cluster..");
+        }
+
+        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        System.out.println(executeCommand("instance:list"));
+
+        System.out.println(executeCommand("cluster:node-list"));
+		ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
-        
-        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
-        System.err.println(executeCommand("instance:list"));
-        
-        System.err.println(executeCommand("cluster:node-list"));
-        Node localNode = clusterManager.getMasterCluster().getLocalNode();
+		Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
-
         String node1 = getNodeIdOfChild("node1");
         String node2 = getNodeIdOfChild("node2");
 
-        System.err.println("Node 1: " + node1);
-        System.err.println("Node 2: " + node2);
+        System.out.println("Node 1: " + node1);
+        System.out.println("Node 2: " + node2);
 
         executeCommand("cluster:group-create client-grp");
         executeCommand("cluster:group-create service-grp");
-        System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
-        System.err.println(executeCommand("cluster:group-set service-grp " + node1));
+        System.out.println(executeCommand("cluster:group-list"));
+        System.out.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
+        System.out.println(executeCommand("cluster:group-set service-grp " + node1));
 
-        System.err.println(executeCommand("cluster:feature-install client-grp greeter-client"));
-        Thread.sleep(10000);
-        System.err.println(executeCommand("cluster:feature-install service-grp greeter-service"));
-        Thread.sleep(10000);
-        System.err.println(executeCommand("cluster:service-list"));
+        System.out.println(executeCommand("cluster:feature-install client-grp greeter-client"));
+        Thread.sleep(5000);
+        System.out.println(executeCommand("cluster:feature-install service-grp greeter-service"));
+        Thread.sleep(5000);
+        System.out.println(executeCommand("cluster:service-list"));
 
         String greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
-        System.err.println(greetOutput);
+        System.out.println(greetOutput);
         assertEquals("Expected 10 greets", 10, countGreetsFromNode(greetOutput, node1));
-        System.err.println(executeCommand("cluster:group-set service-grp " + node2));
-        Thread.sleep(10000);
-        System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
-        System.err.println(executeCommand("cluster:list-services"));
+        System.out.println(executeCommand("cluster:group-set service-grp " + node2));
+        Thread.sleep(5000);
+        System.out.println(executeCommand("cluster:group-list"));
+        System.out.println(executeCommand(generateSSH("node2", "bundle:list -t 0")));
+        System.out.println(executeCommand("cluster:list-services"));
         greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
-        System.err.println(greetOutput);
+        System.out.println(greetOutput);
         assertEquals("Expected 5 greets", 5, countGreetsFromNode(greetOutput, node1));
         assertEquals("Expected 5 greets", 5, countGreetsFromNode(greetOutput, node2));
     }

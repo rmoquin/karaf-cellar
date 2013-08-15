@@ -20,23 +20,19 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.junit.ExamReactorStrategy;
-import org.ops4j.pax.exam.junit.JUnit4TestRunner;
-import org.ops4j.pax.exam.spi.reactors.AllConfinedStagedReactorFactory;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
+import org.ops4j.pax.exam.spi.reactors.PerMethod;
+import org.ops4j.pax.exam.junit.PaxExam;
 
-@RunWith(JUnit4TestRunner.class)
-@ExamReactorStrategy(AllConfinedStagedReactorFactory.class)
+@RunWith(PaxExam.class)
+@ExamReactorStrategy(PerMethod.class)
 public class CellarEventTest extends CellarTestSupport {
 
     @Test
     //@Ignore
     public void testCellarEventFeatureInstall() throws Exception {
-        installCellar();
-        Thread.sleep(DEFAULT_TIMEOUT);
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);
-        
-        System.err.println(executeCommand("feature:install cellar-eventadmin"));
+        installCellar();        
+        System.out.println(executeCommand("feature:install cellar-eventadmin"));
     }
 
     @After

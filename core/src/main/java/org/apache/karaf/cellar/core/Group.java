@@ -23,6 +23,9 @@ public class Group implements MultiNode {
     private String name;
     private Set<Node> nodes = new HashSet<Node>();
 
+    public Group() {
+    }
+
     public Group(String name) {
         this.name = name;
     }

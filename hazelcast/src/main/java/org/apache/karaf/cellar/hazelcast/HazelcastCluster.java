@@ -69,6 +69,10 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
             this.memberNodesByName.put(this.localNode.getName(), this.localNode);
             this.memberNodesById.put(this.localNode.getId(), this.localNode);
             this.memberListenerId = instance.getCluster().addMembershipListener(this);
+            Set<Member> members = instance.getCluster().getMembers();
+            for (Member member : members) {
+                this.addNewNode(member);
+            }
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
         }
@@ -228,20 +232,22 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
-        HazelcastNode newNode = new HazelcastNode(member);
-        this.memberNodesByName.put(newNode.getName(), newNode);
-        this.memberNodesById.put(newNode.getId(), newNode);
+        addNewNode(member);
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         String uuid = membershipEvent.getMember().getUuid();
         HazelcastNode node = this.memberNodesById.remove(uuid);
-        this.memberNodesByName.remove(node.getName());
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Node , " + node.getName() + ", left cluster, " + this.name + ".");
+        if (node != null) {
+            this.memberNodesByName.remove(node.getName());
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Node , " + node.getName() + ", left cluster, " + this.name + ".");
+            }
+            node.destroy();
+        } else {
+            LOGGER.info("Node with uuid {} couldn't be found to be removed.", uuid);
         }
-        node.destroy();
     }
 
     @Override
@@ -260,10 +266,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
             return false;
         }
         final HazelcastCluster other = (HazelcastCluster) obj;
-        if ((this.name == null) ? (other.name != null) : !this.name.equals(other.name)) {
-            return false;
-        }
-        return true;
+        return !((this.name == null) ? (other.name != null) : !this.name.equals(other.name));
     }
 
     /**
@@ -389,5 +392,11 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      */
     public void setNodeName(String nodeName) {
         this.nodeName = nodeName;
+    }
+
+    private void addNewNode(Member member) {
+        HazelcastNode newNode = new HazelcastNode(member);
+        this.memberNodesByName.put(newNode.getName(), newNode);
+        this.memberNodesById.put(newNode.getId(), newNode);
     }
 }

@@ -81,13 +81,13 @@ public class HazelcastGroupManager implements GroupManager {
     /**
      * Listens for node configurations to be unbound.
      *
-     * @param node the node configuration.
-     * @param properties the node service properties.
+     * @param nodeConfiguration the node configuration.
+     * @throws org.osgi.service.cm.ConfigurationException
      */
     public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) throws ConfigurationException {
         if (this.nodeConfiguration != null) {
             try {
-                removeAllGroupsFromNodeConfiguration();
+                removeNodeFromAllGroups(false);
             } catch (IOException ex) {
                 throw new ConfigurationException(null, "Error when attempting to deregister node from all groups.", ex);
             }
@@ -148,7 +148,7 @@ public class HazelcastGroupManager implements GroupManager {
         } else {
             LOGGER.info("Group to remove has null pid, skipping.");
         }
-        if (groupConfig != null && nodeConfiguration.getGroups().contains(groupConfig.getName())) {
+        if (groupConfig != null) {
             removeNodeFromGroupStore(groupConfig.getName());
         } else {
             LOGGER.info("Group to remove was so can't deregister it, skipping.");
@@ -325,19 +325,27 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     private void removeGroupFromNodeConfiguration(String groupName) throws IOException {
-        if (nodeConfiguration.getGroups().contains(groupName)) {
-            nodeConfiguration.getGroups().remove(groupName);
+        Set<String> groups = nodeConfiguration.getGroups();
+        if (groups.contains(groupName)) {
+            groups.remove(groupName);
+            if (groups.isEmpty()) {
+                LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
+                groups.add(Configurations.DEFAULT_GROUP_NAME);
+            }
             Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
-                    .getCanonicalName(), "?");
+                    .getCanonicalName(), null);
             configuration.update(nodeConfiguration.getProperties());
         }
     }
 
     private void removeAllGroupsFromNodeConfiguration() throws IOException {
-        if (nodeConfiguration.getGroups().size() > 0) {
-            nodeConfiguration.getGroups().clear();
+        Set<String> groups = nodeConfiguration.getGroups();
+        if (groups.size() > 0) {
+            groups.clear();
+            LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
+            groups.add(Configurations.DEFAULT_GROUP_NAME);
             Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
-                    .getCanonicalName(), "?");
+                    .getCanonicalName(), null);
             configuration.update(nodeConfiguration.getProperties());
         }
     }
@@ -362,10 +370,21 @@ public class HazelcastGroupManager implements GroupManager {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Attempting to delete group configuration: " + groupName);
         }
-        Configuration[] configurations = configurationAdmin.listConfigurations("(service.factoryPid = " + pid + ")");
+        Configuration[] configurations = configurationAdmin.listConfigurations("(service.pid = " + pid + ")");
         //Shouldn't ever be more than one but just in case.
-        for (Configuration configuration : configurations) {
-            configuration.delete();
+        if (configurations != null) {
+            for (Configuration configuration : configurations) {
+                configuration.delete();
+            }
+        } else {
+            LOGGER.warn("There were no configurations to delete for pid filter: (service.pid = {}", pid);
+            configurations = configurationAdmin.listConfigurations(null);
+            //Shouldn't ever be more than one but just in case.
+            if (configurations != null) {
+                for (Configuration configuration : configurations) {
+                    LOGGER.debug("Debugging list of a valid config, service.pid {}, serviceFactory.pid {}, properties {}.", configuration.getPid(), configuration.getFactoryPid(), configuration.getProperties());
+                }
+            }
         }
         pidGroupNameMap.remove(pid);
     }

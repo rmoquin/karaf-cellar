@@ -30,7 +30,6 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
 import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
-import org.apache.karaf.cellar.hazelcast.serialization.ManageGroupTaskSerializer;
 
 /**
  * Hazelcast configuration manager.
@@ -67,13 +66,13 @@ public class HazelcastConfigurationManager {
             cfg.setClassLoader(hzClassLoader);
         }
         SerializerConfig serializerConfig = new SerializerConfig();
-        serializerConfig.setImplementation(new ManageGroupTaskSerializer());
+        serializerConfig.setImplementation(new GenericCellarSerializer<ManageGroupTask>(11, ManageGroupTask.class));
         serializerConfig.setTypeClass(ManageGroupTask.class);
         cfg.getSerializationConfig().addSerializerConfig(serializerConfig);
 
         GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
-        globalConfig.setImplementation(new GenericCellarSerializer());
+        globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
         cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();
