@@ -41,7 +41,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * Why? Its required if no group member currently in the cluster.
      * If a member of the group joins later, it won't find the change, unless we force it.
      *
-     * @param clusterName the cluster group name.
+     * @param groupName the cluster group name.
      * @param feature the feature name.
      * @param version the feature version.
      * @param status the feature status (installed, uninstalled).
@@ -87,7 +87,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     /**
      * Check if a feature is present in the cluster group.
      *
-     * @param clusterName the cluster group.
+     * @param groupName the cluster group.
      * @param feature the feature name.
      * @param version the feature version.
      * @return true if the feature exists in the cluster group, false else.

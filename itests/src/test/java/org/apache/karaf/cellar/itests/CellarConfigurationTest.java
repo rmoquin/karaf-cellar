@@ -19,6 +19,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -35,12 +36,11 @@ public class CellarConfigurationTest extends CellarTestSupport {
     @Inject ConfigurationAdmin configAdmin;
     
     @Test
-    //@Ignore
+    @Ignore
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
-        Configuration configuration = configAdmin.getConfiguration(TESTPID, "?");
-        Hashtable ht = new Hashtable();
-        configuration.update(ht);
+        Configuration configuration = configAdmin.createFactoryConfiguration(TESTPID);
+        configuration.update(new Hashtable());
         System.out.println("Created a new configuration with pid: " + configuration.getPid());
         
         createCellarChild("child1");

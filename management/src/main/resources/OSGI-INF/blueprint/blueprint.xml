@@ -75,7 +75,7 @@
     <!-- Cellar Cluster Group MBean -->
     <bean id="cellarGroupMBean" class="org.apache.karaf.cellar.management.internal.CellarGroupMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="executionContext" ref="executionContext"/>
+        <property name="commandExecutionContext" ref="commandExecutionContext"/>
         <property name="groupManager" ref="groupManager"/>
     </bean>
 
@@ -104,6 +104,7 @@
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
+    <reference id="commandExecutionContext" interface="org.apache.karaf.cellar.core.command.CommandExecutionContext"/>
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>

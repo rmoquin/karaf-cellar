@@ -17,7 +17,9 @@ package org.apache.karaf.cellar.core.command;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.tasks.GroupTaskResult;
 import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
@@ -34,4 +36,6 @@ public interface CommandExecutionContext {
     String getName();
 
     public Map<Node, Future<GroupTaskResult>> execute(ManageGroupTask command, Set<Node> destinations);
+    
+    public void executeAndHandle(ManageGroupTask command, Set<Node> destinations) throws InterruptedException, TimeoutException, ExecutionException;
 }

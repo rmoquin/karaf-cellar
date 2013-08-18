@@ -308,22 +308,6 @@
 
     <service ref="manageHandlersResultHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
-    <!-- Handler For Cluster Manager Group Command Event -->
-    <bean id="manageGroupCommandHandler" class="org.apache.karaf.cellar.core.control.ManageGroupCommandHandler" init-method="init">
-        <property name="masterCluster" ref="masterCluster"/>
-        <property name="groupManager" ref="groupManager"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-
-    <service ref="manageGroupCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
-
-    <!-- Handlers For Cluster Manager Group Result Event -->
-    <bean id="manageGroupResultHandler" class="org.apache.karaf.cellar.core.control.ManageGroupResultHandler">
-        <property name="commandStore" ref="commandStore"/>
-    </bean>
-
-    <service ref="manageGroupResultHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
-
     <!-- Command Store -->
     <bean id="commandStore" class="org.apache.karaf.cellar.core.command.BasicCommandStore"/>
 

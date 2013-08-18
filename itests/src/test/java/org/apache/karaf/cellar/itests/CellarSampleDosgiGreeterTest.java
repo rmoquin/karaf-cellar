@@ -44,13 +44,12 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
             throw new Exception("Failed waiting for third node to connect to cluster..");
         }
 
-        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
         System.out.println(executeCommand("instance:list"));
 
         System.out.println(executeCommand("cluster:node-list"));
-		ClusterManager clusterManager = getOsgiService(ClusterManager.class);
+        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
-		Node localNode = clusterManager.getMasterCluster().getLocalNode();
+        Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
         String node1 = getNodeIdOfChild("node1");
@@ -66,9 +65,12 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         System.out.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
         System.out.println(executeCommand("cluster:group-set service-grp " + node1));
         Thread.sleep(DELAY_TIMEOUT);
+        System.out.println(executeCommand("cluster:feature-url-add client-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        System.out.println(executeCommand("cluster:feature-url-add service-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:feature-install client-grp greeter-client"));
         System.out.println(executeCommand("cluster:feature-install service-grp greeter-service"));
-        Thread.sleep(5000);
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:service-list"));
 
         String greetOutput = executeCommand("dosgi-greeter:greet Hi 10");

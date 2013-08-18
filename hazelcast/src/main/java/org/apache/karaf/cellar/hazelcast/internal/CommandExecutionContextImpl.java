@@ -19,22 +19,27 @@ import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.CommandExecutionContext;
 import org.apache.karaf.cellar.core.tasks.GroupTaskResult;
 import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
 public class CommandExecutionContextImpl implements CommandExecutionContext {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandExecutionContextImpl.class);
     private String name;
     private HazelcastCluster cluster;
     private IExecutorService executorService;
@@ -44,6 +49,25 @@ public class CommandExecutionContextImpl implements CommandExecutionContext {
     }
 
     public void destroy() {
+    }
+
+    /**
+     * Just execute the distributed task and return when they are all finished
+     * rather than make the caller handle it if it doesn't care.
+     *
+     * @param command the task to execute
+     * @param destinations the destinations to sent to.
+     * @throws java.lang.InterruptedException
+     * @throws java.util.concurrent.TimeoutException
+     * @throws java.util.concurrent.ExecutionException
+     */
+    @Override
+    public void executeAndHandle(ManageGroupTask command, Set<Node> destinations) throws InterruptedException, TimeoutException, ExecutionException {
+        Map<Node, Future<GroupTaskResult>> results = this.execute(command, destinations);
+        for (Map.Entry<Node, Future<GroupTaskResult>> entry : results.entrySet()) {
+            entry.getValue().get(5, TimeUnit.SECONDS);
+        }
+        LOGGER.info("Completed task: " + command.getAction());
     }
 
     @Override
@@ -56,8 +80,7 @@ public class CommandExecutionContextImpl implements CommandExecutionContext {
             results.put(node, result);
         } else {
             Set<Member> members = new HashSet<Member>();
-            for (Iterator<Node> it = destinations.iterator(); it.hasNext();) {
-                Node node = it.next();
+            for (Node node : destinations) {
                 Member member = cluster.findMemberById(node.getId());
                 members.add(member);
             }
