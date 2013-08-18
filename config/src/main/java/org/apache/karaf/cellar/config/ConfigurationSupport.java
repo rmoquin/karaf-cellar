@@ -26,7 +26,7 @@ import java.util.*;
  * Generic configuration support.
  */
 public class ConfigurationSupport {
-    private static String[] EXCLUDED_PROPERTIES = { "service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories" };
+    private static final String[] EXCLUDED_PROPERTIES = { "service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories" };
     private static final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
     protected File storage;
 
@@ -121,8 +121,8 @@ public class ConfigurationSupport {
      * @return true is the property is excluded, false else.
      */
     public boolean isExcludedProperty(String propertyName) {
-        for (int i = 0; i < EXCLUDED_PROPERTIES.length; i++) {
-            if (EXCLUDED_PROPERTIES[i].equals(propertyName)) {
+        for (String excludedProp : EXCLUDED_PROPERTIES) {
+            if (excludedProp.equals(propertyName)) {
                 return true;
             }
         }
@@ -135,7 +135,6 @@ public class ConfigurationSupport {
      * @param admin the configuration admin service.
      * @param pid the configuration PID to store.
      * @param props the properties to store, linked to the configuration PID.
-     * @throws Exception in case of store failure.
      */
     protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) {
         try {

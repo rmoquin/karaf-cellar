@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
-import java.util.List;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
@@ -26,6 +25,7 @@ import org.osgi.service.cm.ConfigurationEvent;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster group")
@@ -56,8 +56,8 @@ public class DeleteCommand extends ConfigCommandSupport {
 
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-        List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
         if (!isAllowed(pid, whitelist, blacklist)) {
             System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
             return null;

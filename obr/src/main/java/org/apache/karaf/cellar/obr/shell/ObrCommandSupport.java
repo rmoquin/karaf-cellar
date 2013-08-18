@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.obr.shell;
 
-import java.util.List;
+import java.util.Set;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
@@ -41,7 +41,7 @@ public abstract class ObrCommandSupport extends CellarCommandSupport {
      * @param blacklist
      * @return in case of check failure.
      */
-    public boolean isAllowed(String id, List<String> whitelist, List<String> blacklist) {
+    public boolean isAllowed(String id, Set<String> whitelist, Set<String> blacklist) {
         CellarSupport support = new CellarSupport();
         return support.isAllowed(id, whitelist, blacklist);
     }

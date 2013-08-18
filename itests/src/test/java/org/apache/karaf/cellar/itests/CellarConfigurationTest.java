@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import java.util.Hashtable;
+import javax.inject.Inject;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -22,17 +24,25 @@ import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class CellarConfigurationTest extends CellarTestSupport {
 
     private static final String TESTPID = "org.apache.karaf.cellar.tst";
-
+    @Inject ConfigurationAdmin configAdmin;
+    
     @Test
     //@Ignore
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
+        Configuration configuration = configAdmin.getConfiguration(TESTPID, "?");
+        Hashtable ht = new Hashtable();
+        configuration.update(ht);
+        System.out.println("Created a new configuration with pid: " + configuration.getPid());
+        
         createCellarChild("child1");
         if (!waitForInstanceToCluster(2)) {
             throw new Exception("Failed waiting for node to connect to cluster..");
@@ -41,36 +51,36 @@ public class CellarConfigurationTest extends CellarTestSupport {
         if (!waitForInstanceToCluster(3)) {
             throw new Exception("Failed waiting for node to connect to cluster..");
         }
-
+                
         String node1 = getNodeIdOfChild("child1");
         String node2 = getNodeIdOfChild("child2");
 
-        String properties = executeCommand(generateSSH("child1", "config:proplist --pid " + TESTPID));
+        String properties = executeCommand(generateSSH("child1", "cluster:config-proplist default " + TESTPID));
         System.out.println(properties);
         assertFalse((properties.contains("myKey")));
 
         //Test configuration sync - add property
-        System.out.println(executeCommand("config:propset --pid " + TESTPID + " myKey myValue"));
-        Thread.sleep(5000);
-        properties = executeCommand(generateSSH("child1", "config:proplist --pid " + TESTPID));
+        System.out.println(executeCommand("cluster:config-propset default " + TESTPID + " myKey myValue"));
+        Thread.sleep(DELAY_TIMEOUT);
+        properties = executeCommand(generateSSH("child1", "cluster:config-proplist default " + TESTPID));
         System.out.println(properties);
         assertTrue(properties.contains("myKey = myValue"));
 
         //Test configuration sync - remove property
-        System.out.println(executeCommand("config:propdel --pid " + TESTPID + " myKey"));
-        Thread.sleep(5000);
-        properties = executeCommand(generateSSH("child1", "config:proplist --pid " + TESTPID));
+        System.out.println(executeCommand("cluster:config-propdel default " + TESTPID + " myKey"));
+        Thread.sleep(DELAY_TIMEOUT);
+        properties = executeCommand(generateSSH("child1", "cluster:config-proplist default " + TESTPID));
         System.out.println(properties);
         assertFalse(properties.contains("myKey"));
 
         //Test configuration sync - add property - join later
         System.out.println(executeCommand("cluster:group-set new-grp " + node1));
-        Thread.sleep(5000);
-        System.out.println(executeCommand(generateSSH("child1", "config:propset --pid " + TESTPID + " myKey2 myValue2")));
-        properties = executeCommand(generateSSH("child1", "config:proplist --pid " + TESTPID));
-        Thread.sleep(5000);
+        Thread.sleep(DELAY_TIMEOUT);
+        System.out.println(executeCommand(generateSSH("child1", "cluster:config-propset new-grp " + TESTPID + " myKey2 myValue2")));
+        properties = executeCommand(generateSSH("child1", "cluster:config-proplist new-grp " + TESTPID));
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:group-set new-grp " + node2));
-        properties = executeCommand(generateSSH("child2", "config:proplist --pid " + TESTPID));
+        properties = executeCommand(generateSSH("child2", "cluster:config-proplist new-grp " + TESTPID));
         System.out.println(properties);
         assertTrue(properties.contains("myKey2 = myValue2"));
     }

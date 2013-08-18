@@ -15,7 +15,7 @@
  */
 package org.apache.karaf.cellar.core;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -26,47 +26,47 @@ public interface GroupConfiguration {
     
     boolean isSyncConfiguration();
 
-    List<String> getInboundConfigurationWhitelist();
+    Set<String> getInboundConfigurationWhitelist();
 
-    List<String> getOutboundConfigurationWhitelist();
+    Set<String> getOutboundConfigurationWhitelist();
 
-    List<String> getInboundConfigurationBlacklist();
+    Set<String> getInboundConfigurationBlacklist();
 
-    List<String> getOutboundConfigurationBlacklist();
+    Set<String> getOutboundConfigurationBlacklist();
 
     boolean isSyncFeatures();
 
     boolean isSyncFeatureRepos();
 
-    List<String> getInboundFeatureWhitelist();
+    Set<String> getInboundFeatureWhitelist();
 
-    List<String> getOutboundFeatureWhitelist();
+    Set<String> getOutboundFeatureWhitelist();
 
-    List<String> getInboundFeatureBlacklist();
+    Set<String> getInboundFeatureBlacklist();
 
-    List<String> getOutboundFeatureBlacklist();
+    Set<String> getOutboundFeatureBlacklist();
 
     boolean isSyncBundles();
 
-    List<String> getInboundBundleWhitelist();
+    Set<String> getInboundBundleWhitelist();
 
-    List<String> getOutboundBundleWhitelist();
+    Set<String> getOutboundBundleWhitelist();
 
-    List<String> getInboundBundleBlacklist();
+    Set<String> getInboundBundleBlacklist();
 
-    List<String> getOutboundBundleBlacklist();
+    Set<String> getOutboundBundleBlacklist();
 
     boolean isSyncOBRUrls();
 
     boolean isSyncOBRBundles();
 
-    List<String> getInboundOBRUrlsWhitelist();
+    Set<String> getInboundOBRUrlsWhitelist();
 
-    List<String> getOutboundOBRUrlsWhitelist();
+    Set<String> getOutboundOBRUrlsWhitelist();
 
-    List<String> getInboundOBRUrlsBlacklist();
+    Set<String> getInboundOBRUrlsBlacklist();
 
-    List<String> getOutboundOBRUrlsBlacklist();
+    Set<String> getOutboundOBRUrlsBlacklist();
 
     /**
      * Registers this node for producing and consuming messages between nodes in the group.

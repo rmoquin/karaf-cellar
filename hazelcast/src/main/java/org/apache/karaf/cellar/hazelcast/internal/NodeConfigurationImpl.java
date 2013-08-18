@@ -18,7 +18,6 @@ package org.apache.karaf.cellar.hazelcast.internal;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
@@ -111,14 +110,14 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      * @return the enabledEventHandlers
      */
     @Override
-    public List<String> getEnabledEvents() {
-        return (List<String>) this.properties.get(ENABLE_EVENTS_PROPERTY);
+    public Set<String> getEnabledEvents() {
+        return (Set<String>) this.properties.get(ENABLE_EVENTS_PROPERTY);
     }
 
     /**
      * @param enabledEvents the enabledEventHandlers to set
      */
-    public void setEnabledEvents(List<String> enabledEvents) {
+    public void setEnabledEvents(Set<String> enabledEvents) {
         this.properties.put(ENABLE_EVENTS_PROPERTY, enabledEvents);
     }
 

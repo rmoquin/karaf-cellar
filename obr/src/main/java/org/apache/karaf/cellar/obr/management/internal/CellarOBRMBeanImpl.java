@@ -104,8 +104,8 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!support.isAllowed(url, whitelist, blacklist)) {
             throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
         }
@@ -148,8 +148,8 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!support.isAllowed(url, whitelist, blacklist)) {
             throw new IllegalArgumentException("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
         }
@@ -191,8 +191,8 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // check if the bundle ID is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!support.isAllowed(bundleId, whitelist, blacklist)) {
             throw new IllegalArgumentException("OBR bundle " + bundleId + " is blocked outbound for cluster group " + groupName);
         }

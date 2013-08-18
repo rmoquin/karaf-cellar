@@ -30,7 +30,7 @@ public interface NodeConfiguration {
 
     boolean isConsumer();
 
-    List<String> getEnabledEvents();
+    Set<String> getEnabledEvents();
 
     /**
      * @return the properties

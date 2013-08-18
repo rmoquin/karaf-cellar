@@ -13,13 +13,9 @@
  */
 package org.apache.karaf.cellar.itests;
 
-
-import org.apache.karaf.cellar.core.ClusterManager;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
@@ -28,15 +24,15 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class CellarObrTest extends CellarTestSupport {
-
+    
     @Test
     //@Ignore
     public void testCellarObrFeatureInstall() throws Exception {
         installCellar();
-
-        System.out.println(executeCommand("feature:install cellar-obr"));
+        Thread.sleep(DELAY_TIMEOUT);
+        featureService.installFeature("cellar-obr");
     }
-
+    
     @After
     public void tearDown() {
         try {
@@ -45,5 +41,5 @@ public class CellarObrTest extends CellarTestSupport {
             //Ignore
         }
     }
-
+    
 }

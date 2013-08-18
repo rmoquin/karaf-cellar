@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.cellar.core.tasks;
 
+import java.io.Serializable;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import org.apache.karaf.cellar.core.Configurations;
@@ -32,7 +33,7 @@ import org.slf4j.Logger;
  *
  * @author rmoquin
  */
-public class ManageGroupTask implements Callable<GroupTaskResult> {
+public class ManageGroupTask implements Callable<GroupTaskResult>, Serializable {
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ManageGroupTask.class);
     private ManageGroupAction action;
     private String groupName;

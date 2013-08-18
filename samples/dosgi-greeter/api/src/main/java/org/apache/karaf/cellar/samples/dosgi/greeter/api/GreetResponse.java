@@ -23,6 +23,10 @@ public class GreetResponse implements Serializable {
     private Greet greet;
     private String response;
 
+    public GreetResponse() {
+        
+    }
+    
     public GreetResponse(Greet greet, String response) {
         this.greet = greet;
         this.response = response;

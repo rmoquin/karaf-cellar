@@ -61,7 +61,7 @@ public class HazelcastGroupManager implements GroupManager {
      * @param node the node configuration.
      * @param properties the node service properties.
      */
-    public void nodeMembershipsReceived(NodeConfiguration nodeConfiguration) throws ConfigurationException {
+    public void nodeMembershipsReceived(NodeConfiguration node) throws ConfigurationException {
         this.nodeConfiguration = nodeConfiguration;
         try {
             Set<String> groupList = this.nodeConfiguration.getGroups();

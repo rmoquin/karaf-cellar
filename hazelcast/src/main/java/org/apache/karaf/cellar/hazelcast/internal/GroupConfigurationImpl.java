@@ -16,8 +16,8 @@
 package org.apache.karaf.cellar.hazelcast.internal;
 
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
@@ -203,14 +203,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundConfigurationWhitelist
      */
     @Override
-    public List<String> getInboundConfigurationWhitelist() {
-        return (List<String>) this.properties.get(CONFIG_WHITELIST_INBOUND_PROPERTY);
+    public Set<String> getInboundConfigurationWhitelist() {
+        return (Set<String>) this.properties.get(CONFIG_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundConfigurationWhitelist the inboundConfigurationWhitelist to set
      */
-    public void setInboundConfigurationWhitelist(List<String> inboundConfigurationWhitelist) {
+    public void setInboundConfigurationWhitelist(Set<String> inboundConfigurationWhitelist) {
         this.properties.put(CONFIG_WHITELIST_INBOUND_PROPERTY, inboundConfigurationWhitelist);
     }
 
@@ -218,14 +218,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundConfigurationWhitelist
      */
     @Override
-    public List<String> getOutboundConfigurationWhitelist() {
-        return (List<String>) this.properties.get(CONFIG_WHITELIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundConfigurationWhitelist() {
+        return (Set<String>) this.properties.get(CONFIG_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundConfigurationWhitelist the outboundConfigurationWhitelist to set
      */
-    public void setOutboundConfigurationWhitelist(List<String> outboundConfigurationWhitelist) {
+    public void setOutboundConfigurationWhitelist(Set<String> outboundConfigurationWhitelist) {
         this.properties.put(CONFIG_WHITELIST_OUTBOUND_PROPERTY, outboundConfigurationWhitelist);
     }
 
@@ -233,14 +233,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundConfigurationBlacklist
      */
     @Override
-    public List<String> getInboundConfigurationBlacklist() {
-        return (List<String>) this.properties.get(CONFIG_BLACKLIST_INBOUND_PROPERTY);
+    public Set<String> getInboundConfigurationBlacklist() {
+        return (Set<String>) this.properties.get(CONFIG_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundConfigurationBlacklist the inboundConfigurationBlacklist to set
      */
-    public void setInboundConfigurationBlacklist(List<String> inboundConfigurationBlacklist) {
+    public void setInboundConfigurationBlacklist(Set<String> inboundConfigurationBlacklist) {
         this.properties.put(CONFIG_BLACKLIST_INBOUND_PROPERTY, inboundConfigurationBlacklist);
     }
 
@@ -248,14 +248,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundConfigurationBlacklist
      */
     @Override
-    public List<String> getOutboundConfigurationBlacklist() {
-        return (List<String>) this.properties.get(CONFIG_BLACKLIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundConfigurationBlacklist() {
+        return (Set<String>) this.properties.get(CONFIG_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundConfigurationBlacklist the outboundConfigurationBlacklist to set
      */
-    public void setOutboundConfigurationBlacklist(List<String> outboundConfigurationBlacklist) {
+    public void setOutboundConfigurationBlacklist(Set<String> outboundConfigurationBlacklist) {
         this.properties.put(CONFIG_BLACKLIST_OUTBOUND_PROPERTY, outboundConfigurationBlacklist);
     }
 
@@ -293,14 +293,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundFeatureWhitelist
      */
     @Override
-    public List<String> getInboundFeatureWhitelist() {
-        return (List<String>) this.properties.get(FEATURES_WHITELIST_INBOUND_PROPERTY);
+    public Set<String> getInboundFeatureWhitelist() {
+        return (Set<String>) this.properties.get(FEATURES_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundFeatureWhitelist the inboundFeatureWhitelist to set
      */
-    public void setInboundFeatureWhitelist(List<String> inboundFeatureWhitelist) {
+    public void setInboundFeatureWhitelist(Set<String> inboundFeatureWhitelist) {
         this.properties.put(FEATURES_WHITELIST_INBOUND_PROPERTY, inboundFeatureWhitelist);
     }
 
@@ -308,14 +308,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundFeatureWhitelist
      */
     @Override
-    public List<String> getOutboundFeatureWhitelist() {
-        return (List<String>) this.properties.get(FEATURES_WHITELIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundFeatureWhitelist() {
+        return (Set<String>) this.properties.get(FEATURES_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundFeatureWhitelist the outboundFeatureWhitelist to set
      */
-    public void setOutboundFeatureWhitelist(List<String> outboundFeatureWhitelist) {
+    public void setOutboundFeatureWhitelist(Set<String> outboundFeatureWhitelist) {
         this.properties.put(FEATURES_WHITELIST_OUTBOUND_PROPERTY, outboundFeatureWhitelist);
     }
 
@@ -323,14 +323,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundFeatureBlacklist
      */
     @Override
-    public List<String> getInboundFeatureBlacklist() {
-        return (List<String>) this.properties.get(FEATURES_BLACKLIST_INBOUND_PROPERTY);
+    public Set<String> getInboundFeatureBlacklist() {
+        return (Set<String>) this.properties.get(FEATURES_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundFeatureBlacklist the inboundFeatureBlacklist to set
      */
-    public void setInboundFeatureBlacklist(List<String> inboundFeatureBlacklist) {
+    public void setInboundFeatureBlacklist(Set<String> inboundFeatureBlacklist) {
         this.properties.put(FEATURES_BLACKLIST_INBOUND_PROPERTY, inboundFeatureBlacklist);
     }
 
@@ -338,14 +338,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundFeatureBlacklist
      */
     @Override
-    public List<String> getOutboundFeatureBlacklist() {
-        return (List<String>) this.properties.get(FEATURES_BLACKLIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundFeatureBlacklist() {
+        return (Set<String>) this.properties.get(FEATURES_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundFeatureBlacklist the outboundFeatureBlacklist to set
      */
-    public void setOutboundFeatureBlacklist(List<String> outboundFeatureBlacklist) {
+    public void setOutboundFeatureBlacklist(Set<String> outboundFeatureBlacklist) {
         this.properties.put(FEATURES_BLACKLIST_OUTBOUND_PROPERTY, outboundFeatureBlacklist);
     }
 
@@ -368,14 +368,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundBundleWhitelist
      */
     @Override
-    public List<String> getInboundBundleWhitelist() {
-        return (List<String>) this.properties.get(BUNDLES_WHITELIST_INBOUND_PROPERTY);
+    public Set<String> getInboundBundleWhitelist() {
+        return (Set<String>) this.properties.get(BUNDLES_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundBundleWhitelist the inboundBundleWhitelist to set
      */
-    public void setInboundBundleWhitelist(List<String> inboundBundleWhitelist) {
+    public void setInboundBundleWhitelist(Set<String> inboundBundleWhitelist) {
         this.properties.put(BUNDLES_WHITELIST_INBOUND_PROPERTY, inboundBundleWhitelist);
     }
 
@@ -383,14 +383,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundBundleWhitelist
      */
     @Override
-    public List<String> getOutboundBundleWhitelist() {
-        return (List<String>) this.properties.get(BUNDLES_WHITELIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundBundleWhitelist() {
+        return (Set<String>) this.properties.get(BUNDLES_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundBundleWhitelist the outboundBundleWhitelist to set
      */
-    public void setOutboundBundleWhitelist(List<String> outboundBundleWhitelist) {
+    public void setOutboundBundleWhitelist(Set<String> outboundBundleWhitelist) {
         this.properties.put(BUNDLES_WHITELIST_OUTBOUND_PROPERTY, outboundBundleWhitelist);
     }
 
@@ -398,14 +398,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundBundleBlacklist
      */
     @Override
-    public List<String> getInboundBundleBlacklist() {
-        return (List<String>) this.properties.get(BUNDLES_BLACKLIST_INBOUND_PROPERTY);
+    public Set<String> getInboundBundleBlacklist() {
+        return (Set<String>) this.properties.get(BUNDLES_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundBundleBlacklist the inboundBundleBlacklist to set
      */
-    public void setInboundBundleBlacklist(List<String> inboundBundleBlacklist) {
+    public void setInboundBundleBlacklist(Set<String> inboundBundleBlacklist) {
         this.properties.put(BUNDLES_BLACKLIST_INBOUND_PROPERTY, inboundBundleBlacklist);
     }
 
@@ -413,14 +413,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundBundleBlacklist
      */
     @Override
-    public List<String> getOutboundBundleBlacklist() {
-        return (List<String>) this.properties.get(BUNDLES_BLACKLIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundBundleBlacklist() {
+        return (Set<String>) this.properties.get(BUNDLES_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundBundleBlacklist the outboundBundleBlacklist to set
      */
-    public void setOutboundBundleBlacklist(List<String> outboundBundleBlacklist) {
+    public void setOutboundBundleBlacklist(Set<String> outboundBundleBlacklist) {
         this.properties.put(BUNDLES_BLACKLIST_OUTBOUND_PROPERTY, outboundBundleBlacklist);
     }
 
@@ -443,14 +443,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundOBRUrlsBlacklist
      */
     @Override
-    public List<String> getInboundOBRUrlsWhitelist() {
-        return (List<String>) this.properties.get(OBR_URLS_WHITELIST_INBOUND_PROPERTY);
+    public Set<String> getInboundOBRUrlsWhitelist() {
+        return (Set<String>) this.properties.get(OBR_URLS_WHITELIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundOBRUrlsWhitelist the inboundBundleBlacklist to set
      */
-    public void setInboundOBRUrlsWhitelist(List<String> inboundOBRUrlsWhitelist) {
+    public void setInboundOBRUrlsWhitelist(Set<String> inboundOBRUrlsWhitelist) {
         this.properties.put(OBR_URLS_WHITELIST_INBOUND_PROPERTY, inboundOBRUrlsWhitelist);
     }
 
@@ -458,14 +458,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundOBRUrlsBlacklist
      */
     @Override
-    public List<String> getOutboundOBRUrlsWhitelist() {
-        return (List<String>) this.properties.get(OBR_URLS_WHITELIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundOBRUrlsWhitelist() {
+        return (Set<String>) this.properties.get(OBR_URLS_WHITELIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundOBRUrlsWhitelist the outboundBundleWhitelist to set
      */
-    public void setOutboundOBRUrlsWhitelist(List<String> outboundOBRUrlsWhitelist) {
+    public void setOutboundOBRUrlsWhitelist(Set<String> outboundOBRUrlsWhitelist) {
         this.properties.put(OBR_URLS_WHITELIST_OUTBOUND_PROPERTY, outboundOBRUrlsWhitelist);
     }
 
@@ -473,14 +473,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the inboundOBRUrlsBlacklist
      */
     @Override
-    public List<String> getInboundOBRUrlsBlacklist() {
-        return (List<String>) this.properties.get(OBR_URLS_BLACKLIST_INBOUND_PROPERTY);
+    public Set<String> getInboundOBRUrlsBlacklist() {
+        return (Set<String>) this.properties.get(OBR_URLS_BLACKLIST_INBOUND_PROPERTY);
     }
 
     /**
      * @param inboundOBRUrlsBlacklist the inboundBundleBlacklist to set
      */
-    public void setInboundOBRUrlsBlacklist(List<String> inboundOBRUrlsBlacklist) {
+    public void setInboundOBRUrlsBlacklist(Set<String> inboundOBRUrlsBlacklist) {
         this.properties.put(OBR_URLS_BLACKLIST_INBOUND_PROPERTY, inboundOBRUrlsBlacklist);
     }
 
@@ -488,14 +488,14 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @return the outboundOBRUrlsBlacklist
      */
     @Override
-    public List<String> getOutboundOBRUrlsBlacklist() {
-        return (List<String>) this.properties.get(OBR_URLS_BLACKLIST_OUTBOUND_PROPERTY);
+    public Set<String> getOutboundOBRUrlsBlacklist() {
+        return (Set<String>) this.properties.get(OBR_URLS_BLACKLIST_OUTBOUND_PROPERTY);
     }
 
     /**
      * @param outboundOBRUrlsBlacklist the outboundBundleBlacklist to set
      */
-    public void setOutboundOBRUrlsBlacklist(List<String> outboundOBRUrlsBlacklist) {
+    public void setOutboundOBRUrlsBlacklist(Set<String> outboundOBRUrlsBlacklist) {
         this.properties.put(OBR_URLS_BLACKLIST_OUTBOUND_PROPERTY, outboundOBRUrlsBlacklist);
     }
 

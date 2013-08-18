@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
 import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
@@ -65,15 +66,21 @@ public class HazelcastConfigurationManager {
         if (hzClassLoader != null) {
             cfg.setClassLoader(hzClassLoader);
         }
-        SerializerConfig serializerConfig = new SerializerConfig();
-        serializerConfig.setImplementation(new GenericCellarSerializer<ManageGroupTask>(11, ManageGroupTask.class));
-        serializerConfig.setTypeClass(ManageGroupTask.class);
-        cfg.getSerializationConfig().addSerializerConfig(serializerConfig);
-
-        GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
+   /*     GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
         globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
         cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);
+
+        SerializerConfig serializerConfig1 = new SerializerConfig();
+        serializerConfig1.setImplementation(new GenericCellarSerializer<ManageGroupTask>(11, ManageGroupTask.class));
+        serializerConfig1.setTypeClass(ManageGroupTask.class);
+        
+        SerializerConfig serializerConfig2 = new SerializerConfig();
+        serializerConfig2.setImplementation(new GenericCellarSerializer<Group>(12, Group.class));
+        serializerConfig2.setTypeClass(Group.class);
+
+        cfg.getSerializationConfig().addSerializerConfig(serializerConfig1);
+        cfg.getSerializationConfig().addSerializerConfig(serializerConfig2);*/
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);

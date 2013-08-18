@@ -65,20 +65,20 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
         System.out.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
         System.out.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
-        Thread.sleep(10000);
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("feature:list"));
         System.out.println(executeCommand("bundle:list"));
 
         System.out.println(executeCommand("cluster:group-list"));
         System.out.println(executeCommand(generateSSH("node2", "bundle:list -t 0")));
 
-        Thread.sleep(10000);
+        Thread.sleep(DELAY_TIMEOUT);
         String output1 = executeCommand(generateSSH("node1", "log:display | grep \"Hallo Cellar\""));
         System.out.println(output1);
         String output2 = executeCommand(generateSSH("node2", "log:display | grep \"Hallo Cellar\""));
         System.out.println(output2);
-        assertTrue("Expected at least lines", countOutputEntires(output1) >= 2);
-        assertTrue("Expected at least lines", countOutputEntires(output2) >= 2);
+        assertTrue("Expected at least 2 lines", countOutputEntires(output1) >= 2);
+        assertTrue("Expected at least 2 lines", countOutputEntires(output2) >= 2);
     }
 
     public int countOutputEntires(String output) {

@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import java.util.List;
+import java.util.Set;
 import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
@@ -128,8 +128,8 @@ public class ObrBundleEventHandler extends ObrSupport implements EventHandler<Cl
         String bundleId = event.getBundleId();
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-            List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-            List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+            Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
             if (cellarSupport.isAllowed(bundleId, whitelist, blacklist)) {
                 Resolver resolver = obrService.resolver();
                 String[] target = getTarget(bundleId);

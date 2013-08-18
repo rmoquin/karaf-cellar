@@ -21,8 +21,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -63,8 +63,8 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
 
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-            List<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
-            List<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
+            Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
+            Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
             if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
                 Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);

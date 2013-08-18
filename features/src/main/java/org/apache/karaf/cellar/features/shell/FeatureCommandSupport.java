@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.features.shell;
 
-import java.util.List;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
@@ -27,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
@@ -49,11 +49,11 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
 
         Boolean result = Boolean.FALSE;
-            Group group = groupManager.findGroupByName(groupName);
-            if (group == null || group.getNodes().isEmpty()) {
+        Group group = groupManager.findGroupByName(groupName);
+        if (group == null || group.getNodes().isEmpty()) {
 
             FeatureInfo info = new FeatureInfo(feature, version);
-                Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
             // check the existing configuration
             if (version == null || (version.trim().length() < 1)) {
                 for (FeatureInfo f : clusterFeatures.keySet()) {
@@ -93,22 +93,25 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @return true if the feature exists in the cluster group, false else.
      */
     public boolean featureExists(String groupName, String feature, String version) {
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            if (clusterFeatures == null)
-                return false;
+        if (clusterFeatures == null) {
+            return false;
+        }
 
-            for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
-                if (version == null) {
-                    if (distributedFeature.getName().equals(feature))
-                        return true;
-                } else {
-                    if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version))
-                        return true;
+        for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
+            if (version == null) {
+                if (distributedFeature.getName().equals(feature)) {
+                    return true;
+                }
+            } else {
+                if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version)) {
+                    return true;
                 }
             }
+        }
 
-            return false;
+        return false;
     }
 
     /**
@@ -123,8 +126,8 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     public boolean isAllowed(Group group, String category, String name, EventType type) {
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-            List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-            List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
 
         return support.isAllowed(name, whitelist, blacklist);
     }

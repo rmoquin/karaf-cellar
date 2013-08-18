@@ -32,7 +32,7 @@ public class CellarEventTest extends CellarTestSupport {
     //@Ignore
     public void testCellarEventFeatureInstall() throws Exception {
         installCellar();        
-        System.out.println(executeCommand("feature:install cellar-eventadmin"));
+        featureService.installFeature("cellar-eventadmin");
     }
 
     @After

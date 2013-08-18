@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -86,8 +85,8 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
 
             Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            List<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
-            List<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
+            Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
+            Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
             for (String pid : clusterConfigurations.keySet()) {
                 if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
                     Dictionary clusterDictionary = clusterConfigurations.get(pid);
@@ -108,7 +107,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
                     }
                 } else {
-                    LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+                    LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
                 }
             }
         }
@@ -140,8 +139,8 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                 for (Configuration localConfiguration : localConfigurations) {
                     String pid = localConfiguration.getPid();
                     // check if the pid is marked as local.
-                    List<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
-                    List<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
+                    Set<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
 
                     if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                         Dictionary localDictionary = localConfiguration.getProperties();

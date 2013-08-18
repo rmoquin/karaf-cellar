@@ -16,28 +16,36 @@
 package org.apache.karaf.cellar.hazelcast.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
-import com.hazelcast.nio.ObjectDataInput;
-import com.hazelcast.nio.ObjectDataOutput;
-import com.hazelcast.nio.serialization.StreamSerializer;
+import com.hazelcast.nio.serialization.ByteArraySerializer;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.hazelcast.HazelcastNode;
+import org.slf4j.Logger;
 
 /**
  *
  * @author rmoquin
  */
-public class GenericCellarSerializer<T> implements StreamSerializer<T> {
+public class GenericCellarSerializer<T> implements ByteArraySerializer<T> {
+    private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(GenericCellarSerializer.class);
     protected static final SmileFactory f = new SmileFactory();
     protected static final ObjectMapper mapper = new ObjectMapper(f);
     protected Class<T> clazz;
     private final int typeId;
 
+    static {
+        SimpleModule module = new SimpleModule();
+        module.addAbstractTypeMapping(Node.class, HazelcastNode.class);
+//        mapper.registerModule(new AfterburnerModule().setUseValueClassLoader(false));
+        mapper.registerModule(module);
+        mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_CONCRETE_AND_ARRAYS);
+    }
+
     public GenericCellarSerializer(int typeId, Class<T> clazz) {
         this.clazz = clazz;
-//        mapper.registerModule(new AfterburnerModule().setUseValueClassLoader(false));
-        mapper.registerModule(new CellarTypesModule());
+        LOGGER.warn("Created JSON serializer for " + clazz);
         this.typeId = typeId;
     }
 
@@ -47,15 +55,16 @@ public class GenericCellarSerializer<T> implements StreamSerializer<T> {
     }
 
     @Override
-    public void write(ObjectDataOutput out, T object) throws IOException {
-        final OutputStream outputStream = (OutputStream) out;
-        mapper.writeValue(outputStream, object);
+    public byte[] write(T object) throws IOException {
+        LOGGER.warn("Writing value object: " + object);
+        return mapper.writeValueAsBytes(object);
     }
 
     @Override
-    public T read(ObjectDataInput in) throws IOException {
-        final InputStream inputStream = (InputStream) in;
-        return mapper.readValue(inputStream, clazz);
+    public T read(byte[] in) throws IOException {
+        T val = mapper.readValue(in, clazz);
+        LOGGER.warn("Read value object: " + val);
+        return val;
     }
 
     @Override

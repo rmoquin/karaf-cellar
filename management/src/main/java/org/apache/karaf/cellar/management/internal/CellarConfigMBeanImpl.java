@@ -72,8 +72,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
         // check if the PID is allowed outbound
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -134,8 +134,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -173,8 +173,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalStateException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }
@@ -219,8 +219,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!cellarSupport.isAllowed(pid, whitelist, blacklist)) {
             throw new IllegalArgumentException("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
         }

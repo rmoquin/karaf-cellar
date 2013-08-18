@@ -13,10 +13,15 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import java.util.Set;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
@@ -30,7 +35,6 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
     //@Ignore
     public void testDosgiGreeter() throws Exception {
         installCellar();
-        Thread.sleep(DEFAULT_TIMEOUT);
         createCellarChild("node1");
         if (!waitForInstanceToCluster(2)) {
             throw new Exception("Failed waiting for second node to connect to cluster..");
@@ -57,12 +61,12 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
         executeCommand("cluster:group-create client-grp");
         executeCommand("cluster:group-create service-grp");
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:group-list"));
         System.out.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
         System.out.println(executeCommand("cluster:group-set service-grp " + node1));
-
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:feature-install client-grp greeter-client"));
-        Thread.sleep(5000);
         System.out.println(executeCommand("cluster:feature-install service-grp greeter-service"));
         Thread.sleep(5000);
         System.out.println(executeCommand("cluster:service-list"));
@@ -71,9 +75,8 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         System.out.println(greetOutput);
         assertEquals("Expected 10 greets", 10, countGreetsFromNode(greetOutput, node1));
         System.out.println(executeCommand("cluster:group-set service-grp " + node2));
-        Thread.sleep(5000);
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:group-list"));
-        System.out.println(executeCommand(generateSSH("node2", "bundle:list -t 0")));
         System.out.println(executeCommand("cluster:list-services"));
         greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
         System.out.println(greetOutput);

@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.config;
 
 import java.io.IOException;
 import java.util.Dictionary;
-import java.util.List;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -27,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
@@ -68,8 +68,8 @@ public class ConfigurationEventHandler extends ConfigurationSupport implements E
         String pid = event.getId();
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        List<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
-        List<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
+        Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
+        Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
         if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
 
             Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);

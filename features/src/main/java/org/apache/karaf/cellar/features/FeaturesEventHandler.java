@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
-import java.util.List;
+import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
@@ -65,8 +65,8 @@ public class FeaturesEventHandler extends FeaturesSupport implements EventHandle
         String name = event.getName();
         String version = event.getVersion();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-        List<String> whitelist = groupConfig.getInboundFeatureWhitelist();
-        List<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+        Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+        Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
         if (cellarSupport.isAllowed(name, whitelist, blacklist) || event.getForce()) {
             FeatureEvent.EventType type = event.getType();
             Boolean isInstalled = isFeatureInstalledLocally(name, version);

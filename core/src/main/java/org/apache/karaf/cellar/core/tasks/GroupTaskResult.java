@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.cellar.core.tasks;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
@@ -23,7 +24,7 @@ import org.apache.karaf.cellar.core.Group;
  *
  * @author rmoquin
  */
-public class GroupTaskResult {
+public class GroupTaskResult implements Serializable {
     private Boolean success = Boolean.TRUE;
     private Set<Group> groups = new HashSet<Group>();
 

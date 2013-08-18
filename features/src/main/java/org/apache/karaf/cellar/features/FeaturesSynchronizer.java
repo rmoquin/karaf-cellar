@@ -90,8 +90,8 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                     String name = info.getName();
                     // check if feature is blocked
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                    List<String> whitelist = groupConfig.getInboundFeatureWhitelist();
-                    List<String> blacklist = groupConfig.getInboundFeatureBlacklist();
+                    Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
+                    Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
                     if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         Boolean remotelyInstalled = clusterFeatures.get(info);
                         Boolean locallyInstalled = isFeatureInstalledLocally(info.getName(), info.getVersion());
@@ -122,7 +122,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                             }
                         }
                     } else {
-                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, groupName);
+                        LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, groupName);
                     }
                 }
             }

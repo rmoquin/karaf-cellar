@@ -40,7 +40,6 @@ public class CellarGroupsTest extends CellarTestSupport {
     @Test
     //@Ignore
     public void testGroupManagerService() throws Exception {
-        System.out.println("############################## Starting Test: testGroupManagerService ##################################################");
         installCellar();
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
@@ -60,7 +59,6 @@ public class CellarGroupsTest extends CellarTestSupport {
 
     @Test
     public void testGroupsWithChildNodes() throws Exception {
-        System.out.println("############################## Starting Test: testGroupsWithChildNodes ##################################################");
         installCellar();
         createdChildren = true;
         createCellarChild("child1");
@@ -70,8 +68,9 @@ public class CellarGroupsTest extends CellarTestSupport {
         String child1Id = getNodeIdOfChild("child1");
         System.out.println(executeCommand("cluster:group-list"));
         System.out.println(executeCommand("cluster:group-create testgroup"));
-        Thread.sleep(COMMAND_TIMEOUT);
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:group-set testgroup " + child1Id));
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:group-list"));
 
         GroupManager groupManager = getOsgiService(GroupManager.class);
@@ -80,6 +79,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 
         System.out.println(executeCommand("cluster:group-delete testgroup"));
+        Thread.sleep(DELAY_TIMEOUT);
         System.out.println(executeCommand("cluster:group-list"));
         groups = groupManager.listAllGroups();
         assertEquals("There should be a single cellar group", 1, groups.size());

@@ -86,8 +86,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     if (state != null) {
                         String bundleLocation = state.getLocation();
                         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-                        List<String> whitelist = groupConfig.getInboundBundleWhitelist();
-                        List<String> blacklist = groupConfig.getInboundBundleBlacklist();
+                        Set<String> whitelist = groupConfig.getInboundBundleWhitelist();
+                        Set<String> blacklist = groupConfig.getInboundBundleBlacklist();
                         if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {
@@ -100,7 +100,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                                 LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
                             }
                         } else {
-                            LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
+                            LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
                         }
                     }
                 }
@@ -111,7 +111,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     /**
      * Push local bundles states to a cluster group.
      *
-     * @param cluster the cluster where to update the bundles states.
      */
     @Override
     public void push(Group group) {
@@ -137,8 +136,8 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
                 // check if the pid is marked as local.
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-                List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+                Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+                Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
                 if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
                     BundleState bundleState = new BundleState();
                     // get the bundle name or location.
@@ -187,7 +186,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     }
 
                 } else {
-                    LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
+                    LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
                 }
             }
         }
@@ -196,7 +195,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     /**
      * Check if the bundle sync flag is enabled for a cluster group.
      *
-     * @param cluster the cluster group to check.
      * @return true if the sync flag is enabled, false else.
      */
     @Override

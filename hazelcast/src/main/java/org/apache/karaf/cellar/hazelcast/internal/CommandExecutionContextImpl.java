@@ -50,14 +50,16 @@ public class CommandExecutionContextImpl implements CommandExecutionContext {
     public Map<Node, Future<GroupTaskResult>> execute(ManageGroupTask command, Set<Node> destinations) {
         Map<Node, Future<GroupTaskResult>> results = new HashMap<Node, Future<GroupTaskResult>>();
         if (destinations.size() == 1) {
-            Node<Member> node = destinations.iterator().next();
-            Future<GroupTaskResult> result = this.executorService.submitToMember(command, node.getSource());
+            Node node = destinations.iterator().next();
+            Member member = cluster.findMemberById(node.getId());
+            Future<GroupTaskResult> result = this.executorService.submitToMember(command, member);
             results.put(node, result);
         } else {
             Set<Member> members = new HashSet<Member>();
             for (Iterator<Node> it = destinations.iterator(); it.hasNext();) {
-                Node<Member> node = it.next();
-                members.add(node.getSource());
+                Node node = it.next();
+                Member member = cluster.findMemberById(node.getId());
+                members.add(member);
             }
             Map<Member, Future<GroupTaskResult>> executedResult = this.executorService.submitToMembers(command, members);
             for (Map.Entry<Member, Future<GroupTaskResult>> entry : executedResult.entrySet()) {

@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import java.util.List;
 import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
@@ -97,8 +96,8 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
 
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-            List<String> whitelist = groupConfig.getOutboundOBRUrlsWhitelist();
-            List<String> blacklist = groupConfig.getOutboundOBRUrlsBlacklist();
+            Set<String> whitelist = groupConfig.getOutboundOBRUrlsWhitelist();
+            Set<String> blacklist = groupConfig.getOutboundOBRUrlsBlacklist();
 
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {

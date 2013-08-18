@@ -45,12 +45,10 @@ import javax.management.remote.JMXServiceURL;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
@@ -71,15 +69,12 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
+    static final Long DELAY_TIMEOUT = 5000L;
     static final Long COMMAND_TIMEOUT = 10000L;
-    static final Long DEFAULT_TIMEOUT = 10000L;
     static final Long SERVICE_TIMEOUT = 30000L;
-    static final String KARAF_VERSION = "3.0.0-SNAPSHOT";
     public static final String RMI_SERVER_PORT = "44445";
     public static final String HTTP_PORT = "9081";
     public static final String RMI_REG_PORT = "1100";
-    static final String GROUP_ID = "org.apache.karaf";
-    static final String ARTIFACT_ID = "apache-karaf";
     static final String INSTANCE_STARTED = "Started";
     static final String INSTANCE_STARTING = "Starting";
     static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
@@ -109,7 +104,7 @@ public class CellarTestSupport {
      */
     protected void installCellar() {
         try {
-            cellarFeatureURI = maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version(KARAF_VERSION).classifier("features").type("xml").getURL();
+            cellarFeatureURI = maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version("3.0.0-SNAPSHOT").classifier("features").type("xml").getURL();
             featureService.addRepository(new URI(cellarFeatureURI), false);
             featureService.installFeature("cellar");
         } catch (Exception ex) {
@@ -143,12 +138,12 @@ public class CellarTestSupport {
 
         //Wait till the node is listed as Starting
         System.err.print("Waiting for " + name + " to start ");
-        for (int i = 0; i < 5 && instances == 0; i++) {
+        for (int i = 0; i < 10 && instances == 0; i++) {
             String response = executeCommand("instance:list | grep " + name + " | grep -c " + INSTANCE_STARTED, COMMAND_TIMEOUT, false);
             instances = Integer.parseInt(response.trim());
             System.err.print(".");
             try {
-                Thread.sleep(3000);
+                Thread.sleep(2000);
             } catch (InterruptedException e) {
                 //Ignore
             }
@@ -195,7 +190,8 @@ public class CellarTestSupport {
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
+            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT),
+            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.instance.core", "WARN")
         //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.aries.blueprint", "DEBUG"),
         //            editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar", "DEBUG"),
         //editConfigurationFilePut("etc/org.ops4j.pax.logging.cfg", "log4j.logger.org.apache.karaf.cellar.shell", "WARN") 

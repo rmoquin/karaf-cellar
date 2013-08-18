@@ -13,7 +13,12 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import java.util.Set;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -31,14 +36,14 @@ public class CellarChildNodesTest extends CellarTestSupport {
         createCellarChild("child1");
         if (!waitForInstanceToCluster(2)) {
             throw new Exception("Failed waiting for second node to connect to cluster..");
-
-		ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);        Node localNode = clusterManager.getMasterCluster().getLocalNode();
+        }
+        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
+        assertNotNull(clusterManager);
+        Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         System.err.println(executeCommand("cluster:node-list"));
         assertNotNull(localNode);
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
-        }
     }
 
     @After

@@ -78,6 +78,7 @@
                             org.apache.karaf.cellar.config.*;version="${project.version}",
                             org.apache.karaf.cellar.utils.ping;version="${project.version}",
                             org.apache.karaf.features;version="[3,4)",
+                            org.apache.karaf.cellar.event;resolution:=optional;version="${project.version}",
                             org.slf4j;resolution:=optional,
                             *
                         </Import-Package>
@@ -114,7 +115,7 @@
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.bundle</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>

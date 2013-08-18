@@ -136,6 +136,16 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         return nodes;
     }
 
+    public Member findMemberById(String id) {
+        Set<Member> members = instance.getCluster().getMembers();
+        for (Member member : members) {
+            if (member.getUuid().equals(id)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
     /**
      * Get a node with a given ID.
      *

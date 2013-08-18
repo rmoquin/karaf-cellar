@@ -62,8 +62,7 @@
     <service ref="configManager" auto-export="interfaces"/>
 
     <bean id="nodeConfiguration" class="org.apache.karaf.cellar.hazelcast.internal.NodeConfigurationImpl">
-        <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeConfiguration" update-strategy="container-managed"
-                               update-method="updated"/>
+        <cm:managed-properties persistent-id="org.apache.karaf.cellar.core.NodeConfiguration" update-strategy="container-managed"/>
         <property name="groups">
             <set>
                 <value>default</value>
@@ -72,7 +71,7 @@
         <property name="producer" value="true"/>
         <property name="consumer" value="true"/>
         <property name="enabledEvents">
-            <list>
+            <set>
                 <value>org.apache.karaf.cellar.bundle.BundleEventHandler</value>
                 <value>org.apache.karaf.cellar.config.ConfigurationEventHandler</value>
                 <value>org.apache.karaf.cellar.features.FeaturesEventHandler</value>
@@ -81,7 +80,7 @@
                 <value>org.apache.karaf.cellar.bundle.BundleEventHandler</value>
                 <value>org.apache.karaf.cellar.obr.ObrBundleEventHandler</value>
                 <value>org.apache.karaf.cellar.obr.ObrUrlEventHandler</value>
-            </list>
+            </set>
         </property>
     </bean>
 
@@ -90,107 +89,107 @@
     <cm:managed-service-factory id="groupFactory" factory-pid="org.apache.karaf.cellar.core.GroupConfiguration"
                                 auto-export="interfaces">
         <cm:managed-component class="org.apache.karaf.cellar.hazelcast.internal.GroupConfigurationImpl">
-            <cm:managed-properties persistent-id="" update-strategy="container-managed" update-method="update"/>
+            <cm:managed-properties persistent-id="" update-strategy="container-managed"/>
             <property name="syncConfiguration" value="true"/>
             <property name="inboundConfigurationWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundConfigurationWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundConfigurationBlacklist">
-                <list>
+                <set>
                     <value>org.apache.felix.fileinstall*</value>
                     <value>org.apache.karaf.cellar*</value>
                     <value>org.apache.karaf.management</value>
                     <value>org.apache.karaf.shell</value>
                     <value>org.ops4j.pax.logging</value>
                     <value>org.ops4j.pax.web</value>
-                </list>
+                </set>
             </property>
             <property name="outboundConfigurationBlacklist">
-                <list>
+                <set>
                     <value>org.apache.felix.fileinstall*</value>
                     <value>org.apache.karaf.cellar*</value>
                     <value>org.apache.karaf.management</value>
                     <value>org.apache.karaf.shell</value>
                     <value>org.ops4j.pax.logging</value>
                     <value>org.ops4j.pax.web</value>
-                </list>
+                </set>
             </property>
             <property name="syncFeatures" value="true"/>
             <property name="syncFeatureRepos" value="true"/>
             <property name="inboundFeatureWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundFeatureWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundFeatureBlacklist">
-                <list>
+                <set>
                     <value>config</value>
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundFeatureBlacklist">
-                <list>
+                <set>
                     <value>config</value>
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
-                </list>
+                </set>
             </property>
             <property name="syncBundles" value="true"/>
             <property name="inboundBundleWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundBundleWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundBundleBlacklist">
-                <list>
+                <set>
                     <value>none</value>
-                </list>
+                </set>
             </property>
             <property name="outboundBundleBlacklist">
-                <list>
+                <set>
                     <value>none</value>
-                </list>
+                </set>
             </property>
             <property name="syncOBRUrls" value="true"/>
             <property name="inboundOBRUrlsWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="outboundOBRUrlsWhitelist">
-                <list>
+                <set>
                     <value>*</value>
-                </list>
+                </set>
             </property>
             <property name="inboundOBRUrlsBlacklist">
-                <list>
+                <set>
                     <value>none</value>
-                </list>
+                </set>
             </property>
             <property name="outboundOBRUrlsBlacklist">
-                <list>
+                <set>
                     <value>none</value>
-                </list>
+                </set>
             </property>
             <property name="syncOBRBundles" value="true"/>
             <property name="masterCluster" ref="masterCluster"/>

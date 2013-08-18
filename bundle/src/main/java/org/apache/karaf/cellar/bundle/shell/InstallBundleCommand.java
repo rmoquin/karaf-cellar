@@ -26,6 +26,7 @@ import org.osgi.framework.BundleEvent;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import org.apache.karaf.cellar.core.Group;
@@ -65,8 +66,8 @@ public class InstallBundleCommand extends CellarCommandSupport {
 
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-        List<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-        List<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
         for (String url : urls) {
             // check if the bundle is allowed to send bundle events
             if (support.isAllowed(url, whitelist, blacklist)) {

@@ -14,11 +14,10 @@
 package org.apache.karaf.cellar.core;
 
 import java.io.Serializable;
-
 /**
  * Generic cluster node interface.
  */
-public interface Node<T> extends Serializable {
+public interface Node extends Serializable {
 
     /**
      * Get the ID of the node.
@@ -45,7 +44,5 @@ public interface Node<T> extends Serializable {
      * @return the name
      */
     String getName();
-
-    T getSource();
 
 }

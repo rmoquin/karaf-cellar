@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import java.util.List;
+import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -68,8 +68,8 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
         String url = event.getUrl();
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-        List<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
             if (cellarSupport.isAllowed(url, whitelist, blacklist) || event.getForce()) {
                 LOGGER.debug("CELLAR OBR: received OBR URL {}", url);
                 if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {

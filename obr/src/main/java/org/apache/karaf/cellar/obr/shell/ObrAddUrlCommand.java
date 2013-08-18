@@ -57,8 +57,8 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
 
         // check if the URL is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        List<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
-        List<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!isAllowed(url, whitelist, blacklist)) {
             System.err.println("OBR URL " + url + " is blocked outbound for cluster group " + groupName);
             return null;

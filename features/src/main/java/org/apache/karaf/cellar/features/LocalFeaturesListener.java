@@ -68,8 +68,8 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                     String name = feature.getName();
                     String version = feature.getVersion();
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                    List<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-                    List<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
+                    Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
+                    Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
                     if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
                         FeatureEvent.EventType type = event.getType();
 
@@ -85,7 +85,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements org.apache
                         featureEvent.setSourceGroup(group);
                         eventProducer.produce(featureEvent);
                     } else {
-                        LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+                        LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
                     }
                 }
             }
