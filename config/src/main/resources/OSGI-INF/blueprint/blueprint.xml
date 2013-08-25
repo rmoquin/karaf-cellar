@@ -30,20 +30,19 @@
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="executionContext" ref="executionContext"/>`
     </bean>
 
     <service ref="localListener" interface="org.osgi.service.cm.ConfigurationListener"/>
 
     <!-- Configuration Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.config.ConfigurationSynchronizer" init-method="init" 
-          destroy-method="destroy" depends-on="eventHandler">
+          destroy-method="destroy" depends-on="eventTask">
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="storage" value="${storage}"/>
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
@@ -53,8 +52,7 @@
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
     
     <!-- Cluster Event Handler -->
-    <bean id="eventHandler" class="org.apache.karaf.cellar.config.ConfigurationEventHandler" init-method="init" 
-          destroy-method="destroy">
+    <bean id="eventTask" class="org.apache.karaf.cellar.config.ConfigurationEventTask">
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
@@ -63,17 +61,17 @@
         <property name="groupManager" ref="groupManager"/>
     </bean>
     
-    <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
+    <service ref="eventTask" interface="org.apache.karaf.cellar.core.command.DistributedTask">
         <service-properties>
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
 
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <ext:property-placeholder placeholder-prefix="$[" placeholder-suffix="]" />
     <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
         <cm:default-properties>

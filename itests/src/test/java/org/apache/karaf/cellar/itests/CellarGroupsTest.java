@@ -19,7 +19,6 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
-import static org.apache.karaf.cellar.itests.CellarTestSupport.COMMAND_TIMEOUT;
 import org.junit.After;
 import org.junit.Test;
 

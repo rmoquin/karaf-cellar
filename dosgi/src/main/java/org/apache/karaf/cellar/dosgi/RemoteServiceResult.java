@@ -13,25 +13,14 @@
  */
 package org.apache.karaf.cellar.dosgi;
 
-import org.apache.karaf.cellar.core.command.Result;
+import org.apache.karaf.cellar.core.command.DistributedResult;
 
 /**
  * Cluster remote service result event.
  */
-public class RemoteServiceResult extends Result {
+public interface RemoteServiceResult extends DistributedResult {
 
-    private Object result;
+    public Object getResult();
 
-    public RemoteServiceResult(String id) {
-        super(id);
-    }
-
-    public Object getResult() {
-        return result;
-    }
-
-    public void setResult(Object result) {
-        this.result = result;
-    }
-
+    public void setResult(Object result);
 }

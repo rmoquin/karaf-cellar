@@ -30,6 +30,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Generic features support.
@@ -43,6 +44,7 @@ public class FeaturesSupport {
     protected CellarSupport cellarSupport;
     protected GroupManager groupManager;
     protected NodeConfiguration nodeConfiguration;
+    protected DistributedExecutionContext executionContext;
 
     public void init() {
         // nothing to do
@@ -247,5 +249,19 @@ public class FeaturesSupport {
      */
     public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
         this.nodeConfiguration = nodeConfiguration;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

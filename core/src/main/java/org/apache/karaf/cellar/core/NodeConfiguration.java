@@ -36,4 +36,14 @@ public interface NodeConfiguration {
      * @return the properties
      */
     Dictionary<String, Object> getProperties();
+
+    /**
+     * @param producer the producer to set
+     */
+    void setProducer(boolean producer);
+
+    /**
+     * @param consumer the consumer to set
+     */
+    void setConsumer(boolean consumer);
 }

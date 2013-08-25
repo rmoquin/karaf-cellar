@@ -15,25 +15,25 @@ package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.command.ExecutionContext;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Handler for cluster remote service invocation event.
  */
 public class RemoteServiceInvocationHandler implements InvocationHandler {
 
-    private String endpointId;
-    private String serviceClass;
-    private ClusterManager clusterManager;
-    private ExecutionContext executionContext;
+    private final String endpointId;
+    private final String serviceClass;
+    private final ClusterManager clusterManager;
+    private final DistributedExecutionContext executionContext;
 
-    public RemoteServiceInvocationHandler(String endpointId,String serviceClass, ClusterManager clusterManager, ExecutionContext executionContext) {
+    public RemoteServiceInvocationHandler(String endpointId,String serviceClass, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
         this.endpointId = endpointId;
         this.serviceClass = serviceClass;
         this.clusterManager = clusterManager;
@@ -42,7 +42,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object o, Method method, Object[] arguments) throws Throwable {
-        RemoteServiceCall remoteServiceCall = new RemoteServiceCall(clusterManager.generateId());
+        RemoteServiceCallTask remoteServiceCall = new RemoteServiceCallTask();
         remoteServiceCall.setEndpointId(endpointId);
         remoteServiceCall.setMethod(method.getName());
         remoteServiceCall.setServiceClass(serviceClass);
@@ -55,7 +55,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         }
 
         remoteServiceCall.setArguments(argumentList);
-        Map<Node,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall);
+        Map<Node,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall, this.clusterManager.getMasterCluster().getLocalNode());
 
         if(results != null) {
             for(Map.Entry<Node,RemoteServiceResult> entry:results.entrySet()) {

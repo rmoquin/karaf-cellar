@@ -11,29 +11,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.core;
-
-import org.apache.karaf.cellar.core.control.Switch;
-
-import java.io.Serializable;
+package org.apache.karaf.cellar.core.control;
 
 /**
- * Generic consumer interface.
+ * Manage group action enum state.
  */
-public interface Consumer<T extends Serializable> {
+public enum ManageGroupActions {
 
-    /**
-     * Consume an object.
-     *
-     * @param obj the object to consume.
-     */
-    public void consume(T obj);
-
-    /**
-     * Get the consumer switch.
-     *
-     * @return the consumer switch.
-     */
-    public Switch getSwitch();
+    SET,
+    JOIN,
+    QUIT,
+    PURGE,
+    LIST;
 
 }

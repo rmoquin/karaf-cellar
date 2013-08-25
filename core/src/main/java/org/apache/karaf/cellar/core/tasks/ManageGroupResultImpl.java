@@ -15,7 +15,6 @@
  */
 package org.apache.karaf.cellar.core.tasks;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
@@ -24,26 +23,44 @@ import org.apache.karaf.cellar.core.Group;
  *
  * @author rmoquin
  */
-public class GroupTaskResult implements Serializable {
-    private Boolean success = Boolean.TRUE;
+public class ManageGroupResultImpl implements ManageGroupResult {
+    private boolean successful = true;
+    private Throwable throwable;
     private Set<Group> groups = new HashSet<Group>();
 
-    public GroupTaskResult() {
+    public ManageGroupResultImpl() {
     }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
+    
+    @Override
     public Set<Group> getGroups() {
         return groups;
     }
 
     public void setGroups(Set<Group> groups) {
         this.groups = groups;
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return successful;
+    }
+
+    @Override
+    public Throwable getThrowable() {
+        return throwable;
+    }
+    
+    /**
+     * @param throwable the throwable to set
+     */
+    public void setThrowable(Throwable throwable) {
+        this.throwable = throwable;
+    }
+
+    /**
+     * @param successful the successful to set
+     */
+    public void setSuccessful(boolean successful) {
+        this.successful = successful;
     }
 }

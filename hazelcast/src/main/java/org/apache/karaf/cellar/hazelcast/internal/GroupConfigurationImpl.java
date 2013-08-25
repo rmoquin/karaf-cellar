@@ -26,14 +26,9 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.event.EventConsumer;
-import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventTransportFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,32 +89,11 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     private Hashtable<String, Object> properties = new Hashtable<String, Object>();
     private CellarCluster masterCluster;
     private BundleContext bundleContext;
-    private EventTransportFactory eventTransportFactory;
-    private EventProducer producer;
-    private EventConsumer consumer;
-    private ServiceRegistration producerRegistration;
-    private ServiceRegistration consumerRegistration;
 
     public void init() {
     }
 
     public void destroy() {
-        if (consumer != null) {
-            consumer.stop();
-        }
-        if (consumerRegistration != null) {
-            consumerRegistration.unregister();
-        }
-        if (producerRegistration != null) {
-            producerRegistration.unregister();
-        }
-
-    }
-
-    public void updated(Map<String, Object> properties) throws ConfigurationException {
-        if (properties != null) {
-            this.properties.putAll(properties);
-        }
     }
 
     /**
@@ -130,23 +104,6 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     @Override
     public Group register() {
         String groupName = this.getName();
-
-        Hashtable serviceProperties = new Hashtable();
-        serviceProperties.put("type", "group");
-        serviceProperties.put("name", groupName);
-
-        if (producer == null) {
-            producer = eventTransportFactory.getEventProducer(groupName, Boolean.TRUE);
-            producerRegistration = bundleContext.registerService(EventProducer.class.getCanonicalName(), producer, serviceProperties);
-        }
-        if (consumer == null) {
-            consumer = eventTransportFactory.getEventConsumer(groupName, true);
-            consumerRegistration = bundleContext.registerService(EventConsumer.class.getCanonicalName(), consumer, serviceProperties);
-        }
-        if (!consumer.isConsuming()) {
-            consumer.start();
-        }
-
         return new Group(groupName);
     }
 
@@ -547,19 +504,5 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
-    }
-
-    /**
-     * @return the eventTransportFactory
-     */
-    public EventTransportFactory getEventTransportFactory() {
-        return eventTransportFactory;
-    }
-
-    /**
-     * @param eventTransportFactory the eventTransportFactory to set
-     */
-    public void setEventTransportFactory(EventTransportFactory eventTransportFactory) {
-        this.eventTransportFactory = eventTransportFactory;
     }
 }

@@ -119,4 +119,6 @@ public interface GroupManager {
     void joinGroup(String groupName) throws ConfigurationException;
 
     void deleteGroup(String groupName) throws IOException, InvalidSyntaxException;
+
+    NodeConfiguration getNodeConfiguration();
 }

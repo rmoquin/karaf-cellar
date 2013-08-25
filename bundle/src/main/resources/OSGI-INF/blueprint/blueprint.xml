@@ -18,13 +18,11 @@
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Bundle Listener -->
-    <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init"
-          destroy-method="destroy">
+    <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init" destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
         <property name="masterCluster" ref="masterCluster"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
 
@@ -36,7 +34,6 @@
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="masterCluster" ref="masterCluster"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
     
@@ -52,12 +49,6 @@
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
     
-    <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
-        <service-properties>
-            <entry key="managed" value="true"/>
-        </service-properties>
-    </service>
-
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
 
     <!-- Cluster Core Services -->
@@ -65,6 +56,5 @@
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 </blueprint>

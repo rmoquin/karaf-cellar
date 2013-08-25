@@ -47,8 +47,8 @@
     <bean id="cellarConfigMBean" class="org.apache.karaf.cellar.management.internal.CellarConfigMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="executionContext" ref="executionContext"/>
     </bean>
 
     <service ref="cellarConfigMBean" auto-export="interfaces">
@@ -61,9 +61,9 @@
     <bean id="cellarFeaturesMBean" class="org.apache.karaf.cellar.management.internal.CellarFeaturesMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="featuresService" ref="featuresService"/>
+        <property name="executionContext" ref="executionContext"/>
     </bean>
 
     <service ref="cellarFeaturesMBean" auto-export="interfaces">
@@ -75,7 +75,7 @@
     <!-- Cellar Cluster Group MBean -->
     <bean id="cellarGroupMBean" class="org.apache.karaf.cellar.management.internal.CellarGroupMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="commandExecutionContext" ref="commandExecutionContext"/>
+        <property name="executionContext" ref="executionContext"/>
         <property name="groupManager" ref="groupManager"/>
     </bean>
 
@@ -89,7 +89,7 @@
     <bean id="cellarBundleMBean" class="org.apache.karaf.cellar.management.internal.CellarBundleMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="eventProducer" ref="eventProducer"/>
+        <property name="executionContext" ref="executionContext"/>
     </bean>
 
     <service ref="cellarBundleMBean" auto-export="interfaces">
@@ -103,9 +103,7 @@
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
-    <reference id="commandExecutionContext" interface="org.apache.karaf.cellar.core.command.CommandExecutionContext"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 

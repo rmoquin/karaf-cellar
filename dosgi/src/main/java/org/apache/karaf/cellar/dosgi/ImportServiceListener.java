@@ -14,12 +14,6 @@
 package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.command.ClusteredExecutionContext;
-import org.apache.karaf.cellar.core.command.CommandStore;
-import org.apache.karaf.cellar.core.command.ExecutionContext;
-import org.apache.karaf.cellar.core.event.EventConsumer;
-import org.apache.karaf.cellar.core.event.EventProducer;
-import org.apache.karaf.cellar.core.event.EventTransportFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.hooks.service.ListenerHook;
@@ -35,6 +29,8 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * Listener for the service import.
@@ -43,13 +39,11 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ImportServiceListener.class);
     private BundleContext bundleContext;
     private ClusterManager clusterManager;
-    private CommandStore commandStore;
-    private EventTransportFactory eventTransportFactory;
     private Map<String, EndpointDescription> remoteEndpoints;
     private Set<ListenerInfo> pendingListeners = new LinkedHashSet<ListenerInfo>();
     private final Map<EndpointDescription, ServiceRegistration> registrations = new HashMap<EndpointDescription, ServiceRegistration>();
-    private final Map<String, EventProducer> producers = new HashMap<String, EventProducer>();
-    private final Map<String, EventConsumer> consumers = new HashMap<String, EventConsumer>();
+    private final Map<String, String> producers = new HashMap<String, String>();
+    private final Map<String, String> consumers = new HashMap<String, String>();
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
@@ -62,10 +56,6 @@ public class ImportServiceListener implements ListenerHook, Runnable {
         for (Map.Entry<EndpointDescription, ServiceRegistration> entry : registrations.entrySet()) {
             ServiceRegistration registration = entry.getValue();
             registration.unregister();
-        }
-        for (Map.Entry<String, EventConsumer> consumerEntry : consumers.entrySet()) {
-            EventConsumer consumer = consumerEntry.getValue();
-            consumer.stop();
         }
         consumers.clear();
         producers.clear();
@@ -147,31 +137,34 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private void importService(EndpointDescription endpoint, ListenerInfo listenerInfo) {
         LOGGER.debug("CELLAR DOSGI: importing remote service: " + endpoint.getId());
 
-        EventProducer requestProducer = producers.get(endpoint.getId());
+        String requestProducer = producers.get(endpoint.getId());
         if (requestProducer == null) {
-            requestProducer = eventTransportFactory.getEventProducer(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId(), Boolean.FALSE);
+            requestProducer = Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId();
             producers.put(endpoint.getId(), requestProducer);
         }
 
-        EventConsumer resultConsumer = consumers.get(endpoint.getId());
+        String resultConsumer = consumers.get(endpoint.getId());
         if (resultConsumer == null) {
-            resultConsumer = eventTransportFactory.getEventConsumer(Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getMasterCluster().getLocalNode().getId() + endpoint.getId(), Boolean.FALSE);
+            resultConsumer = Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getMasterCluster().getLocalNode().getId() + endpoint.getId();
             consumers.put(endpoint.getId(), resultConsumer);
-        } else if (!resultConsumer.isConsuming()) {
-            resultConsumer.start();
         }
 
         producers.put(endpoint.getId(), requestProducer);
         consumers.put(endpoint.getId(), resultConsumer);
 
-        ExecutionContext executionContext = new ClusteredExecutionContext(requestProducer, commandStore);
-
-        RemoteServiceFactory remoteServiceFactory = new RemoteServiceFactory(endpoint, clusterManager, executionContext);
-        ServiceRegistration registration = listenerInfo.getBundleContext().registerService(endpoint.getServiceClass(),
-                remoteServiceFactory,
-                new Hashtable<String, Object>(endpoint.getProperties()));
-        registrations.put(endpoint, registration);
-        pendingListeners.remove(listenerInfo);
+        ServiceReference<DistributedExecutionContext> sr = null;
+        try {
+            sr = this.bundleContext.getServiceReference(DistributedExecutionContext.class);
+            DistributedExecutionContext executionContext = this.bundleContext.getService(sr);
+            RemoteServiceFactory remoteServiceFactory = new RemoteServiceFactory(endpoint, clusterManager, executionContext);
+            ServiceRegistration registration = listenerInfo.getBundleContext().registerService(endpoint.getServiceClass(),
+                    remoteServiceFactory,
+                    new Hashtable<String, Object>(endpoint.getProperties()));
+            registrations.put(endpoint, registration);
+            pendingListeners.remove(listenerInfo);
+        } finally {
+            this.bundleContext.ungetService(sr);
+        }
     }
 
     /**
@@ -184,10 +177,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
         registration.unregister();
 
         producers.remove(endpoint.getId());
-        EventConsumer consumer = consumers.remove(endpoint.getId());
-        if (consumer != null) {
-            consumer.stop();
-        }
+        consumers.remove(endpoint.getId());
     }
 
     public BundleContext getBundleContext() {
@@ -204,21 +194,5 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
-    }
-
-    public CommandStore getCommandStore() {
-        return commandStore;
-    }
-
-    public void setCommandStore(CommandStore commandStore) {
-        this.commandStore = commandStore;
-    }
-
-    public EventTransportFactory getEventTransportFactory() {
-        return eventTransportFactory;
-    }
-
-    public void setEventTransportFactory(EventTransportFactory eventTransportFactory) {
-        this.eventTransportFactory = eventTransportFactory;
     }
 }

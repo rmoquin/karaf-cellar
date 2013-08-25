@@ -32,7 +32,6 @@ import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -45,7 +44,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private GroupManager groupManager;
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
-    private EventProducer eventProducer;
     private NodeConfiguration nodeConfiguration;
 
     public ConfigurationSynchronizer() {
@@ -121,12 +119,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     @Override
     public void push(Group group) {
 
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR CONFIG: cluster event producer is OFF");
-            return;
-        }
-
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);
@@ -150,7 +142,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         // broadcast the cluster event
                         ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                         event.setSourceGroup(group);
-                        eventProducer.produce(event);
+                        executionContext.execute(event, group.getNodes());
                     } else {
                         LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
                     }
@@ -229,20 +221,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
-    }
-
-    /**
-     * @return the eventProducer
-     */
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    /**
-     * @param eventProducer the eventProducer to set
-     */
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 
     /**

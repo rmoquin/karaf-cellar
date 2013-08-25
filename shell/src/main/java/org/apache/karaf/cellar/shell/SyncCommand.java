@@ -20,9 +20,10 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 
 @Command(scope = "cluster", name = "sync", description = "Force the call of all cluster synchronizers available")
-public class SyncCommand extends ClusterCommandSupport {
+public class SyncCommand extends CellarCommandSupport {
     @Override
     protected Object doExecute() throws Exception {
         Set<Group> localGroups = groupManager.listLocalGroups();

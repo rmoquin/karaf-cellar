@@ -16,10 +16,9 @@ package org.apache.karaf.cellar.features.shell;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
-import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
+import org.apache.karaf.cellar.features.RepositoryEventTask;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
@@ -42,8 +41,6 @@ public class UrlAddCommand extends FeatureCommandSupport {
 
     @Option(name = "-i", aliases = { "--install-all" }, description = "Install all features contained in the repository URLs", required = false, multiValued = false)
     boolean install;
-
-    private EventProducer eventProducer;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -118,21 +115,15 @@ public class UrlAddCommand extends FeatureCommandSupport {
                         featuresService.removeRepository(new URI(url));
 
                     // broadcast the cluster event
-                    ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
+                    RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryAdded);
                     event.setInstall(install);
                     event.setSourceGroup(group);
-                    eventProducer.produce(event);
+                    executionContext.executeAndCallback(event, group.getNodes());
                 } else {
                     System.err.println("Features repository URL " + url + " already registered");
                 }
             }
 
         return null;
-    }
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 }

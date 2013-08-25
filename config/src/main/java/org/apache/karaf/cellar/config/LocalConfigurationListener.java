@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
@@ -28,6 +26,7 @@ import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -39,9 +38,9 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
     private ConfigurationAdmin configurationAdmin;
     private GroupManager groupManager;
     private ClusterManager clusterManager;
-    private EventProducer eventProducer;
     private CellarSupport cellarSupport;
-
+    private DistributedExecutionContext executionContext;
+    
     /**
      * Callback method called when a local configuration changes.
      *
@@ -49,10 +48,6 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
      */
     @Override
     public void configurationEvent(ConfigurationEvent event) {
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR CONFIG: cluster event producer is OFF");
-            return;
-        }
         String pid = event.getPid();
 
         Dictionary localDictionary = null;
@@ -80,22 +75,22 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             // update the configurations in the cluster group
                             clusterConfigurations.remove(pid);
                             // broadcast the cluster event
-                            ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                            clusterConfigurationEvent.setType(ConfigurationEvent.CM_DELETED);
-                            clusterConfigurationEvent.setSourceGroup(group);
-                            clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                            eventProducer.produce(clusterConfigurationEvent);
+                            ConfigurationEventTask configurationEventTask = new ConfigurationEventTask();
+                            configurationEventTask.setType(ConfigurationEvent.CM_DELETED);
+                            configurationEventTask.setSourceGroup(group);
+                            configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+                            executionContext.executeAsync(configurationEventTask, group.getNodes(), null);
                         } else {
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
                             if (!equals(localDictionary, distributedDictionary)) {
                                 // update the configurations in the cluster group
                                 clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
-                                ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                                clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
-                                clusterConfigurationEvent.setSourceGroup(group);
-                                clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                                eventProducer.produce(clusterConfigurationEvent);
+                                ConfigurationEventTask configurationEventTask = new ConfigurationEventTask();
+                                configurationEventTask.setType(ConfigurationEvent.CM_UPDATED);
+                                configurationEventTask.setSourceGroup(group);
+                                configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+                                executionContext.executeAsync(configurationEventTask, group.getNodes(), null);
                             }
                         }
                     } catch (Exception e) {
@@ -114,14 +109,6 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
 
     public void destroy() {
         // nothing to do
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 
     /**
@@ -178,5 +165,19 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
      */
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

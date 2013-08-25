@@ -34,8 +34,6 @@ import org.apache.karaf.cellar.core.NodeConfiguration;
 public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
-    public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
-    private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
@@ -46,12 +44,6 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
         // check if the handler is ON
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
-            return;
-        }
-
-        if (groupManager == null) {
-            // in rare cases for example right after installation this happens!
-            LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
             return;
         }
 

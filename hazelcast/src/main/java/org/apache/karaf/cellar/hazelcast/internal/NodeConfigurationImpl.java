@@ -87,6 +87,7 @@ public class NodeConfigurationImpl implements NodeConfiguration {
     /**
      * @param producer the producer to set
      */
+    @Override
     public void setProducer(boolean producer) {
         this.properties.put(PRODUCER_PROPERTY, producer);
     }

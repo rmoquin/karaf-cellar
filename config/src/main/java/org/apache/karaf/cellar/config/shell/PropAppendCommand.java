@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -26,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 @Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
 public class PropAppendCommand extends ConfigCommandSupport {
@@ -42,7 +42,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
     @Argument(index = 3, name = "value", description = "The property value", required = true, multiValued = false)
     String value;
 
-    private EventProducer eventProducer;
+    private DistributedExecutionContext executionContext;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -50,12 +50,6 @@ public class PropAppendCommand extends ConfigCommandSupport {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
-            return null;
-        }
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
             return null;
         }
 
@@ -90,19 +84,25 @@ public class PropAppendCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
-            eventProducer.produce(event);
+            executionContext.execute(event,group.getNodes());
         } else {
             System.out.println("No configuration found in cluster group " + groupName);
         }
         return null;
     }
 
-    public EventProducer getEventProducer() {
-        return eventProducer;
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 
 }

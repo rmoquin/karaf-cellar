@@ -16,16 +16,14 @@ package org.apache.karaf.cellar.config.shell;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.cellar.config.Constants;
-import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 @Command(scope = "cluster", name = "config-propdel", description = "Delete a property from a configuration in a cluster group")
 public class PropDelCommand extends ConfigCommandSupport {
@@ -39,7 +37,7 @@ public class PropDelCommand extends ConfigCommandSupport {
     @Argument(index = 2, name = "key", description = "The property key to delete", required = true, multiValued = false)
     String key;
 
-    private EventProducer eventProducer;
+    private DistributedExecutionContext executionContext;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -47,12 +45,6 @@ public class PropDelCommand extends ConfigCommandSupport {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
-            return null;
-        }
-
-        // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
             return null;
         }
 
@@ -75,9 +67,9 @@ public class PropDelCommand extends ConfigCommandSupport {
                 clusterConfigurations.put(pid, distributedDictionary);
 
                 // broadcast the cluster event
-                ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+                ClusterConfigurationEvent event = new ClusterConfigurationEvent();
                 event.setSourceGroup(group);
-                eventProducer.produce(event);
+                executionContext.execute(event, group.getNodes());
             }
         } else {
             System.out.println("No configuration found in cluster group " + groupName);
@@ -86,12 +78,18 @@ public class PropDelCommand extends ConfigCommandSupport {
         return null;
     }
 
-    public EventProducer getEventProducer() {
-        return eventProducer;
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 
 }

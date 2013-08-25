@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.features.shell;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.event.EventType;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
@@ -27,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.GroupConfiguration;
 
 /**
  * Abstract cluster feature shell command.
@@ -117,18 +115,13 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
     /**
      * Check if a cluster features event is allowed.
      *
-     * @param group the cluster group.
-     * @param category the features category name.
-     * @param name the feature name.
-     * @param type the event type (inbound, outbound).
+     * @param name
+     * @param whitelist
+     * @param blacklist
      * @return true if the cluster features event is allowed, false else.
      */
-    public boolean isAllowed(Group group, String category, String name, EventType type) {
+    public boolean isAllowed(String name, Set<String> whitelist, Set<String> blacklist) {
         CellarSupport support = new CellarSupport();
-        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
-        Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
-
         return support.isAllowed(name, whitelist, blacklist);
     }
 

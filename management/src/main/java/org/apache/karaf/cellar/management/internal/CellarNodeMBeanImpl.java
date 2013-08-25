@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.command.ExecutionContext;
 import org.apache.karaf.cellar.management.CellarNodeMBean;
 import org.apache.karaf.cellar.utils.ping.Ping;
 
@@ -23,13 +22,14 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Implementation of the Cellar Node MBean.
  */
 public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBean {
     private ClusterManager clusterManager;
-    private ExecutionContext executionContext;
+    private DistributedExecutionContext executionContext;
 
     public CellarNodeMBeanImpl() throws NotCompliantMBeanException {
         super(CellarNodeMBean.class);
@@ -43,11 +43,11 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
         this.clusterManager = clusterManager;
     }
 
-    public ExecutionContext getExecutionContext() {
+    public DistributedExecutionContext getExecutionContext() {
         return this.executionContext;
     }
 
-    public void setExecutionContext(ExecutionContext executionContext) {
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
 
@@ -58,9 +58,8 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
             throw new IllegalArgumentException("Cluster group " + nodeName + " doesn't exist");
         }
         Long start = System.currentTimeMillis();
-        Ping ping = new Ping(clusterManager.generateId());
-        ping.setDestinations(new HashSet(Arrays.asList(node)));
-        executionContext.execute(ping);
+        Ping ping = new Ping();
+        executionContext.executeAndWait(ping, node);
         Long stop = System.currentTimeMillis();
         return (stop - start);
     }

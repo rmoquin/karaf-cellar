@@ -17,25 +17,38 @@ package org.apache.karaf.cellar.core.command;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeoutException;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.tasks.GroupTaskResult;
-import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
 
 /**
  *
  * @author rmoquin
  */
-public interface CommandExecutionContext {
-
+public interface DistributedExecutionContext<T, R> {
     /**
      * @return the name
      */
     String getName();
 
-    public Map<Node, Future<GroupTaskResult>> execute(ManageGroupTask command, Set<Node> destinations);
-    
-    public void executeAndHandle(ManageGroupTask command, Set<Node> destinations) throws InterruptedException, TimeoutException, ExecutionException;
+    public Map<Node, Future<R>> execute(T command, Set<Node> destinations);
+
+    public Map<Node, Future<R>> execute(T command, Node destination);
+
+    public Map<Node, R> executeAndWait(T command, Set<Node> destinations);
+
+    public Map<Node, R> executeAndWait(T command, Node destination);
+
+    public void executeAsync(T command, Set<Node> destinations, DistributedMultiCallback callback);
+
+    public void executeAsync(T command, Node destination, DistributedCallback<R> callback);
+
+    /**
+     * @param timeoutSeconds the timeoutSeconds to set
+     */
+    void setTimeoutSeconds(int timeoutSeconds);
+
+    /**
+     * @return the timeoutSeconds
+     */
+    int getTimeoutSeconds();
 }

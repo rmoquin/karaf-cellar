@@ -14,8 +14,6 @@
 package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.event.EventConsumer;
-import org.apache.karaf.cellar.core.event.EventTransportFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -39,13 +37,12 @@ public class ExportServiceListener implements ServiceListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ExportServiceListener.class);
 
     private CellarCluster masterCluster;
-    private EventTransportFactory eventTransportFactory;
     private BundleContext bundleContext;
     private Map<String, EndpointDescription> remoteEndpoints;
-    private final Map<String, EventConsumer> consumers = new HashMap<String, EventConsumer>();
+    private final Map<String, String> consumers = new HashMap<String, String>();
 
     private Node node;
-    
+
     public void init() {
         node = masterCluster.getLocalNode();
         remoteEndpoints = masterCluster.getMap(Constants.REMOTE_ENDPOINTS);
@@ -69,10 +66,6 @@ public class ExportServiceListener implements ServiceListener {
 
     public void destroy() {
         bundleContext.removeServiceListener(this);
-        for (Map.Entry<String, EventConsumer> consumerEntry : consumers.entrySet()) {
-            EventConsumer consumer = consumerEntry.getValue();
-            consumer.stop();
-        }
         consumers.clear();
     }
 
@@ -105,40 +98,38 @@ public class ExportServiceListener implements ServiceListener {
      * @param serviceReference The reference of the service to be exported.
      */
     public void exportService(ServiceReference serviceReference) {
-            String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
-            if (exportedServices != null && exportedServices.length() > 0) {
-                LOGGER.debug("CELLAR DOSGI: registering services {} in the cluster", exportedServices);
-                String[] interfaces = exportedServices.split(Constants.INTERFACE_SEPARATOR);
-                Object service = bundleContext.getService(serviceReference);
+        String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
+        if (exportedServices != null && exportedServices.length() > 0) {
+            LOGGER.debug("CELLAR DOSGI: registering services {} in the cluster", exportedServices);
+            String[] interfaces = exportedServices.split(Constants.INTERFACE_SEPARATOR);
+            Object service = bundleContext.getService(serviceReference);
 
-                Set<String> exportedInterfaces = getServiceInterfaces(service, interfaces);
+            Set<String> exportedInterfaces = getServiceInterfaces(service, interfaces);
 
-                for (String iface : exportedInterfaces) {
-                    // add endpoint description to the set.
-                    Version version = serviceReference.getBundle().getVersion();
-                    String endpointId = iface + Constants.SEPARATOR + version.toString();
+            for (String iface : exportedInterfaces) {
+                // add endpoint description to the set.
+                Version version = serviceReference.getBundle().getVersion();
+                String endpointId = iface + Constants.SEPARATOR + version.toString();
 
-                    EndpointDescription endpoint;
+                EndpointDescription endpoint;
 
-                    if (remoteEndpoints.containsKey(endpointId)) {
-                        endpoint = remoteEndpoints.get(endpointId);
-                        endpoint.getNodes().add(node);
-                    } else {
-                        endpoint = new EndpointDescription(endpointId, node);
-                    }
+                if (remoteEndpoints.containsKey(endpointId)) {
+                    endpoint = remoteEndpoints.get(endpointId);
+                    endpoint.getNodes().add(node);
+                } else {
+                    endpoint = new EndpointDescription(endpointId, node);
+                }
 
-                    remoteEndpoints.put(endpointId, endpoint);
+                remoteEndpoints.put(endpointId, endpoint);
 
-                    // register the endpoint consumer
-                    EventConsumer consumer = consumers.get(endpointId);
-                    if (consumer == null) {
-                        consumer = eventTransportFactory.getEventConsumer(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId, false);
-                        consumers.put(endpointId, consumer);
-                    } else if (!consumer.isConsuming()) {
-                        consumer.start();
-                    }
+                // register the endpoint consumer
+                String consumerEndpointId = consumers.get(endpointId);
+                if (consumerEndpointId == null) {
+                    consumerEndpointId = Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId;
+                    consumers.put(endpointId, consumerEndpointId);
                 }
             }
+        }
     }
 
     /**
@@ -147,36 +138,33 @@ public class ExportServiceListener implements ServiceListener {
      * @param serviceReference the service to stop to expose on the cluster.
      */
     public void unExportService(ServiceReference serviceReference) {
-            String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
-            if (exportedServices != null && exportedServices.length() > 0) {
-                LOGGER.debug("CELLAR DOSGI: un-register service {} from the cluster", exportedServices);
-                String[] interfaces = exportedServices.split(Constants.INTERFACE_SEPARATOR);
-                Object service = bundleContext.getService(serviceReference);
+        String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
+        if (exportedServices != null && exportedServices.length() > 0) {
+            LOGGER.debug("CELLAR DOSGI: un-register service {} from the cluster", exportedServices);
+            String[] interfaces = exportedServices.split(Constants.INTERFACE_SEPARATOR);
+            Object service = bundleContext.getService(serviceReference);
 
-                Set<String> exportedInterfaces = getServiceInterfaces(service, interfaces);
+            Set<String> exportedInterfaces = getServiceInterfaces(service, interfaces);
 
-                for (String iface : exportedInterfaces) {
-                    // add endpoint description to the set.
-                    Version version = serviceReference.getBundle().getVersion();
-                    String endpointId = iface + Constants.SEPARATOR + version.toString();
+            for (String iface : exportedInterfaces) {
+                // add endpoint description to the set.
+                Version version = serviceReference.getBundle().getVersion();
+                String endpointId = iface + Constants.SEPARATOR + version.toString();
 
-                    EndpointDescription endpointDescription = remoteEndpoints.remove(endpointId);
-                    endpointDescription.getNodes().remove(node);
-                    // if the endpoint is used for export from other nodes too, then put it back.
-                    if (endpointDescription.getNodes().size() > 0) {
-                        remoteEndpoints.put(endpointId, endpointDescription);
-                    }
-
-                    EventConsumer eventConsumer = consumers.remove(endpointId);
-                    eventConsumer.stop();
+                EndpointDescription endpointDescription = remoteEndpoints.remove(endpointId);
+                endpointDescription.getNodes().remove(node);
+                // if the endpoint is used for export from other nodes too, then put it back.
+                if (endpointDescription.getNodes().size() > 0) {
+                    remoteEndpoints.put(endpointId, endpointDescription);
                 }
             }
+        }
     }
 
     /**
      * Get the interfaces that match the exported service interfaces.
      *
-     * @param service  the service.
+     * @param service the service.
      * @param services the service interfaces.
      * @return the matched service interface.
      */
@@ -210,14 +198,6 @@ public class ExportServiceListener implements ServiceListener {
             }
         }
         return interfaceList;
-    }
-
-    public EventTransportFactory getEventTransportFactory() {
-        return eventTransportFactory;
-    }
-
-    public void setEventTransportFactory(EventTransportFactory eventTransportFactory) {
-        this.eventTransportFactory = eventTransportFactory;
     }
 
     public BundleContext getBundleContext() {

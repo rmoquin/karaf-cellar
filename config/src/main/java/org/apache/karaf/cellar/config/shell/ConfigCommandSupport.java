@@ -27,7 +27,6 @@ public abstract class ConfigCommandSupport extends CellarCommandSupport {
      * Check if a configuration is allowed.
      *
      * @param pid the configuration PID.
-     * @param type the cluster event type.
      * @return true if the cluster event type is allowed, false else.
      */
     public boolean isAllowed(String pid, Set<String> whitelist, Set<String> blacklist) {

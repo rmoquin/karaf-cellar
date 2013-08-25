@@ -18,7 +18,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageGroupActions;
 import org.apache.karaf.cellar.management.CellarGroupMBean;
 
 import javax.management.NotCompliantMBeanException;
@@ -27,7 +27,7 @@ import javax.management.openmbean.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.apache.karaf.cellar.core.command.CommandExecutionContext;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
 
 /**
@@ -35,7 +35,7 @@ import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
  */
 public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMBean {
     private ClusterManager clusterManager;
-    private CommandExecutionContext commandExecutionContext;
+    private DistributedExecutionContext commandExecutionContext;
     private GroupManager groupManager;
 
     public CellarGroupMBeanImpl() throws NotCompliantMBeanException {
@@ -60,8 +60,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
                 nodes.add(n.getName());
             }
             ManageGroupTask command = new ManageGroupTask();
-            command.setAction(ManageGroupAction.QUIT);
-            command.setGroupName(name);
+            command.setAction(ManageGroupActions.QUIT);
+            command.setDestinationGroup(name);
             Set<Node> recipientList = clusterManager.listNodes(nodes);
             commandExecutionContext.execute(command, recipientList);
         }
@@ -83,8 +83,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         nodes.add(node);
 
         ManageGroupTask command = new ManageGroupTask();
-        command.setAction(ManageGroupAction.JOIN);
-        command.setGroupName(groupName);
+        command.setAction(ManageGroupActions.JOIN);
+        command.setDestinationGroup(groupName);
 
         commandExecutionContext.execute(command, nodes);
     }
@@ -104,8 +104,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         nodes.add(node);
 
         ManageGroupTask command = new ManageGroupTask();
-        command.setAction(ManageGroupAction.QUIT);
-        command.setGroupName(groupName);
+        command.setAction(ManageGroupActions.QUIT);
+        command.setDestinationGroup(groupName);
         commandExecutionContext.execute(command, nodes);
     }
 
@@ -152,14 +152,14 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
     /**
      * @return the commandExecutionContext
      */
-    public CommandExecutionContext getCommandExecutionContext() {
+    public DistributedExecutionContext getCommandExecutionContext() {
         return commandExecutionContext;
     }
 
     /**
      * @param commandExecutionContext the commandExecutionContext to set
      */
-    public void setCommandExecutionContext(CommandExecutionContext commandExecutionContext) {
+    public void setCommandExecutionContext(DistributedExecutionContext commandExecutionContext) {
         this.commandExecutionContext = commandExecutionContext;
     }
 

@@ -14,7 +14,7 @@
 package org.apache.karaf.cellar.shell.group;
 
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageGroupActions;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -37,7 +37,7 @@ public class GroupJoinCommand extends GroupSupport {
             return null;
         }
 
-        return doExecute(ManageGroupAction.JOIN, groupName, null, nodes, false);
+        return doExecute(ManageGroupActions.JOIN, groupName, null, nodes, false);
     }
 
 }

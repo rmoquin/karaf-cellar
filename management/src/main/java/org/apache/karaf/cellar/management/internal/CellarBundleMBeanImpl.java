@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.management.CellarBundleMBean;
 import org.osgi.framework.BundleEvent;
 
@@ -32,6 +31,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Implementation of the Cellar Bundle MBean.
@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
 public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundleMBean {
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private EventProducer eventProducer;
+    private DistributedExecutionContext executionContext;
 
     public CellarBundleMBeanImpl() throws NotCompliantMBeanException {
         super(CellarBundleMBean.class);
@@ -51,11 +51,6 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
-        }
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
         }
 
         // check if the bundle location is allowed
@@ -407,11 +402,17 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         this.groupManager = groupManager;
     }
 
-    public EventProducer getEventProducer() {
-        return eventProducer;
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

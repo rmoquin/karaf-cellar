@@ -17,9 +17,10 @@ import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 
 @Command(scope = "cluster", name = "node-list", description = "List the nodes in the cluster")
-public class NodesListCommand extends ClusterCommandSupport {
+public class NodesListCommand extends CellarCommandSupport {
     private static final String HEADER_FORMAT = "   %-30s   %-20s   %-5s";
     private static final String OUTPUT_FORMAT = "%1s [%-30s] [%-20s] [%5s]";
 

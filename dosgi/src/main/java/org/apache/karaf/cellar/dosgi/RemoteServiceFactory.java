@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.command.ExecutionContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -22,17 +21,18 @@ import org.osgi.framework.ServiceRegistration;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Factory for remote service.
  */
 public class RemoteServiceFactory implements ServiceFactory {
 
-    private EndpointDescription description;
-    private ClusterManager clusterManager;
-    private ExecutionContext executionContext;
+    private final EndpointDescription description;
+    private final ClusterManager clusterManager;
+    private final DistributedExecutionContext executionContext;
 
-    public RemoteServiceFactory(EndpointDescription description, ClusterManager clusterManager, ExecutionContext executionContext) {
+    public RemoteServiceFactory(EndpointDescription description, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
         this.description = description;
         this.clusterManager = clusterManager;
         this.executionContext = executionContext;

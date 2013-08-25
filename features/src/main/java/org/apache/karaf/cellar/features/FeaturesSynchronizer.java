@@ -172,7 +172,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     /**
      * Check if the sync flag is enabled for a cluster group.
      *
-     * @param cluster the cluster group.
+     * @param group the cluster group.
      * @return true if the sync flag is enabled, false else.
      */
     @Override

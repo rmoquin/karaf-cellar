@@ -13,15 +13,40 @@
  */
 package org.apache.karaf.cellar.utils.ping;
 
-import org.apache.karaf.cellar.core.command.Result;
+import org.apache.karaf.cellar.core.command.DistributedResult;
 
 /**
  * Cluster pong event.
  */
-public class Pong extends Result {
+public class Pong implements DistributedResult {
+    private boolean isSuccessful = true;
+    private Throwable error;
 
-    public Pong(String id) {
-        super(id);
+    public Pong() {
+    }
+
+    @Override
+    public boolean isSuccessful() {
+        return isSuccessful;
+    }
+
+    @Override
+    public Throwable getThrowable() {
+        return error;
+    }
+
+    /**
+     * @param isSuccessful the isSuccessful to set
+     */
+    public void setIsSuccessful(boolean isSuccessful) {
+        this.isSuccessful = isSuccessful;
+    }
+
+    /**
+     * @param error the error to set
+     */
+    public void setThrowable(Throwable error) {
+        this.error = error;
     }
 
 }

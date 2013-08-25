@@ -16,10 +16,9 @@ package org.apache.karaf.cellar.features.shell;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
-import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
+import org.apache.karaf.cellar.features.RepositoryEventTask;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
@@ -43,20 +42,12 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
     @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features contained in the repository URLs", required = false, multiValued = false)
     boolean uninstall;
 
-    private EventProducer eventProducer;
-    
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
-            return null;
-        }
-
-        // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
             return null;
         }
 
@@ -118,10 +109,10 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
                     featuresService.removeRepository(new URI(url));
 
                 // broadcast a cluster event
-                ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
+                RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryRemoved);
                 event.setUninstall(uninstall);
                 event.setSourceGroup(group);
-                eventProducer.produce(event);
+                executionContext.executeAndCallback(event, group.getNodes());
             } else {
                 System.err.println("Features repository URL " + url + " not found in cluster group " + groupName);
             }
@@ -129,10 +120,5 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
 
         return null;
     }
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
+
 }

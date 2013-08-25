@@ -13,15 +13,21 @@
  */
 package org.apache.karaf.cellar.utils.ping;
 
-import org.apache.karaf.cellar.core.command.Command;
+import org.apache.karaf.cellar.core.command.DistributedTask;
 
 /**
  * Cluster ping event.
  */
-public class Ping extends Command<Pong> {
+public class Ping extends DistributedTask<Pong> {
 
-    public Ping(String id) {
-        super(id);
+    public Ping() {
+    }
+
+    @Override
+    protected Pong execute() throws Exception {
+        Pong pong = new Pong();
+        pong.setIsSuccessful(true);
+        return pong;
     }
 
 }

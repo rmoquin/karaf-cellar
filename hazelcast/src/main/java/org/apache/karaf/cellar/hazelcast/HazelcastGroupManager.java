@@ -59,14 +59,13 @@ public class HazelcastGroupManager implements GroupManager {
      * Listens for node configurations to be bound.
      *
      * @param node the node configuration.
-     * @param properties the node service properties.
+     * @throws org.osgi.service.cm.ConfigurationException
      */
     public void nodeMembershipsReceived(NodeConfiguration node) throws ConfigurationException {
-        this.nodeConfiguration = nodeConfiguration;
+        this.nodeConfiguration = node;
         try {
             Set<String> groupList = this.nodeConfiguration.getGroups();
-            for (Iterator<String> it = groupList.iterator(); it.hasNext();) {
-                String groupName = it.next();
+            for (String groupName : groupList) {
                 if (this.pidGroupNameMap.containsKey(groupName)) {
                     addNodeToGroupStore(groupName);
                 } else {
@@ -405,6 +404,7 @@ public class HazelcastGroupManager implements GroupManager {
         this.configurationAdmin = configurationAdmin;
     }
 
+    @Override
     public NodeConfiguration getNodeConfiguration() {
         return nodeConfiguration;
     }

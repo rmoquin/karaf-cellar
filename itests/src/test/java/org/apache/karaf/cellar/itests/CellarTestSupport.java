@@ -69,9 +69,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 
 public class CellarTestSupport {
-    static final Long DELAY_TIMEOUT = 5000L;
-    static final Long COMMAND_TIMEOUT = 10000L;
-    static final Long SERVICE_TIMEOUT = 30000L;
+    public static final Long DELAY_TIMEOUT = 5000L;
+    public static final Long COMMAND_TIMEOUT = 10000L;
+    public static final Long SERVICE_TIMEOUT = 30000L;
     public static final String RMI_SERVER_PORT = "44445";
     public static final String HTTP_PORT = "9081";
     public static final String RMI_REG_PORT = "1100";

@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 @Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster group")
 public class DeleteCommand extends ConfigCommandSupport {
@@ -37,7 +37,7 @@ public class DeleteCommand extends ConfigCommandSupport {
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
 
-    private EventProducer eventProducer;
+    private DistributedExecutionContext executionContext;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -45,12 +45,6 @@ public class DeleteCommand extends ConfigCommandSupport {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
-            return null;
-        }
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
             return null;
         }
 
@@ -69,10 +63,10 @@ public class DeleteCommand extends ConfigCommandSupport {
             clusterConfigurations.remove(pid);
 
             // broadcast a cluster event
-            ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+            ClusterConfigurationEvent event = new ClusterConfigurationEvent();
             event.setSourceGroup(group);
             event.setType(ConfigurationEvent.CM_DELETED);
-            eventProducer.produce(event);
+            executionContext.execute(event, group.getNodes());
 
         } else {
             System.out.println("Configuration distributed map not found for cluster group " + groupName);

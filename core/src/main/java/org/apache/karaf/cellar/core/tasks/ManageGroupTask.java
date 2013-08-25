@@ -15,130 +15,98 @@
  */
 package org.apache.karaf.cellar.core.tasks;
 
-import java.io.Serializable;
+import org.apache.karaf.cellar.core.command.DistributedTask;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.ServiceReference;
+import org.apache.karaf.cellar.core.control.ManageGroupActions;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
-public class ManageGroupTask implements Callable<GroupTaskResult>, Serializable {
-    private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ManageGroupTask.class);
-    private ManageGroupAction action;
-    private String groupName;
-    private Node sourceNode;
-    protected Group sourceGroup;
-    
+public class ManageGroupTask extends DistributedTask<ManageGroupResultImpl> {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageGroupTask.class);
+    private ManageGroupActions action;
+    private String destinationGroup;
+
     public ManageGroupTask() {
     }
 
-    public ManageGroupTask(ManageGroupAction action, String groupName) {
+    public ManageGroupTask(ManageGroupActions action, String destinationGroup) {
         this.action = action;
-        this.groupName = groupName;
+        this.destinationGroup = destinationGroup;
     }
 
     @Override
-    public GroupTaskResult call() throws Exception {
+    protected ManageGroupResultImpl execute() throws Exception {
+        ManageGroupResultImpl result = new ManageGroupResultImpl();
+        try {
 //        if (Thread.currentThread().isInterrupted()) {
 //            return 0;
 //        }
-        LOGGER.info("Starting execution of the manage group task received from node {}", sourceNode.getName());
-        Bundle bundle = FrameworkUtil.getBundle(this.getClass());
-        BundleContext bundleContext = bundle.getBundleContext();
-        ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences(GroupManager.class.getCanonicalName(), null);
-        if (serviceReferences != null && serviceReferences.length > 0) {
-            ServiceReference ref = serviceReferences[0];
-            GroupManager groupManager = (GroupManager) bundleContext.getService(ref);
-            try {
-                GroupTaskResult result = new GroupTaskResult();
+            LOGGER.info("Starting execution of the manage group task received from node {}", getSourceNode().getName());
 
-                String targetGroupName = this.groupName;
-                if (ManageGroupAction.JOIN.equals(action)) {
-                    groupManager.joinGroup(targetGroupName);
-                } else if (ManageGroupAction.QUIT.equals(action)) {
-                    groupManager.deregisterNodeFromGroup(targetGroupName);
-                    if (groupManager.listLocalGroups().isEmpty()) {
-                        groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
-                    }
-                } else if (ManageGroupAction.PURGE.equals(action)) {
-                    groupManager.deregisterNodeFromAllGroups();
+            GroupManager groupManager = super.getService(GroupManager.class);
+
+            if (ManageGroupActions.JOIN.equals(action)) {
+                groupManager.joinGroup(destinationGroup);
+            } else if (ManageGroupActions.QUIT.equals(action)) {
+                groupManager.deregisterNodeFromGroup(destinationGroup);
+                if (groupManager.listLocalGroups().isEmpty()) {
                     groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
-                } else if (ManageGroupAction.SET.equals(action)) {
-                    Group localGroup = groupManager.listLocalGroups().iterator().next();
-                    groupManager.deregisterNodeFromGroup(localGroup.getName());
-                    groupManager.joinGroup(targetGroupName);
                 }
-                Set<Group> groups = groupManager.listAllGroups();
-                for (Group g : groups) {
-                    if (g.getName() != null && !g.getName().isEmpty()) {
-                        result.getGroups().add(g);
-                    }
-                }
-                return result;
-            } finally {
-                bundleContext.ungetService(ref);
+            } else if (ManageGroupActions.PURGE.equals(action)) {
+                groupManager.deregisterNodeFromAllGroups();
+                groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
+            } else if (ManageGroupActions.SET.equals(action)) {
+                Group localGroup = groupManager.listLocalGroups().iterator().next();
+                groupManager.deregisterNodeFromGroup(localGroup.getName());
+                groupManager.joinGroup(destinationGroup);
             }
+            Set<Group> groups = groupManager.listAllGroups();
+            for (Group g : groups) {
+                if (g.getName() != null && !g.getName().isEmpty()) {
+                    result.getGroups().add(g);
+                }
+            }
+            result.setSuccessful(true);
+        } catch (Exception ex) {
+            LOGGER.error("Task wasn't processed for some reason.", ex);
+            result.setThrowable(ex);
+            result.setSuccessful(false);
         }
-        throw new Exception("Task wasn't processed for some reason: " + this.toString());
-    }
-
-    @Override
-    public String toString() {
-        return String.format("ManageGroupTask{action=%s, groupName=%s, sourceNode=%s, sourceGroup=%s%s", action, groupName, sourceNode, sourceGroup, '}');
+        return result;
     }
 
     /**
      * @return the action
      */
-    public ManageGroupAction getAction() {
+    public ManageGroupActions getAction() {
         return action;
     }
 
     /**
      * @param action the action to set
      */
-    public void setAction(ManageGroupAction action) {
+    public void setAction(ManageGroupActions action) {
         this.action = action;
     }
 
     /**
-     * @return the groupName
+     * @return the destinationGroup
      */
-    public String getGroupName() {
-        return groupName;
+    public String getDestinationGroup() {
+        return destinationGroup;
     }
 
     /**
-     * @param groupName the groupName to set
+     * @param destinationGroup the destinationGroup to set
      */
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    public Node getSourceNode() {
-        return sourceNode;
-    }
-
-    public void setSourceNode(Node sourceNode) {
-        this.sourceNode = sourceNode;
-    }
-
-    public Group getSourceGroup() {
-        return sourceGroup;
-    }
-
-    public void setSourceGroup(Group sourceGroup) {
-        this.sourceGroup = sourceGroup;
+    public void setDestinationGroup(String destinationGroup) {
+        this.destinationGroup = destinationGroup;
     }
 }

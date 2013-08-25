@@ -14,27 +14,30 @@
 package org.apache.karaf.cellar.shell.producer;
 
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ProducerSwitchCommand;
-import org.apache.karaf.cellar.core.control.ProducerSwitchResult;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.shell.ClusterCommandSupport;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
+import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationResult;
+import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationTask;
 
 /**
  * Generic cluster event producer shell command support.
  */
-public abstract class ProducerSupport extends ClusterCommandSupport {
+public abstract class ProducerSupport extends CellarCommandSupport {
 
     protected static final String HEADER_FORMAT = "   %-30s   %-5s";
     protected static final String OUTPUT_FORMAT = "%1s [%-30s] [%-5s]";
 
+    private DistributedExecutionContext executionContext;
+
     protected Object doExecute(List<String> nodeNames, SwitchStatus status) throws Exception {
 
-        ProducerSwitchCommand command = new ProducerSwitchCommand(clusterManager.generateId());
+        NodeEventConfigurationTask command = new NodeEventConfigurationTask();
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
@@ -61,10 +64,9 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
             return null;
         }
 
-        command.setDestinations(recipientList);
         command.setStatus(status);
 
-        Map<Node, ProducerSwitchResult> results = executionContext.execute(command);
+        Map<Node, NodeEventConfigurationResult> results = executionContext.executeAndWait(command, recipientList);
         if (results == null || results.isEmpty()) {
             System.out.println("No result received within given timeout");
         } else {
@@ -74,15 +76,29 @@ public abstract class ProducerSupport extends ClusterCommandSupport {
                 if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
                     local = "*";
                 }
-                ProducerSwitchResult result = results.get(node);
+                NodeEventConfigurationResult result = results.get(node);
                 String statusString = "OFF";
-                if (result.getStatus()) {
+                if (SwitchStatus.ON.equals(result.getSwitchStatus())) {
                     statusString = "ON";
                 }
                 System.out.println(String.format(OUTPUT_FORMAT, local, node.getName(), statusString));
             }
         }
         return null;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 
 }

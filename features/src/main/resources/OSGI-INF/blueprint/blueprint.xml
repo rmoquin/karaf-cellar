@@ -25,7 +25,7 @@
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
         <property name="cellarSupport" ref="cellarSupport"/>
-        <property name="eventProducer" ref="eventProducer"/>
+        <property name="executionContext" ref="executionContext"/>
     </bean>
 
     <service ref="localListener" interface="org.apache.karaf.features.FeaturesListener"/>
@@ -43,8 +43,7 @@
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Features Event Handler -->
-    <bean id="featuresEventHandler" class="org.apache.karaf.cellar.features.FeaturesEventHandler"
-          init-method="init" destroy-method="destroy">
+    <bean id="featuresEventHandler" class="org.apache.karaf.cellar.features.FeaturesEventTask">
         <property name="nodeConfiguration" ref="nodeConfiguration"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
@@ -52,15 +51,14 @@
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
     
-    <service ref="featuresEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
+    <service ref="featuresEventHandler" interface="org.apache.karaf.cellar.core.command.DistributedTask">
         <service-properties>
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
 
     <!-- Cluster Features Repositories Event Handler -->
-    <bean id="repositoryEventHandler" class="org.apache.karaf.cellar.features.RepositoryEventHandler"
-          init-method="init" destroy-method="destroy">
+    <bean id="repositoryEventHandler" class="org.apache.karaf.cellar.features.RepositoryEventTask">
         <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>        
         <property name="clusterManager" ref="clusterManager"/>
@@ -68,13 +66,13 @@
         <property name="cellarSupport" ref="cellarSupport"/>
     </bean>
 
-    <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
+    <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.command.DistributedTask"/>
 
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
 
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

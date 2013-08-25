@@ -18,7 +18,6 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
@@ -39,7 +38,6 @@ import org.apache.karaf.cellar.core.NodeConfiguration;
  */
 public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
-    private EventProducer eventProducer;
     private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarCluster masterCluster;
@@ -201,14 +199,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     public Boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
         return this.groupManager.findGroupConfigurationByName(groupName).isSyncBundles();
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 
     /**

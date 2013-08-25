@@ -18,11 +18,11 @@ import org.apache.karaf.cellar.utils.ping.Ping;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 
 @Command(scope = "cluster", name = "node-ping", description = "Ping a cluster node")
-public class NodePingCommand extends ClusterCommandSupport {
+public class NodePingCommand extends CellarCommandSupport {
 
     private static Long TIMEOUT = 5000L;
 
@@ -34,6 +34,8 @@ public class NodePingCommand extends ClusterCommandSupport {
 
     @Argument(index = 2, name = "interval", description = "The time in millis to wait between iteration", required = false, multiValued = false)
     Long interval = 1000L;
+
+    private DistributedExecutionContext executionContext;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -47,9 +49,9 @@ public class NodePingCommand extends ClusterCommandSupport {
         try {
             for (int i = 1; i <= iterations; i++) {
                 Long start = System.currentTimeMillis();
-                Ping ping = new Ping(clusterManager.generateId());
-                ping.setDestinations(new HashSet(Arrays.asList(node)));
-                executionContext.execute(ping);
+                Ping ping = new Ping();
+                //Don't care about the Pong result object.
+                executionContext.executeAndHandle(ping, node);
                 Long stop = System.currentTimeMillis();
                 Long delay = stop - start;
                 if (delay >= TIMEOUT) {
@@ -65,6 +67,20 @@ public class NodePingCommand extends ClusterCommandSupport {
             throw e;
         }
         return null;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 
 }

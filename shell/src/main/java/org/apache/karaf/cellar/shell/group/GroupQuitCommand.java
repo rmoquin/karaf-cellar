@@ -14,7 +14,7 @@
 package org.apache.karaf.cellar.shell.group;
 
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageGroupActions;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -36,7 +36,7 @@ public class GroupQuitCommand extends GroupSupport {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
-        return doExecute(ManageGroupAction.QUIT, groupName, null, nodes, false);
+        return doExecute(ManageGroupActions.QUIT, groupName, null, nodes, false);
     }
 
 }

@@ -19,14 +19,4 @@
        http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
        http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd">
 
-    <!-- Handlers Registry -->
-    <bean id="registry" class="org.apache.karaf.cellar.core.event.EventHandlerServiceRegistry"/>
-    <service ref="registry" interface="org.apache.karaf.cellar.core.event.EventHandlerRegistry"/>
-
-    <reference-list id="eventHandlers" interface="org.apache.karaf.cellar.core.event.EventHandler" availability="optional">
-        <reference-listener bind-method="bind" unbind-method="unbind">
-            <ref component-id="registry"/>
-        </reference-listener>
-    </reference-list>
-
 </blueprint>
