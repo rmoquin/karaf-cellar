@@ -45,6 +45,7 @@
         <property name="clusterManager" ref="clusterManager"/>
         <property name="storage" value="${storage}"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="executionContext" ref="executionContext"/>`
     </bean>
 
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>

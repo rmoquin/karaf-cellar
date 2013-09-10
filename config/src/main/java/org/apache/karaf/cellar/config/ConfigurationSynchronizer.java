@@ -31,7 +31,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
@@ -45,6 +45,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
     private NodeConfiguration nodeConfiguration;
+    private DistributedExecutionContext executionContext;
 
     public ConfigurationSynchronizer() {
         // nothing to do
@@ -140,9 +141,9 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         // update the configurations in the cluster group
                         clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
                         // broadcast the cluster event
-                        ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+                        ConfigurationEventTask event = new ConfigurationEventTask(pid);
                         event.setSourceGroup(group);
-                        executionContext.execute(event, group.getNodes());
+                        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
                     } else {
                         LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
                     }
@@ -235,5 +236,19 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
         this.nodeConfiguration = nodeConfiguration;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

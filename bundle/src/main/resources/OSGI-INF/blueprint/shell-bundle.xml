@@ -27,6 +27,7 @@
         <command name="cluster/bundle-install">
             <action class="org.apache.karaf.cellar.bundle.shell.InstallBundleCommand">
                 <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -35,6 +36,7 @@
         <command name="cluster/bundle-uninstall">
             <action class="org.apache.karaf.cellar.bundle.shell.UninstallBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -45,6 +47,7 @@
         <command name="cluster/bundle-start">
             <action class="org.apache.karaf.cellar.bundle.shell.StartBundleCommand">
                 <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -55,6 +58,7 @@
         <command name="cluster/bundle-stop">
             <action class="org.apache.karaf.cellar.bundle.shell.StopBundleCommand">
                 <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -75,4 +79,6 @@
     <bean id="allBundlesVersionCompleter" class="org.apache.karaf.cellar.bundle.shell.completers.AllBundlesVersionCompleter">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
+    
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

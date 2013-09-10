@@ -79,7 +79,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             configurationEventTask.setType(ConfigurationEvent.CM_DELETED);
                             configurationEventTask.setSourceGroup(group);
                             configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                            executionContext.executeAsync(configurationEventTask, group.getNodes(), null);
+                            executionContext.executeAsync(configurationEventTask, group.getNodesExcluding(groupManager.getNode()), null);
                         } else {
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
@@ -90,7 +90,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 configurationEventTask.setType(ConfigurationEvent.CM_UPDATED);
                                 configurationEventTask.setSourceGroup(group);
                                 configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                                executionContext.executeAsync(configurationEventTask, group.getNodes(), null);
+                                executionContext.executeAsync(configurationEventTask, group.getNodesExcluding(groupManager.getNode()), null);
                             }
                         }
                     } catch (Exception e) {

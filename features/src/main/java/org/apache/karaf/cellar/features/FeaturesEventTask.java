@@ -31,7 +31,9 @@ import org.apache.karaf.features.Feature;
  */
 public class FeaturesEventTask extends DistributedTask<FeatureEventResponse> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventTask.class);
+    private static final String separator = "/";
 
+    private String id;
     private String name;
     private String version;
     private Boolean noClean;
@@ -42,9 +44,15 @@ public class FeaturesEventTask extends DistributedTask<FeatureEventResponse> {
     public FeaturesEventTask() {
     }
 
-    public FeaturesEventTask(String name, String version, Boolean noRefresh, FeatureEvent.EventType type) {
+    public FeaturesEventTask(String name, String version, FeatureEvent.EventType type) {
+        this(name, version, false, false, type);
+    }
+
+    public FeaturesEventTask(String name, String version, Boolean noClean, Boolean noRefresh, FeatureEvent.EventType type) {
+        this.id = name + separator + version;
         this.name = name;
         this.version = version;
+        this.noClean = noClean;
         this.noRefresh = noRefresh;
         this.type = type;
     }
@@ -117,16 +125,21 @@ public class FeaturesEventTask extends DistributedTask<FeatureEventResponse> {
         return result;
     }
 
+    public String getId() {
+        this.id = name + separator + version;
+        return this.id;
+    }
+
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getVersion() {
-        return version;
+        return this.version;
     }
 
     public Boolean getNoClean() {
-        return noClean;
+        return this.noClean;
     }
 
     public void setNoClean(Boolean noClean) {

@@ -30,9 +30,7 @@ public class LocalGroupsCompleter extends GroupCompleterSupport {
     @Override
     protected boolean acceptsGroup(Group group) {
         Node node = groupManager.getNode();
-        if (group.getNodes().contains(node))
-            return true;
-        else return false;
+        return group.getNodes().contains(node);
     }
 
 }

@@ -62,6 +62,7 @@ public class Group implements MultiNode {
      * Checks if a node is part of the specified group.
      *
      * @param node the node to check
+     * @return 
      */
     @Override
     public boolean containsNode(Node node) {
@@ -71,6 +72,13 @@ public class Group implements MultiNode {
     @Override
     public Set<Node> getNodes() {
         return nodes;
+    }
+    
+    @Override
+    public Set<Node> getNodesExcluding(Node node) {
+        Set<Node> nodesCopy = new HashSet<Node>();
+        nodesCopy.remove(node);
+        return nodesCopy;
     }
 
     @Override

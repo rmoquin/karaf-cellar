@@ -22,6 +22,7 @@ import org.apache.karaf.cellar.core.Group;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.karaf.cellar.config.ConfigurationEventTask;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
@@ -67,9 +68,9 @@ public class PropDelCommand extends ConfigCommandSupport {
                 clusterConfigurations.put(pid, distributedDictionary);
 
                 // broadcast the cluster event
-                ClusterConfigurationEvent event = new ClusterConfigurationEvent();
+                ConfigurationEventTask event = new ConfigurationEventTask();
                 event.setSourceGroup(group);
-                executionContext.execute(event, group.getNodes());
+                executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
             }
         } else {
             System.out.println("No configuration found in cluster group " + groupName);
