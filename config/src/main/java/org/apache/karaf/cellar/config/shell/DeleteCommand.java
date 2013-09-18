@@ -13,11 +13,9 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
-import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -25,6 +23,7 @@ import org.osgi.service.cm.ConfigurationEvent;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.karaf.cellar.config.ConfigurationEventTask;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
@@ -63,10 +62,10 @@ public class DeleteCommand extends ConfigCommandSupport {
             clusterConfigurations.remove(pid);
 
             // broadcast a cluster event
-            ClusterConfigurationEvent event = new ClusterConfigurationEvent();
+            ConfigurationEventTask event = new ConfigurationEventTask();
             event.setSourceGroup(group);
             event.setType(ConfigurationEvent.CM_DELETED);
-            executionContext.execute(event, group.getNodes());
+            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
 
         } else {
             System.out.println("Configuration distributed map not found for cluster group " + groupName);

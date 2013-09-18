@@ -80,7 +80,7 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
         // broadcast the cluster event
         FeaturesEventTask event = new FeaturesEventTask(feature, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceGroup(group);
-        executionContext.executeAndCallback(event, group.getNodes());
+        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
         return null;
     }
 }

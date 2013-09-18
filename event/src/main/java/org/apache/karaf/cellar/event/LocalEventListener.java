@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.event;
 import java.io.Serializable;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -99,14 +98,6 @@ public class LocalEventListener extends EventSupport implements EventHandler {
      * Destruction method.
      */
     public void destroy() {
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 
     /**

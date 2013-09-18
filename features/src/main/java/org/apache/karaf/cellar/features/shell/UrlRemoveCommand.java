@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.features.shell;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.cellar.features.RepositoryEventTask;
@@ -112,7 +111,7 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
                 RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryRemoved);
                 event.setUninstall(uninstall);
                 event.setSourceGroup(group);
-                executionContext.executeAndCallback(event, group.getNodes());
+                executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
             } else {
                 System.err.println("Features repository URL " + url + " not found in cluster group " + groupName);
             }

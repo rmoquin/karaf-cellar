@@ -13,11 +13,9 @@
  */
 package org.apache.karaf.cellar.bundle;
 
-import java.util.List;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
@@ -113,12 +111,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     @Override
     public void push(Group group) {
 
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
-            return;
-        }
-
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
@@ -178,9 +170,9 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                         clusterBundles.put(id, bundleState);
 
                         // broadcast the event
-                        ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
+                        BundleEventTask event = new BundleEventTask(symbolicName, version, bundleLocation, status);
                         event.setSourceGroup(group);
-                        eventProducer.produce(event);
+                        executionContext.executeAndWait(event, group.getNodesExcluding(this.groupManager.getNode()));
                     }
 
                 } else {

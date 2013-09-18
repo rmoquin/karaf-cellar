@@ -18,9 +18,8 @@
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Features Listener -->
-    <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener" init-method="init"
-          destroy-method="destroy">
-        <property name="nodeConfiguration" ref="nodeConfiguration"/>        
+    <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener">
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
@@ -31,13 +30,13 @@
     <service ref="localListener" interface="org.apache.karaf.features.FeaturesListener"/>
 
     <!-- Features/Repositories Synchronizer -->
-    <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer"
-          init-method="init" destroy-method="destroy">
+    <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer">
         <property name="nodeConfiguration" ref="nodeConfiguration"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="executionContext" ref="executionContext"/>`
     </bean>
 
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>

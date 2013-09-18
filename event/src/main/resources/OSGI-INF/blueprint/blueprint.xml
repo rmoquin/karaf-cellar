@@ -24,6 +24,7 @@
         <property name="eventProducer" ref="eventProducer"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="executionContext" ref="executionContext"/>`
     </bean>
     
     <service ref="localEventListener">
@@ -61,4 +62,5 @@
     <reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" />
     <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

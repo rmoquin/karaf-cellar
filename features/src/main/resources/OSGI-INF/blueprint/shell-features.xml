@@ -20,7 +20,7 @@
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="eventProducer" ref="eventProducer"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -32,7 +32,7 @@
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="eventProducer" ref="eventProducer"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -62,8 +62,8 @@
             <action class="org.apache.karaf.cellar.features.shell.UrlAddCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
                 <property name="featuresService" ref="featuresService"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -73,8 +73,8 @@
             <action class="org.apache.karaf.cellar.features.shell.UrlRemoveCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="eventProducer" ref="eventProducer"/>
                 <property name="featuresService" ref="featuresService"/>
+                <property name="executionContext" ref="executionContext"/>`
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -90,4 +90,5 @@
         <property name="featuresService" ref="featuresService"/>
     </bean>
 
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

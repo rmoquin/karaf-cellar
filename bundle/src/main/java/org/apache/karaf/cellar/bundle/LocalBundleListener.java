@@ -15,8 +15,6 @@ package org.apache.karaf.cellar.bundle;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.features.Feature;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.SynchronousBundleListener;
@@ -37,7 +35,6 @@ import org.apache.karaf.cellar.core.GroupManager;
  */
 public class LocalBundleListener extends BundleSupport implements SynchronousBundleListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalBundleListener.class);
-    private EventProducer eventProducer;
     private GroupManager groupManager;
     private CellarCluster masterCluster;
     private CellarSupport cellarSupport;
@@ -57,12 +54,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
         }
 
         if (event.getBundle().getBundleId() == 0) {
-            return;
-        }
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR BUNDLE: cluster event producer is OFF");
             return;
         }
 
@@ -118,9 +109,9 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             }
 
                             // broadcast the cluster event
-                            ClusterBundleEvent clusterBundleEvent = new ClusterBundleEvent(symbolicName, version, bundleLocation, type);
-                            clusterBundleEvent.setSourceGroup(group);
-                            eventProducer.produce(clusterBundleEvent);
+                            BundleEventTask bundleEventTask = new BundleEventTask(symbolicName, version, bundleLocation, type);
+                            bundleEventTask.setSourceGroup(group);
+                            executionContext.executeAndWait(bundleEventTask, group.getNodesExcluding(groupManager.getNode()));
                         } catch (Exception e) {
                             LOGGER.error("CELLAR BUNDLE: failed to create bundle event", e);
                         }
@@ -139,14 +130,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
 
     public void destroy() {
         bundleContext.removeBundleListener(this);
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 
     /**

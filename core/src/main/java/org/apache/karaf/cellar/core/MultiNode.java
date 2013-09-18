@@ -54,6 +54,9 @@ public interface MultiNode extends Serializable {
      * Checks if a node is part of the specified group.
      *
      * @param node the node to check
+     * @return 
      */
     public boolean containsNode(Node node);
+
+    Set<Node> getNodesExcluding(Node node);
 }

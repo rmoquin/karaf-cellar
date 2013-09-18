@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Abstract cluster feature shell command.
@@ -33,7 +34,9 @@ import java.util.Set;
 public abstract class FeatureCommandSupport extends CellarCommandSupport {
     protected static final transient Logger LOGGER = LoggerFactory.getLogger(FeatureCommandSupport.class);
     protected FeaturesService featuresService;
-
+    protected CellarSupport cellarSupport = new CellarSupport();
+    protected DistributedExecutionContext executionContext;
+    
     /**
      * Force the features status for a specific group.
      * Why? Its required if no group member currently in the cluster.
@@ -43,6 +46,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @param feature the feature name.
      * @param version the feature version.
      * @param status the feature status (installed, uninstalled).
+     * @return 
      */
     public Boolean updateFeatureStatus(String groupName, String feature, String version, Boolean status) {
 
@@ -121,8 +125,7 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
      * @return true if the cluster features event is allowed, false else.
      */
     public boolean isAllowed(String name, Set<String> whitelist, Set<String> blacklist) {
-        CellarSupport support = new CellarSupport();
-        return support.isAllowed(name, whitelist, blacklist);
+        return cellarSupport.isAllowed(name, whitelist, blacklist);
     }
 
     public FeaturesService getFeaturesService() {
@@ -131,5 +134,19 @@ public abstract class FeatureCommandSupport extends CellarCommandSupport {
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

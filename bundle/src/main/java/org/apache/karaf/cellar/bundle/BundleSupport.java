@@ -22,6 +22,7 @@ import org.osgi.framework.BundleException;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +32,8 @@ import org.slf4j.LoggerFactory;
 public class BundleSupport {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
-	private FeaturesService featuresService;
+	protected FeaturesService featuresService;
+	protected DistributedExecutionContext executionContext;
 
     /**
      * Locally install a bundle.
@@ -153,5 +155,19 @@ public class BundleSupport {
 	public void setFeaturesService(FeaturesService featureService) {
 		this.featuresService = featureService;
 	}
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
+    }
 
 }

@@ -41,8 +41,8 @@
         <felix.configadmin.version>1.6.0</felix.configadmin.version>
         <felix.utils.version>1.2.0</felix.utils.version>
         <felix.webconsole.version>4.2.0</felix.webconsole.version>
-        <felix.annotations.version>1.9.4</felix.annotations.version>
-        <felix.scr.plugin.version>1.9.0</felix.scr.plugin.version>
+        <felix.annotations.version>1.9.6</felix.annotations.version>
+        <felix.scr.plugin.version>1.14.0</felix.scr.plugin.version>
         <hazelcast.version>3.0</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
@@ -80,6 +80,17 @@
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/cellar/trunk</developerConnection>
         <url>http://svn.apache.org/repos/asf/karaf/cellar/trunk</url>
     </scm>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <id>apache.snapshots</id>
+            <name>Apache Snapshot Repository</name>
+            <url>http://repository.apache.org/snapshots</url>
+        </pluginRepository>
+    </pluginRepositories>
     
     <issueManagement>
         <system>jira</system>

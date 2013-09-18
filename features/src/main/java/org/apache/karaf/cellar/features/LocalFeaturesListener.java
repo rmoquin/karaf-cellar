@@ -32,16 +32,6 @@ import org.apache.karaf.features.FeaturesListener;
 public class LocalFeaturesListener extends FeaturesSupport implements FeaturesListener {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
 
-    @Override
-    public void init() {
-        super.init();
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-    }
-
     /**
      * This method is called when a local feature has changed.
      *
@@ -72,9 +62,9 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                         }
 
                         // broadcast the event
-                        FeaturesEventTask featureEvent = new FeaturesEventTask(name, version, false, type);
+                        FeaturesEventTask featureEvent = new FeaturesEventTask(name, version, type);
                         featureEvent.setSourceGroup(group);
-
+                        executionContext.executeAsync(featureEvent, group.getNodesExcluding(groupManager.getNode()), null);
                     } else {
                         LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
                     }
@@ -138,8 +128,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                         }
                     }
                     // broadcast the cluster event
-                    
-                    super.executionContext.executeAsync(clusterRepositoryEvent, group.getNodes());
+                    executionContext.executeAndWait(clusterRepositoryEvent, group.getNodesExcluding(groupManager.getNode()));
                 }
             }
         }

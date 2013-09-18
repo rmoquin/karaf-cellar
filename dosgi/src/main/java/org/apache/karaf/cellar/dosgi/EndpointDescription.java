@@ -21,6 +21,7 @@ import org.osgi.framework.InvalidSyntaxException;
 
 import java.util.Dictionary;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -98,6 +99,13 @@ public class EndpointDescription implements MultiNode {
     @Override
     public boolean containsNode(Node node) {
         return this.nodes.add(node);
+    }
+    
+    @Override
+    public Set<Node> getNodesExcluding(Node node) {
+        Set<Node> nodesCopy = new HashSet<Node>();
+        nodesCopy.remove(node);
+        return nodesCopy;
     }
 
     @Override

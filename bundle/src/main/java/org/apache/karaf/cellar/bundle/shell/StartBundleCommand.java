@@ -14,23 +14,20 @@
 package org.apache.karaf.cellar.bundle.shell;
 
 import org.apache.karaf.cellar.bundle.BundleState;
-import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
 
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.bundle.BundleEventTask;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "bundle-start", description = "Start a bundle in a cluster group")
 public class StartBundleCommand extends BundleCommandSupport {
-    private EventProducer eventProducer;
 
     @Override
     protected Object doExecute() throws Exception {
@@ -38,12 +35,6 @@ public class StartBundleCommand extends BundleCommandSupport {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             System.err.println("Cluster group " + groupName + " doesn't exist");
-            return null;
-        }
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
             return null;
         }
 
@@ -80,16 +71,10 @@ public class StartBundleCommand extends BundleCommandSupport {
 
         // broadcast the cluster event
         String[] split = key.split("/");
-        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STARTED);
+        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.STARTED);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
 
         return null;
-    }
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 }
