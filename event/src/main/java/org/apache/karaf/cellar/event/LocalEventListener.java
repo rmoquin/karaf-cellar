@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.event;
 
 import java.io.Serializable;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
@@ -26,13 +25,15 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 public class LocalEventListener extends EventSupport implements EventHandler {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalEventListener.class);
-    private EventProducer eventProducer;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
-
+    private DistributedExecutionContext executionContext;
+    
     @Override
     public void handleEvent(Event event) {
 
@@ -41,12 +42,12 @@ public class LocalEventListener extends EventSupport implements EventHandler {
             return;
         }
 
+//TODO Fiure out a good way to fix this.
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR EVENT: cluster event producer is OFF");
-            return;
-        }
-
+        //if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        //    LOGGER.warn("CELLAR EVENT: cluster event producer is OFF");
+        //    return;
+        //}
         try {
             if (event.getTopic() != null) {
                 Set<Group> groups = null;
@@ -72,14 +73,15 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                         Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
                         String topicName = event.getTopic();
                         Map<String, Serializable> properties = getEventProperties(event);
-                        if (cellarSupport.isAllowed(topicName, whitelist, blacklist)) {
-                            // broadcast the event
-                            ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
+                        //TODO Figure out how to handle this.
+                        //if (cellarSupport.isAllowed(topicName, whitelist, blacklist)) {
+                        // broadcast the event
+                            ClusterEventTask clusterEvent = new ClusterEventTask(properties);
                             clusterEvent.setSourceGroup(group);
-                            eventProducer.produce(clusterEvent);
-                        } else {
-                            LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
-                        }
+                            executionContext.executeAsync(clusterEvent, group.getNodesExcluding(groupManager.getNode()), null);
+                        //} else {
+                        //    LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
+                        //}
                     }
                 }
             }
@@ -126,5 +128,19 @@ public class LocalEventListener extends EventSupport implements EventHandler {
      */
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

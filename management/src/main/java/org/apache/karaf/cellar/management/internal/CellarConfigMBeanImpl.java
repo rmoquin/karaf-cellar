@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.management.internal;
 
-import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
+import org.apache.karaf.cellar.config.ConfigurationEventTask;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.management.CellarConfigMBean;
@@ -23,8 +23,8 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 
 /**
  * Implementation of the Cellar Config MBean.
@@ -32,8 +32,8 @@ import org.apache.karaf.cellar.core.event.EventProducer;
 public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfigMBean {
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private EventProducer eventProducer;
     private CellarSupport cellarSupport;
+    private DistributedExecutionContext executionContext;
 
     public CellarConfigMBeanImpl() throws NotCompliantMBeanException {
         super(CellarConfigMBean.class);
@@ -65,10 +65,11 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+//Figure out how to handle this
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+        //if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        //    throw new IllegalStateException("Cluster event producer is OFF");
+        //}
 
         // check if the PID is allowed outbound
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
@@ -84,10 +85,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             clusterConfigurations.remove(pid);
 
             // broadcast the cluster event
-            ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+            ConfigurationEventTask event = new ConfigurationEventTask(pid);
             event.setSourceGroup(group);
             event.setType(ConfigurationEvent.CM_DELETED);
-            eventProducer.produce(event);
+            distributedExecutionContext.produce(event);
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
@@ -259,20 +260,6 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     }
 
     /**
-     * @return the eventProducer
-     */
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    /**
-     * @param eventProducer the eventProducer to set
-     */
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
-    /**
      * @return the cellarSupport
      */
     public CellarSupport getCellarSupport() {
@@ -284,5 +271,19 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
      */
     public void setCellarSupport(CellarSupport cellarSupport) {
         this.cellarSupport = cellarSupport;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

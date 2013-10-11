@@ -19,7 +19,6 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.cellar.obr.ObrBundleInfo;
@@ -38,8 +37,6 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
     @Argument(index = 1, name = "url", description = "The repository URL to register in the OBR service", required = true, multiValued = false)
     String url;
 
-    private EventProducer eventProducer;
-
     @Override
     public Object doExecute() throws Exception {
         // check if the group exists
@@ -49,11 +46,12 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
             return null;
         }
 
+//TODO figure out how to handle this
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
-            return null;
-        }
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            System.err.println("Cluster event producer is OFF");
+//            return null;
+//        }
 
         // check if the URL is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
@@ -83,7 +81,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
         event.setForce(true);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(ping, node);
 
         return null;
     }

@@ -15,6 +15,7 @@
  */
 package org.apache.karaf.cellar.core.tasks;
 
+import java.io.IOException;
 import org.apache.karaf.cellar.core.command.DistributedTask;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -73,7 +74,7 @@ public class NodeEventConfigurationTask extends DistributedTask<NodeEventConfigu
             result.setSwitchStatus(this.status);
             result.setSwitchType(this.type);
             result.setSuccessful(true);
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             LOGGER.error("Task wasn't processed for some reason.", ex);
             result.setThrowable(ex);
             result.setSuccessful(false);

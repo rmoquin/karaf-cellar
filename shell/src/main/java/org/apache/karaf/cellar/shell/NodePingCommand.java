@@ -51,7 +51,7 @@ public class NodePingCommand extends CellarCommandSupport {
                 Long start = System.currentTimeMillis();
                 Ping ping = new Ping();
                 //Don't care about the Pong result object.
-                executionContext.executeAndHandle(ping, node);
+                executionContext.executeAndWait(ping, node);
                 Long stop = System.currentTimeMillis();
                 Long delay = stop - start;
                 if (delay >= TIMEOUT) {
@@ -72,6 +72,7 @@ public class NodePingCommand extends CellarCommandSupport {
     /**
      * @return the executionContext
      */
+    @Override
     public DistributedExecutionContext getExecutionContext() {
         return executionContext;
     }
@@ -79,6 +80,7 @@ public class NodePingCommand extends CellarCommandSupport {
     /**
      * @param executionContext the executionContext to set
      */
+    @Override
     public void setExecutionContext(DistributedExecutionContext executionContext) {
         this.executionContext = executionContext;
     }

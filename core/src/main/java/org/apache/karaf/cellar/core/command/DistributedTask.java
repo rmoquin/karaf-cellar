@@ -25,15 +25,12 @@ import org.apache.karaf.shell.console.BundleContextAware;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author rmoquin
  */
 public abstract class DistributedTask<T extends DistributedResult> implements Callable<T>, Serializable, BundleContextAware {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(DistributedTask.class);
     protected transient BundleContext bundleContext;
     protected List<ServiceReference<?>> usedReferences;
     protected Node sourceNode;

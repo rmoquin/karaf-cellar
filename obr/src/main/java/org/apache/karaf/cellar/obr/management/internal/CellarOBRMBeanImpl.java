@@ -18,7 +18,6 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
@@ -31,6 +30,7 @@ import javax.management.openmbean.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Implementation of the Cellar OBR MBean.
@@ -39,7 +39,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private EventProducer eventProducer;
+    private DistributedExecutionContext executionContext;
     private RepositoryAdmin obrService;
 
     public CellarOBRMBeanImpl() throws NotCompliantMBeanException {
@@ -97,9 +97,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+        //TODO Implement this.
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
@@ -129,7 +130,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
         event.setForce(true);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.produce(event);
     }
 
     @Override
@@ -140,10 +141,11 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+//TODO figure out how to handle this
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
@@ -172,7 +174,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_REMOVE_EVENT_TYPE);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.produce(event);
     }
 
     @Override
@@ -183,10 +185,11 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+//TODO figure out how to handle this
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         // check if the bundle ID is allowed outbound
         CellarSupport support = new CellarSupport();
@@ -202,7 +205,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
         event.setForce(true);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.produce(event);
     }
 
     public ClusterManager getClusterManager() {
@@ -222,11 +225,11 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
     }
 
     public EventProducer getEventProducer() {
-        return eventProducer;
+        return executionContext;
     }
 
     public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+        this.executionContext = eventProducer;
     }
 
     public RepositoryAdmin getObrService() {
@@ -235,5 +238,19 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
     public void setObrService(RepositoryAdmin obrService) {
         this.obrService = obrService;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

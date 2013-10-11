@@ -20,22 +20,12 @@ import org.apache.karaf.cellar.core.command.DistributedTask;
 /**
  * Cluster event.
  */
-public class ClusterEvent extends DistributedTask<ClusterEventResult>{
+public abstract class ClusterEventTask extends DistributedTask<ClusterEventResult>{
 
-    private String topicName;
     private Map<String, Serializable> properties;
 
-    public ClusterEvent(String topicName, Map<String, Serializable> properties) {
-        this.topicName = topicName;
+    public ClusterEventTask(Map<String, Serializable> properties) {
         this.properties = properties;
-    }
-
-    public String getTopicName() {
-        return this.topicName;
-    }
-    
-    public void setTopicName(String topicName) {
-        this.topicName = topicName;
     }
 
     public Map<String, Serializable> getProperties() {

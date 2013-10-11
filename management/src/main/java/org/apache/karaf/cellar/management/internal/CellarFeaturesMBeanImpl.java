@@ -1,5 +1,7 @@
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -15,10 +17,8 @@ package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
-import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
 import org.apache.karaf.cellar.management.CellarFeaturesMBean;
 import org.apache.karaf.features.*;
 import org.osgi.framework.BundleEvent;
@@ -31,8 +31,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.features.FeaturesEventTask;
+import org.apache.karaf.cellar.features.RepositoryEventTask;
 
 /**
  * Implementation of the Cellar Features MBean.
@@ -40,7 +41,7 @@ import org.apache.karaf.cellar.core.event.EventProducer;
 public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeaturesMBean {
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private EventProducer eventProducer;
+    private DistributedExecutionContext executionContext;
     private FeaturesService featuresService;
     private CellarSupport cellarSupport;
 
@@ -56,10 +57,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+        //TODO figure out what to do about this.
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
@@ -112,9 +114,9 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // broadcast the cluster event
-        ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
+        FeaturesEventTask event = new FeaturesEventTask(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.execute(event, group.getNodes());
     }
 
     @Override
@@ -140,10 +142,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+        //Figure out how to handle this.
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
@@ -183,9 +186,9 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         clusterFeatures.put(feature, false);
 
         // broadcast the cluster event
-        ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, FeatureEvent.EventType.FeatureUninstalled);
+        FeaturesEventTask event = new FeaturesEventTask(name, version, FeatureEvent.EventType.FeatureUninstalled);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.execute(event, group.getNodes());
     }
 
     @Override
@@ -250,10 +253,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+                //Figure out how to handle this.
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
@@ -311,10 +315,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // broadcast the cluster event
-            ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
+            RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryAdded);
             event.setInstall(install);
             event.setSourceGroup(group);
-            eventProducer.produce(event);
+            executionContext.execute(event, group.getNodes());
         } else {
             throw new IllegalArgumentException("Features repository URL " + url + " already registered");
         }
@@ -333,10 +337,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
+                //Figure out how to handle this.
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
+//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
 
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
@@ -394,10 +399,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // broadcast a cluster event
-            ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
+            RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryRemoved);
             event.setUninstall(uninstall);
             event.setSourceGroup(group);
-            eventProducer.produce(event);
+            executionContext.execute(event, group.getNodes());
         } else {
             throw new IllegalArgumentException("Features repository URL " + url + " not found in cluster group " + groupName);
         }
@@ -442,16 +447,16 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     }
 
     /**
-     * @return the eventProducer
+     * @return the executionContext
      */
-    public EventProducer getEventProducer() {
-        return eventProducer;
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
     /**
-     * @param eventProducer the eventProducer to set
+     * @param executionContext the executionContext to set
      */
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

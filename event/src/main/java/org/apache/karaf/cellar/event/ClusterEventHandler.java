@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.event;
 
-import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.event.EventHandler;
@@ -31,7 +30,7 @@ import org.apache.karaf.cellar.core.NodeConfiguration;
 /**
  * Handler for cluster event.
  */
-public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEvent> {
+public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEventTask> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
     private NodeConfiguration nodeConfiguration;
@@ -39,17 +38,18 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
     private CellarSupport cellarSupport;
 
     @Override
-    public void handle(ClusterEvent event) {
+    public void handle(ClusterEventTask event) {
 
+        //TODO Figure out what to do about this
         // check if the handler is ON
-        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
-            return;
-        }
+//        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
+//            return;
+//        }
 
         // check if the group is local
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR EVENT: node is not part of the event cluster group");
+            LOGGER.debug("CELLAR EVENT: receiving node is the one that sent the event, will be skipped for this node.");
             return;
         }
 
@@ -57,15 +57,16 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
             Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
-            if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
+            //TODO Fix this somehow.
+			//if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
                 Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
                 postEvent(event.getTopicName(), properties);
-            } else {
-                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
-            }
+            //} else {
+            //    LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+            //}
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }
@@ -106,8 +107,8 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
      * @return the cluster event type.
      */
     @Override
-    public Class<ClusterEvent> getType() {
-        return ClusterEvent.class;
+    public Class<ClusterEventTask> getType() {
+        return ClusterEventTask.class;
     }
 
     /**
