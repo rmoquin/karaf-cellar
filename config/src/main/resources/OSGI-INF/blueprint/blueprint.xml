@@ -55,7 +55,6 @@
     <!-- Cluster Event Handler -->
     <bean id="eventTask" class="org.apache.karaf.cellar.config.ConfigurationEventTask">
         <property name="configurationAdmin" ref="configurationAdmin"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>

@@ -95,7 +95,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
             String groupName = group.getName();
             Set<String> clusterUrls = clusterManager.getSet(Constants.URLS_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
 
-<<<<<<< HEAD
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
             Set<String> whitelist = groupConfig.getOutboundOBRUrlsWhitelist();
             Set<String> blacklist = groupConfig.getOutboundOBRUrlsBlacklist();
@@ -112,25 +111,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
                         ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());
                         clusterBundles.add(info);
                         // TODO fire event to the other nodes ?
-=======
-            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-            try {
-                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
-                Repository[] repositories = obrService.listRepositories();
-                for (Repository repository : repositories) {
-                    if (isAllowed(group, Constants.URLS_CONFIG_CATEGORY, repository.getURI().toString(), EventType.OUTBOUND)) {
-                        clusterUrls.add(repository.getURI().toString());
-                        // update OBR bundles in the cluster group
-                        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
-                        Resource[] resources = repository.getResources();
-                        for (Resource resource : resources) {
-                            ObrBundleInfo info = new ObrBundleInfo(resource.getPresentationName(), resource.getSymbolicName(), resource.getVersion().toString());
-                            clusterBundles.add(info);
-                            // TODO fire event to the other nodes ?
-                        }
-                    } else {
-                        LOGGER.debug("CELLAR OBR: URL {} is marked BLOCKED OUTBOUND for cluster group {}", repository.getURI().toString(), groupName);
->>>>>>> remotes/apache/trunk
                     }
                 } else {
                     LOGGER.warn("CELLAR OBR: URL {} is blocked outbound for cluster group {}", repository.getURI().toString(), groupName);

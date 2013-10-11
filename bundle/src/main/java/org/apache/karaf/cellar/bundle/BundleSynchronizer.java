@@ -43,7 +43,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
-<<<<<<< HEAD
         for (Group group : groups) {
             if (isSyncEnabled(group)) {
                 pull(group);
@@ -52,14 +51,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
                 }
-=======
-        if (groups != null && !groups.isEmpty()) {
-            for (Group group : groups) {
-                if (isSyncEnabled(group)) {
-                    pull(group);
-                    push(group);
-                } else LOGGER.debug("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
->>>>>>> remotes/apache/trunk
             }
         }
     }
@@ -101,15 +92,11 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                                     installBundleFromLocation(state.getLocation());
                                     startBundle(symbolicName, version);
                                 }
-<<<<<<< HEAD
                             } catch (BundleException e) {
                                 LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
                             }
                         } else {
                             LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
-=======
-                            } else LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
->>>>>>> remotes/apache/trunk
                         }
                     }
                 }
@@ -124,15 +111,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     @Override
     public void push(Group group) {
 
-<<<<<<< HEAD
-=======
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
-            return;
-        }
-
->>>>>>> remotes/apache/trunk
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
@@ -181,7 +159,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                         status = BundleEvent.STARTED;
                     }
 
-<<<<<<< HEAD
                     bundleState.setStatus(status);
 
                     BundleState existingState = clusterBundles.get(id);
@@ -200,9 +177,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
                 } else {
                     LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
-=======
-                    } else LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
->>>>>>> remotes/apache/trunk
                 }
             }
         }

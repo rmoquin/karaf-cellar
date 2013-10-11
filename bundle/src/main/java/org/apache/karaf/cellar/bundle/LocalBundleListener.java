@@ -57,17 +57,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
-<<<<<<< HEAD
         if (event.getBundle() != null) {
-=======
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
-            return;
-        }
-
-        if (event != null && event.getBundle() != null) {
->>>>>>> remotes/apache/trunk
             Set<Group> groups = null;
             try {
                 groups = groupManager.listLocalGroups();
@@ -108,7 +98,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             }
 
                             // check the features first
-<<<<<<< HEAD
                             List<Feature> matchingFeatures = retrieveFeature(bundleLocation);
                             Set<String> featuresWhitelist = groupConfig.getOutboundFeatureWhitelist();
                             Set<String> featuresBlacklist = groupConfig.getOutboundFeatureBlacklist();
@@ -119,16 +108,6 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                                 }
                             }
 
-=======
-                        	List<Feature> matchingFeatures = retrieveFeature(bundleLocation);
-                        	for (Feature feature : matchingFeatures) {
-            					if (!isAllowed(group, "features", feature.getName(), EventType.OUTBOUND)) {
-            						LOGGER.debug("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, feature.getName(), group.getName());
-            						return;
-            					}
-            				}
-                            
->>>>>>> remotes/apache/trunk
                             // broadcast the cluster event
                             BundleEventTask bundleEventTask = new BundleEventTask(symbolicName, version, bundleLocation, type);
                             bundleEventTask.setSourceGroup(group);
@@ -137,13 +116,9 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             LOGGER.error("CELLAR BUNDLE: failed to create bundle event", e);
                         }
 
-<<<<<<< HEAD
                     } else {
                         LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, group.getName());
                     }
-=======
-                    } else LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, group.getName());
->>>>>>> remotes/apache/trunk
                 }
             }
         }

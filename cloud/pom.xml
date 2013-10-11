@@ -32,7 +32,6 @@
     <artifactId>org.apache.karaf.cellar.cloud</artifactId>
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Cloud</name>
-<<<<<<< HEAD
     <build>
         <plugins>
             <plugin>
@@ -58,25 +57,6 @@
         </plugins>
     </build>
     
-=======
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.import>
-            org.joda.time;version="${joda-time.version}",
-            org.joda.time.chrono;version="${joda-time.version}",
-            org.apache.karaf.cellar.core*;version="${project.version}",
-            org.osgi*,
-            org.slf4j;resolution:=optional
-        </osgi.import>
-        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,org.jclouds.*,*</osgi.dynamic.import>
-        <osgi.export>
-            org.apache.karaf.cellar.cloud*;version="${project.version}"
-        </osgi.export>
-        <osgi.bundle.activator>org.apache.karaf.cellar.cloud.Activator</osgi.bundle.activator>
-    </properties>
-
->>>>>>> remotes/apache/trunk
     <dependencies>
 
         <!-- Internal Dependencies -->

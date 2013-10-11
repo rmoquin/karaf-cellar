@@ -33,7 +33,6 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Shell</name>
 
-<<<<<<< HEAD
     <build>
         <plugins>
             <plugin>
@@ -60,26 +59,6 @@
             </plugin>
         </plugins>
     </build>
-=======
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <osgi.import>
-            org.apache.karaf.cellar.core*;version="${project.version}",
-            org.apache.karaf.cellar*;version="${project.version}",
-            org.apache.felix.service.command,
-            org.apache.felix.gogo.commands,
-            org.apache.karaf.shell.console;version="[3,4)",
-            org.apache.karaf.shell.console.commands;version="[3,4)",
-            org.apache.karaf.shell.console.completer;version="[3,4)",
-            org.apache.karaf.shell.commands;version="[3,4)",
-            org.osgi*
-        </osgi.import>
-        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,*</osgi.dynamic.import>
-        <osgi.export>
-            org.apache.karaf.cellar.shell*;version="${project.version}"
-        </osgi.export>
-    </properties>
->>>>>>> remotes/apache/trunk
 
     <dependencies>
         <dependency>

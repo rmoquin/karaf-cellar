@@ -111,17 +111,12 @@ public class FeaturesSupport {
                     Boolean installed = featuresService.isInstalled(feature);
                     clusterFeatures.put(info, installed);
                 }
-<<<<<<< HEAD
             } else {
                 LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
             }
         } else {
             LOGGER.warn("CELLAR FEATURES: feature is null");
         }
-=======
-            } else LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
-        } else LOGGER.warn("CELLAR FEATURES: feature is null");
->>>>>>> remotes/apache/trunk
     }
 
     /**
@@ -145,17 +140,12 @@ public class FeaturesSupport {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     clusterFeatures.put(info, force);
                 }
-<<<<<<< HEAD
             } else {
                 LOGGER.warn("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
             }
         } else {
             LOGGER.warn("CELLAR FEATURES: feature is null");
         }
-=======
-            } else LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", feature.getName(), groupName);
-        } else LOGGER.warn("CELLAR FEATURES: feature is null");
->>>>>>> remotes/apache/trunk
     }
 
     /**

@@ -198,94 +198,8 @@ public class HazelcastGroupManager implements GroupManager {
      * done.
      */
     @Override
-<<<<<<< HEAD
     public void deregisterNodeFromAllGroups() throws IOException {
         this.removeNodeFromAllGroups(false);
-=======
-    public void registerGroup(Group group) {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(combinedClassLoader);
-            String groupName = group.getName();
-            createGroup(groupName);
-
-            LOGGER.debug("CELLAR HAZELCAST: registering cluster group {}.", groupName);
-            Properties serviceProperties = new Properties();
-            serviceProperties.put("type", "group");
-            serviceProperties.put("name", groupName);
-
-            if (!producerRegistrations.containsKey(groupName)) {
-                EventProducer producer = groupProducers.get(groupName);
-                if (producer == null) {
-                    producer = eventTransportFactory.getEventProducer(groupName, Boolean.TRUE);
-                    groupProducers.put(groupName, producer);
-                }
-
-                ServiceRegistration producerRegistration = bundleContext.registerService(EventProducer.class.getCanonicalName(), producer, (Dictionary) serviceProperties);
-                producerRegistrations.put(groupName, producerRegistration);
-            }
-
-            if (!consumerRegistrations.containsKey(groupName)) {
-                EventConsumer consumer = groupConsumer.get(groupName);
-                if (consumer == null) {
-                    consumer = eventTransportFactory.getEventConsumer(groupName, true);
-                    groupConsumer.put(groupName, consumer);
-                } else if (!consumer.isConsuming()) {
-                    consumer.start();
-                }
-                ServiceRegistration consumerRegistration = bundleContext.registerService(EventConsumer.class.getCanonicalName(), consumer, (Dictionary) serviceProperties);
-                consumerRegistrations.put(groupName, consumerRegistration);
-            }
-
-            group.getNodes().add(getNode());
-            listGroups().put(groupName, group);
-
-            // add group to configuration
-            try {
-                Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
-                if (configuration != null) {
-                    Dictionary<String, Object> properties = configuration.getProperties();
-                    if (properties != null) {
-                        String groups = (String) properties.get(Configurations.GROUPS_KEY);
-                        if (groups == null || groups.isEmpty()) {
-                            groups = groupName;
-                        } else {
-                            Set<String> groupNamesSet = convertStringToSet(groups);
-                            groupNamesSet.add(groupName);
-                            groups = convertSetToString(groupNamesSet);
-                        }
-
-                        if (groups == null || groups.isEmpty()) {
-                            groups = groupName;
-                        }
-                        properties.put(Configurations.GROUPS_KEY, groups);
-                        configuration.update(properties);
-                    }
-                }
-            } catch (IOException e) {
-                LOGGER.error("CELLAR HAZELCAST: error reading cluster group configuration {}", group);
-            }
-
-            // launch the synchronization on the group
-            try {
-                ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences("org.apache.karaf.cellar.core.Synchronizer", null);
-                if (serviceReferences != null && serviceReferences.length > 0) {
-                    for (ServiceReference ref : serviceReferences) {
-                        Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                        if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
-                            synchronizer.pull(group);
-                            synchronizer.push(group);
-                        }
-                        bundleContext.ungetService(ref);
-                    }
-                }
-            } catch (InvalidSyntaxException e) {
-                LOGGER.error("CELLAR HAZELCAST: failed to look for synchronizers", e);
-            }
-        } finally {
-            Thread.currentThread().setContextClassLoader(originalClassLoader);
-        }
->>>>>>> remotes/apache/trunk
     }
 
     @Override
@@ -397,7 +311,6 @@ public class HazelcastGroupManager implements GroupManager {
         return nodeConfiguration.getGroups();
     }
 
-<<<<<<< HEAD
     private IMap<String, Group> getGroupMapStore() {
         return masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
     }
@@ -417,24 +330,6 @@ public class HazelcastGroupManager implements GroupManager {
             if (groups.isEmpty()) {
                 LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
                 groups.add(Configurations.DEFAULT_GROUP_NAME);
-=======
-    /**
-     * Invoked when an entry is updated.
-     *
-     * @param entryEvent entry event
-     */
-    @Override
-    public void entryUpdated(EntryEvent entryEvent) {
-        LOGGER.debug("CELLAR HAZELCAST: cluster group configuration has been updated, updating local configuration");
-        try {
-            Configuration conf = configurationAdmin.getConfiguration(GROUPS);
-            Dictionary props = conf.getProperties();
-            Object key = entryEvent.getKey();
-            Object value = entryEvent.getValue();
-            if (props.get(key) == null || !props.get(key).equals(value)) {
-                props.put(key, value);
-                conf.update(props);
->>>>>>> remotes/apache/trunk
             }
             Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
                     .getCanonicalName(), null);

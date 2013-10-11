@@ -38,16 +38,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
     public void handleEvent(Event event) {
 
         // ignore log entry event
-<<<<<<< HEAD
         if (event.getTopic().startsWith("org/osgi/service/log/LogEntry")) {
-=======
-        if (event.getTopic().startsWith("org/osgi/service/log/LogEntry"))
-            return;
-
-        // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.debug("CELLAR EVENT: cluster event producer is OFF");
->>>>>>> remotes/apache/trunk
             return;
         }
 
@@ -87,15 +78,10 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                         // broadcast the event
                             ClusterEventTask clusterEvent = new ClusterEventTask(properties);
                             clusterEvent.setSourceGroup(group);
-<<<<<<< HEAD
                             executionContext.executeAsync(clusterEvent, group.getNodesExcluding(groupManager.getNode()), null);
                         //} else {
                         //    LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
                         //}
-=======
-                            eventProducer.produce(clusterEvent);
-                        } else LOGGER.debug("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND for cluster group {}", topicName, group.getName());
->>>>>>> remotes/apache/trunk
                     }
                 }
             }

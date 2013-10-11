@@ -196,78 +196,8 @@
         </cm:managed-component>
     </cm:managed-service-factory>
 
-<<<<<<< HEAD
     <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
         <property name="masterCluster" ref="masterCluster"/>
-=======
-    <!-- Cluster Event Transport Factory -->
-    <bean id="eventTransportFactory" class="org.apache.karaf.cellar.hazelcast.HazelcastEventTransportFactory">
-        <property name="dispatcher"  ref="dispatcher"/>
-        <property name="instance" ref="hazelcast"/>
-        <property name="combinedClassLoader" ref="combinedClassLoader"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    <service ref="eventTransportFactory" interface="org.apache.karaf.cellar.core.event.EventTransportFactory"/>
-
-    <!-- Cellar Extender -->
-    <bean id="cellarExtender" class="org.apache.karaf.cellar.hazelcast.CellarExtender"  init-method="init" destroy-method="destroy">
-        <property name="combinedClassLoader" ref="combinedClassLoader"/>
-        <property name="bundleContext" ref="blueprintBundleContext"/>
-    </bean>
-
-    <!-- Bundle Combined ClassLoader -->
-    <bean id="combinedClassLoader" class="org.apache.karaf.cellar.core.utils.CombinedClassLoader" init-method="init" destroy-method="destroy"/>
-
-    <!-- Local Node -->
-    <bean id="node" factory-ref="clusterManager" factory-method="getNode"/>
-
-    <!-- Cluster Event Topic -->
-    <bean id="eventTopic" factory-ref="hazelcast" factory-method="getTopic">
-        <argument value="org.apache.karaf.cellar.event.topic"/>
-    </bean>
-
-    <!-- Cluster Event Consumer -->
-    <bean id="consumer" class="org.apache.karaf.cellar.hazelcast.TopicConsumer" init-method="init"
-          destroy-method="destroy">
-        <property name="instance" ref="hazelcast"/>
-        <property name="dispatcher" ref="dispatcher"/>
-        <property name="node" ref="node"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-
-    <!-- Cluster Event Producer -->
-    <bean id="producer" class="org.apache.karaf.cellar.hazelcast.TopicProducer" init-method="init">
-        <property name="instance" ref="hazelcast"/>
-        <property name="node" ref="node"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    <service ref="producer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
-
-    <!-- Execution Context -->
-    <bean id="executionContext" class="org.apache.karaf.cellar.core.command.ClusteredExecutionContext">
-        <property name="producer" ref="producer"/>
-        <property name="commandStore" ref="commandStore"/>
-    </bean>
-    <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.ExecutionContext"/>
-
-    <!-- Handler For Cluster Producer Switch Command Event -->
-    <bean id="producerSwitchCommandHandler" class="org.apache.karaf.cellar.core.control.ProducerSwitchCommandHandler">
-        <property name="producer" ref="producer"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
-    </bean>
-    <service ref="producerSwitchCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
-
-    <!-- Handler For Cluster Producer Switch Result Event -->
-    <bean id="producerSwitchResultHandler" class="org.apache.karaf.cellar.core.control.ProducerSwitchResultHandler">
-        <property name="commandStore" ref="commandStore"/>
-    </bean>
-    <service ref="producerSwitchResultHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
-
-    <!-- Handler For Cluster Consumer Switch Command Event -->
-    <bean id="consumerSwitchCommandHandler" class="org.apache.karaf.cellar.core.control.ConsumerSwitchCommandHandler">
-        <property name="producer" ref="producer"/>
-        <property name="consumer" ref="consumer"/>
->>>>>>> remotes/apache/trunk
         <property name="configurationAdmin" ref="configurationAdmin"/>
         <property name="nodeConfiguration" ref="nodeConfigRef"/>
     </bean>

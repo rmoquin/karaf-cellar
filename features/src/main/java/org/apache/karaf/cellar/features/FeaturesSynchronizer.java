@@ -43,13 +43,9 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 if (isSyncEnabled(group)) {
                     pull(group);
                     push(group);
-<<<<<<< HEAD
                 } else {
                     LOGGER.warn("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
                 }
-=======
-                } else LOGGER.debug("CELLAR FEATURES: sync is disabled for cluster group {}", group.getName());
->>>>>>> remotes/apache/trunk
             }
         }
     }
@@ -124,13 +120,9 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                             } catch (Exception e) {
                                 LOGGER.warn("CELLAR FEATURES: failed to uninstall feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
                             }
-<<<<<<< HEAD
                         }
                     } else {
                         LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, groupName);
-=======
-                        } else LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group {}", name, groupName);
->>>>>>> remotes/apache/trunk
                     }
                 }
             }
@@ -146,7 +138,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
     public void push(Group group) {
         if (group != null) {
             String groupName = group.getName();
-            LOGGER.debug("CELLAR FEATURES: pushing features repositories and features in cluster group {}", groupName);
+            LOGGER.info("CELLAR FEATURES: pushing features repositories and features in cluster group {}", groupName);
             clusterManager.getList(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
             Repository[] repositoryList = new Repository[0];
