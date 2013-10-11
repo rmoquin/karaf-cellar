@@ -40,6 +40,15 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
     @Override
     public void featureEvent(FeatureEvent event) {
 
+<<<<<<< HEAD
+=======
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
+            return;
+        }
+
+>>>>>>> remotes/apache/trunk
         if (event != null) {
             Set<Group> groups = groupManager.listLocalGroups();
 
@@ -64,10 +73,15 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                         // broadcast the event
                         FeaturesEventTask featureEvent = new FeaturesEventTask(name, version, type);
                         featureEvent.setSourceGroup(group);
+<<<<<<< HEAD
                         executionContext.executeAsync(featureEvent, group.getNodesExcluding(groupManager.getNode()), null);
                     } else {
                         LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
                     }
+=======
+                        eventProducer.produce(featureEvent);
+                    } else LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+>>>>>>> remotes/apache/trunk
                 }
             }
         }
@@ -81,8 +95,16 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
     @Override
     public void repositoryEvent(RepositoryEvent event) {
 
+<<<<<<< HEAD
         if (event != null && event.getRepository() != null) {
             Set<Group> groups = groupManager.listLocalGroups();
+=======
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
+            return;
+        }
+>>>>>>> remotes/apache/trunk
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {

@@ -42,10 +42,23 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
 
         //TODO Figure out what to do about this
         // check if the handler is ON
+<<<<<<< HEAD
 //        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
 //            return;
 //        }
+=======
+        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
+            return;
+        }
+        
+        if (groupManager == null) {
+        	// in rare cases for example right after installation this happens!
+        	LOGGER.error("CELLAR EVENT: retrieved event {} while groupManager is not available yet!", event);
+        	return;
+        }
+>>>>>>> remotes/apache/trunk
 
         // check if the group is local
         if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
@@ -64,9 +77,13 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
                 postEvent(event.getTopicName(), properties);
+<<<<<<< HEAD
             //} else {
             //    LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
             //}
+=======
+            } else LOGGER.debug("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+>>>>>>> remotes/apache/trunk
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }

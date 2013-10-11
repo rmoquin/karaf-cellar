@@ -58,11 +58,15 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                 if (isSyncEnabled(group)) {
                     pull(group);
                     push(group);
+<<<<<<< HEAD
                 } else {
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
                     }
                 }
+=======
+                } else LOGGER.debug("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
+>>>>>>> remotes/apache/trunk
             }
         }
     }
@@ -102,11 +106,15 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                             localConfiguration.update(localDictionary);
                             persistConfiguration(configurationAdmin, pid, localDictionary);
                         }
+<<<<<<< HEAD
                     } catch (IOException ex) {
                         LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
                     }
                 } else {
                     LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+=======
+                    } else  LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED INBOUND for cluster group {}", clusterConfiguration, groupName);
+>>>>>>> remotes/apache/trunk
                 }
             }
         }
@@ -120,6 +128,15 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     @Override
     public void push(Group group) {
 
+<<<<<<< HEAD
+=======
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
+            return;
+        }
+
+>>>>>>> remotes/apache/trunk
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);
@@ -128,6 +145,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Configuration[] localConfigurations;
             try {
+<<<<<<< HEAD
                 localConfigurations = configurationAdmin.listConfigurations(null);
                 for (Configuration localConfiguration : localConfigurations) {
                     String pid = localConfiguration.getPid();
@@ -146,6 +164,26 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
                     } else {
                         LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
+=======
+                Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+                Configuration[] localConfigurations;
+                try {
+                    localConfigurations = configurationAdmin.listConfigurations(null);
+                    for (Configuration localConfiguration : localConfigurations) {
+                        String pid = localConfiguration.getPid();
+                        // check if the pid is marked as local.
+                        if (isAllowed(group, Constants.CATEGORY, pid, EventType.OUTBOUND)) {
+                            Dictionary localDictionary = localConfiguration.getProperties();
+                            localDictionary = filter(localDictionary);
+                            // update the configurations in the cluster group
+                            clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
+                            // broadcast the cluster event
+                            ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+                            event.setSourceGroup(group);
+                            eventProducer.produce(event);
+                        } else
+                            LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
+>>>>>>> remotes/apache/trunk
                     }
                 }
             } catch (IOException ex) {

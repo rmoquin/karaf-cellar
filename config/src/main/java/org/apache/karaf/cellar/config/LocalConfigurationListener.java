@@ -48,18 +48,17 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
      */
     @Override
     public void configurationEvent(ConfigurationEvent event) {
-        String pid = event.getPid();
+<<<<<<< HEAD
+=======
 
-        Dictionary localDictionary = null;
-        if (event.getType() != ConfigurationEvent.CM_DELETED) {
-            try {
-                Configuration conf = configurationAdmin.getConfiguration(pid, null);
-                localDictionary = conf.getProperties();
-            } catch (Exception e) {
-                LOGGER.error("CELLAR CONFIG: can't retrieve configuration with PID {}", pid, e);
-                return;
-            }
+        // check if the producer is ON
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
+            return;
         }
+
+>>>>>>> remotes/apache/trunk
+        String pid = event.getPid();
 
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
@@ -72,6 +71,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
                     try {
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
+<<<<<<< HEAD
                             // update the configurations in the cluster group
                             clusterConfigurations.remove(pid);
                             // broadcast the cluster event
@@ -80,7 +80,24 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                             configurationEventTask.setSourceGroup(group);
                             configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                             executionContext.executeAsync(configurationEventTask, group.getNodesExcluding(groupManager.getNode()), null);
+=======
+
+                            if (clusterConfigurations.containsKey(pid)) {
+                                // update the configurations in the cluster group
+                                clusterConfigurations.remove(pid);
+                                // broadcast the cluster event
+                                ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
+                                clusterConfigurationEvent.setType(event.getType());
+                                clusterConfigurationEvent.setSourceNode(clusterManager.getNode());
+                                clusterConfigurationEvent.setSourceGroup(group);
+                                eventProducer.produce(clusterConfigurationEvent);
+                            }
+
+>>>>>>> remotes/apache/trunk
                         } else {
+
+                            Configuration conf = configurationAdmin.getConfiguration(pid, null);
+                            Dictionary localDictionary = conf.getProperties();
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
                             if (!equals(localDictionary, distributedDictionary)) {
@@ -96,9 +113,13 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     } catch (Exception e) {
                         LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {} {}", pid, group.getName(), e);
                     }
+<<<<<<< HEAD
                 } else {
                     LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {} {}", pid, group.getName());
                 }
+=======
+                } else LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, group.getName());
+>>>>>>> remotes/apache/trunk
             }
         }
     }
