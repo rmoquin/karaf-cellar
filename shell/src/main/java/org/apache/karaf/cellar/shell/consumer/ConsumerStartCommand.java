@@ -29,4 +29,5 @@ public class ConsumerStartCommand extends ConsumerSupport {
     protected Object doExecute() throws Exception {
         return doExecute(nodes, SwitchStatus.ON);
     }
+
 }

@@ -32,43 +32,6 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Webconsole</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.karaf.cellar.webconsole*;version="${project.version}"
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.karaf.cellar.core*;version="${project.version}",
-                            org.apache.felix.webconsole;version="[3,5)",
-                            org.slf4j;resolution:=optional,
-                            *
-                        </Import-Package>
-                        <Embed-Dependency>json</Embed-Dependency>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-        <resources>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <includes>
-                    <include>**/*</include>
-                </includes>
-            </resource>
-            <resource>
-                <directory>${project.basedir}/src/main/resources</directory>
-                <filtering>true</filtering>
-                <includes>
-                    <include>**/*.info</include>
-                </includes>
-            </resource>
-        </resources>
-    </build>
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
@@ -76,6 +39,7 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -113,4 +77,44 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>**/*.info</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.cellar.webconsole*;version="${project.version}"
+                        </Export-Package>
+                        <Import-Package>
+                            org.apache.karaf.cellar.core*;version="${project.version}",
+                            org.apache.felix.webconsole;version="[3,5)",
+                            org.slf4j;resolution:=optional,
+                            *
+                        </Import-Package>
+                        <Embed-Dependency>json</Embed-Dependency>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+
+    </build>
+
 </project>

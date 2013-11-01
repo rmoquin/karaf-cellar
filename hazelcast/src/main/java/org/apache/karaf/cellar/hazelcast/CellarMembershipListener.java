@@ -62,7 +62,7 @@ public class CellarMembershipListener implements MembershipListener {
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn("CELLAR HAZELCAST: error while calling memberAdded", e);
+            LOGGER.warn("Error while calling memberAdded", e);
         }
     }
 

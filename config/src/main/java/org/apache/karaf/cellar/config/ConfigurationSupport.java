@@ -179,9 +179,9 @@ public class ConfigurationSupport {
 
             for (Enumeration<String> keys = props.keys(); keys.hasMoreElements();) {
                 String key = keys.nextElement();
-                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key) &&
-                         !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key) &&
-                         !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key) 
+				&& !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key) 
+				&& !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     p.put(key, (String) props.get(key));
                 }
             }

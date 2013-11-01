@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 @Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
 public class PropAppendCommand extends ConfigCommandSupport {
@@ -41,8 +40,6 @@ public class PropAppendCommand extends ConfigCommandSupport {
     @Argument(index = 3, name = "value", description = "The property value", required = true, multiValued = false)
     String value;
 
-    private DistributedExecutionContext executionContext;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -52,6 +49,11 @@ public class PropAppendCommand extends ConfigCommandSupport {
             return null;
         }
 
+		//This needs to be re-enabled
+        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+         System.err.println("Cluster event producer is OFF");
+         return null;
+         }*/
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -83,25 +85,11 @@ public class PropAppendCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ConfigurationEventTask event = new ConfigurationEventTask(pid);
             event.setSourceGroup(group);
-            executionContext.execute(event,group.getNodesExcluding(groupManager.getNode()));
+            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {
             System.out.println("No configuration found in cluster group " + groupName);
         }
         return null;
-    }
-
-    /**
-     * @return the executionContext
-     */
-    public DistributedExecutionContext getExecutionContext() {
-        return executionContext;
-    }
-
-    /**
-     * @param executionContext the executionContext to set
-     */
-    public void setExecutionContext(DistributedExecutionContext executionContext) {
-        this.executionContext = executionContext;
     }
 
 }

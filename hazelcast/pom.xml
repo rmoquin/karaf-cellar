@@ -33,9 +33,6 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Hazelcast</name>
 
-    <properties>
-        <packageVersion.dir>com/fasterxml/jackson/module/afterburner</packageVersion.dir>
-    </properties>
     <build>
         <plugins>
             <plugin>
@@ -104,16 +101,12 @@
 
         <!-- Internal Dependencies -->
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.scr.annotations</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.cellar</groupId>
-            <artifactId>org.apache.karaf.cellar.bundle</artifactId>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.scr.annotations</artifactId>
         </dependency>
 
         <dependency>
@@ -132,20 +125,10 @@
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-afterburner</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.dataformat</groupId>
-            <artifactId>jackson-dataformat-smile</artifactId>
-        </dependency>
-
         <!-- Logging Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 

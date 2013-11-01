@@ -46,10 +46,12 @@
                             org.apache.karaf.cellar.bundle.shell.completers;version="${project.version}"
                         </Export-Package>
                         <Import-Package>
-                            org.apache.karaf.cellar.core*;version="${project.version}",
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
+							            org.apache.karaf.cellar.core*;version="${project.version}",
+            org.apache.felix.service.command,
+            org.apache.karaf.shell.commands;version="[3,4)",
+            org.apache.karaf.shell.console;version="[3,4)",
+            org.apache.karaf.shell.console.completer;version="[3,4)",
+            org.apache.karaf.shell.commands;version="[3,4)",
                             org.apache.karaf.features;version="[3,4)",
                             org.slf4j;resolution:=optional,
                             *
@@ -59,7 +61,14 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
+        <!-- Internal Dependencies -->
+	<dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.core</artifactId>
+        </dependency>
+	
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -69,15 +78,12 @@
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         
-        <dependency>
-            <groupId>org.apache.karaf.cellar</groupId>
-            <artifactId>org.apache.karaf.cellar.core</artifactId>
-        </dependency>
         <!-- Karaf features -->
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
+
         <!-- Logging Dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>

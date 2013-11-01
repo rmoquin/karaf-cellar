@@ -110,7 +110,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                                 LOGGER.debug("CELLAR FEATURES: installing feature {}/{}", info.getName(), info.getVersion());
                                 featuresService.installFeature(info.getName(), info.getVersion());
                             } catch (Exception e) {
-                                LOGGER.warn("CELLAR FEATURES: failed to install feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
+                                    LOGGER.error("CELLAR FEATURES: failed to install feature {}/{} ", new Object[]{info.getName(), info.getVersion()}, e);
                             }
                             // if feature has to be uninstalled locally
                         } else if (!remotelyInstalled && locallyInstalled) {
@@ -118,7 +118,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                                 LOGGER.debug("CELLAR FEATURES: un-installing feature {}/{}", info.getName(), info.getVersion());
                                 featuresService.uninstallFeature(info.getName(), info.getVersion());
                             } catch (Exception e) {
-                                LOGGER.warn("CELLAR FEATURES: failed to uninstall feature {}/{} ", new Object[] { info.getName(), info.getVersion() }, e);
+                                    LOGGER.error("CELLAR FEATURES: failed to uninstall feature {}/{} ", new Object[]{info.getName(), info.getVersion()}, e);
                             }
                         }
                     } else {
@@ -148,14 +148,13 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                 repositoryList = featuresService.listRepositories();
                 featuresList = featuresService.listFeatures();
             } catch (Exception e) {
-                LOGGER.warn("CELLAR FEATURES: unable to list features", e);
+                    LOGGER.error("CELLAR FEATURES: error listing features", e);
             }
 
             // push features repositories to the cluster group
             if (repositoryList != null && repositoryList.length > 0) {
                 for (Repository repository : repositoryList) {
                     pushRepository(repository, group);
-                    LOGGER.debug("CELLAR FEATURES: pushing repository {} in cluster group {}", repository.getName(), group.getName());
                 }
             }
 
@@ -180,4 +179,5 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
         String groupName = group.getName();
         return this.groupManager.findGroupConfigurationByName(groupName).isSyncFeatures();
     }
+
 }

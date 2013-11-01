@@ -56,7 +56,7 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
 
         // check if the handler is ON
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.warn("CELLAR OBR: switch is OFF", SWITCH_ID);
+            LOGGER.debug("CELLAR OBR: {} switch is OFF", SWITCH_ID);
             return;
         }
 
@@ -68,10 +68,9 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
         String url = event.getUrl();
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-        Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
-        Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
+        	Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
+        	Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
             if (cellarSupport.isAllowed(url, whitelist, blacklist) || event.getForce()) {
-                LOGGER.debug("CELLAR OBR: received OBR URL {}", url);
                 if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
                     obrService.addRepository(url);
@@ -83,8 +82,6 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
                         LOGGER.warn("CELLAR OBR: repository URL {} has not been added to the OBR service", url);
                     }
                 }
-            } else {
-                LOGGER.warn("CELLAR OBR: repository URL {} is marked BLOCKED INBOUND for cluster group {}", url, event.getSourceGroup().getName());
             }
         } catch (Exception e) {
             LOGGER.error("CELLAR OBR: failed to register repository URL {}", url, e);

@@ -38,36 +38,41 @@ public class StartBundleCommand extends BundleCommandSupport {
             return null;
         }
 
+        //TODO turn back on at some point.
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            System.err.println("Cluster event producer is OFF");
+//            return null;
+//        }
         // update the bundle in the cluster group
         String location;
         String key = null;
-            Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
+        Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-            key = selector(clusterBundles);
+        key = selector(clusterBundles);
 
-            if (key == null) {
-                System.err.println("Bundle " + key + " not found in cluster group " + groupName);
-            }
+        if (key == null) {
+            System.err.println("Bundle " + key + " not found in cluster group " + groupName);
+        }
 
-            BundleState state = clusterBundles.get(key);
-            if (state == null) {
-                System.err.println("Bundle " + key + " not found in cluster group " + groupName);
-                return null;
-            }
-            location = state.getLocation();
+        BundleState state = clusterBundles.get(key);
+        if (state == null) {
+            System.err.println("Bundle " + key + " not found in cluster group " + groupName);
+            return null;
+        }
+        location = state.getLocation();
 
-            // check if the bundle is allowed
-            CellarSupport support = new CellarSupport();
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+        // check if the bundle is allowed
+        CellarSupport support = new CellarSupport();
+        GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
         Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
         if (!support.isAllowed(location, whitelist, blacklist)) {
-                System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
-                return null;
-            }
+            System.err.println("Bundle location " + location + " is blocked outbound for cluster group " + groupName);
+            return null;
+        }
 
-            state.setStatus(BundleEvent.STARTED);
-            clusterBundles.put(key, state);
+        state.setStatus(BundleEvent.STARTED);
+        clusterBundles.put(key, state);
 
         // broadcast the cluster event
         String[] split = key.split("/");

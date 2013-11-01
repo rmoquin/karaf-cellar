@@ -63,14 +63,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
         <!-- Internal Dependencies -->
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
@@ -81,12 +73,10 @@
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Configuration Admin -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.configadmin</artifactId>
-            <scope>provided</scope>
+<!-- Configuration Admin -->
+<dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         <!-- Logging Dependencies -->
         <dependency>

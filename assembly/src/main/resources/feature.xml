@@ -25,9 +25,9 @@
     <feature name="jackson" description="Jackson JSON parser" version="${jackson.version}" resolver="(obr)">
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-smile/${jackson.version}</bundle>
+        <!--<bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-smile/${jackson.version}</bundle>-->
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
-        <!--<bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-afterburner/${jackson.version}</bundle>-->
+        <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-afterburner/${jackson.version}</bundle>
     </feature>
     
     <feature name="hazelcast" description="In memory data grid" version="${hazelcast.version}" resolver="(obr)">

@@ -18,13 +18,13 @@ import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.bundle.BundleEventTask;
+import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.shell.commands.Command;
 import org.osgi.framework.BundleEvent;
 
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.bundle.BundleEventTask;
-import org.apache.karaf.cellar.core.GroupConfiguration;
 
 @Command(scope = "cluster", name = "bundle-uninstall", description = "Uninstall a bundle from a cluster group")
 public class UninstallBundleCommand extends BundleCommandSupport {
@@ -38,6 +38,11 @@ public class UninstallBundleCommand extends BundleCommandSupport {
             return null;
         }
 
+        //TODO turn back on at some point.
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            System.err.println("Cluster event producer is OFF");
+//            return null;
+//        }
         // update the bundle in the cluster group
         String location;
         String key = null;

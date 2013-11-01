@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.cloud;
 
 import java.io.Serializable;
+
 import org.joda.time.DateTime;
 
 /**

@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.features;
 
+import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.features.Feature;
@@ -25,7 +26,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -67,9 +67,8 @@ public class FeaturesSupport {
 
             if (localFeatures != null && localFeatures.length > 0) {
                 for (Feature localFeature : localFeatures) {
-                    if (localFeature.getName().equals(name) && (localFeature.getVersion().equals(version) || version == null)) {
+                    if (localFeature.getName().equals(name) && (localFeature.getVersion().equals(version) || version == null))
                         return true;
-                    }
                 }
             }
         }

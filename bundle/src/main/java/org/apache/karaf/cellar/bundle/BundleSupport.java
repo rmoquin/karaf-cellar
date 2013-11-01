@@ -30,10 +30,11 @@ import org.slf4j.LoggerFactory;
  * Generic Cellar bundle support.
  */
 public class BundleSupport {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
-	protected FeaturesService featuresService;
-	protected DistributedExecutionContext executionContext;
+    protected FeaturesService featuresService;
+    protected DistributedExecutionContext executionContext;
 
     /**
      * Locally install a bundle.
@@ -124,21 +125,21 @@ public class BundleSupport {
      * @return the list of feature where the bundle is present.
      * @throws Exception in case of retrieval failure.
      */
-	protected List<Feature> retrieveFeature(String bundleLocation) throws Exception {
-		Feature[] features = featuresService.listFeatures();
-		List<Feature> matchingFeatures = new ArrayList<Feature>();
-		for (Feature feature : features) {
-			List<BundleInfo> bundles = feature.getBundles();
-			for (BundleInfo bundleInfo : bundles) {
-				String location = bundleInfo.getLocation();
-				if (location.equalsIgnoreCase(bundleLocation)) {
-					matchingFeatures.add(feature);
-					LOGGER.debug("CELLAR BUNDLE: found a feature {} containing bundle {}", feature.getName(), bundleLocation);
-				}
-			}
-		}
-		return matchingFeatures;
-	}
+    protected List<Feature> retrieveFeature(String bundleLocation) throws Exception {
+        Feature[] features = featuresService.listFeatures();
+        List<Feature> matchingFeatures = new ArrayList<Feature>();
+        for (Feature feature : features) {
+            List<BundleInfo> bundles = feature.getBundles();
+            for (BundleInfo bundleInfo : bundles) {
+                String location = bundleInfo.getLocation();
+                if (location.equalsIgnoreCase(bundleLocation)) {
+                    matchingFeatures.add(feature);
+                    LOGGER.debug("CELLAR BUNDLE: found a feature {} containing bundle {}", feature.getName(), bundleLocation);
+                }
+            }
+        }
+        return matchingFeatures;
+    }
 
     public BundleContext getBundleContext() {
         return this.bundleContext;
@@ -148,13 +149,13 @@ public class BundleSupport {
         this.bundleContext = bundleContext;
     }
 
-	public FeaturesService getFeaturesService() {
-		return featuresService;
-	}
+    public FeaturesService getFeaturesService() {
+        return featuresService;
+    }
 
-	public void setFeaturesService(FeaturesService featureService) {
-		this.featuresService = featureService;
-	}
+    public void setFeaturesService(FeaturesService featureService) {
+        this.featuresService = featureService;
+    }
 
     /**
      * @return the executionContext

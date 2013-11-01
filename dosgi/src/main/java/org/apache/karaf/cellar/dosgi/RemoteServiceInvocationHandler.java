@@ -15,13 +15,13 @@ package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Handler for cluster remote service invocation event.

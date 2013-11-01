@@ -47,12 +47,6 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
 //            return;
 //        }
 
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR EVENT: receiving node is the one that sent the event, will be skipped for this node.");
-            return;
-        }
-
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
             Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();

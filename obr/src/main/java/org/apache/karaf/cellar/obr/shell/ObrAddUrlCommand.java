@@ -34,7 +34,7 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
     String groupName;
 
-    @Argument(index = 1, name = "url", description = "The repository URL to register in the OBR service", required = true, multiValued = false)
+    @Argument(index = 1, name = "url", description = "The OBR URL.", required = true, multiValued = false)
     String url;
 
     @Override
@@ -52,7 +52,6 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
 //            System.err.println("Cluster event producer is OFF");
 //            return null;
 //        }
-
         // check if the URL is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -78,19 +77,9 @@ public class ObrAddUrlCommand extends ObrCommandSupport {
         }
 
         // broadcast a cluster event
-        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
-        event.setForce(true);
+        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_ADD_EVENT_TYPE);
         event.setSourceGroup(group);
-        executionContext.executeAndWait(ping, node);
-
+        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         return null;
-    }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
     }
 }

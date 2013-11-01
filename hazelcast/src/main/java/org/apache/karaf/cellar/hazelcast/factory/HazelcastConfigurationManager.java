@@ -69,8 +69,7 @@ public class HazelcastConfigurationManager {
    /*     GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
         globalConfig.setClassName("java.lang.Object");
         globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
-        cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);
-
+        cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);*/
         SerializerConfig serializerConfig1 = new SerializerConfig();
         serializerConfig1.setImplementation(new GenericCellarSerializer<ManageGroupTask>(11, ManageGroupTask.class));
         serializerConfig1.setTypeClass(ManageGroupTask.class);
@@ -80,7 +79,7 @@ public class HazelcastConfigurationManager {
         serializerConfig2.setTypeClass(Group.class);
 
         cfg.getSerializationConfig().addSerializerConfig(serializerConfig1);
-        cfg.getSerializationConfig().addSerializerConfig(serializerConfig2);*/
+        cfg.getSerializationConfig().addSerializerConfig(serializerConfig2);
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);

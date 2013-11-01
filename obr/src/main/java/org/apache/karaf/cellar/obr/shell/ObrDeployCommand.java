@@ -66,7 +66,6 @@ public class ObrDeployCommand extends ObrCommandSupport {
         int type = 0;
         if (start) type = Constants.BUNDLE_START_EVENT_TYPE;
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
-        event.setForce(true);
         event.setSourceGroup(group);
         eventProducer.produce(event);
 

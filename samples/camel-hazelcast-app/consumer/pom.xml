@@ -54,7 +54,6 @@
             </plugin>
         </plugins>
     </build>
-    
     <dependencies>
         <dependency>
             <groupId>org.apache.camel</groupId>

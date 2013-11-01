@@ -16,7 +16,13 @@
            xmlns:ext="http://aries.apache.org/blueprint/xmlns/blueprint-ext/v1.1.0">
 
     <ext:property-placeholder/>
-    
+    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
+    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
+
     <!-- Core Cellar MBean -->
     <bean id="cellarMBean" class="org.apache.karaf.cellar.management.internal.CellarMBeanImpl">
         <property name="bundleContext" ref="blueprintBundleContext"/>
@@ -30,6 +36,8 @@
             <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=core,name=${karaf.name}"/>
         </service-properties>
     </service>
+
+    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
 
     <!-- Cellar Node MBean -->
     <bean id="cellarNodeMBean" class="org.apache.karaf.cellar.management.internal.CellarNodeMBeanImpl">
@@ -97,14 +105,5 @@
             <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=bundle,name=${karaf.name}"/>
         </service-properties>
     </service>
-    
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
-    
-    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
-    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
-    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 
 </blueprint>

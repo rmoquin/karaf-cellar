@@ -49,6 +49,11 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
+		//TODO Re-enable this functionaity,
+        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }*/
 
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);

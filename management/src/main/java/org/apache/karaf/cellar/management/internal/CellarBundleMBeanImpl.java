@@ -14,10 +14,8 @@
 package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.bundle.BundleState;
-import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.management.CellarBundleMBean;
 import org.osgi.framework.BundleEvent;
 
@@ -31,12 +29,14 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.karaf.cellar.bundle.BundleEventTask;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Implementation of the Cellar Bundle MBean.
  */
 public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundleMBean {
+
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private DistributedExecutionContext executionContext;
@@ -84,9 +84,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         clusterBundles.put(name + "/" + version, state);
 
         // broadcast the event
-        ClusterBundleEvent event = new ClusterBundleEvent(name, version, location, BundleEvent.INSTALLED);
+        BundleEventTask event = new BundleEventTask(name, version, location, BundleEvent.INSTALLED);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(event, group.getNodesExcluding(this.groupManager.getNode()));
     }
 
     @Override
@@ -98,10 +98,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
-
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
         // update the cluster group
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
@@ -130,9 +129,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // broadcast the event
         String[] split = key.split("/");
-        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.UNINSTALLED);
+        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.UNINSTALLED);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
     @Override
@@ -144,10 +143,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF for this node");
-        }
-
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF for this node");
+//        }
         // update the cluster group
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
@@ -177,9 +175,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // broadcast the cluster event
         String[] split = key.split("/");
-        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STARTED);
+        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.STARTED);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
     @Override
@@ -191,10 +189,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
-
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
         // update the cluster group
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
@@ -224,19 +221,19 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // broadcast the cluster event
         String[] split = key.split("/");
-        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STOPPED);
+        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.STOPPED);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
     @Override
     public TabularData getBundles(String groupName) throws Exception {
         CompositeType compositeType = new CompositeType("Bundle", "Karaf Cellar bundle",
-                new String[] { "id", "name", "version", "status", "location" },
-                new String[] { "ID of the bundle", "Name of the bundle", "Version of the bundle", "Current status of the bundle", "Location of the bundle" },
-                new OpenType[] { SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                new String[]{"id", "name", "version", "status", "location"},
+                new String[]{"ID of the bundle", "Name of the bundle", "Version of the bundle", "Current status of the bundle", "Location of the bundle"},
+                new OpenType[]{SimpleType.INTEGER, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
         TabularType tableType = new TabularType("Bundles", "Table of all KarafCellar bundles", compositeType,
-                new String[] { "name", "version" });
+                new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
@@ -280,8 +277,8 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
                     break;
             }
             CompositeData data = new CompositeDataSupport(compositeType,
-                    new String[] { "id", "name", "version", "status", "location" },
-                    new Object[] { id, name, version, status, state.getLocation() });
+                    new String[]{"id", "name", "version", "status", "location"},
+                    new Object[]{id, name, version, status, state.getLocation()});
             table.put(data);
             id++;
         }

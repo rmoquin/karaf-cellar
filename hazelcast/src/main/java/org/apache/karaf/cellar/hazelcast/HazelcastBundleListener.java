@@ -22,16 +22,14 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Hazelcast bundle listener.
  */
 public class HazelcastBundleListener implements SynchronousBundleListener {
-    private static Logger LOGGER = LoggerFactory.getLogger(HazelcastBundleListener.class);
+
     private BundleContext bundleContext;
-    private Map<String, List<URL>> loadedResources = new ConcurrentHashMap<String, List<URL>>();
+    private final Map<String, List<URL>> loadedResources = new ConcurrentHashMap<String, List<URL>>();
 
     public void init() {
         bundleContext.addBundleListener(this);
@@ -52,7 +50,6 @@ public class HazelcastBundleListener implements SynchronousBundleListener {
         }
     }
 
-//    @Override
     @Override
     public void bundleChanged(BundleEvent event) {
         switch (event.getType()) {

@@ -13,20 +13,17 @@
  */
 package org.apache.karaf.cellar.event;
 
-import java.io.Serializable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generic Cellar OSGi event support.
  */
 public class EventSupport {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(EventSupport.class);
     protected EventAdmin eventAdmin;
 
     /**

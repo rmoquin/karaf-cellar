@@ -14,6 +14,7 @@
 package org.apache.karaf.cellar.dosgi;
 
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceRegistration;
@@ -21,7 +22,6 @@ import org.osgi.framework.ServiceRegistration;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Factory for remote service.

@@ -55,7 +55,6 @@
             </plugin>
         </plugins>
     </build>
-    
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>

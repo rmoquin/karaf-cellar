@@ -18,11 +18,13 @@
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Bundle Listener -->
-    <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init" destroy-method="destroy">
+    <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init" 
+          destroy-method="destroy">
+        <property name="masterCluster" ref="masterCluster"/>
+	<property name="groupManager" ref="groupManager"/>
+        
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
-        <property name="masterCluster" ref="masterCluster"/>
-        <property name="groupManager" ref="groupManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
@@ -30,11 +32,10 @@
     <!-- Bundle Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.bundle.BundleSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
-        <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
-        <property name="masterCluster" ref="masterCluster"/>
         <property name="groupManager" ref="groupManager"/>
+	<property name="masterCluster" ref="masterCluster"/>
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
@@ -42,23 +43,28 @@
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Bundle Event Handler -->
-    <bean id="eventHandler" class="org.apache.karaf.cellar.bundle.BundleEventTask"
+    <bean id="eventHandler" class="org.apache.karaf.cellar.bundle.BundleEventHandler"
           init-method="init" destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
-        <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="executionContext" ref="executionContext"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+	<property name="featuresService" ref="featuresService"/>
     </bean>
     
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
 
+    <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
+        <service-properties>
+            <entry key="managed" value="true"/>
+        </service-properties>
+    </service>
+
     <!-- Cluster Core Services -->
-    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
+    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

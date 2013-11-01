@@ -30,6 +30,7 @@ import org.apache.karaf.cellar.core.command.DistributedTask;
  * The BundleEventTask is responsible to process received cluster event for bundles.
  */
 public class BundleEventTask extends DistributedTask<BundleEventResponse> {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleEventTask.class);
     private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
@@ -56,13 +57,12 @@ public class BundleEventTask extends DistributedTask<BundleEventResponse> {
     /**
      * Handle received bundle cluster events.
      *
-     * @return 
+     * @return
      */
     @Override
     public BundleEventResponse execute() {
         BundleEventResponse result = new BundleEventResponse();
         try {
-            // check if the pid is marked as local.
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(this.sourceGroup.getName());
             Set<String> bundleWhitelist = groupConfig.getInboundBundleWhitelist();
             Set<String> bundleBlacklist = groupConfig.getInboundBundleBlacklist();

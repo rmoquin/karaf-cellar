@@ -30,6 +30,7 @@ import org.apache.karaf.features.FeaturesListener;
  * Local features listener.
  */
 public class LocalFeaturesListener extends FeaturesSupport implements FeaturesListener {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
 
     /**
@@ -40,6 +41,11 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
     @Override
     public void featureEvent(FeatureEvent event) {
 
+        //TODO Re-enable this functionaity,
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
+//            return;
+//        }
         if (event != null) {
             Set<Group> groups = groupManager.listLocalGroups();
 
@@ -81,6 +87,11 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
     @Override
     public void repositoryEvent(RepositoryEvent event) {
 
+        //TODO Re-enable this functionaity,
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
+//            return;
+//        }
         if (event != null && event.getRepository() != null) {
             Set<Group> groups = groupManager.listLocalGroups();
 

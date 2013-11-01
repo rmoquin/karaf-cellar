@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -41,8 +40,6 @@ public class PropSetCommand extends ConfigCommandSupport {
     @Argument(index = 3, name = "value", description = "The property value", required = true, multiValued = false)
     String value;
 
-    private DistributedExecutionContext executionContext;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -52,6 +49,11 @@ public class PropSetCommand extends ConfigCommandSupport {
             return null;
         }
 
+        //This needs to be re-enabled
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            System.err.println("Cluster event producer is OFF");
+//            return null;
+//        }
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -80,19 +82,5 @@ public class PropSetCommand extends ConfigCommandSupport {
             System.out.println("No configuration found in cluster group " + groupName);
         }
         return null;
-    }
-
-    /**
-     * @return the executionContext
-     */
-    public DistributedExecutionContext getExecutionContext() {
-        return executionContext;
-    }
-
-    /**
-     * @param executionContext the executionContext to set
-     */
-    public void setExecutionContext(DistributedExecutionContext executionContext) {
-        this.executionContext = executionContext;
     }
 }

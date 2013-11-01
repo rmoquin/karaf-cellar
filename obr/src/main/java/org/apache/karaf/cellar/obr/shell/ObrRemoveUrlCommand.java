@@ -18,7 +18,6 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.cellar.obr.ObrBundleInfo;

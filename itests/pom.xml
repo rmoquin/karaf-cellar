@@ -33,17 +33,12 @@
     <name>Apache Karaf :: Cellar :: Integration Tests</name>
 
     <dependencies>
+
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <version>${karaf.version}</version>
             <type>zip</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.karaf</groupId>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         
         <dependency>
@@ -51,32 +46,18 @@
             <artifactId>apache-karaf</artifactId>
             <version>${karaf.version}</version>
             <type>tar.gz</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.karaf</groupId>
-                    <artifactId>org.apache.karaf.client</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.runtime</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.instance</groupId>
-            <artifactId>org.apache.karaf.instance.command</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.instance</groupId>
-            <artifactId>org.apache.karaf.instance.core</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>apache-karaf-cellar</artifactId>
             <classifier>features</classifier>
             <type>xml</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.core</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -106,18 +87,6 @@
                         <id>generate-depends-file</id>
                         <goals>
                             <goal>generate-depends-file</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>jar-test-classes</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>test-jar</goal>
                         </goals>
                     </execution>
                 </executions>

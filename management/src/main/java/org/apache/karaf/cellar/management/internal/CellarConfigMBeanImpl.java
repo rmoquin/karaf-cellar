@@ -24,12 +24,12 @@ import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 /**
  * Implementation of the Cellar Config MBean.
  */
 public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfigMBean {
+
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
@@ -70,7 +70,6 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         //if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
         //    throw new IllegalStateException("Cluster event producer is OFF");
         //}
-
         // check if the PID is allowed outbound
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -85,10 +84,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             clusterConfigurations.remove(pid);
 
             // broadcast the cluster event
-            ConfigurationEventTask event = new ConfigurationEventTask(pid);
+            ConfigurationEventTask event = new ConfigurationEventTask();
             event.setSourceGroup(group);
             event.setType(ConfigurationEvent.CM_DELETED);
-            distributedExecutionContext.produce(event);
+            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
@@ -98,11 +97,11 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
     public TabularData listProperties(String groupName, String pid) throws Exception {
 
         CompositeType compositeType = new CompositeType("Property", "Cellar Config Property",
-                new String[] { "key", "value" },
-                new String[] { "Property key", "Property value" },
-                new OpenType[] { SimpleType.STRING, SimpleType.STRING });
+                new String[]{"key", "value"},
+                new String[]{"Property key", "Property value"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
         TabularType tableType = new TabularType("Properties", "Table of all properties in the configuration PID",
-                compositeType, new String[] { "key" });
+                compositeType, new String[]{"key"});
         TabularData table = new TabularDataSupport(tableType);
 
         Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
@@ -113,8 +112,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
                 String key = (String) propertyNames.nextElement();
                 String value = (String) clusterProperties.get(key);
                 CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                        new String[] { "key", "value" },
-                        new String[] { key, value });
+                        new String[]{"key", "value"},
+                        new String[]{key, value});
                 table.put(data);
             }
         }
@@ -130,10 +129,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
-
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
@@ -152,9 +150,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             clusterConfigurations.put(pid, clusterProperties);
 
             // broadcast the cluster event
-            ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+            ConfigurationEventTask event = new ConfigurationEventTask();
             event.setSourceGroup(group);
-            eventProducer.produce(event);
+            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
@@ -169,10 +167,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is on
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
-
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
@@ -198,9 +195,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             clusterConfigurations.put(pid, clusterProperties);
 
             // broadcast the cluster event
-            ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+            ConfigurationEventTask event = new ConfigurationEventTask(pid);
             event.setSourceGroup(group);
-            eventProducer.produce(event);
+            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }
@@ -215,10 +212,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the event producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            throw new IllegalStateException("Cluster event producer is OFF");
-        }
-
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            throw new IllegalStateException("Cluster event producer is OFF");
+//        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
@@ -234,9 +230,10 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
                 clusterDictionary.remove(key);
                 clusterConfigurations.put(pid, clusterDictionary);
                 // broadcast the cluster event
-                ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
+                ConfigurationEventTask event = new ConfigurationEventTask();
                 event.setSourceGroup(group);
-                eventProducer.produce(event);
+                executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+
             }
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);

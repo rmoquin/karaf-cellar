@@ -1,6 +1,6 @@
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
-/*
+ /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 package org.apache.karaf.cellar.management.internal;
 
 import org.apache.karaf.cellar.bundle.BundleState;
-import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
 import org.apache.karaf.cellar.management.CellarFeaturesMBean;
@@ -31,6 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.Configurations;
+import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.features.FeaturesEventTask;
 import org.apache.karaf.cellar.features.RepositoryEventTask;
@@ -39,6 +44,7 @@ import org.apache.karaf.cellar.features.RepositoryEventTask;
  * Implementation of the Cellar Features MBean.
  */
 public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeaturesMBean {
+
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private DistributedExecutionContext executionContext;
@@ -57,12 +63,11 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-        //TODO figure out what to do about this.
+        //TODO Turn this back on.
         // check if the producer is ON
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
         Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
@@ -147,7 +152,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
         Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
@@ -199,12 +203,12 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     @Override
     public TabularData getFeatures(String group) throws Exception {
         CompositeType featuresType = new CompositeType("Feature", "Karaf Cellar feature",
-                new String[] { "name", "version", "installed" },
-                new String[] { "Name of the feature", "Version of the feature", "Whether the feature is installed or not" },
-                new OpenType[] { SimpleType.STRING, SimpleType.STRING, SimpleType.BOOLEAN });
+                new String[]{"name", "version", "installed"},
+                new String[]{"Name of the feature", "Version of the feature", "Whether the feature is installed or not"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.BOOLEAN});
 
         TabularType tabularType = new TabularType("Features", "Table of all Karaf Cellar features",
-                featuresType, new String[] { "name", "version" });
+                featuresType, new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tabularType);
 
         Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + group);
@@ -212,8 +216,8 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             for (FeatureInfo feature : clusterFeatures.keySet()) {
                 boolean installed = clusterFeatures.get(feature);
                 CompositeData data = new CompositeDataSupport(featuresType,
-                        new String[] { "name", "version", "installed" },
-                        new Object[] { feature.getName(), feature.getVersion(), installed });
+                        new String[]{"name", "version", "installed"},
+                        new Object[]{feature.getName(), feature.getVersion(), installed});
                 table.put(data);
             }
         }
@@ -258,7 +262,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
         // get the features in the cluster group
@@ -342,7 +345,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
         // get the features in the cluster group

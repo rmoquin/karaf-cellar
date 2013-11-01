@@ -16,6 +16,11 @@ package org.apache.karaf.cellar.bundle;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
+import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.framework.BundleException;
@@ -24,11 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group.
@@ -48,9 +48,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 pull(group);
                 push(group);
             } else {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
-                }
+                LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
             }
         }
     }
@@ -111,6 +109,11 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
     @Override
     public void push(Group group) {
 
+		//TODO turn back on at some point.
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
+            return;
+        }
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR BUNDLE: pushing bundles to cluster group {}", groupName);
@@ -137,7 +140,6 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                     // if there is no symbolic name, resort to location.
                     name = (name == null) ? bundle.getLocation() : name;
                     bundleState.setName(name);
-                    bundleState.setName(bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME));
                     bundleState.setLocation(bundleLocation);
 
                     if (status == Bundle.ACTIVE) {

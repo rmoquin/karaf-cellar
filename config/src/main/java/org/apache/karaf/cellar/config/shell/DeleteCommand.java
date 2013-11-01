@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.config.ConfigurationEventTask;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 @Command(scope = "cluster", name = "config-delete", description = "Delete a configuration from a cluster group")
 public class DeleteCommand extends ConfigCommandSupport {
@@ -36,8 +35,6 @@ public class DeleteCommand extends ConfigCommandSupport {
     @Argument(index = 1, name = "pid", description = "The configuration PID", required = true, multiValued = false)
     String pid;
 
-    private DistributedExecutionContext executionContext;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -47,6 +44,11 @@ public class DeleteCommand extends ConfigCommandSupport {
             return null;
         }
 
+		//TODO This needs to be re-enabled
+        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+         System.err.println("Cluster event producer is OFF");
+         return null;
+         }*/
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
         Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();

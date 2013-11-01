@@ -50,6 +50,11 @@ public class UrlAddCommand extends FeatureCommandSupport {
             return null;
         }
 
+		//TODO Re-enable this functionaity,
+        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }*/
             // get the features repositories in the cluster group
             List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
             // get the features in the cluster group

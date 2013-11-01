@@ -17,7 +17,7 @@ package org.apache.karaf.cellar.hazelcast.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.smile.SmileFactory;
+import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
 import com.hazelcast.nio.serialization.ByteArraySerializer;
 import java.io.IOException;
 import org.apache.karaf.cellar.core.Node;
@@ -29,16 +29,16 @@ import org.slf4j.Logger;
  * @author rmoquin
  */
 public class GenericCellarSerializer<T> implements ByteArraySerializer<T> {
+
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(GenericCellarSerializer.class);
-    protected static final SmileFactory f = new SmileFactory();
-    protected static final ObjectMapper mapper = new ObjectMapper(f);
+    protected static final ObjectMapper mapper = new ObjectMapper();
     protected Class<T> clazz;
     private final int typeId;
 
     static {
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(Node.class, HazelcastNode.class);
-//        mapper.registerModule(new AfterburnerModule().setUseValueClassLoader(false));
+        mapper.registerModule(new AfterburnerModule().setUseValueClassLoader(false));
         mapper.registerModule(module);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_CONCRETE_AND_ARRAYS);
     }

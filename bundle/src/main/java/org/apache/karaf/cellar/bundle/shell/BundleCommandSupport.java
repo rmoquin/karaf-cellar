@@ -15,11 +15,11 @@ package org.apache.karaf.cellar.bundle.shell;
 
 import org.apache.karaf.cellar.bundle.BundleState;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
+import org.apache.karaf.shell.commands.Argument;
 
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.karaf.shell.commands.Argument;
 
 public abstract class BundleCommandSupport extends CellarCommandSupport {
 
@@ -31,13 +31,12 @@ public abstract class BundleCommandSupport extends CellarCommandSupport {
 
     @Argument(index = 2, name = "version", description = "The bundle version", required = false, multiValued = false)
     String version;
-    
+
     protected abstract Object doExecute() throws Exception;
 
     /**
      * Bundle selector on the cluster.
      *
-     * @param clusterBundles
      * @return the bundle key is the distributed bundle map.
      */
     protected String selector(Map<String, BundleState> clusterBundles) {
@@ -130,4 +129,5 @@ public abstract class BundleCommandSupport extends CellarCommandSupport {
         }
         return key;
     }
+
 }

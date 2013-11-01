@@ -42,6 +42,11 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
             return null;
         }
 
+		//TODO Re-enable this functionaity,
+        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF for this node");
+            return null;
+        }*/
         // check if the feature exists in the map
         if (!featureExists(groupName, feature, version)) {
             if (version != null) {

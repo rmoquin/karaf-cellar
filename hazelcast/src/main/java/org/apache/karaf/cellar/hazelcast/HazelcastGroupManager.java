@@ -37,6 +37,7 @@ import org.slf4j.Logger;
  * Keep in sync the distributed group configuration with the locally persisted.
  */
 public class HazelcastGroupManager implements GroupManager {
+
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastGroupManager.class);
     private NodeConfiguration nodeConfiguration;
     private Map<String, GroupConfiguration> groupMemberships = new ConcurrentHashMap<String, GroupConfiguration>();

@@ -35,14 +35,17 @@ import java.util.Set;
 import org.osgi.service.cm.ConfigurationException;
 
 /**
- * WebConsole plugin for Cellar cluster.
+ * WebConsole plugin for Cellar cluster groups.
  */
 public class CellarPlugin extends AbstractWebConsolePlugin {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarPlugin.class);
+
     public static final String NAME = "cellar";
     public static final String LABEL = "Cellar";
     private ClassLoader classLoader;
     private String cellarJs = "/cellar/res/ui/cellar.js";
+
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private BundleContext bundleContext;
@@ -50,11 +53,11 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     public void start() {
         super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
-        LOGGER.info("{} plugin activated", LABEL);
+        this.LOGGER.info("{} plugin activated", LABEL);
     }
 
     public void stop() {
-        LOGGER.info("{} plugin deactivated", LABEL);
+        this.LOGGER.info("{} plugin deactivated", LABEL);
         super.deactivate();
     }
 
@@ -80,11 +83,7 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         if (action == null) {
             success = true;
         } else if (action.equals("createGroup")) {
-            try {
-                groupManager.createGroup(group);
-            } catch (ConfigurationException ex) {
-                throw new ServletException("Error creating group: " + group, ex);
-            }
+            groupManager.createGroup(group);
             success = true;
         } else if (action.equals("deleteGroup")) {
             groupManager.deregisterNodeFromGroup(group);
@@ -143,18 +142,18 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
             try {
                 ins = url.openStream();
                 if (ins == null) {
-                    LOGGER.error("failed to open {}", url);
+                    this.LOGGER.error("failed to open {}", url);
                     url = null;
                 }
             } catch (IOException e) {
-                LOGGER.error(e.getMessage(), e);
+                this.LOGGER.error(e.getMessage(), e);
                 url = null;
             } finally {
                 if (ins != null) {
                     try {
                         ins.close();
                     } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
+                        this.LOGGER.error(e.getMessage(), e);
                     }
                 }
             }
@@ -191,11 +190,11 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
                 jw.key("members");
                 jw.array();
                 if (nodes != null) {
-                for (Node n : members) {
-                    jw.object();
-                    jw.key("id");
-                    jw.value(n.getId());
-                    jw.endObject();
+                    for (Node n : members) {
+                        jw.object();
+                        jw.key("id");
+                        jw.value(n.getId());
+                        jw.endObject();
                     }
                 }
 
@@ -248,7 +247,9 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
     }
+
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
     }
+
 }

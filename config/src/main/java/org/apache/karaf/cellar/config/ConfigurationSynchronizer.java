@@ -35,10 +35,11 @@ import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * The ConfigurationSynchronizer is called when Cellar starts or when a node joins a cluster group.
- * The purpose is to synchronize local configurations with the configurations in the cluster groups.
+ * The ConfigurationSynchronizer is called when Cellar starts or when a node joins a cluster group. The purpose is to
+ * synchronize local configurations with the configurations in the cluster groups.
  */
 public class ConfigurationSynchronizer extends ConfigurationSupport implements Synchronizer {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationSynchronizer.class);
     private ConfigurationAdmin configurationAdmin;
     private GroupManager groupManager;
@@ -59,9 +60,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                     pull(group);
                     push(group);
                 } else {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
-                    }
+                    LOGGER.warn("CELLAR CONFIG: sync is disabled for cluster group {}", group.getName());
                 }
             }
         }
@@ -120,6 +119,11 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     @Override
     public void push(Group group) {
 
+        //This needs to be re-enabled
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
+//            return;
+//        }
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);

@@ -13,13 +13,13 @@
  */
 package org.apache.karaf.cellar.event;
 
-import java.io.Serializable;
 import org.apache.karaf.cellar.core.Group;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
@@ -42,7 +42,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
             return;
         }
 
-//TODO Fiure out a good way to fix this.
+		//TODO Fiure out a good way to fix this.
         // check if the producer is ON
         //if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
         //    LOGGER.warn("CELLAR EVENT: cluster event producer is OFF");

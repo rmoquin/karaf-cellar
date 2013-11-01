@@ -30,10 +30,11 @@ import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 
 /**
- * LocalBundleListener is listening for local bundles changes.
- * When a local bundle change occurs, this listener updates the cluster and broadcasts a cluster bundle event.
+ * LocalBundleListener is listening for local bundles changes. When a local bundle change occurs, this listener updates
+ * the cluster and broadcasts a cluster bundle event.
  */
 public class LocalBundleListener extends BundleSupport implements SynchronousBundleListener {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalBundleListener.class);
     private GroupManager groupManager;
     private CellarCluster masterCluster;
@@ -57,18 +58,23 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
+		//TODO turn back on at some point.
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
+            return;
+        }
         if (event.getBundle() != null) {
             Set<Group> groups = null;
             try {
                 groups = groupManager.listLocalGroups();
             } catch (Exception ex) {
-                LOGGER.warn("CELLAR BUNDLE: failed to list local groups. Is Cellar uninstalling ?", ex);
+                LOGGER.warn("Failed to list local groups. Is Cellar uninstalling ?", ex);
             }
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
                     // get the bundle name or location.
-                    String name = (String) event.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
+                    String name = event.getBundle().getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
                     // if there is no name, then default to symbolic name.
                     name = (name == null) ? event.getBundle().getSymbolicName() : name;
                     // if there is no symbolic name, resort to location.

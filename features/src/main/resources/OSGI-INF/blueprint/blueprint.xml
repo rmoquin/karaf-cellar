@@ -22,9 +22,9 @@
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="featuresService" ref="featuresService"/>
         <property name="cellarSupport" ref="cellarSupport"/>
         <property name="executionContext" ref="executionContext"/>
+        <property name="featuresService" ref="featuresService"/>
     </bean>
 
     <service ref="localListener" interface="org.apache.karaf.features.FeaturesListener"/>
@@ -34,8 +34,8 @@
         <property name="nodeConfiguration" ref="nodeConfiguration"/>        
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="featuresService" ref="featuresService"/>
         <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="featuresService" ref="featuresService"/>
         <property name="executionContext" ref="executionContext"/>`
     </bean>
 
@@ -72,6 +72,6 @@
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
+    <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 </blueprint>

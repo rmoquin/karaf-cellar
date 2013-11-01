@@ -24,7 +24,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.config.ConfigurationEventTask;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 @Command(scope = "cluster", name = "config-propdel", description = "Delete a property from a configuration in a cluster group")
 public class PropDelCommand extends ConfigCommandSupport {
@@ -38,8 +37,6 @@ public class PropDelCommand extends ConfigCommandSupport {
     @Argument(index = 2, name = "key", description = "The property key to delete", required = true, multiValued = false)
     String key;
 
-    private DistributedExecutionContext executionContext;
-
     @Override
     protected Object doExecute() throws Exception {
         // check if the group exists
@@ -49,6 +46,11 @@ public class PropDelCommand extends ConfigCommandSupport {
             return null;
         }
 
+        //This needs to be re-enabled
+//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+//            System.err.println("Cluster event producer is OFF");
+//            return null;
+//        }
         // check if the configuration PID is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -77,20 +79,6 @@ public class PropDelCommand extends ConfigCommandSupport {
         }
 
         return null;
-    }
-
-    /**
-     * @return the executionContext
-     */
-    public DistributedExecutionContext getExecutionContext() {
-        return executionContext;
-    }
-
-    /**
-     * @param executionContext the executionContext to set
-     */
-    public void setExecutionContext(DistributedExecutionContext executionContext) {
-        this.executionContext = executionContext;
     }
 
 }

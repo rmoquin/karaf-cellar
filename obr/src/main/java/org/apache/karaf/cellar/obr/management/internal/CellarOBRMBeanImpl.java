@@ -17,7 +17,6 @@ import org.apache.felix.bundlerepository.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cellar.core.*;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.ClusterObrUrlEvent;
 import org.apache.karaf.cellar.obr.Constants;
@@ -71,20 +70,20 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         CompositeType compositeType = new CompositeType("OBR Bundle", "Bundles available in the OBR service",
-                new String[]{ "name", "symbolic", "version"},
-                new String[]{ "Name of the bundle", "Symbolic name of the bundle", "Version of the bundle" },
-                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.STRING });
+                new String[]{"name", "symbolic", "version"},
+                new String[]{"Name of the bundle", "Symbolic name of the bundle", "Version of the bundle"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.STRING});
         TabularType tableType = new TabularType("OBR Bundles", "Table of all bundles available in the OBR service", compositeType,
                 new String[]{"name", "version"});
         TabularData table = new TabularDataSupport(tableType);
 
-            Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
-            for (ObrBundleInfo info : clusterBundles) {
-                CompositeData data = new CompositeDataSupport(compositeType,
-                        new String[]{ "name", "symbolic", "version" },
-                        new Object[]{ info.getPresentationName(), info.getSymbolicName(), info.getVersion() });
-                table.put(data);
-            }
+        Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
+        for (ObrBundleInfo info : clusterBundles) {
+            CompositeData data = new CompositeDataSupport(compositeType,
+                    new String[]{"name", "symbolic", "version"},
+                    new Object[]{info.getPresentationName(), info.getSymbolicName(), info.getVersion()});
+            table.put(data);
+        }
         return table;
     }
 
@@ -101,7 +100,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
@@ -127,10 +125,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // broadcast a cluster event
-        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_ADD_EVENT_TYPE);
-        event.setForce(true);
+        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_ADD_EVENT_TYPE);
         event.setSourceGroup(group);
-        executionContext.produce(event);
+//        event.setForce(true);
+        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
     @Override
@@ -146,7 +144,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
@@ -172,9 +169,9 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // broadcast a cluster event
-        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_REMOVE_EVENT_TYPE);
+        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_REMOVE_EVENT_TYPE);
         event.setSourceGroup(group);
-        executionContext.produce(event);
+        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
     @Override
@@ -190,7 +187,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 //        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
 //            throw new IllegalStateException("Cluster event producer is OFF");
 //        }
-
         // check if the bundle ID is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
@@ -203,9 +199,9 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // broadcast a cluster event
         int type = 0;
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
-        event.setForce(true);
+//        event.setForce(true);
         event.setSourceGroup(group);
-        executionContext.produce(event);
+        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
     public ClusterManager getClusterManager() {
@@ -222,14 +218,6 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
 
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    public EventProducer getEventProducer() {
-        return executionContext;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.executionContext = eventProducer;
     }
 
     public RepositoryAdmin getObrService() {

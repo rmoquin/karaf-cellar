@@ -30,6 +30,13 @@ public interface GroupManager {
      */
     public Node getNode();
 
+
+    /**
+     * Delete an existing cluster group.
+     *
+     * @param groupName the cluster group name to delete.
+     */
+    void deleteGroup(String groupName) throws IOException, InvalidSyntaxException;
     /**
      * Look for a cluster group with the given name.
      *
@@ -100,9 +107,9 @@ public interface GroupManager {
      */
     public Set<String> listGroupNames(Node node);
 
-    public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException;
 
     public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties);
+    public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException;
 
     /**
      * Removes the specified cellar group from the local nodes configuration which triggers the appropriate
@@ -117,8 +124,6 @@ public interface GroupManager {
     void createGroup(String groupName) throws IOException, ConfigurationException;
 
     void joinGroup(String groupName) throws ConfigurationException;
-
-    void deleteGroup(String groupName) throws IOException, InvalidSyntaxException;
 
     NodeConfiguration getNodeConfiguration();
 }

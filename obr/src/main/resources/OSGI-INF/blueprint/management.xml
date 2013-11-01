@@ -36,5 +36,4 @@
         </property>
     </bean>
 
-    <reference id="eventProducer" interface="org.apache.karaf.cellar.core.event.EventProducer"/>
 </blueprint>
