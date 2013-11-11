@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 @Component(name = "org.apache.karaf.cellar.core.GroupConfiguration", createPid = false, configurationFactory = true,
         label = "Group Configuration", ds = false, metatype = true, description = "The configuration synchronization policies for a specific group.")
 public class GroupConfigurationImpl implements GroupConfiguration {
+
     private static Logger LOGGER = LoggerFactory.getLogger(GroupConfigurationImpl.class);
     @Property(label = "Group Name", description = "The name of this group.")
     public static final String GROUP_NAME_PROPERTY = "name";
@@ -86,7 +87,11 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     public static final String SYNC_OBR_URLS_PROPERTY = "syncOBRUrls";
     @Property(label = "Sync OBR Bundles", boolValue = true, description = "Enable synchronizing OBR bundle changes to and from other nodes in the same group.")
     public static final String SYNC_OBR_BUNDLES_PROPERTY = "syncOBRBundles";
-    private Hashtable<String, Object> properties = new Hashtable<String, Object>();
+    @Property(label = "Accepted Events (Inbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of event types that this cluster group is allowed to process.")
+    public static final String ACCEPTED_EVENTS_PROPERTY = "acceptedEvents";
+    @Property(label = "Producible Events (Outbound)", unbounded = PropertyUnbounded.VECTOR, description = "The list of event types that this cluster is allowed to produce.")
+    public static final String PRODUCIBLE_EVENTS_PROPERTY = "producibleEvents";
+    private final Hashtable<String, Object> properties = new Hashtable<String, Object>();
     private CellarCluster masterCluster;
     private BundleContext bundleContext;
 
@@ -504,5 +509,23 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    @Override
+    public Set<String> getAcceptedEvents() {
+        return (Set<String>) this.properties.get(ACCEPTED_EVENTS_PROPERTY);
+    }
+
+    public void getAcceptedEvents(Set<String> acceptedEvents) {
+        this.properties.put(ACCEPTED_EVENTS_PROPERTY, acceptedEvents);
+    }
+
+    @Override
+    public Set<String> getProducibleEvents() {
+        return (Set<String>) this.properties.get(PRODUCIBLE_EVENTS_PROPERTY);
+    }
+
+    public void setProducibleEvents(Set<String> producibleEvents) {
+        this.properties.put(PRODUCIBLE_EVENTS_PROPERTY, producibleEvents);
     }
 }

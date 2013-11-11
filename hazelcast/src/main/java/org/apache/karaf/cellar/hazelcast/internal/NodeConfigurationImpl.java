@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 @Component(name = "org.apache.karaf.cellar.core.NodeConfiguration", configurationFactory = false, label = "Node Configuration", ds = false,
         metatype = true, description = "The list of groups that the current node belongs to and control of which configurations will be synced to or from it.")
 public class NodeConfigurationImpl implements NodeConfiguration {
+
     private static Logger LOGGER = LoggerFactory.getLogger(NodeConfigurationImpl.class);
     @Property(label = "Groups", unbounded = PropertyUnbounded.VECTOR, description = "The names of the groups this node belongs to.")
     public static final String GROUPS_PROPERTY = "groups";
@@ -103,6 +104,7 @@ public class NodeConfigurationImpl implements NodeConfiguration {
     /**
      * @param consumer the consumer to set
      */
+    @Override
     public void setConsumer(boolean consumer) {
         this.properties.put(CONSUMER_PROPERTY, consumer);
     }
@@ -120,6 +122,10 @@ public class NodeConfigurationImpl implements NodeConfiguration {
      */
     public void setEnabledEvents(Set<String> enabledEvents) {
         this.properties.put(ENABLE_EVENTS_PROPERTY, enabledEvents);
+    }
+
+    public boolean isProducibleEvent(Object event) {
+        return this.getEnabledEvents().contains(event);
     }
 
     /**

@@ -23,6 +23,7 @@ import org.osgi.service.cm.ConfigurationException;
  * Generic cluster group manager interface.
  */
 public interface GroupManager {
+
     /**
      * Get the local node.
      *
@@ -30,13 +31,13 @@ public interface GroupManager {
      */
     public Node getNode();
 
-
     /**
      * Delete an existing cluster group.
      *
      * @param groupName the cluster group name to delete.
      */
     void deleteGroup(String groupName) throws IOException, InvalidSyntaxException;
+
     /**
      * Look for a cluster group with the given name.
      *
@@ -61,16 +62,16 @@ public interface GroupManager {
     public Map<String, Group> listGroups();
 
     /**
-     * Get the list of local cluster groups.
-     * A "local" cluster group means a cluster group where the local node is belonging.
+     * Get the list of local cluster groups. A "local" cluster group means a cluster group where the local node is
+     * belonging.
      *
      * @return a set of local cluster groups.
      */
     public Set<Group> listLocalGroups();
 
     /**
-     * Check if a given cluster group is a local one.
-     * A "local" clsuter group means a cluster group where the local node is belonging.
+     * Check if a given cluster group is a local one. A "local" clsuter group means a cluster group where the local node
+     * is belonging.
      *
      * @param groupName the cluster group name.
      * @return true if the cluster group is a local one, false else.
@@ -107,8 +108,8 @@ public interface GroupManager {
      */
     public Set<String> listGroupNames(Node node);
 
-
     public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties);
+
     public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException;
 
     /**
@@ -126,4 +127,6 @@ public interface GroupManager {
     void joinGroup(String groupName) throws ConfigurationException;
 
     NodeConfiguration getNodeConfiguration();
+
+    boolean isProducibleEvent(Object event);
 }

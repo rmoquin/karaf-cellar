@@ -33,26 +33,27 @@
     <name>Apache Karaf :: Cellar :: Core</name>
     <packaging>bundle</packaging>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.karaf.cellar.core;version="${project.version}",
-                            org.apache.karaf.cellar.core.*;version="${project.version}"
-                        </Export-Package>
-                        <Import-Package>
+    <properties>
+        <osgi.import>
                             org.apache.karaf.shell.console*;version="[3,4)",
-                            org.slf4j;resolution:=optional,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
+            org.osgi*,
+            org.slf4j;resolution:=optional
+        </osgi.import>
+        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,*</osgi.dynamic.import>
+        <osgi.export>
+            org.apache.karaf.cellar.core*;version="${project.version}"
+        </osgi.export>
+    </properties>
+
+    <build>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources/</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </testResource>
+        </testResources>
     </build>
 
     <dependencies>
@@ -76,6 +77,10 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+        </dependency>
         <!-- Testing Dependencies -->
         <dependency>
             <groupId>junit</groupId>

@@ -58,8 +58,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
-		//TODO turn back on at some point.
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (!groupManager.isProducibleEvent(event)) {
             LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
             return;
         }

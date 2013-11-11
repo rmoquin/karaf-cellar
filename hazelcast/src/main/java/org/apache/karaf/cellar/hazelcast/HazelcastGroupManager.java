@@ -32,9 +32,8 @@ import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 
 /**
- * A group manager implementation powered by Hazelcast.
- * The role of this class is to provide means of creating groups, setting nodes to groups etc.
- * Keep in sync the distributed group configuration with the locally persisted.
+ * A group manager implementation powered by Hazelcast. The role of this class is to provide means of creating groups,
+ * setting nodes to groups etc. Keep in sync the distributed group configuration with the locally persisted.
  */
 public class HazelcastGroupManager implements GroupManager {
 
@@ -184,10 +183,11 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     /**
-     * Removes all the groups from the this nodes configuration which triggers the appropriate deregistration actions to
-     * be done.
+     * Removes all the groups from the this nodes configuration which triggers the appropriate de-registration actions
+     * to be done.
      *
      * @param groupName
+     * @throws java.io.IOException
      */
     @Override
     public void deregisterNodeFromGroup(String groupName) throws IOException {
@@ -195,8 +195,10 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     /**
-     * Removes all the groups from this nodes configuration which triggers the appropriate deregistration actions to be
+     * Removes all the groups from this nodes configuration which triggers the appropriate de-registration actions to be
      * done.
+     *
+     * @throws java.io.IOException
      */
     @Override
     public void deregisterNodeFromAllGroups() throws IOException {
@@ -270,6 +272,11 @@ public class HazelcastGroupManager implements GroupManager {
     @Override
     public Set<Group> listAllGroups() {
         return new HashSet<Group>(getGroupMapStore().values());
+    }
+
+    @Override
+    public boolean isProducibleEvent(Object event) {
+        return this.nodeConfiguration.isProducer() && this.nodeConfiguration.getEnabledEvents().contains(event);
     }
 
     @Override
@@ -364,12 +371,10 @@ public class HazelcastGroupManager implements GroupManager {
     protected void deleteGroupConfiguration(String groupName) throws IOException, InvalidSyntaxException {
         String pid = pidGroupNameMap.get(groupName);
         if (pid == null) {
-            LOGGER.warn("Group can't be deleted because it doesn't exist: + " + groupName);
+            LOGGER.warn("Group {} can't be deleted because it doesn't exist.", groupName);
             return;
         }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Attempting to delete group configuration: " + groupName);
-        }
+        LOGGER.info("Attempting to delete group configuration {}.", groupName);
         Configuration[] configurations = configurationAdmin.listConfigurations("(service.pid = " + pid + ")");
         //Shouldn't ever be more than one but just in case.
         if (configurations != null) {

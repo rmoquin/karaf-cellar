@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 
-@Command(scope = "cluster", name = "bundle-install", description = "Install a bundle in a cluster group")
+@Command(scope = "cluster", name = "bundle-install", description = "Install bundles in a cluster group")
 public class InstallBundleCommand extends CellarCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
@@ -55,10 +55,10 @@ public class InstallBundleCommand extends CellarCommandSupport {
         }
 
         //TODO turn back on at some point.
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            System.err.println("Cluster event producer is OFF");
-//            return null;
-//        }
+        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
@@ -93,11 +93,11 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 clusterBundles.put(symbolicName + "/" + version, state);
 
                 // broadcast the cluster event
-                BundleEventTask event = new BundleEventTask(symbolicName, version, url, BundleEvent.INSTALLED);
+                ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, url, BundleEvent.INSTALLED);
                 event.setSourceGroup(group);
                 getExecutionContext().executeAndWait(event, group.getNodesExcluding(this.groupManager.getNode()));
             } else {
-                System.err.println("Bundle location " + url + " is blocked outbound in cluster group " + groupName);
+                System.err.println("Bundle location " + url + " is blocked outbound for cluster group " + groupName);
             }
         }
 

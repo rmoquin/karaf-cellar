@@ -33,42 +33,32 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Bundle</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.karaf.cellar.bundle;version="${project.version}",
-                            org.apache.karaf.cellar.bundle.shell;version="${project.version}",
-                            org.apache.karaf.cellar.bundle.shell.completers;version="${project.version}"
-                        </Export-Package>
-                        <Import-Package>
-							            org.apache.karaf.cellar.core*;version="${project.version}",
+    <properties>
+        <osgi.import>
+            org.apache.karaf.cellar.core*;version="${project.version}",
             org.apache.felix.service.command,
-            org.apache.karaf.shell.commands;version="[3,4)",
+            org.apache.felix.gogo.commands,
             org.apache.karaf.shell.console;version="[3,4)",
+            org.apache.karaf.shell.console.commands;version="[3,4)",
             org.apache.karaf.shell.console.completer;version="[3,4)",
             org.apache.karaf.shell.commands;version="[3,4)",
-                            org.apache.karaf.features;version="[3,4)",
-                            org.slf4j;resolution:=optional,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+            org.apache.karaf.features;version="[3,4)",
+            org.osgi*,
+            org.slf4j;resolution:=optional
+        </osgi.import>
+        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,*</osgi.dynamic.import>
+        <osgi.export>
+            org.apache.karaf.cellar.bundle*;version="${project.version}"
+        </osgi.export>
+    </properties>
 
     <dependencies>
         <!-- Internal Dependencies -->
-	<dependency>
+        <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>
         </dependency>
-	
+
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
@@ -77,7 +67,7 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>
-        
+
         <!-- Karaf features -->
         <dependency>
             <groupId>org.apache.karaf.features</groupId>

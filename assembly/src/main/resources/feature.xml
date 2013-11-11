@@ -25,7 +25,6 @@
     <feature name="jackson" description="Jackson JSON parser" version="${jackson.version}" resolver="(obr)">
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
-        <!--<bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-smile/${jackson.version}</bundle>-->
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
         <bundle start-level="32" dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-afterburner/${jackson.version}</bundle>
     </feature>
@@ -41,9 +40,9 @@
         <config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
             name=default
         </config>
-        <feature version="${project.version}">cellar-core</feature>
-        <feature version="${jackson.version}">jackson</feature>
+	<feature version="${jackson.version}">jackson</feature>
         <feature version="${hazelcast.version}">hazelcast</feature>
+        <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="33">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
     </feature>    
     <feature name="cellar-config" description="ConfigAdmin cluster support" version="${project.version}" resolver="(obr)">
@@ -71,10 +70,10 @@
     </feature>
 
     <feature name="cellar" description="Karaf clustering" version="${project.version}" resolver="(obr)">
-        <feature version="${project.version}">cellar-bundle</feature>
         <feature version="${project.version}">cellar-hazelcast</feature>
         <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-config</feature>
+        <feature version="${project.version}">cellar-bundle</feature>
         <feature version="${project.version}">cellar-features</feature>
         <feature version="${project.version}">cellar-management</feature>
         <feature version="${project.version}">cellar-dosgi</feature>

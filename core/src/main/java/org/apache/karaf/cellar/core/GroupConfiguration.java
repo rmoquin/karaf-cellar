@@ -21,9 +21,10 @@ import java.util.Set;
  *
  * @author rmoquin
  */
-public interface GroupConfiguration {    
+public interface GroupConfiguration {
+
     String getName();
-    
+
     boolean isSyncConfiguration();
 
     Set<String> getInboundConfigurationWhitelist();
@@ -67,6 +68,10 @@ public interface GroupConfiguration {
     Set<String> getInboundOBRUrlsBlacklist();
 
     Set<String> getOutboundOBRUrlsBlacklist();
+
+    Set<String> getAcceptedEvents();
+
+    Set<String> getProducibleEvents();
 
     /**
      * Registers this node for producing and consuming messages between nodes in the group.
