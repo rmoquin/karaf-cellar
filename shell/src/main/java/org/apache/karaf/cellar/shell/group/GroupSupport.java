@@ -27,7 +27,7 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.core.tasks.ManageGroupResultImpl;
-import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
+import org.apache.karaf.cellar.core.tasks.ManageGroupCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +57,7 @@ public abstract class GroupSupport extends CellarCommandSupport {
      */
     protected Object doExecute(ManageGroupActions action, String group, Group source, Collection<String> nodeNames, Boolean suppressOutput) throws Exception {;
 
-        ManageGroupTask command = new ManageGroupTask();
+        ManageGroupCommand command = new ManageGroupCommand();
         if (source == null) {
             source = super.groupManager.findGroupByName(Configurations.DEFAULT_GROUP_NAME);
             command.setSourceGroup(source);

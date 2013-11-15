@@ -31,10 +31,13 @@ import org.osgi.framework.ServiceReference;
  * @author rmoquin
  */
 public abstract class DistributedTask<T extends DistributedResult> implements Callable<T>, Serializable, BundleContextAware {
+
     protected transient BundleContext bundleContext;
     protected List<ServiceReference<?>> usedReferences;
     protected Node sourceNode;
     protected Group sourceGroup;
+    protected boolean force;
+    protected boolean postPublish;
 
     @Override
     public T call() throws Exception {
@@ -55,7 +58,7 @@ public abstract class DistributedTask<T extends DistributedResult> implements Ca
             return null;
         }
     }
-    
+
     protected <T> T getService(Class<T> clazz) {
         ServiceReference<T> sr = getBundleContext().getServiceReference(clazz);
         if (sr != null) {
@@ -120,5 +123,21 @@ public abstract class DistributedTask<T extends DistributedResult> implements Ca
     @Override
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    public boolean isForce() {
+        return force;
+    }
+
+    public void setForce(boolean force) {
+        this.force = force;
+    }
+
+    public boolean isPostPublish() {
+        return postPublish;
+    }
+
+    public void setPostPublish(boolean postPublish) {
+        this.postPublish = postPublish;
     }
 }

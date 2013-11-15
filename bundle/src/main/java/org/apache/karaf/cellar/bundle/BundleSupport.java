@@ -23,15 +23,12 @@ import org.osgi.framework.BundleException;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Generic Cellar bundle support.
  */
 public class BundleSupport {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
     protected FeaturesService featuresService;
     protected DistributedExecutionContext executionContext;

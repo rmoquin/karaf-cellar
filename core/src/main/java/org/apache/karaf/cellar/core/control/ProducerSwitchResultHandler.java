@@ -13,15 +13,16 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-/**
- * Manage group action enum state.
- */
-public enum ManageGroupActions {
+import org.apache.karaf.cellar.core.command.ResultHandler;
 
-    SET,
-    JOIN,
-    QUIT,
-    PURGE,
-    LIST;
+/**
+ * Producer switch result handler.
+ */
+public class ProducerSwitchResultHandler extends ResultHandler<ProducerSwitchResult> {
+
+    @Override
+    public Class<ProducerSwitchResult> getType() {
+        return ProducerSwitchResult.class;
+    }
 
 }

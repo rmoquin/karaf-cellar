@@ -14,11 +14,12 @@
 package org.apache.karaf.cellar.bundle.shell;
 
 import org.apache.karaf.cellar.bundle.BundleState;
+import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.bundle.Constants;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.bundle.BundleEventTask;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.shell.commands.Argument;

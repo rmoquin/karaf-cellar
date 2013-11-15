@@ -1,11 +1,9 @@
 /*
- * Copyright 2013 The Apache Software Foundation.
- *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,27 +14,29 @@
 package org.apache.karaf.cellar.core.tasks;
 
 import org.apache.karaf.cellar.core.command.DistributedTask;
-import java.util.Set;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.control.ManageGroupActions;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  *
  * @author rmoquin
  */
-public class ManageGroupTask extends DistributedTask<ManageGroupResultImpl> {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageGroupTask.class);
-    private ManageGroupActions action;
+public class ManageGroupCommand extends DistributedTask<ManageGroupResultImpl> {
+
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageGroupCommand.class);
+    private ManageGroupAction action;
     private String destinationGroup;
 
-    public ManageGroupTask() {
+    public ManageGroupCommand() {
     }
 
-    public ManageGroupTask(ManageGroupActions action, String destinationGroup) {
+    public ManageGroupCommand(ManageGroupAction action, String destinationGroup) {
         this.action = action;
         this.destinationGroup = destinationGroup;
     }
@@ -52,17 +52,17 @@ public class ManageGroupTask extends DistributedTask<ManageGroupResultImpl> {
 
             GroupManager groupManager = super.getService(GroupManager.class);
 
-            if (ManageGroupActions.JOIN.equals(action)) {
+            if (ManageGroupAction.JOIN.equals(action)) {
                 groupManager.joinGroup(destinationGroup);
-            } else if (ManageGroupActions.QUIT.equals(action)) {
+            } else if (ManageGroupAction.QUIT.equals(action)) {
                 groupManager.deregisterNodeFromGroup(destinationGroup);
                 if (groupManager.listLocalGroups().isEmpty()) {
                     groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
                 }
-            } else if (ManageGroupActions.PURGE.equals(action)) {
+            } else if (ManageGroupAction.PURGE.equals(action)) {
                 groupManager.deregisterNodeFromAllGroups();
                 groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
-            } else if (ManageGroupActions.SET.equals(action)) {
+            } else if (ManageGroupAction.SET.equals(action)) {
                 Group localGroup = groupManager.listLocalGroups().iterator().next();
                 groupManager.deregisterNodeFromGroup(localGroup.getName());
                 groupManager.joinGroup(destinationGroup);
@@ -85,14 +85,14 @@ public class ManageGroupTask extends DistributedTask<ManageGroupResultImpl> {
     /**
      * @return the action
      */
-    public ManageGroupActions getAction() {
+    public ManageGroupAction getAction() {
         return action;
     }
 
     /**
      * @param action the action to set
      */
-    public void setAction(ManageGroupActions action) {
+    public void setAction(ManageGroupAction action) {
         this.action = action;
     }
 

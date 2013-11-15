@@ -114,7 +114,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             }
 
                             // broadcast the cluster event
-                            BundleEventTask bundleEventTask = new BundleEventTask(symbolicName, version, bundleLocation, type);
+                            ClusterBundleEvent bundleEventTask = new ClusterBundleEvent(symbolicName, version, bundleLocation, type);
                             bundleEventTask.setSourceGroup(group);
                             executionContext.executeAndWait(bundleEventTask, group.getNodesExcluding(groupManager.getNode()));
                         } catch (Exception e) {

@@ -29,7 +29,7 @@ import java.util.jar.JarInputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.karaf.cellar.bundle.BundleEventTask;
+import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
@@ -84,7 +84,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         clusterBundles.put(name + "/" + version, state);
 
         // broadcast the event
-        BundleEventTask event = new BundleEventTask(name, version, location, BundleEvent.INSTALLED);
+        ClusterBundleEvent event = new ClusterBundleEvent(name, version, location, BundleEvent.INSTALLED);
         event.setSourceGroup(group);
         executionContext.executeAndWait(event, group.getNodesExcluding(this.groupManager.getNode()));
     }
@@ -129,7 +129,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // broadcast the event
         String[] split = key.split("/");
-        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.UNINSTALLED);
+        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.UNINSTALLED);
         event.setSourceGroup(group);
         executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
     }
@@ -175,7 +175,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // broadcast the cluster event
         String[] split = key.split("/");
-        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.STARTED);
+        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STARTED);
         event.setSourceGroup(group);
         executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
     }
@@ -221,7 +221,7 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
 
         // broadcast the cluster event
         String[] split = key.split("/");
-        BundleEventTask event = new BundleEventTask(split[0], split[1], location, BundleEvent.STOPPED);
+        ClusterBundleEvent event = new ClusterBundleEvent(split[0], split[1], location, BundleEvent.STOPPED);
         event.setSourceGroup(group);
         executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
     }

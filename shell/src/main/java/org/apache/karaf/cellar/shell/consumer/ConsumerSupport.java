@@ -23,7 +23,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationResult;
-import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationTask;
+import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationCommand;
 
 /**
  * Generic cluster event consumer shell command support.
@@ -36,7 +36,7 @@ public abstract class ConsumerSupport extends CellarCommandSupport {
 
     protected Object doExecute(List<String> nodeNames, SwitchStatus status) throws Exception {
 
-        NodeEventConfigurationTask command = new NodeEventConfigurationTask();
+        NodeEventConfigurationCommand command = new NodeEventConfigurationCommand();
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();

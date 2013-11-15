@@ -16,6 +16,7 @@ package org.apache.karaf.cellar.bundle;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
@@ -43,12 +44,12 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
+        if (groups != null && !groups.isEmpty()) {
         for (Group group : groups) {
             if (isSyncEnabled(group)) {
                 pull(group);
                 push(group);
-            } else {
-                LOGGER.warn("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
+                } else LOGGER.debug("CELLAR BUNDLE: sync is disabled for cluster group {}", group.getName());
             }
         }
     }
@@ -93,8 +94,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                             } catch (BundleException e) {
                                 LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
                             }
-                        } else {
-                            LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
+                            } else LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
                         }
                     }
                 }
@@ -144,20 +144,15 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
                     if (status == Bundle.ACTIVE) {
                         status = BundleEvent.STARTED;
-                    }
-                    if (status == Bundle.INSTALLED) {
+                    } else if (status == Bundle.INSTALLED) {
                         status = BundleEvent.INSTALLED;
-                    }
-                    if (status == Bundle.RESOLVED) {
+                    } else if (status == Bundle.RESOLVED) {
                         status = BundleEvent.RESOLVED;
-                    }
-                    if (status == Bundle.STARTING) {
+                    } else if (status == Bundle.STARTING) {
                         status = BundleEvent.STARTING;
-                    }
-                    if (status == Bundle.UNINSTALLED) {
+                    } else if (status == Bundle.UNINSTALLED) {
                         status = BundleEvent.UNINSTALLED;
-                    }
-                    if (status == Bundle.STOPPING) {
+                    } else if (status == Bundle.STOPPING) {
                         status = BundleEvent.STARTED;
                     }
 
@@ -172,13 +167,12 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                         clusterBundles.put(id, bundleState);
 
                         // broadcast the event
-                        BundleEventTask event = new BundleEventTask(symbolicName, version, bundleLocation, status);
+                        ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, bundleLocation, status);
                         event.setSourceGroup(group);
                         executionContext.executeAndWait(event, group.getNodesExcluding(this.groupManager.getNode()));
                     }
 
-                } else {
-                    LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
+                    } else LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, groupName);
                 }
             }
         }

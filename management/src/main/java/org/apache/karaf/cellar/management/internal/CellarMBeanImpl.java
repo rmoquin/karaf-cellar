@@ -30,7 +30,7 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.control.SwitchType;
-import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationTask;
+import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationCommand;
 
 /**
  * Implementation of the Cellar Core MBean.
@@ -273,7 +273,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void retrieveProducerStatuses(SwitchType switchType, Set<Node> nodes) throws Exception {
-        NodeEventConfigurationTask command = new NodeEventConfigurationTask(null, switchType);
+        NodeEventConfigurationCommand command = new NodeEventConfigurationCommand(null, switchType);
 
         if (nodes == null || nodes.isEmpty()) {
             throw new IllegalArgumentException("At least one node must be specified in or to retrieve producer statuses.");
@@ -283,7 +283,7 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public void changeProducerStatus(SwitchType switchType, SwitchStatus switchStatus, String nodeName) throws Exception {
-        NodeEventConfigurationTask command = new NodeEventConfigurationTask(switchStatus, switchType);
+        NodeEventConfigurationCommand command = new NodeEventConfigurationCommand(switchStatus, switchType);
 
         Node node;
 

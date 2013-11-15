@@ -32,15 +32,15 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class NodeEventConfigurationTask extends DistributedTask<NodeEventConfigurationResult> {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(NodeEventConfigurationTask.class);
+public class NodeEventConfigurationCommand extends DistributedTask<NodeEventConfigurationResult> {
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(NodeEventConfigurationCommand.class);
     private SwitchStatus status = null;
     private SwitchType type = null;
 
-    public NodeEventConfigurationTask() {
+    public NodeEventConfigurationCommand() {
     }
 
-    public NodeEventConfigurationTask(SwitchStatus status, SwitchType type) {
+    public NodeEventConfigurationCommand(SwitchStatus status, SwitchType type) {
         this.status = status;
         this.type = type;
     }

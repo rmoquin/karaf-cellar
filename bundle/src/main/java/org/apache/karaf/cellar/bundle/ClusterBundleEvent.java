@@ -27,11 +27,11 @@ import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.DistributedTask;
 
 /**
- * The BundleEventTask is responsible to process received cluster event for bundles.
+ * The ClusterBundleEvent is responsible to process received cluster event for bundles.
  */
-public class BundleEventTask extends DistributedTask<BundleEventResponse> {
+public class ClusterBundleEvent extends DistributedTask<BundleEventResponse> {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleEventTask.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterBundleEvent.class);
     private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarSupport cellarSupport;
@@ -43,10 +43,10 @@ public class BundleEventTask extends DistributedTask<BundleEventResponse> {
     private String location;
     private int type;
 
-    public BundleEventTask() {
+    public ClusterBundleEvent() {
     }
 
-    public BundleEventTask(String symbolicName, String version, String location, int type) {
+    public ClusterBundleEvent(String symbolicName, String version, String location, int type) {
         this.id = symbolicName + "/" + version;
         this.symbolicName = symbolicName;
         this.version = version;

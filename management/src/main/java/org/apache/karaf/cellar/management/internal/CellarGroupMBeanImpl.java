@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
+import org.apache.karaf.cellar.core.tasks.ManageGroupCommand;
 
 /**
  * Implementation of the Cellar Group MBean;
@@ -59,7 +59,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             for (Node n : g.getNodes()) {
                 nodes.add(n.getName());
             }
-            ManageGroupTask command = new ManageGroupTask();
+            ManageGroupCommand command = new ManageGroupCommand();
             command.setAction(ManageGroupActions.QUIT);
             command.setDestinationGroup(name);
             Set<Node> recipientList = clusterManager.listNodes(nodes);
@@ -82,7 +82,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         Set<Node> nodes = new HashSet<Node>();
         nodes.add(node);
 
-        ManageGroupTask command = new ManageGroupTask();
+        ManageGroupCommand command = new ManageGroupCommand();
         command.setAction(ManageGroupActions.JOIN);
         command.setDestinationGroup(groupName);
 
@@ -103,7 +103,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         Set<Node> nodes = new HashSet<Node>();
         nodes.add(node);
 
-        ManageGroupTask command = new ManageGroupTask();
+        ManageGroupCommand command = new ManageGroupCommand();
         command.setAction(ManageGroupActions.QUIT);
         command.setDestinationGroup(groupName);
         commandExecutionContext.execute(command, nodes);

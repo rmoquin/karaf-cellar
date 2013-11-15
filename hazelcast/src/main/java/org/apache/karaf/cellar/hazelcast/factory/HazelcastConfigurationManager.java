@@ -28,7 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.tasks.ManageGroupTask;
+import org.apache.karaf.cellar.core.tasks.ManageGroupCommand;
 import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 
@@ -71,8 +71,8 @@ public class HazelcastConfigurationManager {
         globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
         cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);*/
         SerializerConfig serializerConfig1 = new SerializerConfig();
-        serializerConfig1.setImplementation(new GenericCellarSerializer<ManageGroupTask>(11, ManageGroupTask.class));
-        serializerConfig1.setTypeClass(ManageGroupTask.class);
+        serializerConfig1.setImplementation(new GenericCellarSerializer<ManageGroupCommand>(11, ManageGroupCommand.class));
+        serializerConfig1.setTypeClass(ManageGroupCommand.class);
         
         SerializerConfig serializerConfig2 = new SerializerConfig();
         serializerConfig2.setImplementation(new GenericCellarSerializer<Group>(12, Group.class));
