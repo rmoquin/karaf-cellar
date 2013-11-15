@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
-import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationResult;
-import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationCommand;
+import org.apache.karaf.cellar.core.control.NodeEventConfigurationResult;
+import org.apache.karaf.cellar.core.control.NodeEventConfigurationCommand;
 
 /**
  * Generic cluster event producer shell command support.

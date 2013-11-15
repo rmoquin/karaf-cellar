@@ -19,12 +19,12 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 
 /**
  * Handler for cluster remote service call event.
  */
-public class RemoteServiceCallTask extends DistributedTask<RemoteServiceResult> {
+public class RemoteServiceCallTask extends Event<RemoteServiceResult> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(RemoteServiceCallTask.class);
     private String endpointId;
     private String method;

@@ -23,13 +23,13 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.features.Feature;
 
 /**
  * Handler for cluster features event.
  */
-public class FeaturesEventTask extends DistributedTask<FeatureEventResponse> {
+public class FeaturesEventTask extends Event<FeatureEventResponse> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventTask.class);
     private static final String separator = "/";
 

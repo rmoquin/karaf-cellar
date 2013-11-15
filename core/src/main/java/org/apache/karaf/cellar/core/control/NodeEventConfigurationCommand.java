@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.core.tasks;
+package org.apache.karaf.cellar.core.control;
 
 import java.io.IOException;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
@@ -32,7 +32,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class NodeEventConfigurationCommand extends DistributedTask<NodeEventConfigurationResult> {
+public class NodeEventConfigurationCommand extends Event<NodeEventConfigurationResult> {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(NodeEventConfigurationCommand.class);
     private SwitchStatus status = null;
     private SwitchType type = null;
@@ -51,18 +52,10 @@ public class NodeEventConfigurationCommand extends DistributedTask<NodeEventConf
         try {
             result.setSwitchStatus(status);
             result.setSwitchType(type);
-//        if (Thread.currentThread().isInterrupted()) {
-//            return 0;
-//        }
             LOGGER.info("Starting execution of the manage group task received from node {}", getSourceNode().getName());
 
             ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-            //Group manager really isn't where I should be storing node stuff, but it happens to be currently.
             GroupManager groupManager = super.getService(GroupManager.class);
-            //This stuff will be needed once more than one node is supported.
-//            ClusterManager clusterManager = super.getService(ClusterManager.class);
-//            CellarCluster cellarCluster = clusterManager.getMasterCluster();
-//            Node node = cellarCluster.getLocalNode();
             NodeConfiguration nodeConfiguration = groupManager.getNodeConfiguration();
             if (SwitchType.CONSUMER.equals(this.type)) {
                 nodeConfiguration.setConsumer(SwitchStatus.ON.equals(this.status));

@@ -18,33 +18,12 @@ import org.apache.karaf.cellar.core.command.Result;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.karaf.cellar.core.command.DistributedResult;
 
 /**
  * Manager group result.
  */
-public class ManageGroupResult extends Result {
+public interface ManageGroupResult extends DistributedResult {
 
-    private Boolean success = Boolean.TRUE;
-    private Set<Group> groups = new HashSet<Group>();
-
-    public ManageGroupResult(String id) {
-        super(id);
-    }
-
-    public Boolean getSuccess() {
-        return success;
-    }
-
-    public void setSuccess(Boolean success) {
-        this.success = success;
-    }
-
-    public Set<Group> getGroups() {
-        return groups;
-    }
-
-    public void setGroups(Set<Group> groups) {
-        this.groups = groups;
-    }
-
+    public Set<Group> getGroups();
 }

@@ -13,12 +13,12 @@
  */
 package org.apache.karaf.cellar.utils.ping;
 
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 
 /**
  * Cluster ping event.
  */
-public class Ping extends DistributedTask<Pong> {
+public class Ping extends Event<Pong> {
 
     public Ping() {
     }

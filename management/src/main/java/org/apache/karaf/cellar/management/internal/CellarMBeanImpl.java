@@ -30,7 +30,7 @@ import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.control.SwitchType;
-import org.apache.karaf.cellar.core.tasks.NodeEventConfigurationCommand;
+import org.apache.karaf.cellar.core.control.NodeEventConfigurationCommand;
 
 /**
  * Implementation of the Cellar Core MBean.

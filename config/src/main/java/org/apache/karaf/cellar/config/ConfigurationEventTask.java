@@ -27,7 +27,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -35,7 +35,7 @@ import org.osgi.service.cm.ConfigurationEvent;
 /**
  * ConfigurationEventTask handles received configuration cluster event.
  */
-public class ConfigurationEventTask extends DistributedTask<ConfigurationTaskResult> {
+public class ConfigurationEventTask extends Event<ConfigurationTaskResult> {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationEventTask.class);
     private String pid;
     private int type;

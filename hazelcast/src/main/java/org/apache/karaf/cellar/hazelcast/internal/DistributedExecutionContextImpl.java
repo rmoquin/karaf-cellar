@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.command.DistributedResult;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class DistributedExecutionContextImpl<T extends DistributedTask, R extends DistributedResult> implements DistributedExecutionContext<T, R> {
+public class DistributedExecutionContextImpl<T extends Event, R extends DistributedResult> implements DistributedExecutionContext<T, R> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedExecutionContextImpl.class);
     private String name;
     private HazelcastCluster cluster;

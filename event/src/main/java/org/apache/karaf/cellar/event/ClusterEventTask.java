@@ -15,12 +15,12 @@ package org.apache.karaf.cellar.event;
 
 import java.io.Serializable;
 import java.util.Map;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 
 /**
  * Cluster event.
  */
-public abstract class ClusterEventTask extends DistributedTask<ClusterEventResult>{
+public abstract class ClusterEventTask extends Event<ClusterEventResult>{
 
     private Map<String, Serializable> properties;
 

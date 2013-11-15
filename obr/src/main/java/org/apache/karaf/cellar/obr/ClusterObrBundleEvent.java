@@ -22,7 +22,7 @@ import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.osgi.framework.Bundle;
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Cluster OBR bundle event.
  */
-public class ClusterObrBundleEvent extends DistributedTask<ClusterObrEventResponse> {
+public class ClusterObrBundleEvent extends Event<ClusterObrEventResponse> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrBundleEventHandler.class);
 

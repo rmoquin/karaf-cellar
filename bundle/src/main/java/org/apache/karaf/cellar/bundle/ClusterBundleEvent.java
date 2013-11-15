@@ -24,12 +24,12 @@ import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 
 /**
  * The ClusterBundleEvent is responsible to process received cluster event for bundles.
  */
-public class ClusterBundleEvent extends DistributedTask<BundleEventResponse> {
+public class ClusterBundleEvent extends Event<BundleEventResponse> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterBundleEvent.class);
     private NodeConfiguration nodeConfiguration;

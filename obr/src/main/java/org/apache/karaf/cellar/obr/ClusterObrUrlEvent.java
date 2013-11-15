@@ -22,7 +22,7 @@ import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Cluster OBR URL event.
  */
-public class ClusterObrUrlEvent extends DistributedTask<ClusterObrEventResponse> {
+public class ClusterObrUrlEvent extends Event<ClusterObrEventResponse> {
 
     private final String url;
     private final UrlEventTypes type;

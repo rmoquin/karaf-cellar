@@ -18,14 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
-import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.features.Repository;
 
 /**
  * Handler for cluster features repository event.
  */
-public class RepositoryEventTask extends DistributedTask<RespositoryEventResponse> {
+public class RepositoryEventTask extends Event<RespositoryEventResponse> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(RepositoryEventTask.class);
     private String id;
