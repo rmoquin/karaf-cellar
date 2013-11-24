@@ -16,21 +16,20 @@ package org.apache.karaf.cellar.core.exception;
 /**
  * Exception raised with a store is not found.
  */
-public class StoreNotFoundException extends Exception {
+public class CommandHandlerNotFoundException extends Exception {
 
-    public StoreNotFoundException() {
-        // nothing to do
+    public CommandHandlerNotFoundException() {
     }
 
-    public StoreNotFoundException(String message) {
+    public CommandHandlerNotFoundException(String message) {
         super(message);
     }
 
-    public StoreNotFoundException(String message, Throwable cause) {
+    public CommandHandlerNotFoundException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public StoreNotFoundException(Throwable cause) {
+    public CommandHandlerNotFoundException(Throwable cause) {
         super(cause);
     }
 

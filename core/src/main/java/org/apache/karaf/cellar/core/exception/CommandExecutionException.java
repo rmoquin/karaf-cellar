@@ -11,29 +11,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.core;
-
-import org.apache.karaf.cellar.core.control.Switch;
-
-import java.io.Serializable;
+package org.apache.karaf.cellar.core.exception;
 
 /**
- * Generic handler.
+ * Exception raised when no cluster event producer has been found.
  */
-public interface Handler<T extends Serializable> {
+public class CommandExecutionException extends Exception {
 
-    /**
-     * Get the type of the event handled by this handler.
-     *
-     * @return the type of the event that the handler can handle.
-     */
-    public Class<T> getType();
+    public CommandExecutionException() {
+        // nothing to do
+    }
 
-    /**
-     * Get the handler switch.
-     *
-     * @return the handler switch.
-     */
-    public Switch getSwitch();
+    public CommandExecutionException(String message) {
+        super(message);
+    }
+
+    public CommandExecutionException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public CommandExecutionException(Throwable cause) {
+        super(cause);
+    }
 
 }

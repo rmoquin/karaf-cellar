@@ -18,7 +18,7 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageGroupActions;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.cellar.management.CellarGroupMBean;
 
 import javax.management.NotCompliantMBeanException;
@@ -28,12 +28,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.apache.karaf.cellar.core.tasks.ManageGroupCommand;
+import org.apache.karaf.cellar.core.control.ManageGroupCommand;
 
 /**
  * Implementation of the Cellar Group MBean;
  */
 public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMBean {
+
     private ClusterManager clusterManager;
     private DistributedExecutionContext commandExecutionContext;
     private GroupManager groupManager;
@@ -60,7 +61,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
                 nodes.add(n.getName());
             }
             ManageGroupCommand command = new ManageGroupCommand();
-            command.setAction(ManageGroupActions.QUIT);
+            command.setAction(ManageGroupAction.);
             command.setDestinationGroup(name);
             Set<Node> recipientList = clusterManager.listNodes(nodes);
             commandExecutionContext.execute(command, recipientList);
@@ -70,27 +71,15 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
 
     @Override
     public void join(String groupName, String nodeName) throws Exception {
-        Group group = groupManager.findGroupByName(groupName);
-        if (group == null) {
-            throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
-        }
-
-        Node node = clusterManager.findNodeByName(nodeName);
-        if (node == null) {
-            throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
-        }
-        Set<Node> nodes = new HashSet<Node>();
-        nodes.add(node);
-
-        ManageGroupCommand command = new ManageGroupCommand();
-        command.setAction(ManageGroupActions.JOIN);
-        command.setDestinationGroup(groupName);
-
-        commandExecutionContext.execute(command, nodes);
+        this.executeCommand(groupName, nodeName, ManageGroupAction.JOIN);
     }
 
     @Override
     public void quit(String groupName, String nodeName) throws Exception {
+        this.executeCommand(groupName, nodeName, ManageGroupAction.QUIT);
+    }
+
+    private void executeCommand(String groupName, String nodeName, ManageGroupAction action) throws Exception {
         Group group = groupManager.findGroupByName(groupName);
         if (group == null) {
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
@@ -100,13 +89,11 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         if (node == null) {
             throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
         }
-        Set<Node> nodes = new HashSet<Node>();
-        nodes.add(node);
 
         ManageGroupCommand command = new ManageGroupCommand();
-        command.setAction(ManageGroupActions.QUIT);
+        command.setAction(action);
         command.setDestinationGroup(groupName);
-        commandExecutionContext.execute(command, nodes);
+        commandExecutionContext.execute(command, node);
     }
 
     @Override
@@ -114,12 +101,12 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         Set<Group> allGroups = groupManager.listAllGroups();
 
         CompositeType groupType = new CompositeType("Group", "Karaf Cellar cluster group",
-                new String[] { "name", "members" },
-                new String[] { "Name of the cluster group", "Members of the cluster group" },
-                new OpenType[] { SimpleType.STRING, SimpleType.STRING });
+                new String[]{"name", "members"},
+                new String[]{"Name of the cluster group", "Members of the cluster group"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
 
         TabularType tableType = new TabularType("Groups", "Table of all Karaf Cellar groups", groupType,
-                new String[] { "name" });
+                new String[]{"name"});
 
         TabularData table = new TabularDataSupport(tableType);
 
@@ -133,8 +120,8 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
                 }
             }
             CompositeData data = new CompositeDataSupport(groupType,
-                    new String[] { "name", "members" },
-                    new Object[] { group.getName(), members.toString() });
+                    new String[]{"name", "members"},
+                    new Object[]{group.getName(), members.toString()});
             table.put(data);
         }
 

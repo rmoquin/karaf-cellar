@@ -28,15 +28,15 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.tasks.ManageGroupCommand;
+import org.apache.karaf.cellar.core.control.ManageGroupCommand;
 import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 
 /**
- * Hazelcast configuration manager.
- * It loads hazelcast.xml configuration file.
+ * Hazelcast configuration manager. It loads hazelcast.xml configuration file.
  */
 public class HazelcastConfigurationManager {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(HazelcastConfigurationManager.class);
     private Set<String> discoveredMemberSet = new LinkedHashSet<String>();
     private String xmlConfig;
@@ -66,14 +66,14 @@ public class HazelcastConfigurationManager {
         if (hzClassLoader != null) {
             cfg.setClassLoader(hzClassLoader);
         }
-   /*     GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
-        globalConfig.setClassName("java.lang.Object");
-        globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
-        cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);*/
+        /*     GlobalSerializerConfig globalConfig = new GlobalSerializerConfig();
+         globalConfig.setClassName("java.lang.Object");
+         globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
+         cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);*/
         SerializerConfig serializerConfig1 = new SerializerConfig();
         serializerConfig1.setImplementation(new GenericCellarSerializer<ManageGroupCommand>(11, ManageGroupCommand.class));
         serializerConfig1.setTypeClass(ManageGroupCommand.class);
-        
+
         SerializerConfig serializerConfig2 = new SerializerConfig();
         serializerConfig2.setImplementation(new GenericCellarSerializer<Group>(12, Group.class));
         serializerConfig2.setTypeClass(Group.class);

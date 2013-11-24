@@ -20,5 +20,5 @@ package org.apache.karaf.cellar.core.control;
  * @author rmoquin
  */
 public enum SwitchType {
-    PRODUCER, CONSUMER;
+    OUTBOUND, INBOUND;
 }

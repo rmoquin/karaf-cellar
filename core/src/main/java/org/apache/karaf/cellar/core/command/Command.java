@@ -11,27 +11,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.core.exception;
+package org.apache.karaf.cellar.core.command;
+
+import org.apache.karaf.cellar.core.event.Event;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Exception raised when no cluster event producer has been found.
+ * Command.
  */
-public class ProducerNotFoundException extends Exception {
+public class Command<R extends DistributedResult> extends Event {
 
-    public ProducerNotFoundException() {
-        // nothing to do
+    protected static final transient Logger LOGGER = LoggerFactory.getLogger(Command.class);
+
+    protected long timeout = 10000;
+
+    public Command() {
     }
 
-    public ProducerNotFoundException(String message) {
-        super(message);
+    public Command(String id) {
+        super(id);
     }
 
-    public ProducerNotFoundException(String message, Throwable cause) {
-        super(message, cause);
+    public long getTimeout() {
+        return timeout;
     }
 
-    public ProducerNotFoundException(Throwable cause) {
-        super(cause);
+    public void setTimeout(long timeout) {
+        this.timeout = timeout;
     }
-
 }

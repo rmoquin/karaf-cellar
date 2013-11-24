@@ -14,19 +14,19 @@
 package org.apache.karaf.cellar.core.event;
 
 import org.apache.karaf.cellar.core.Handler;
+import org.apache.karaf.cellar.core.command.DistributedResult;
 
 /**
  * Event handler interface.
  */
-public interface EventHandler<E extends Event> extends Handler<E> {
+public interface EventHandler<E extends Event, R extends DistributedResult> extends Handler<E> {
 
     public static String MANAGED_FILTER = "(managed=true)";
 
     /**
-     * Handle a cluster {@code Event}.
+     * Execute an {@code Event} and return a {@code Result}.
      *
      * @param event the cluster event to handle.
      */
-    public void handle(E event);
-
+    public R execute(E event);
 }

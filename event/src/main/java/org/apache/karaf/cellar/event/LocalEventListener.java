@@ -76,7 +76,7 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                         //TODO Figure out how to handle this.
                         //if (cellarSupport.isAllowed(topicName, whitelist, blacklist)) {
                         // broadcast the event
-                            ClusterEventTask clusterEvent = new ClusterEventTask(properties);
+                            ClusterEvent clusterEvent = new ClusterEvent(properties);
                             clusterEvent.setSourceGroup(group);
                             executionContext.executeAsync(clusterEvent, group.getNodesExcluding(groupManager.getNode()), null);
                         //} else {

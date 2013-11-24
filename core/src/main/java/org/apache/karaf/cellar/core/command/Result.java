@@ -21,10 +21,15 @@ package org.apache.karaf.cellar.core.command;
  */
 public class Result implements DistributedResult {
 
+    private String id;
     protected boolean successful = true;
     protected Throwable throwable;
 
     public Result() {
+    }
+
+    public Result(String id) {
+        this.id = id;
     }
 
     @Override
@@ -49,5 +54,19 @@ public class Result implements DistributedResult {
      */
     public void setSuccessful(boolean successful) {
         this.successful = successful;
+    }
+
+    /**
+     * @return the id
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * @param id the id to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 }

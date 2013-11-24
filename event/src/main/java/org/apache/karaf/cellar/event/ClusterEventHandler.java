@@ -13,57 +13,59 @@
  */
 package org.apache.karaf.cellar.event;
 
+import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
+import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.apache.karaf.cellar.core.exception.CommandExecutionException;
 
 /**
  * Handler for cluster event.
  */
-public class ClusterEventHandler extends EventSupport implements EventHandler<ClusterEventTask> {
+public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEventResult> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ClusterEventHandler.class);
-    private NodeConfiguration nodeConfiguration;
-    private GroupManager groupManager;
-    private CellarSupport cellarSupport;
+    private final EventSupport eventSupport = new EventSupport();
+    public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
+    private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
-    public void handle(ClusterEventTask event) {
-
-        //TODO Figure out what to do about this
-        // check if the handler is ON
-//        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
-//            return;
-//        }
+    public ClusterEventResult execute(ClusterEvent event) {
+        ClusterEventResult clusterEventResult = new ClusterEventResult();
+        clusterEventResult.setId(event.getId());
+        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
+            clusterEventResult.setSuccessful(false);
+            clusterEventResult.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID)));
+            return clusterEventResult;
+        }
 
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
             Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
-            //TODO Fix this somehow.
-			//if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
+            if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
                 Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
-                postEvent(event.getTopicName(), properties);
-            //} else {
-            //    LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
-            //}
+                clusterEventResult.setProperties(properties);
+                clusterEventResult.setTopicName(event.getTopicName());
+            } else {
+                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+            }
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }
+        return clusterEventResult;
     }
 
     public void init() {
@@ -101,49 +103,7 @@ public class ClusterEventHandler extends EventSupport implements EventHandler<Cl
      * @return the cluster event type.
      */
     @Override
-    public Class<ClusterEventTask> getType() {
-        return ClusterEventTask.class;
-    }
-
-    /**
-     * @return the groupManager
-     */
-    public GroupManager getGroupManager() {
-        return groupManager;
-    }
-
-    /**
-     * @param groupManager the groupManager to set
-     */
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
-    }
-
-    /**
-     * @return the nodeConfiguration
-     */
-    public NodeConfiguration getNodeConfiguration() {
-        return nodeConfiguration;
-    }
-
-    /**
-     * @param nodeConfiguration the nodeConfiguration to set
-     */
-    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
-        this.nodeConfiguration = nodeConfiguration;
+    public Class<ClusterEvent> getType() {
+        return ClusterEvent.class;
     }
 }

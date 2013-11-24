@@ -13,48 +13,61 @@
  */
 package org.apache.karaf.cellar.core.control;
 
+import java.io.IOException;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.command.CommandHandler;
 
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.osgi.service.cm.ConfigurationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manager group command handler.
  */
 public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand, ManageGroupResult> {
 
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageGroupCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.managegroup.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
     public ManageGroupResult execute(ManageGroupCommand command) {
-
-        ManageGroupResult result = new ManageGroupResult(command.getId());
+        ManageGroupResult result = new ManageGroupResult();
         ManageGroupAction action = command.getAction();
+        String destinationGroup = command.getDestinationGroup();
 
-        String targetGroupName = command.getGroupName();
-
-        if (ManageGroupAction.JOIN.equals(action)) {
-            joinGroup(targetGroupName);
-        } else if (ManageGroupAction.QUIT.equals(action)) {
-            quitGroup(targetGroupName);
-            if (groupManager.listLocalGroups().isEmpty()) {
-                joinGroup(Configurations.DEFAULT_GROUP_NAME);
+        try {
+            if (ManageGroupAction.JOIN.equals(action)) {
+                groupManager.joinGroup(destinationGroup);
+            } else if (ManageGroupAction.QUIT.equals(action)) {
+                groupManager.deregisterNodeFromGroup(destinationGroup);
+                if (groupManager.listLocalGroups().isEmpty()) {
+                    groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
+                }
+            } else if (ManageGroupAction.PURGE.equals(action)) {
+                groupManager.deregisterNodeFromAllGroups();
+                groupManager.joinGroup(Configurations.DEFAULT_GROUP_NAME);
+            } else if (ManageGroupAction.SET.equals(action)) {
+                Group localGroup = groupManager.listLocalGroups().iterator().next();
+                groupManager.deregisterNodeFromGroup(localGroup.getName());
+                groupManager.joinGroup(destinationGroup);
             }
-        } else if (ManageGroupAction.PURGE.equals(action)) {
-            purgeGroups();
-            joinGroup(Configurations.DEFAULT_GROUP_NAME);
-        } else if (ManageGroupAction.SET.equals(action)) {
-            Group localGroup = groupManager.listLocalGroups().iterator().next();
-            quitGroup(localGroup.getName());
-            joinGroup(targetGroupName);
+            Set<Group> groups = groupManager.listAllGroups();
+            for (Group g : groups) {
+                if (g.getName() != null && !g.getName().isEmpty()) {
+                    result.getGroups().add(g);
+                }
+            }
+            result.setSuccessful(true);
+        } catch (Exception ex) {
+            LOGGER.error("Task wasn't processed for some reason.", ex);
+            result.setThrowable(ex);
+            result.setSuccessful(false);
         }
-
-        addGroupListToResult(result);
-
         return result;
     }
 
@@ -77,18 +90,20 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * Add {@link Node} to the target {@link Group}.
      *
      * @param targetGroupName the target group name where to add the node.
+     * @throws java.io.IOException
+     * @throws org.osgi.service.cm.ConfigurationException
      */
-    public void joinGroup(String targetGroupName) {
-        Node node = clusterManager.getNode();
+    public void joinGroup(String targetGroupName) throws IOException, ConfigurationException {
+        Node node = super.clusterManager.getMasterCluster().getLocalNode();
         Map<String, Group> groups = groupManager.listGroups();
         if (groups != null && !groups.isEmpty()) {
             Group targetGroup = groups.get(targetGroupName);
             if (targetGroup == null) {
-                groupManager.registerGroup(targetGroupName);
-            } else if (!targetGroup.getNodes().contains(node)) {
-                targetGroup.getNodes().add(node);
-                groupManager.listGroups().put(targetGroupName, targetGroup);
-                groupManager.registerGroup(targetGroup);
+                groupManager.createGroup(targetGroupName);
+                targetGroup = groupManager.findGroupByName(targetGroupName);
+            }
+            if (!targetGroup.getNodes().contains(node)) {
+                targetGroup.addNode(node);
             }
         }
     }
@@ -99,13 +114,12 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * @param targetGroupName the target group name where to remove the node.
      */
     public void quitGroup(String targetGroupName) {
-        Node node = clusterManager.getNode();
+        Node node = super.clusterManager.getMasterCluster().getLocalNode();
         Map<String, Group> groups = groupManager.listGroups();
         if (groups != null && !groups.isEmpty()) {
             Group targetGroup = groups.get(targetGroupName);
             if (targetGroup.getNodes().contains(node)) {
-                targetGroup.getNodes().remove(node);
-                groupManager.unRegisterGroup(targetGroup);
+                targetGroup.removeNode(node);
             }
         }
     }
@@ -114,7 +128,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
      * Remove {@link Node} from all {@link Group}s.
      */
     public void purgeGroups() {
-        Node node = clusterManager.getNode();
+        Node node = super.clusterManager.getMasterCluster().getLocalNode();
         Set<String> groupNames = groupManager.listGroupNames(node);
         if (groupNames != null && !groupNames.isEmpty()) {
             for (String targetGroupName : groupNames) {

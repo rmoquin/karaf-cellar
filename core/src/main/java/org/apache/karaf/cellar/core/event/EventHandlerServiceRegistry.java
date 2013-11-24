@@ -15,11 +15,12 @@ package org.apache.karaf.cellar.core.event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.apache.karaf.cellar.core.command.DistributedResult;
 
 /**
  * Event handler service registry.
  */
-public class EventHandlerServiceRegistry<E extends Event> implements EventHandlerRegistry<E> {
+public class EventHandlerServiceRegistry<E extends Event, R extends DistributedResult> implements EventHandlerRegistry<E, R> {
 
     private final Map<Class, EventHandler> eventHandlerMap = new ConcurrentHashMap<Class, EventHandler>();
 
@@ -30,7 +31,7 @@ public class EventHandlerServiceRegistry<E extends Event> implements EventHandle
      * @return the corresponding cluster event handler to use.
      */
     @Override
-    public EventHandler<E> getHandler(E event) {
+    public EventHandler<E, R> getHandler(E event) {
         if (event != null) {
             Class clazz = event.getClass();
             return eventHandlerMap.get(clazz);

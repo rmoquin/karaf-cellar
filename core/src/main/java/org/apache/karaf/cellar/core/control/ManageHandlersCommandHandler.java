@@ -48,7 +48,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
         ManageHandlersResult result = new ManageHandlersResult(command.getId());
 
         BundleContext bundleContext = ((BundleReference) getClass().getClassLoader()).getBundle().getBundleContext();
-        ServiceReference[] references = new ServiceReference[0];
+        ServiceReference[] references = null;
         try {
             references = bundleContext.getServiceReferences(EventHandler.class.getName(), EventHandler.MANAGED_FILTER);
             if (references != null && references.length > 0) {
@@ -59,16 +59,14 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
                         result.getHandlers().put(handler.getClass().getName(), handler.getSwitch().getStatus().name());
                     } else {
                         if (command.getHandlerName().equals(handler.getClass().getName())) {
-                            if (command.getStatus() != null) {
-                                if (command.getStatus()) {
-                                    // persist the handler switch status to configuration admin
-                                    persist(handler.getClass().getName(), SwitchStatus.ON);
-                                    handler.getSwitch().turnOn();
-                                } else {
-                                    // persist the handler switch status to configuration admin
-                                    persist(handler.getClass().getName(), SwitchStatus.OFF);
-                                    handler.getSwitch().turnOff();
-                                }
+                            if (command.getStatus()) {
+                                // persist the handler switch status to configuration admin
+                                persist(handler.getClass().getName(), SwitchStatus.ON);
+                                handler.getSwitch().turnOn();
+                            } else {
+                                // persist the handler switch status to configuration admin
+                                persist(handler.getClass().getName(), SwitchStatus.OFF);
+                                handler.getSwitch().turnOff();
                             }
                             result.getHandlers().put(handler.getClass().getName(), handler.getSwitch().getStatus().name());
                             break;
@@ -77,7 +75,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
                 }
             }
         } catch (InvalidSyntaxException e) {
-            LOGGER.error("Syntax error looking up service {} using filter {}", EventHandler.class.getName(), EventHandler.MANAGED_FILTER);
+            LOGGER.error("Syntax error looking up service {} using filter {}", this.getClass().getName(), EventHandler.MANAGED_FILTER, e);
         } finally {
             if (references != null) {
                 for (ServiceReference ref : references) {
@@ -96,7 +94,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
+            Configuration configuration = super.configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
             if (configuration != null) {
                 Dictionary<String, Object> properties = configuration.getProperties();
                 if (properties != null) {

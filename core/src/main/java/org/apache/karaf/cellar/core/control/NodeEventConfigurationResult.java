@@ -15,24 +15,49 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import org.apache.karaf.cellar.core.command.DistributedResult;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.control.SwitchType;
+import org.apache.karaf.cellar.core.command.Result;
 
 /**
  *
  * @author rmoquin
  */
-public interface NodeEventConfigurationResult extends DistributedResult {
+public class NodeEventConfigurationResult extends Result {
 
-    /**
-     * @return the switchStatus
-     */
-    SwitchStatus getSwitchStatus();
+    private SwitchType switchType;
+    private SwitchStatus switchStatus;
+
+    public NodeEventConfigurationResult() {
+    }
+
+    public NodeEventConfigurationResult(String id) {
+        super(id);
+    }
 
     /**
      * @return the switchType
      */
-    SwitchType getSwitchType();
+    public SwitchType getSwitchType() {
+        return switchType;
+    }
 
+    /**
+     * @param switchType the switchType to set
+     */
+    public void setSwitchType(SwitchType switchType) {
+        this.switchType = switchType;
+    }
+
+    /**
+     * @return the switchStatus
+     */
+    public SwitchStatus getSwitchStatus() {
+        return switchStatus;
+    }
+
+    /**
+     * @param switchStatus the switchStatus to set
+     */
+    public void setSwitchStatus(SwitchStatus switchStatus) {
+        this.switchStatus = switchStatus;
+    }
 }

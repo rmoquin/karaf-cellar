@@ -13,10 +13,9 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import org.apache.karaf.cellar.core.command.Result;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.karaf.cellar.core.command.Result;
 
 /**
  * Manage handlers result.
@@ -24,6 +23,9 @@ import java.util.Map;
 public class ManageHandlersResult extends Result {
 
     public Map<String, String> handlers = new HashMap<String, String>();
+
+    public ManageHandlersResult() {
+    }
 
     public ManageHandlersResult(String id) {
         super(id);
@@ -36,5 +38,4 @@ public class ManageHandlersResult extends Result {
     public void setHandlers(Map<String, String> handlers) {
         this.handlers = handlers;
     }
-
 }

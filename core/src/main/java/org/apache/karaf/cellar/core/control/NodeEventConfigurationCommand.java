@@ -15,64 +15,29 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import java.io.IOException;
-import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.control.SwitchType;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.karaf.cellar.core.command.Command;
 
 /**
  *
  * @author rmoquin
  */
-public class NodeEventConfigurationCommand extends Event<NodeEventConfigurationResult> {
+public class NodeEventConfigurationCommand extends Command<NodeEventConfigurationResult> {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(NodeEventConfigurationCommand.class);
     private SwitchStatus status = null;
     private SwitchType type = null;
 
     public NodeEventConfigurationCommand() {
     }
 
+    public NodeEventConfigurationCommand(String id) {
+        super(id);
+    }
+
     public NodeEventConfigurationCommand(SwitchStatus status, SwitchType type) {
         this.status = status;
         this.type = type;
-    }
-
-    @Override
-    public NodeEventConfigurationResult execute() throws Exception {
-        NodeEventConfigurationResultImpl result = new NodeEventConfigurationResultImpl();
-        try {
-            result.setSwitchStatus(status);
-            result.setSwitchType(type);
-            LOGGER.info("Starting execution of the manage group task received from node {}", getSourceNode().getName());
-
-            ConfigurationAdmin configAdmin = super.getService(ConfigurationAdmin.class);
-            GroupManager groupManager = super.getService(GroupManager.class);
-            NodeConfiguration nodeConfiguration = groupManager.getNodeConfiguration();
-            if (SwitchType.CONSUMER.equals(this.type)) {
-                nodeConfiguration.setConsumer(SwitchStatus.ON.equals(this.status));
-            } else {
-                nodeConfiguration.setProducer(SwitchStatus.ON.equals(this.status));
-            }
-            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName());
-            configuration.update(nodeConfiguration.getProperties());
-            result.setSwitchStatus(this.status);
-            result.setSwitchType(this.type);
-            result.setSuccessful(true);
-        } catch (IOException ex) {
-            LOGGER.error("Task wasn't processed for some reason.", ex);
-            result.setThrowable(ex);
-            result.setSuccessful(false);
-        }
-        return result;
     }
 
     @Override

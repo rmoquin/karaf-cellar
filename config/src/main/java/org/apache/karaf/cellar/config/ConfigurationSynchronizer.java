@@ -16,6 +16,7 @@ package org.apache.karaf.cellar.config;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Synchronizer;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.slf4j.Logger;
@@ -119,11 +120,10 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     @Override
     public void push(Group group) {
 
-        //This needs to be re-enabled
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
-//            return;
-//        }
+        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
+            return;
+        }
         if (group != null) {
             String groupName = group.getName();
             LOGGER.debug("CELLAR CONFIG: pushing configurations to cluster group {}", groupName);
@@ -145,8 +145,9 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         // update the configurations in the cluster group
                         clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
                         // broadcast the cluster event
-                        ConfigurationEventTask event = new ConfigurationEventTask(pid);
+                        ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                         event.setSourceGroup(group);
+                        event.setSourceNode(groupManager.getNode());
                         executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
                     } else {
                         LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);

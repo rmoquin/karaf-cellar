@@ -39,7 +39,7 @@ public class HazelcastGroupManager implements GroupManager {
 
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastGroupManager.class);
     private NodeConfiguration nodeConfiguration;
-    private Map<String, GroupConfiguration> groupMemberships = new ConcurrentHashMap<String, GroupConfiguration>();
+    private final Map<String, GroupConfiguration> groupMemberships = new ConcurrentHashMap<String, GroupConfiguration>();
     private final Map<String, String> pidGroupNameMap = new HashMap<String, String>();
     private HazelcastCluster masterCluster;
     private ConfigurationAdmin configurationAdmin;

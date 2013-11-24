@@ -15,6 +15,7 @@ package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
@@ -30,17 +31,18 @@ import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
- * LocalConfigurationListener is listening for local configuration changes.
- * When a local configuration change occurs, this listener updates the cluster and broadcasts a cluster config event.
+ * LocalConfigurationListener is listening for local configuration changes. When a local configuration change occurs,
+ * this listener updates the cluster and broadcasts a cluster config event.
  */
 public class LocalConfigurationListener extends ConfigurationSupport implements ConfigurationListener {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalConfigurationListener.class);
     private ConfigurationAdmin configurationAdmin;
     private GroupManager groupManager;
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
     private DistributedExecutionContext executionContext;
-    
+
     /**
      * Callback method called when a local configuration changes.
      *
@@ -48,6 +50,10 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
      */
     @Override
     public void configurationEvent(ConfigurationEvent event) {
+        if (getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
+            return;
+        }
         String pid = event.getPid();
 
         Dictionary localDictionary = null;
@@ -72,25 +78,30 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
                     try {
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
-                            // update the configurations in the cluster group
-                            clusterConfigurations.remove(pid);
-                            // broadcast the cluster event
-                            ConfigurationEventTask configurationEventTask = new ConfigurationEventTask();
-                            configurationEventTask.setType(ConfigurationEvent.CM_DELETED);
-                            configurationEventTask.setSourceGroup(group);
-                            configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                            executionContext.executeAsync(configurationEventTask, group.getNodesExcluding(groupManager.getNode()), null);
+                            if (clusterConfigurations.containsKey(pid)) {
+                                // update the configurations in the cluster group
+                                clusterConfigurations.remove(pid);
+                                // broadcast the cluster event
+                                ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
+                                clusterConfigurationEvent.setType(event.getType());
+                                clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+                                clusterConfigurationEvent.setSourceGroup(group);
+                                executionContext.executeAsync(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()), null);
+                            }
                         } else {
+                            Configuration conf = configurationAdmin.getConfiguration(pid, null);
+                            localDictionary = conf.getProperties();
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
                             if (!equals(localDictionary, distributedDictionary)) {
                                 // update the configurations in the cluster group
                                 clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
-                                ConfigurationEventTask configurationEventTask = new ConfigurationEventTask();
-                                configurationEventTask.setType(ConfigurationEvent.CM_UPDATED);
-                                configurationEventTask.setSourceGroup(group);
-                                configurationEventTask.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                                executionContext.executeAsync(configurationEventTask, group.getNodesExcluding(groupManager.getNode()), null);
+                                // broadcast the cluster event
+                                ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
+                                clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
+                                clusterConfigurationEvent.setSourceGroup(group);
+                                clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
+                                executionContext.executeAsync(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()), null);
                             }
                         }
                     } catch (Exception e) {

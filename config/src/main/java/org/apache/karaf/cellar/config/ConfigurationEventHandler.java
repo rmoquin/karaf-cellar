@@ -13,12 +13,20 @@
  */
 package org.apache.karaf.cellar.config;
 
-import java.util.Dictionary;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
+import org.apache.karaf.cellar.core.control.BasicSwitch;
+import org.apache.karaf.cellar.core.control.Switch;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.event.EventHandler;
+import org.apache.karaf.cellar.core.event.EventType;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -27,48 +35,50 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.event.Event;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 
 /**
- * ConfigurationEventTask handles received configuration cluster event.
+ * ConfigurationEventHandler handles received configuration cluster event.
  */
-public class ConfigurationEventTask extends Event<ConfigurationTaskResult> {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationEventTask.class);
-    private String pid;
-    private int type;
-    private ConfigurationAdmin configurationAdmin;
-    private CellarSupport cellarSupport;
-    private ClusterManager clusterManager;
-    private GroupManager groupManager;
-    private NodeConfiguration nodeConfiguration;
+public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurationEvent, ConfigurationTaskResult> {
+
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationEventHandler.class);
+
+    public static final String SWITCH_ID = "org.apache.karaf.cellar.configuration.handler";
+
+    private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private final ConfigurationSupport configSupport = new ConfigurationSupport();
 
-    public ConfigurationEventTask() {
-    }
-
-    public ConfigurationEventTask(String pid) {
-    }
-
     @Override
-    public ConfigurationTaskResult execute() {
+    public ConfigurationTaskResult execute(ClusterConfigurationEvent command) {
 
-        Group group = this.sourceGroup;
+        ConfigurationTaskResult result = new ConfigurationTaskResult(command.getId());
+
+        // check if the handler is ON
+        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR CONFIG: {} switch is OFF, cluster event not handled", SWITCH_ID);
+            return result;
+        }
+
+        Group group = command.getSourceGroup();
         String groupName = group.getName();
-        ConfigurationTaskResultImpl result = new ConfigurationTaskResultImpl();
+
+        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+
+        String pid = command.getId();
+
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
-            if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
-
-                Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+            if (cellarSupport.isAllowed(command.getSourceGroup(), Constants.CATEGORY, pid, EventType.INBOUND)) {
 
                 Properties clusterDictionary = clusterConfigurations.get(pid);
-                Configuration conf;
-                conf = configurationAdmin.getConfiguration(pid, null);
+                Configuration conf = configurationAdmin.getConfiguration(pid, null);
                 if (type == ConfigurationEvent.CM_DELETED) {
                     if (conf.getProperties() != null) {
                         // delete the properties
@@ -91,14 +101,56 @@ public class ConfigurationEventTask extends Event<ConfigurationTaskResult> {
             } else {
                 LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
                 result.setSuccessful(false);
-                result.setThrowable(new IllegalStateException("CELLAR CONFIG: configuration PID " + pid + " is marked BLOCKED INBOUND for cluster group " + sourceGroup.getName()));
+                result.setThrowable(new IllegalStateException("CELLAR CONFIG: configuration PID " + pid + " is marked BLOCKED INBOUND for cluster group " + group.getName()));
             }
         } catch (Exception ex) {
-            LOGGER.error("CELLAR FEATURES: failed to handle configuration task event", ex);
+            LOGGER.error("CELLAR CONFIG: failed to execute cluster configuration command event", ex);
             result.setThrowable(ex);
             result.setSuccessful(false);
         }
         return result;
+    }
+
+    public void init() {
+        // nothing to do
+    }
+
+    public void destroy() {
+        // nothing to do
+    }
+
+    /**
+     * Get the cluster configuration event handler switch.
+     *
+     * @return the cluster configuration event handler switch.
+     */
+    @Override
+    public Switch getSwitch() {
+        // load the switch status from the config
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
+            if (configuration != null) {
+                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
+                if (status) {
+                    eventSwitch.turnOn();
+                } else {
+                    eventSwitch.turnOff();
+                }
+            }
+        } catch (Exception e) {
+            // nothing to do
+        }
+        return eventSwitch;
+    }
+
+    /**
+     * Get the cluster event type.
+     *
+     * @return the cluster configuration event type.
+     */
+    @Override
+    public Class<ClusterConfigurationEvent> getType() {
+        return ClusterConfigurationEvent.class;
     }
 
     /**
@@ -169,33 +221,5 @@ public class ConfigurationEventTask extends Event<ConfigurationTaskResult> {
      */
     public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
         this.nodeConfiguration = nodeConfiguration;
-    }
-
-    /**
-     * @return the pid
-     */
-    public String getPid() {
-        return pid;
-    }
-
-    /**
-     * @param pid the pid to set
-     */
-    public void setPid(String pid) {
-        this.pid = pid;
-    }
-
-    /**
-     * @return the type
-     */
-    public int getType() {
-        return type;
-    }
-
-    /**
-     * @param type the type to set
-     */
-    public void setType(int type) {
-        this.type = type;
     }
 }

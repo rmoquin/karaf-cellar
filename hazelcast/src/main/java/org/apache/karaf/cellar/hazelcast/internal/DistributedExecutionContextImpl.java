@@ -28,9 +28,10 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.command.DistributedResult;
-import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.command.DistributedTask;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
 import org.slf4j.Logger;
@@ -40,7 +41,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class DistributedExecutionContextImpl<T extends Event, R extends DistributedResult> implements DistributedExecutionContext<T, R> {
+public class DistributedExecutionContextImpl<C extends Command, R extends DistributedResult> implements DistributedExecutionContext<C, R> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedExecutionContextImpl.class);
     private String name;
     private HazelcastCluster cluster;
@@ -52,18 +54,19 @@ public class DistributedExecutionContextImpl<T extends Event, R extends Distribu
     }
 
     public void destroy() {
+        //I think the executor service shuts itself down automatically.
     }
 
     /**
      * Executes the distributed task and waits for each Future to return rather than let the caller manually handle it.
      *
-     * @param task the task to execute
+     * @param command the task to execute
      * @param destinations the destinations to sent to.
      * @return
      */
     @Override
-    public Map<Node, R> executeAndWait(T task, Set<Node> destinations) {
-        Map<Node, Future<R>> results = this.execute(task, destinations);
+    public Map<Node, R> executeAndWait(C command, Set<Node> destinations) {
+        Map<Node, Future<R>> results = this.execute(command, destinations);
         Map<Node, R> finishedResults = new HashMap<Node, R>();
         for (Map.Entry<Node, Future<R>> entry : results.entrySet()) {
             Node node = entry.getKey();
@@ -71,23 +74,23 @@ public class DistributedExecutionContextImpl<T extends Event, R extends Distribu
                 R result = entry.getValue().get(timeoutSeconds, TimeUnit.SECONDS);
                 finishedResults.put(node, result);
             } catch (Exception ex) {
-                LOGGER.error("Node {} generated an error executing task {}", node.getName(), task, ex);
+                LOGGER.error("Node {} generated an error executing task {}", node.getName(), command, ex);
             }
         }
-        LOGGER.info("Completed task {} on selected nodes." + task);
+        LOGGER.info("Completed task {} on selected nodes." + command);
         return finishedResults;
     }
 
     /**
      * Executes the distributed task and waits for each Future to return rather than let the caller manually handle it.
      *
-     * @param task the task to execute
+     * @param command the task to execute
      * @param destination the destination to sent to.
      * @return
      */
     @Override
-    public Map<Node, R> executeAndWait(T task, Node destination) {
-        Map<Node, Future<R>> results = this.execute(task, destination);
+    public Map<Node, R> executeAndWait(C command, Node destination) {
+        Map<Node, Future<R>> results = this.execute(command, destination);
         Map<Node, R> finishedResults = new HashMap<Node, R>();
         Map.Entry<Node, Future<R>> entry = results.entrySet().iterator().next();
         Node node = entry.getKey();
@@ -95,52 +98,55 @@ public class DistributedExecutionContextImpl<T extends Event, R extends Distribu
             R result = entry.getValue().get(timeoutSeconds, TimeUnit.SECONDS);
             finishedResults.put(node, result);
         } catch (Exception ex) {
-            LOGGER.error("Node {} generated an error executing task {}", node.getName(), task, ex);
+            LOGGER.error("Node {} generated an error executing task {}", node.getName(), command, ex);
         }
-        LOGGER.info("Completed task {}" + task);
+        LOGGER.info("Completed task {}" + command);
         return finishedResults;
     }
 
     @Override
-    public Map<Node, Future<R>> execute(T task, Node node) {
+    public Map<Node, Future<R>> execute(C command, Node node) {
         Map<Node, Future<R>> results = new HashMap<Node, Future<R>>();
         Member member = cluster.findMemberById(node.getId());
         Future<R> result;
+        DistributedTask task = new DistributedTask(command);
         result = this.executorService.submitToMember(task, member);
         results.put(node, result);
         return results;
     }
 
     @Override
-    public void executeAsync(T task, Node node, DistributedCallback<R> callback) {
+    public void executeAsync(C command, Node node, DistributedCallback<R> callback) {
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null.");
         }
         ExecutionCallback<R> distributedCallback = new DistributedCallbackImpl<R>(callback);
         Member member = cluster.findMemberById(node.getId());
+        DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMember(task, member, distributedCallback);
     }
 
     @Override
-    public Map<Node, Future<R>> execute(T task, Set<Node> destinations) {
+    public Map<Node, Future<R>> execute(C command, Set<Node> destinations) {
         Map<Node, Future<R>> results = new HashMap<Node, Future<R>>();
         Set<Member> members = new HashSet<Member>();
         for (Node node : destinations) {
             Member member = cluster.findMemberById(node.getId());
             members.add(member);
         }
+        DistributedTask task = new DistributedTask(command);
         Map<Member, Future<R>> executedResult = this.executorService.submitToMembers(task, members);
         for (Map.Entry<Member, Future<R>> entry : executedResult.entrySet()) {
             Member member = entry.getKey();
             Future<R> future = entry.getValue();
             results.put(new HazelcastNode(member), future);
         }
-        LOGGER.info("Completed task {}" + task);
+        LOGGER.info("Completed task {}" + command);
         return results;
     }
 
     @Override
-    public void executeAsync(T task, Set<Node> destinations, DistributedMultiCallback callback) {
+    public void executeAsync(C command, Set<Node> destinations, DistributedMultiCallback callback) {
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null.");
         }
@@ -151,6 +157,7 @@ public class DistributedExecutionContextImpl<T extends Event, R extends Distribu
             Member member = cluster.findMemberById(node.getId());
             members.add(member);
         }
+        DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMembers(task, members, distributedCallback);
     }
 

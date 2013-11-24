@@ -23,13 +23,14 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.features.Feature;
 
 /**
  * Handler for cluster features event.
  */
-public class FeaturesEventTask extends Event<FeatureEventResponse> {
+public class FeaturesEventTask extends CommandHandler<FeatureEventCommand, FeatureEventResponse> {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventTask.class);
     private static final String separator = "/";
 
@@ -63,7 +64,7 @@ public class FeaturesEventTask extends Event<FeatureEventResponse> {
      * @return
      */
     @Override
-    public FeatureEventResponse execute() {
+    public FeatureEventResponse execute(FeatureEventCommand command) {
         if (cellarSupport == null) {
             cellarSupport = new CellarSupport();
         }

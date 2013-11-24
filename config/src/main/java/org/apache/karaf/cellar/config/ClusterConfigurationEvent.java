@@ -11,39 +11,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cellar.core.control;
+package org.apache.karaf.cellar.config;
 
 import org.apache.karaf.cellar.core.command.Command;
 
 /**
- * Manage handlers command.
+ * Cluster configuration event.
  */
-public class ManageHandlersCommand extends Command<ManageHandlersResult> {
+public class ClusterConfigurationEvent extends Command<ConfigurationTaskResult> {
 
-    private String handlerName;
-    private Boolean status = true;
+    private Integer type;
 
-    public ManageHandlersCommand() {
-    }
-
-    public ManageHandlersCommand(String id) {
+    public ClusterConfigurationEvent(String id) {
         super(id);
     }
 
-    public String getHandlerName() {
-        return handlerName;
+    public Integer getType() {
+        return type;
     }
 
-    public void setHandlerName(String handlerName) {
-        this.handlerName = handlerName;
+    public void setType(Integer type) {
+        this.type = type;
     }
 
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
+    @Override
+    public String toString() {
+        return "ClusterConfigurationEvent [type=" + type + ", id=" + id
+                + ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
+                + ", destination=" + destination + ", force=" + force
+                + ", postPublish=" + postPublish + "]";
     }
 
 }

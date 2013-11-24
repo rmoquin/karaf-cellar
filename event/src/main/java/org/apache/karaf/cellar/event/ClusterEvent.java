@@ -15,17 +15,28 @@ package org.apache.karaf.cellar.event;
 
 import java.io.Serializable;
 import java.util.Map;
-import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.command.Command;
 
 /**
  * Cluster event.
  */
-public abstract class ClusterEventTask extends Event<ClusterEventResult>{
+public class ClusterEvent extends Command<ClusterEventResult> {
 
+    private String topicName;
     private Map<String, Serializable> properties;
 
-    public ClusterEventTask(Map<String, Serializable> properties) {
+    public ClusterEvent(String topicName, Map<String, Serializable> properties) {
+        super(topicName);
+        this.topicName = topicName;
         this.properties = properties;
+    }
+
+    public String getTopicName() {
+        return this.topicName;
+    }
+    
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
     }
 
     public Map<String, Serializable> getProperties() {

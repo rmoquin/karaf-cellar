@@ -15,11 +15,19 @@
  */
 package org.apache.karaf.cellar.config;
 
-import org.apache.karaf.cellar.core.command.DistributedResult;
+import org.apache.karaf.cellar.core.command.Result;
 
 /**
  *
  * @author rmoquin
  */
-public interface ConfigurationTaskResult extends DistributedResult {
+public class ConfigurationTaskResult extends Result {
+
+    public ConfigurationTaskResult() {
+    }
+
+    public ConfigurationTaskResult(String id) {
+        super(id);
+    }
+
 }

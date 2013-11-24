@@ -15,8 +15,9 @@ package org.apache.karaf.cellar.core.event;
 
 import org.apache.karaf.cellar.core.Handler;
 import org.apache.karaf.cellar.core.HandlerRegistry;
+import org.apache.karaf.cellar.core.command.DistributedResult;
 
-public interface EventHandlerRegistry<E extends Event> extends HandlerRegistry<E, Handler<E>> {
+public interface EventHandlerRegistry<E extends Event, R extends DistributedResult> extends HandlerRegistry<E, Handler<E>> {
 
     /**
      * Return the cluster {@code EventHandler} for a given cluster {@code Event}.
@@ -25,6 +26,5 @@ public interface EventHandlerRegistry<E extends Event> extends HandlerRegistry<E
      * @return the cluster event handler to use.
      */
     @Override
-    public EventHandler<E> getHandler(E event);
-
+    public EventHandler<E, R> getHandler(E event);
 }

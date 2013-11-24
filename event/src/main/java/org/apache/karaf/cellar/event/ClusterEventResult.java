@@ -15,40 +15,41 @@
  */
 package org.apache.karaf.cellar.event;
 
-import org.apache.karaf.cellar.core.command.DistributedResult;
+import java.io.Serializable;
+import java.util.Map;
+import org.apache.karaf.cellar.core.command.Result;
 
 /**
  *
  * @author rmoquin
  */
-public class ClusterEventResult implements DistributedResult {
-    private boolean successful = true;
-    private Throwable throwable;
+public class ClusterEventResult extends Result {
+
+    private String topicName;
+    private Map<String, Serializable> properties;
 
     public ClusterEventResult() {
     }
 
-    @Override
-    public boolean isSuccessful() {
-        return successful;
+    public ClusterEventResult(String topicName, Map<String, Serializable> properties) {
+        super(topicName);
+        this.topicName = topicName;
+        this.properties = properties;
     }
 
-    @Override
-    public Throwable getThrowable() {
-        return throwable;
+    public String getTopicName() {
+        return this.topicName;
     }
 
-    /**
-     * @param throwable the throwable to set
-     */
-    public void setThrowable(Throwable throwable) {
-        this.throwable = throwable;
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
     }
 
-    /**
-     * @param successful the successful to set
-     */
-    public void setSuccessful(boolean successful) {
-        this.successful = successful;
+    public Map<String, Serializable> getProperties() {
+        return this.properties;
+    }
+
+    public void setProperties(Map<String, Serializable> properties) {
+        this.properties = properties;
     }
 }
