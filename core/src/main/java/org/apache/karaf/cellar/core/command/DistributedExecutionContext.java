@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.control.Switch;
 
 /**
  *
@@ -51,4 +52,8 @@ public interface DistributedExecutionContext<T, R> {
      * @return the timeoutSeconds
      */
     int getTimeoutSeconds();
+
+    Switch getSwitch();
+
+    String getTopic();
 }

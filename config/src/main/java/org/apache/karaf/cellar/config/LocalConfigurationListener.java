@@ -50,7 +50,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
      */
     @Override
     public void configurationEvent(ConfigurationEvent event) {
-        if (getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
             return;
         }

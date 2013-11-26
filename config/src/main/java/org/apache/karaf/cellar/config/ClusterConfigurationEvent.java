@@ -22,6 +22,9 @@ public class ClusterConfigurationEvent extends Command<ConfigurationTaskResult> 
 
     private Integer type;
 
+    public ClusterConfigurationEvent() {
+    }
+
     public ClusterConfigurationEvent(String id) {
         super(id);
     }

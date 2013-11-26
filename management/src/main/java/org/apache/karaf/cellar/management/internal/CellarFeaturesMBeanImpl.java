@@ -37,8 +37,9 @@ import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.apache.karaf.cellar.features.FeaturesEventTask;
-import org.apache.karaf.cellar.features.RepositoryEventTask;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.features.FeaturesEventCommand;
+import org.apache.karaf.cellar.features.RepositoryEventCommand;
 
 /**
  * Implementation of the Cellar Features MBean.
@@ -63,11 +64,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-        //TODO Turn this back on.
         // check if the producer is ON
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
         Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
@@ -119,7 +119,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // broadcast the cluster event
-        FeaturesEventTask event = new FeaturesEventTask(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
+        FeaturesEventCommand event = new FeaturesEventCommand(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceGroup(group);
         executionContext.execute(event, group.getNodes());
     }
@@ -147,11 +147,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-        //Figure out how to handle this.
         // check if the producer is ON
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
         Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
@@ -190,7 +189,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         clusterFeatures.put(feature, false);
 
         // broadcast the cluster event
-        FeaturesEventTask event = new FeaturesEventTask(name, version, FeatureEvent.EventType.FeatureUninstalled);
+        FeaturesEventCommand event = new FeaturesEventCommand(name, version, FeatureEvent.EventType.FeatureUninstalled);
         event.setSourceGroup(group);
         executionContext.execute(event, group.getNodes());
     }
@@ -257,11 +256,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-                //Figure out how to handle this.
         // check if the event producer is ON
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
         // get the features in the cluster group
@@ -318,7 +316,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // broadcast the cluster event
-            RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryAdded);
+            RepositoryEventCommand event = new RepositoryEventCommand(url, RepositoryEvent.EventType.RepositoryAdded);
             event.setInstall(install);
             event.setSourceGroup(group);
             executionContext.execute(event, group.getNodes());
@@ -340,11 +338,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-                //Figure out how to handle this.
         // check if the event producer is ON
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
         // get the features in the cluster group
@@ -401,7 +398,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // broadcast a cluster event
-            RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryRemoved);
+            RepositoryEventCommand event = new RepositoryEventCommand(url, RepositoryEvent.EventType.RepositoryRemoved);
             event.setUninstall(uninstall);
             event.setSourceGroup(group);
             executionContext.execute(event, group.getNodes());

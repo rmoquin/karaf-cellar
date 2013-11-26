@@ -50,7 +50,7 @@
                             javax.management,
                             javax.management.loading,
                             javax.management.openmbean,
-                            org.apache.karaf.features*;version="[3,4)",
+                            org.apache.karaf.features*;version="${project.version}",
                             org.apache.karaf.cellar*;version="${project.version}",
                             *
                         </Import-Package>
@@ -64,6 +64,10 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
         </dependency>
         <!-- Karaf Cellar dependencies -->
         <dependency>

@@ -13,7 +13,7 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
-import org.apache.karaf.cellar.config.ConfigurationEventTask;
+import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 @Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
 public class PropAppendCommand extends ConfigCommandSupport {
@@ -49,11 +50,10 @@ public class PropAppendCommand extends ConfigCommandSupport {
             return null;
         }
 
-		//This needs to be re-enabled
-        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-         System.err.println("Cluster event producer is OFF");
-         return null;
-         }*/
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -83,7 +83,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
             clusterConfigurations.put(pid, properties);
 
             // broadcast the cluster event
-            ConfigurationEventTask event = new ConfigurationEventTask(pid);
+            ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
             executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {

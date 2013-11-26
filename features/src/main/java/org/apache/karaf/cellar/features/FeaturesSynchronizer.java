@@ -31,9 +31,10 @@ import org.apache.karaf.cellar.core.GroupConfiguration;
 /**
  * Features synchronizer.
  */
-public class FeaturesSynchronizer extends FeaturesSupport implements Synchronizer {
+public class FeaturesSynchronizer implements Synchronizer {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSynchronizer.class);
-
+	private FeaturesSupport featuresSupport = new FeaturesSupport();
+	
     @Override
     public void init() {
         super.init();
@@ -92,7 +93,7 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
                     Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
                     Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
-                    if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
+                    if (featuresSupport.isAllowed(name, whitelist, blacklist)) {
                         Boolean remotelyInstalled = clusterFeatures.get(info);
                         Boolean locallyInstalled = isFeatureInstalledLocally(info.getName(), info.getVersion());
 

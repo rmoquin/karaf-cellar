@@ -24,7 +24,6 @@ import org.apache.karaf.cellar.management.CellarGroupMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
@@ -61,12 +60,12 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
                 nodes.add(n.getName());
             }
             ManageGroupCommand command = new ManageGroupCommand();
-            command.setAction(ManageGroupAction.);
+            command.setAction(ManageGroupAction.QUIT);
             command.setDestinationGroup(name);
             Set<Node> recipientList = clusterManager.listNodes(nodes);
             commandExecutionContext.execute(command, recipientList);
         }
-        groupManager.deregisterNodeFromAllGroups();
+        groupManager.deregisterNodeFromGroup(name);
     }
 
     @Override

@@ -21,15 +21,15 @@ import org.apache.karaf.cellar.core.command.Result;
  *
  * @author rmoquin
  */
-public class NodeEventConfigurationResult extends Result {
+public class NodeConfigurationResult extends Result {
 
     private SwitchType switchType;
     private SwitchStatus switchStatus;
 
-    public NodeEventConfigurationResult() {
+    public NodeConfigurationResult() {
     }
 
-    public NodeEventConfigurationResult(String id) {
+    public NodeConfigurationResult(String id) {
         super(id);
     }
 

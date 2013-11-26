@@ -33,6 +33,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
 
+	private FeatureSupport featuresSupport;
     /**
      * This method is called when a local feature has changed.
      *
@@ -41,11 +42,11 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
     @Override
     public void featureEvent(FeatureEvent event) {
 
-        //TODO Re-enable this functionaity,
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
-//            return;
-//        }
+        // check if the producer is ON
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
+            return;
+        }
         if (event != null) {
             Set<Group> groups = groupManager.listLocalGroups();
 
@@ -57,7 +58,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                     Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
                     Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
-                    if (cellarSupport.isAllowed(name, whitelist, blacklist)) {
+                    if (featuresSupport.isAllowed(name, whitelist, blacklist)) {
                         FeatureEvent.EventType type = event.getType();
 
                         // update the features in the cluster group
@@ -68,7 +69,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                         }
 
                         // broadcast the event
-                        FeaturesEventTask featureEvent = new FeaturesEventTask(name, version, type);
+                        ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
                         featureEvent.setSourceGroup(group);
                         executionContext.executeAsync(featureEvent, group.getNodesExcluding(groupManager.getNode()), null);
                     } else {
@@ -88,16 +89,16 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
     public void repositoryEvent(RepositoryEvent event) {
 
         //TODO Re-enable this functionaity,
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
-//            return;
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
+            return;
+        }
         if (event != null && event.getRepository() != null) {
             Set<Group> groups = groupManager.listLocalGroups();
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
-                    RepositoryEventTask clusterRepositoryEvent = new RepositoryEventTask(event.getRepository().getURI().toString(), event.getType());
+            		ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
                     clusterRepositoryEvent.setSourceGroup(group);
                     RepositoryEvent.EventType type = event.getType();
 

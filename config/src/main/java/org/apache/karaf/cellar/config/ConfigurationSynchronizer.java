@@ -120,7 +120,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     @Override
     public void push(Group group) {
 
-        if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
             return;
         }

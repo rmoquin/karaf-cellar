@@ -18,27 +18,16 @@ import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventHandler;
-import org.apache.karaf.cellar.core.event.EventType;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
-import org.apache.karaf.cellar.core.event.Event;
 import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 
 /**
@@ -75,11 +64,11 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
-            if (cellarSupport.isAllowed(command.getSourceGroup(), Constants.CATEGORY, pid, EventType.INBOUND)) {
+            if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
 
                 Properties clusterDictionary = clusterConfigurations.get(pid);
-                Configuration conf = configurationAdmin.getConfiguration(pid, null);
-                if (type == ConfigurationEvent.CM_DELETED) {
+                Configuration conf = configAdmin.getConfiguration(pid, null);
+                if (command.getType() == ConfigurationEvent.CM_DELETED) {
                     if (conf.getProperties() != null) {
                         // delete the properties
                         conf.delete();
@@ -94,7 +83,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                         localDictionary = configSupport.filter(localDictionary);
                         if (!configSupport.equals(clusterDictionary, localDictionary)) {
                             conf.update((Dictionary) clusterDictionary);
-                            configSupport.persistConfiguration(configurationAdmin, pid, clusterDictionary);
+                            configSupport.persistConfiguration(configAdmin, pid, clusterDictionary);
                         }
                     }
                 }
@@ -128,9 +117,9 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
+            Configuration configuration = configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
             if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
+                Boolean status = Boolean.valueOf((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
                 if (status) {
                     eventSwitch.turnOn();
                 } else {
@@ -138,7 +127,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                 }
             }
         } catch (Exception e) {
-            // nothing to do
+            LOGGER.warn("An error occurred handling a configuration event.", e);
         }
         return eventSwitch;
     }
@@ -151,75 +140,5 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
     @Override
     public Class<ClusterConfigurationEvent> getType() {
         return ClusterConfigurationEvent.class;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
-    }
-
-    /**
-     * @return the clusterManager
-     */
-    public ClusterManager getClusterManager() {
-        return clusterManager;
-    }
-
-    /**
-     * @param clusterManager the clusterManager to set
-     */
-    public void setClusterManager(ClusterManager clusterManager) {
-        this.clusterManager = clusterManager;
-    }
-
-    /**
-     * @return the configurationAdmin
-     */
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
-    }
-
-    /**
-     * @param configurationAdmin the configurationAdmin to set
-     */
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
-    }
-
-    /**
-     * @return the groupManager
-     */
-    public GroupManager getGroupManager() {
-        return groupManager;
-    }
-
-    /**
-     * @param groupManager the groupManager to set
-     */
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the nodeConfiguration
-     */
-    public NodeConfiguration getNodeConfiguration() {
-        return nodeConfiguration;
-    }
-
-    /**
-     * @param nodeConfiguration the nodeConfiguration to set
-     */
-    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
-        this.nodeConfiguration = nodeConfiguration;
     }
 }

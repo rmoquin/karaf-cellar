@@ -21,13 +21,14 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.apache.karaf.cellar.core.control.BasicSwitch;
+import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
+import org.osgi.service.cm.Configuration;
 
 /**
  * The BundleEventHandler is responsible to process received cluster event for bundles.
@@ -39,9 +40,6 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     public static final String SWITCH_ID = "org.apache.karaf.cellar.bundle.handler";
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private NodeConfiguration nodeConfiguration;
-    private GroupManager groupManager;
-    private CellarSupport cellarSupport;
     private BundleSupport bundleSupport;
 
     /**
@@ -62,43 +60,43 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
         }
 
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroup.getName());
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(command.getSourceGroup().getName());
             Set<String> bundleWhitelist = groupConfig.getInboundBundleWhitelist();
             Set<String> bundleBlacklist = groupConfig.getInboundBundleBlacklist();
 
             Set<String> featuresWhitelist = groupConfig.getInboundFeatureWhitelist();
             Set<String> featuresBlacklist = groupConfig.getInboundFeatureBlacklist();
-            if (cellarSupport.isAllowed(this.location, bundleWhitelist, bundleBlacklist)) {
+            if (cellarSupport.isAllowed(command.getLocation(), bundleWhitelist, bundleBlacklist)) {
                 // check the features first
-                List<Feature> matchingFeatures = bundleSupport.retrieveFeature(this.location);
+                List<Feature> matchingFeatures = bundleSupport.retrieveFeature(command.getLocation());
                 for (Feature feature : matchingFeatures) {
                     if (!cellarSupport.isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
-                        LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", location, this.symbolicName, this.sourceGroup.getName());
+                        LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", command.getLocation(), command.getSymbolicName(), command.getSourceGroup().getName());
                         result.setSuccessful(false);
-                        result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + this.location + " is contained in feature " + this.symbolicName + " marked BLOCKED INBOUND for cluster group " + this.sourceGroup.getName()));
+                        result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + command.getLocation() + " is contained in feature " + command.getSymbolicName() + " marked BLOCKED INBOUND for cluster group " + command.getSourceGroup().getName()));
                         return result;
                     }
                 }
-                if (this.type == BundleEvent.INSTALLED) {
-                    LOGGER.debug("CELLAR BUNDLE: installing bundle {} from {}", this.getId(), this.location);
-                    bundleSupport.installBundleFromLocation(this.location);
-                } else if (this.type == BundleEvent.UNINSTALLED) {
-                    LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}/{}", this.symbolicName, this.version);
-                    bundleSupport.uninstallBundle(this.symbolicName, this.version);
-                } else if (this.type == BundleEvent.STARTED) {
-                    LOGGER.debug("CELLAR BUNDLE: starting bundle {}/{}", this.symbolicName, this.version);
-                    bundleSupport.startBundle(this.symbolicName, this.version);
-                } else if (this.type == BundleEvent.STOPPED) {
-                    LOGGER.debug("CELLAR BUNDLE: stopping bundle {}/{}", this.symbolicName, this.version);
-                    bundleSupport.stopBundle(this.symbolicName, this.version);
-                } else if (this.type == BundleEvent.UPDATED) {
-                    LOGGER.debug("CELLAR BUNDLE: updating bundle {}/{}", this.symbolicName, this.version);
-                    bundleSupport.updateBundle(this.symbolicName, this.version);
+                if (command.getTyoe() == BundleEvent.INSTALLED) {
+                    LOGGER.debug("CELLAR BUNDLE: installing bundle {} from {}", command.getId(), command.getLocation());
+                    bundleSupport.installBundleFromLocation(command.getLocation());
+                } else if (command.getTyoe() == BundleEvent.UNINSTALLED) {
+                    LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                    bundleSupport.uninstallBundle(command.getSymbolicName(), command.getVersion());
+                } else if (command.getTyoe() == BundleEvent.STARTED) {
+                    LOGGER.debug("CELLAR BUNDLE: starting bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                    bundleSupport.startBundle(command.getSymbolicName(), command.getVersion());
+                } else if (command.getTyoe() == BundleEvent.STOPPED) {
+                    LOGGER.debug("CELLAR BUNDLE: stopping bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                    bundleSupport.stopBundle(command.getSymbolicName(), command.getVersion());
+                } else if (command.getTyoe() == BundleEvent.UPDATED) {
+                    LOGGER.debug("CELLAR BUNDLE: updating bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                    bundleSupport.updateBundle(command.getSymbolicName(), command.getVersion());
                 }
             } else {
-                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", this.location, this.sourceGroup.getName());
+                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", command.getLocation(), command.getSourceGroup().getName());
                 result.setSuccessful(false);
-                result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + this.location + " is marked BLOCKED INBOUND in cluster group " + this.sourceGroup.getName()));
+                result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + command.getLocation() + " is marked BLOCKED INBOUND in cluster group " + command.getSourceGroup().getName()));
             }
         } catch (Exception ex) {
             LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", ex);
@@ -125,7 +123,7 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     public Switch getSwitch() {
         // load the switch status from the config
         try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.NODE);
+            Configuration configuration = configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
             if (configuration != null) {
                 Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
                 if (status) {

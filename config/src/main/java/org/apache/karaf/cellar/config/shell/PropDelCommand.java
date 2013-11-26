@@ -22,8 +22,9 @@ import org.apache.karaf.cellar.core.Group;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import org.apache.karaf.cellar.config.ConfigurationEventTask;
+import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 @Command(scope = "cluster", name = "config-propdel", description = "Delete a property from a configuration in a cluster group")
 public class PropDelCommand extends ConfigCommandSupport {
@@ -47,10 +48,10 @@ public class PropDelCommand extends ConfigCommandSupport {
         }
 
         //This needs to be re-enabled
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            System.err.println("Cluster event producer is OFF");
-//            return null;
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }
         // check if the configuration PID is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
@@ -70,7 +71,7 @@ public class PropDelCommand extends ConfigCommandSupport {
                 clusterConfigurations.put(pid, distributedDictionary);
 
                 // broadcast the cluster event
-                ConfigurationEventTask event = new ConfigurationEventTask();
+                ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                 event.setSourceGroup(group);
                 executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
             }

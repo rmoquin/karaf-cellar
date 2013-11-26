@@ -32,7 +32,8 @@ import org.apache.karaf.cellar.core.control.ManageHandlersCommand;
 import org.apache.karaf.cellar.core.control.ManageHandlersResult;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.control.SwitchType;
-import org.apache.karaf.cellar.core.control.NodeEventConfigurationCommand;
+import org.apache.karaf.cellar.core.control.NodeConfigurationCommand;
+import org.apache.karaf.cellar.core.control.NodeConfigurationResult;
 
 /**
  * Implementation of the Cellar Core MBean.
@@ -106,10 +107,11 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
     public TabularData handlerStatus() throws Exception {
         ManageHandlersCommand command = new ManageHandlersCommand(clusterManager.generateId());
 
+        Set<Node> nodes = clusterManager.listNodes();
         command.setHandlerName(null);
         command.setStatus(null);
 
-        Map<Node, ManageHandlersResult> results = executionContext.executeAndWait(command, Boolean);
+        Map<Node, ManageHandlersResult> results = executionContext.executeAndWait(command, nodes);
 
         CompositeType compositeType = new CompositeType("Event Handler", "Karaf Cellar cluster event handler",
                 new String[]{"node", "handler", "status", "local"},
@@ -180,10 +182,8 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
 
     @Override
     public TabularData consumerStatus() throws Exception {
-        ConsumerSwitchCommand command = new ConsumerSwitchCommand(clusterManager.generateId());
+        NodeConfigurationCommand command = new NodeConfigurationCommand(clusterManager.generateId());
         command.setStatus(null);
-
-        Map<Node, ConsumerSwitchResult> results = executionContext.execute(command);
 
         CompositeType compositeType = new CompositeType("Event Consumer", "Karaf Cellar cluster event consumer",
                 new String[]{"node", "status", "local"},
@@ -192,63 +192,12 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         TabularType tableType = new TabularType("Event Consumers", "Table of Karaf Cellar cluster event consumers",
                 compositeType, new String[]{"node"});
         TabularDataSupport table = new TabularDataSupport(tableType);
-
-        for (Node node : results.keySet()) {
-            boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
-            ConsumerSwitchResult consumerSwitchResult = results.get(node);
-            CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                    new String[]{"node", "status", "local"},
-                    new Object[]{node.getName(), consumerSwitchResult.getStatus(), local});
-            table.put(data);
-        }
-
+        this.getNodeStatuses(SwitchType.INBOUND, table, compositeType);
         return table;
     }
 
     @Override
-    public void consumerStart(String nodeName) throws Exception {
-        ConsumerSwitchCommand command = new ConsumerSwitchCommand(clusterManager.generateId());
-
-        Node node;
-        if (nodeName == null || nodeName.isEmpty()) {
-            node = clusterManager.getMasterCluster().getLocalNode();
-        } else {
-            node = clusterManager.findNodeByName(nodeName);
-            if (node == null) {
-                throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
-            }
-        }
-
-        command.setDestinations(nodes);
-        command.setStatus(SwitchStatus.ON);
-        command.setSourceNode(groupManager.getNode());
-        executionContext.execute(command, node);
-    }
-
-    @Override
-    public void consumerStop(String nodeName) throws Exception {
-        ConsumerSwitchCommand command = new ConsumerSwitchCommand(clusterManager.generateId());
-
-        Node node;
-
-        if (nodeName == null || nodeName.isEmpty()) {
-            node = clusterManager.getMasterCluster().getLocalNode();
-        } else {
-            node = clusterManager.findNodeByName(nodeName);
-            if (node == null) {
-                throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
-            }
-        }
-
-        command.setStatus(SwitchStatus.OFF);
-        executionContext.execute(command, node);
-    }
-
-    @Override
     public TabularData producerStatus() throws Exception {
-        Set<Node> nodes = clusterManager.listNodes();
-        Map<Node, ProducerSwitchResult> results = this.changeProducerStatus(SwitchType.OUTBOUND, null, nodes);
-
         CompositeType compositeType = new CompositeType("Event Producer", "Karaf Cellar cluster event producer",
                 new String[]{"node", "status", "local"},
                 new String[]{"Node hosting event producer", "Current status of the event producer", "True if the node is local"},
@@ -256,54 +205,93 @@ public class CellarMBeanImpl extends StandardMBean implements CellarMBean {
         TabularType tableType = new TabularType("Event Producers", "Table of Karaf Cellar cluster event producers",
                 compositeType, new String[]{"node"});
         TabularDataSupport table = new TabularDataSupport(tableType);
-
-        for (Node node : results.keySet()) {
-            boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
-            ProducerSwitchResult producerSwitchResult = results.get(node);
-            CompositeDataSupport data = new CompositeDataSupport(compositeType,
-                    new String[]{"node", "status", "local"},
-                    new Object[]{node.getName(), producerSwitchResult.getStatus(), local});
-            table.put(data);
-        }
+        this.getNodeStatuses(SwitchType.OUTBOUND, table, compositeType);
 
         return table;
     }
 
     @Override
-    public void retrieveProducerStatuses(SwitchType switchType, Set<Node> nodes) throws Exception {
-        NodeEventConfigurationCommand command = new NodeEventConfigurationCommand(null, switchType);
-
-        if (nodes == null || nodes.isEmpty()) {
-            throw new IllegalArgumentException("At least one node must be specified in or to retrieve producer statuses.");
-        }
-        this.executionContext.execute(SwitchType.OUTBOUND, null, nodes);
+    public void consumerStart(String nodeName) throws Exception {
+        start(nodeName, SwitchType.INBOUND);
     }
 
     @Override
-    public void changeProducerStatus(SwitchType switchType, SwitchStatus switchStatus, String nodeName) throws Exception {
-        NodeEventConfigurationCommand command = new NodeEventConfigurationCommand(switchStatus, switchType);
+    public void producerStart(String nodeName) throws Exception {
+        start(nodeName, SwitchType.OUTBOUND);
+    }
+
+    @Override
+    public void consumerStop(String nodeName) throws Exception {
+        stop(nodeName, SwitchType.INBOUND);
+    }
+
+    @Override
+    public void producerStop(String nodeName) throws Exception {
+        stop(nodeName, SwitchType.OUTBOUND);
+    }
+
+    public Map<Node, NodeConfigurationResult> changeNodeStatus(SwitchType switchType, SwitchStatus switchStatus, String nodeName) throws Exception {
+        NodeConfigurationCommand command = new NodeConfigurationCommand(clusterManager.generateId(), switchStatus, switchType);
 
         Node node;
-
         if (nodeName == null || nodeName.isEmpty()) {
             node = clusterManager.getMasterCluster().getLocalNode();
         } else {
             node = clusterManager.findNodeByName(nodeName);
             if (node == null) {
-                throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist)");
+                throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
             }
         }
 
-        this.executionContext.execute(command, node);
+        return this.executionContext.execute(command, node);
     }
 
-    @Override
-    public void producerStart(String nodeId) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public TabularDataSupport getNodeStatuses(SwitchType switchType, TabularDataSupport table, CompositeType compositeType) throws Exception {
+        NodeConfigurationCommand command = new NodeConfigurationCommand(clusterManager.generateId(), null, switchType);
+        Set<Node> nodes = clusterManager.listNodes();
+        Map<Node, NodeConfigurationResult> results = this.executionContext.execute(command, nodes);
+        for (Node node : results.keySet()) {
+            boolean local = (node.equals(clusterManager.getMasterCluster().getLocalNode()));
+            NodeConfigurationResult nodeConfigurationResult = results.get(node);
+            CompositeDataSupport data = new CompositeDataSupport(compositeType,
+                    new String[]{"node", "status", "local"},
+                    new Object[]{node.getName(), nodeConfigurationResult.getSwitchStatus(), local});
+            table.put(data);
+        }
+        return table;
     }
 
-    @Override
-    public void producerStop(String nodeId) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    private Map<Node, ManageHandlersResult> start(String nodeName, SwitchType switchTyoe) throws Exception {
+        NodeConfigurationCommand command = new NodeConfigurationCommand(clusterManager.generateId(), SwitchStatus.ON, switchTyoe);
+
+        Node node;
+        if (nodeName == null || nodeName.isEmpty()) {
+            node = clusterManager.getMasterCluster().getLocalNode();
+        } else {
+            node = clusterManager.findNodeByName(nodeName);
+            if (node == null) {
+                throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
+            }
+        }
+
+        command.setSourceNode(groupManager.getNode());
+        return executionContext.execute(command, node);
+    }
+
+    private Map<Node, ManageHandlersResult> stop(String nodeName, SwitchType switchTyoe) throws Exception {
+        NodeConfigurationCommand command = new NodeConfigurationCommand(clusterManager.generateId(), SwitchStatus.OFF, switchTyoe);
+
+        Node node;
+        if (nodeName == null || nodeName.isEmpty()) {
+            node = clusterManager.getMasterCluster().getLocalNode();
+        } else {
+            node = clusterManager.findNodeByName(nodeName);
+            if (node == null) {
+                throw new IllegalArgumentException("Cluster node " + nodeName + " doesn't exist");
+            }
+        }
+
+        command.setSourceNode(groupManager.getNode());
+        return executionContext.execute(command, node);
     }
 }

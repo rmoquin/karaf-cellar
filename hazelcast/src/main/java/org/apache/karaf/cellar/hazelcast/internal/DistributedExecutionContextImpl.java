@@ -27,13 +27,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.command.DistributedResult;
 import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.control.BasicSwitch;
+import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +52,11 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     private String name;
     private HazelcastCluster cluster;
     private IExecutorService executorService;
+    private ConfigurationAdmin configurationAdmin;
     private int timeoutSeconds = 60;
+    public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.producer";
+
+    private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     public void init() {
         executorService = this.cluster.getExecutorService(name);
@@ -151,7 +160,6 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
             throw new IllegalArgumentException("Callback cannot be null.");
         }
         MultiExecutionCallback distributedCallback = new DistributedMultiCallbackImpl(callback);
-        Map<Node, Future<R>> results = new HashMap<Node, Future<R>>();
         Set<Member> members = new HashSet<Member>();
         for (Node node : destinations) {
             Member member = cluster.findMemberById(node.getId());
@@ -159,6 +167,28 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         }
         DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMembers(task, members, distributedCallback);
+    }
+
+    public Switch getSwitch() {
+        // load the switch status from the config
+        try {
+            Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+            if (configuration != null) {
+                Boolean status = Boolean.valueOf((String) configuration.getProperties().get(Configurations.PRODUCER));
+                if (status) {
+                    eventSwitch.turnOn();
+                } else {
+                    eventSwitch.turnOff();
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error retrieving switch, {}, for execution context.", Configurations.PRODUCER, e);
+        }
+        return eventSwitch;
+    }
+
+    public String getTopic() {
+        return name;
     }
 
     /**
@@ -204,5 +234,13 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     @Override
     public void setTimeoutSeconds(int timeoutSeconds) {
         this.timeoutSeconds = timeoutSeconds;
+    }
+
+    public ConfigurationAdmin getConfigurationAdmin() {
+        return configurationAdmin;
+    }
+
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
     }
 }

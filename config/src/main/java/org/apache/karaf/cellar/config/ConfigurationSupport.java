@@ -21,12 +21,14 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.*;
+import org.apache.karaf.cellar.core.CellarSupport;
 
 /**
  * Generic configuration support.
  */
-public class ConfigurationSupport {
-    private static final String[] EXCLUDED_PROPERTIES = { "service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories" };
+public class ConfigurationSupport extends CellarSupport {
+
+    private static final String[] EXCLUDED_PROPERTIES = {"service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories"};
     private static final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
     protected File storage;
 
@@ -121,8 +123,8 @@ public class ConfigurationSupport {
      * @return true is the property is excluded, false else.
      */
     public boolean isExcludedProperty(String propertyName) {
-        for (String excludedProp : EXCLUDED_PROPERTIES) {
-            if (excludedProp.equals(propertyName)) {
+        for (int i = 0; i < EXCLUDED_PROPERTIES.length; i++) {
+            if (EXCLUDED_PROPERTIES[i].equals(propertyName)) {
                 return true;
             }
         }
@@ -166,9 +168,9 @@ public class ConfigurationSupport {
             Set<String> set = p.keySet();
 
             for (String key : set) {
-                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key) &&
-                         !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key) &&
-                         !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     propertiesToRemove.add(key);
                 }
             }
@@ -179,9 +181,9 @@ public class ConfigurationSupport {
 
             for (Enumeration<String> keys = props.keys(); keys.hasMoreElements();) {
                 String key = keys.nextElement();
-                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key) 
-				&& !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key) 
-				&& !FELIX_FILEINSTALL_FILENAME.equals(key)) {
+                if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
+                        && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
+                        && !FELIX_FILEINSTALL_FILENAME.equals(key)) {
                     p.put(key, (String) props.get(key));
                 }
             }

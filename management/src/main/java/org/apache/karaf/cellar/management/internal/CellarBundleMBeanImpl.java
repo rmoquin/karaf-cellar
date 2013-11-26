@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.karaf.cellar.bundle.ClusterBundleEvent;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 /**
  * Implementation of the Cellar Bundle MBean.
@@ -97,10 +98,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-        // check if the producer is ON
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // update the cluster group
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
@@ -143,9 +143,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF for this node");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF for this node");
+        }
         // update the cluster group
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
@@ -189,9 +189,9 @@ public class CellarBundleMBeanImpl extends StandardMBean implements CellarBundle
         }
 
         // check if the producer is ON
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // update the cluster group
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 

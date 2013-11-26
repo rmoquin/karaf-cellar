@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author rmoquin
  */
-public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeEventConfigurationCommand, NodeEventConfigurationResult> {
+public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeConfigurationCommand, NodeConfigurationResult> {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(NodeEventConfigurationCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.nodeconfig.switch";
@@ -36,15 +36,14 @@ public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeEve
     }
 
     @Override
-    public NodeEventConfigurationResult execute(NodeEventConfigurationCommand command) {
-        NodeEventConfigurationResult result = new NodeEventConfigurationResult();
+    public NodeConfigurationResult execute(NodeConfigurationCommand command) {
+        NodeConfigurationResult result = new NodeConfigurationResult();
         try {
             SwitchType type = command.getType();
             SwitchStatus status = command.getStatus();
-            NodeConfiguration nodeConfiguration = groupManager.getNodeConfiguration();
             if (SwitchType.INBOUND.equals(type)) {
                 nodeConfiguration.setConsumer(SwitchStatus.ON.equals(status));
-            } else {
+            } else if (SwitchType.OUTBOUND.equals(type)) {
                 nodeConfiguration.setProducer(SwitchStatus.ON.equals(status));
             }
             Configuration configuration = getConfigAdmin().getConfiguration(NodeConfiguration.class.getCanonicalName());
@@ -61,8 +60,8 @@ public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeEve
     }
 
     @Override
-    public Class<NodeEventConfigurationCommand> getType() {
-        return NodeEventConfigurationCommand.class;
+    public Class<NodeConfigurationCommand> getType() {
+        return NodeConfigurationCommand.class;
     }
 
     @Override

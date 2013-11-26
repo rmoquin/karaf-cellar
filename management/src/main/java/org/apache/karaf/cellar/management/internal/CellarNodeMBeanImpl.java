@@ -28,6 +28,7 @@ import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
  * Implementation of the Cellar Node MBean.
  */
 public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBean {
+
     private ClusterManager clusterManager;
     private DistributedExecutionContext executionContext;
 
@@ -68,22 +69,22 @@ public class CellarNodeMBeanImpl extends StandardMBean implements CellarNodeMBea
     public TabularData getNodes() throws Exception {
 
         CompositeType nodeType = new CompositeType("Node", "Karaf Cellar cluster node",
-                new String[] { "id", "hostname", "port", "local" },
-                new String[]{ "ID of the node", "Hostname of the node", "Port number of the node", "True if the node is local" },
-                new OpenType[]{ SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.BOOLEAN });
+                new String[]{"id", "hostname", "port", "local"},
+                new String[]{"ID of the node", "Hostname of the node", "Port number of the node", "True if the node is local"},
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING, SimpleType.INTEGER, SimpleType.BOOLEAN});
 
-        TabularType tableType = new TabularType("Nodes", "Table of all Karaf Cellar nodes", nodeType, new String[] { "id" });
+        TabularType tableType = new TabularType("Nodes", "Table of all Karaf Cellar nodes", nodeType, new String[]{"id"});
 
         TabularData table = new TabularDataSupport(tableType);
 
         Set<Node> nodes = clusterManager.listNodes();
 
-            for (Node node : nodes) {
+        for (Node node : nodes) {
             boolean local = (nodes.equals(clusterManager.getMasterCluster().getLocalNode()));
-                CompositeData data = new CompositeDataSupport(nodeType,
-                    new String[]{ "id", "hostname", "port", "local" },
-                    new Object[]{ node.getId(), node.getHost(), node.getPort(), local });
-                table.put(data);
+            CompositeData data = new CompositeDataSupport(nodeType,
+                    new String[]{"id", "hostname", "port", "local"},
+                    new Object[]{node.getId(), node.getHost(), node.getPort(), local});
+            table.put(data);
         }
 
         return table;

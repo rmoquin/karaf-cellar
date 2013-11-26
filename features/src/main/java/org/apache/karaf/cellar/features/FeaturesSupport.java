@@ -35,7 +35,7 @@ import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 /**
  * Generic features support.
  */
-public class FeaturesSupport {
+public class FeaturesSupport extends CellarSupport {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSupport.class);
 
@@ -104,7 +104,7 @@ public class FeaturesSupport {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
             Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
-            if (cellarSupport.isAllowed(feature.getName(), whitelist, blacklist)) {
+            if (isAllowed(feature.getName(), whitelist, blacklist)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     Boolean installed = featuresService.isInstalled(feature);
@@ -134,7 +134,7 @@ public class FeaturesSupport {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
             Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
-            if (cellarSupport.isAllowed(feature.getName(), whitelist, blacklist)) {
+            if (isAllowed(feature.getName(), whitelist, blacklist)) {
                 if (featuresService != null && clusterFeatures != null) {
                     FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
                     clusterFeatures.put(info, force);

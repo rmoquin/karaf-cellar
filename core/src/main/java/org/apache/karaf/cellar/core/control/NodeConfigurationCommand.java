@@ -23,19 +23,20 @@ import org.apache.karaf.cellar.core.command.Command;
  *
  * @author rmoquin
  */
-public class NodeEventConfigurationCommand extends Command<NodeEventConfigurationResult> {
+public class NodeConfigurationCommand extends Command<NodeConfigurationResult> {
 
     private SwitchStatus status = null;
     private SwitchType type = null;
 
-    public NodeEventConfigurationCommand() {
+    public NodeConfigurationCommand() {
     }
 
-    public NodeEventConfigurationCommand(String id) {
+    public NodeConfigurationCommand(String id) {
         super(id);
     }
 
-    public NodeEventConfigurationCommand(SwitchStatus status, SwitchType type) {
+    public NodeConfigurationCommand(String id, SwitchStatus status, SwitchType type) {
+        super(id);
         this.status = status;
         this.type = type;
     }

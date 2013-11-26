@@ -38,14 +38,14 @@ public class CellarSupport {
      * @param blackList the blacklisted items for a particular event.
      * @return 
      */
-    public boolean isAllowed(String url, Set<String> whiteList, Set<String> blackList) {
+    public boolean isAllowed(String event, Set<String> whiteList, Set<String> blackList) {
         boolean result = true;
         
         // if no white listed items we assume all are accepted.
         if (whiteList != null && !whiteList.isEmpty()) {
             result = false;
             for (String whiteListItem : whiteList) {
-                if (wildCardMatch(url, whiteListItem)) {
+                if (wildCardMatch(event, whiteListItem)) {
                     result = true;
                 }
             }
@@ -54,7 +54,7 @@ public class CellarSupport {
         // if any blackList item matched, then false is returned.
         if (blackList != null && !blackList.isEmpty()) {
             for (String blackListItem : blackList) {
-                if (wildCardMatch(url, blackListItem)) {
+                if (wildCardMatch(event, blackListItem)) {
                     result = false;
                 }
             }

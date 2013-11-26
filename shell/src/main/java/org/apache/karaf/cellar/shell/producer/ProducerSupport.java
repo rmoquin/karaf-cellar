@@ -22,8 +22,8 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
-import org.apache.karaf.cellar.core.control.NodeEventConfigurationResult;
-import org.apache.karaf.cellar.core.control.NodeEventConfigurationCommand;
+import org.apache.karaf.cellar.core.control.NodeConfigurationResult;
+import org.apache.karaf.cellar.core.control.NodeConfigurationCommand;
 
 /**
  * Generic cluster event producer shell command support.
@@ -37,7 +37,7 @@ public abstract class ProducerSupport extends CellarCommandSupport {
 
     protected Object doExecute(List<String> nodeNames, SwitchStatus status) throws Exception {
 
-        NodeEventConfigurationCommand command = new NodeEventConfigurationCommand();
+        NodeConfigurationCommand command = new NodeConfigurationCommand();
 
         // looking for nodes and check if exist
         Set<Node> recipientList = new HashSet<Node>();
@@ -66,7 +66,7 @@ public abstract class ProducerSupport extends CellarCommandSupport {
 
         command.setStatus(status);
 
-        Map<Node, NodeEventConfigurationResult> results = executionContext.executeAndWait(command, recipientList);
+        Map<Node, NodeConfigurationResult> results = executionContext.executeAndWait(command, recipientList);
         if (results == null || results.isEmpty()) {
             System.out.println("No result received within given timeout");
         } else {
@@ -76,7 +76,7 @@ public abstract class ProducerSupport extends CellarCommandSupport {
                 if (node.equals(clusterManager.getMasterCluster().getLocalNode())) {
                     local = "*";
                 }
-                NodeEventConfigurationResult result = results.get(node);
+                NodeConfigurationResult result = results.get(node);
                 String statusString = "OFF";
                 if (SwitchStatus.ON.equals(result.getSwitchStatus())) {
                     statusString = "ON";

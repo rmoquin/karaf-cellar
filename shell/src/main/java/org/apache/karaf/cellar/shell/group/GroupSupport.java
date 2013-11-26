@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.shell.group;
 
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageGroupActions;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -25,9 +24,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
+import org.apache.karaf.cellar.core.control.ManageGroupCommand;
+import org.apache.karaf.cellar.core.control.ManageGroupResult;
 import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
-import org.apache.karaf.cellar.core.control.ManageGroupResultImpl;
-import org.apache.karaf.cellar.core.tasks.ManageGroupCommand;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +35,13 @@ import org.slf4j.LoggerFactory;
  * Generic cluster group shell command support.
  */
 public abstract class GroupSupport extends CellarCommandSupport {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupSupport.class);
     protected static final String HEADER_FORMAT = "   %-20s   %s";
     protected static final String OUTPUT_FORMAT = "%1s [%-20s] [%s]";
     private DistributedExecutionContext executionContext;
 
-    protected Object doExecute(ManageGroupActions action, String group, Group source, Collection<String> nodes) throws Exception {
+    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodes) throws Exception {
         return doExecute(action, group, source, nodes, false);
     }
 
@@ -55,7 +56,7 @@ public abstract class GroupSupport extends CellarCommandSupport {
      * @return the Object resulting of the command execution.
      * @throws Exception in case of execution failure.
      */
-    protected Object doExecute(ManageGroupActions action, String group, Group source, Collection<String> nodeNames, Boolean suppressOutput) throws Exception {;
+    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodeNames, Boolean suppressOutput) throws Exception {;
 
         ManageGroupCommand command = new ManageGroupCommand();
         if (source == null) {
@@ -93,12 +94,12 @@ public abstract class GroupSupport extends CellarCommandSupport {
             command.setDestinationGroup(group);
         }
 
-        Map<Node, Future<ManageGroupResultImpl>> future = executionContext.execute(command, recipientList);
+        Map<Node, Future<ManageGroupResult>> future = executionContext.execute(command, recipientList);
         System.out.println(String.format(HEADER_FORMAT, "Group", "Members"));
-        for (Map.Entry<Node, Future<ManageGroupResultImpl>> entry : future.entrySet()) {
+        for (Map.Entry<Node, Future<ManageGroupResult>> entry : future.entrySet()) {
             Node node = entry.getKey();
             try {
-                ManageGroupResultImpl result = entry.getValue().get(5, TimeUnit.SECONDS);
+                ManageGroupResult result = entry.getValue().get(5, TimeUnit.SECONDS);
                 if (!suppressOutput) {
                     if (result != null && result.getGroups() != null) {
                         printGroups(result.getGroups());
@@ -140,6 +141,7 @@ public abstract class GroupSupport extends CellarCommandSupport {
     /**
      * @return the executionContext
      */
+    @Override
     public DistributedExecutionContext getExecutionContext() {
         return executionContext;
     }
@@ -147,6 +149,7 @@ public abstract class GroupSupport extends CellarCommandSupport {
     /**
      * @param executionContext the executionContext to set
      */
+    @Override
     public void setExecutionContext(DistributedExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
