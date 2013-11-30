@@ -25,10 +25,13 @@ import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
 import java.util.Set;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 
 @Command(scope = "cluster", name = "obr-remove-url", description = "Remove a repository URL from the distributed OBR service.")
-public class ObrRemoveUrlCommand extends ObrCommandSupport {
+public class ObrRemoveUrlCommand extends CellarCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name.", required = true, multiValued = false)
     String groupName;
@@ -36,7 +39,8 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
     @Argument(index = 1, name = "url", description = "The repository URL to remove from the OBR service.", required = true, multiValued = false)
     String url;
 
-    private EventProducer eventProducer;
+    private CellarSupport cellarSupport = new CellarSupport();
+    private RepositoryAdmin obrService;
 
     @Override
     public Object doExecute() throws Exception {
@@ -48,7 +52,7 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF for this node");
             return null;
         }
@@ -57,7 +61,7 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
-        if (!isAllowed(url, whitelist, blacklist)) {
+        if (!cellarSupport.isAllowed(url, whitelist, blacklist)) {
             System.err.println("OBR URL " + url + " is blocked outbound");
             return null;
         }
@@ -78,19 +82,23 @@ public class ObrRemoveUrlCommand extends ObrCommandSupport {
         }
 
         // create an event and produce it
-        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.URL_REMOVE_EVENT_TYPE);
+        ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_REMOVE_EVENT_TYPE);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
-
+        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         return null;
     }
 
-    public EventProducer getEventProducer() {
-        return eventProducer;
+    /**
+     * @return the obrService
+     */
+    public RepositoryAdmin getObrService() {
+        return obrService;
     }
 
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
+    /**
+     * @param obrService the obrService to set
+     */
+    public void setObrService(RepositoryAdmin obrService) {
+        this.obrService = obrService;
     }
-
 }

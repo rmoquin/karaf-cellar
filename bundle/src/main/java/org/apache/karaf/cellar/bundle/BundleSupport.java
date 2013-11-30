@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.bundle;
 
+import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.features.BundleInfo;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
@@ -22,16 +23,17 @@ import org.osgi.framework.BundleException;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic Cellar bundle support.
  */
-public class BundleSupport {
+public class BundleSupport extends CellarSupport {
 
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
-    protected FeaturesService featuresService;
-    protected DistributedExecutionContext executionContext;
+    private FeaturesService featuresService;
 
     /**
      * Locally install a bundle.
@@ -152,20 +154,6 @@ public class BundleSupport {
 
     public void setFeaturesService(FeaturesService featureService) {
         this.featuresService = featureService;
-    }
-
-    /**
-     * @return the executionContext
-     */
-    public DistributedExecutionContext getExecutionContext() {
-        return executionContext;
-    }
-
-    /**
-     * @param executionContext the executionContext to set
-     */
-    public void setExecutionContext(DistributedExecutionContext executionContext) {
-        this.executionContext = executionContext;
     }
 
 }

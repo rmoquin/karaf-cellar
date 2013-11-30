@@ -13,34 +13,16 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import java.util.Set;
-import org.apache.felix.bundlerepository.Reason;
-import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.bundlerepository.Resolver;
-import org.apache.felix.bundlerepository.Resource;
-import org.apache.karaf.cellar.core.CellarSupport;
-import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
-import org.apache.karaf.cellar.core.event.Event;
-import org.apache.karaf.cellar.core.control.BasicSwitch;
-import org.apache.karaf.cellar.core.control.Switch;
-import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.cellar.obr.Constants.UrlEventTypes;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.Version;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cluster OBR URL event.
  */
-public class ClusterObrUrlEvent extends Event<ClusterObrEventResponse> {
+public class ClusterObrUrlEvent extends Command<ClusterObrEventResponse> {
 
     private final String url;
     private final UrlEventTypes type;
-    private RepositoryAdmin obrService;
 
     public ClusterObrUrlEvent(String url, UrlEventTypes type) {
         this.url = url;
@@ -54,10 +36,4 @@ public class ClusterObrUrlEvent extends Event<ClusterObrEventResponse> {
     public UrlEventTypes getType() {
         return this.type;
     }
-
-    @Override
-    protected ClusterObrEventResponse execute() throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }

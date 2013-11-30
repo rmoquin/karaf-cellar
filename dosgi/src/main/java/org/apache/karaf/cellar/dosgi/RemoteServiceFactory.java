@@ -32,6 +32,12 @@ public class RemoteServiceFactory implements ServiceFactory {
     private final ClusterManager clusterManager;
     private final DistributedExecutionContext executionContext;
 
+    /**
+     *
+     * @param description
+     * @param clusterManager
+     * @param executionContext
+     */
     public RemoteServiceFactory(EndpointDescription description, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
         this.description = description;
         this.clusterManager = clusterManager;
@@ -43,12 +49,12 @@ public class RemoteServiceFactory implements ServiceFactory {
         ClassLoader classLoader = new RemoteServiceProxyClassLoader(bundle);
         List<Class> interfaces = new ArrayList<Class>();
         String interfaceName = description.getServiceClass();
-            try {
-                interfaces.add(classLoader.loadClass(interfaceName));
-            } catch (ClassNotFoundException e) {
-                // Ignore
-            }
-        RemoteServiceInvocationHandler handler = new RemoteServiceInvocationHandler(description.getId(), interfaceName,clusterManager,executionContext);
+        try {
+            interfaces.add(classLoader.loadClass(interfaceName));
+        } catch (ClassNotFoundException e) {
+            // Ignore
+        }
+        RemoteServiceInvocationHandler handler = new RemoteServiceInvocationHandler(description.getId(), interfaceName, clusterManager, executionContext);
         return Proxy.newProxyInstance(classLoader, interfaces.toArray(new Class[interfaces.size()]), handler);
     }
 

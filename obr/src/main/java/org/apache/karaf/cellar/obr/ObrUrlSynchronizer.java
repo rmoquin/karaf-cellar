@@ -21,26 +21,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
 
 /**
  * OBR URL Synchronizer.
  */
-public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
+public class ObrUrlSynchronizer implements Synchronizer {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
     private CellarSupport cellarSupport;
-    private NodeConfiguration nodeConfiguration;
     private ClusterManager clusterManager;
     private GroupManager groupManager;
+    private RepositoryAdmin obrService;
 
-    @Override
     public void init() {
-        super.init();
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
@@ -54,9 +53,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
         }
     }
 
-    @Override
     public void destroy() {
-        super.destroy();
     }
 
     /**
@@ -111,7 +108,7 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
                         // TODO fire event to the other nodes ?
                     }
                 } else {
-                	LOGGER.debug("CELLAR OBR: URL {} is marked BLOCKED OUTBOUND for cluster group {}", repository.getURI().toString(), groupName);
+                    LOGGER.debug("CELLAR OBR: URL {} is marked BLOCKED OUTBOUND for cluster group {}", repository.getURI().toString(), groupName);
                 }
             }
         }
@@ -121,20 +118,6 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     public Boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
         return this.groupManager.findGroupConfigurationByName(groupName).isSyncOBRUrls();
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**
@@ -166,16 +149,16 @@ public class ObrUrlSynchronizer extends ObrSupport implements Synchronizer {
     }
 
     /**
-     * @return the nodeConfiguration
+     * @return the obrService
      */
-    public NodeConfiguration getNodeConfiguration() {
-        return nodeConfiguration;
+    public RepositoryAdmin getObrService() {
+        return obrService;
     }
 
     /**
-     * @param nodeConfiguration the nodeConfiguration to set
+     * @param obrService the obrService to set
      */
-    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
-        this.nodeConfiguration = nodeConfiguration;
+    public void setObrService(RepositoryAdmin obrService) {
+        this.obrService = obrService;
     }
 }

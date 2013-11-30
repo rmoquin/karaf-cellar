@@ -13,11 +13,7 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import static org.junit.Assert.assertNotNull;
-
-import org.apache.karaf.cellar.core.ClusterManager;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -31,7 +27,7 @@ public class CellarEventTest extends CellarTestSupport {
     @Test
     //@Ignore
     public void testCellarEventFeatureInstall() throws Exception {
-        installCellar();        
+        installCellar();
         featureService.installFeature("cellar-eventadmin");
     }
 

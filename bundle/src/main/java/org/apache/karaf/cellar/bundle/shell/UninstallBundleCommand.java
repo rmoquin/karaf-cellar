@@ -40,7 +40,7 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         }
 
         //TODO turn back on at some point.
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }

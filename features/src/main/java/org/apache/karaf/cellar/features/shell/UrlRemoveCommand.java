@@ -17,7 +17,6 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
-import org.apache.karaf.cellar.features.RepositoryEventTask;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
@@ -28,6 +27,7 @@ import org.apache.karaf.shell.commands.Option;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
 
 @Command(scope = "cluster", name = "feature-url-remove", description = "Remove features repository URLs from a cluster group")
 public class UrlRemoveCommand extends FeatureCommandSupport {
@@ -38,7 +38,7 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
-    @Option(name = "-u", aliases = { "--uninstall-all" }, description = "Uninstall all features contained in the repository URLs", required = false, multiValued = false)
+    @Option(name = "-u", aliases = {"--uninstall-all"}, description = "Uninstall all features contained in the repository URLs", required = false, multiValued = false)
     boolean uninstall;
 
     @Override
@@ -51,9 +51,9 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
         }
 		//TODO Re-enable this functionaity,
         /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
-            return null;
-        }*/
+         System.err.println("Cluster event producer is OFF");
+         return null;
+         }*/
 
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
@@ -71,7 +71,7 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
             }
             if (found) {
                 // update the repository temporary locally
-                Repository repository  = null;
+                Repository repository = null;
                 boolean localRegistered = false;
                 // local lookup
                 for (Repository registeredRepository : featuresService.listRepositories()) {
@@ -109,11 +109,12 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
                 }
 
                 // un-register the repository if it's not local registered
-                if (!localRegistered)
+                if (!localRegistered) {
                     featuresService.removeRepository(new URI(url));
+                }
 
                 // broadcast a cluster event
-                RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryRemoved);
+                ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
                 event.setUninstall(uninstall);
                 event.setSourceGroup(group);
                 executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));

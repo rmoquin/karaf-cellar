@@ -13,21 +13,17 @@
  */
 package org.apache.karaf.cellar.utils.ping;
 
-import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.command.Command;
 
 /**
  * Cluster ping event.
  */
-public class Ping extends Event<Pong> {
+public class Ping extends Command<Pong> {
 
     public Ping() {
     }
 
-    @Override
-    protected Pong execute() throws Exception {
-        Pong pong = new Pong();
-        pong.setIsSuccessful(true);
-        return pong;
+    public Ping(String id) {
+        super(id);
     }
-
 }

@@ -18,9 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
+import java.text.MessageFormat;
+import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.apache.karaf.cellar.core.control.BasicSwitch;
+import org.apache.karaf.cellar.core.control.Switch;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.apache.karaf.cellar.core.exception.CommandExecutionException;
 import org.apache.karaf.features.FeaturesService;
-import org.apache.karaf.features.Repository;
 
 /**
  * Handler for cluster features repository event.
@@ -32,21 +37,25 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.repository.handler";
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-	private FeaturesService featuresService;
+    private final FeaturesSupport featuresSupport = new FeaturesSupport();
+    private FeaturesService featuresService;
+
     /**
      * Handle cluster features repository event.
      *
+     * @param event
      * @return
      */
     @Override
-    public RespositoryEventResponse execute(ClusterRepositoryEvent command) {
+    public RespositoryEventResponse execute(ClusterRepositoryEvent event) {
 
         RespositoryEventResponse result = new RespositoryEventResponse();
-        try {
-    	// check if the handler is ON
-		        if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
-            LOGGER.debug("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID);
-            return;
+        // check if the handler is ON
+        if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
+            LOGGER.warn("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID);
+            result.setSuccessful(false);
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {I0} switch is OFF, cluster event is not handled", SWITCH_ID)));
+            return result;
         }
 
         String uri = event.getId();
@@ -54,14 +63,14 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
         try {
             // TODO check if isAllowed
             if (RepositoryEvent.EventType.RepositoryAdded.equals(type)) {
-                if (!isRepositoryRegisteredLocally(uri)) {
+                if (!featuresSupport.isRepositoryRegisteredLocally(uri)) {
                     LOGGER.debug("CELLAR FEATURES: adding repository URI {}", uri);
                     featuresService.addRepository(new URI(uri), event.getInstall());
                 } else {
                     LOGGER.debug("CELLAR FEATURES: repository URI {} is already registered locally");
                 }
             } else {
-                if (isRepositoryRegisteredLocally(uri)) {
+                if (featuresSupport.isRepositoryRegisteredLocally(uri)) {
                     LOGGER.debug("CELLAR FEATURES: removing repository URI {}", uri);
                     featuresService.removeRepository(new URI(uri), event.getUninstall());
                 } else {
@@ -70,21 +79,31 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
             }
         } catch (Exception e) {
             LOGGER.error("CELLAR FEATURES: failed to add/remove repository URL {}", uri, e);
-            result.setThrowable(ex);
+            result.setThrowable(e);
             result.setSuccessful(false);
         }
         return result;
     }
 
-    @Override
-    public Class<ClusterRepositoryEvent> getType() {
-
-        return ClusterRepositoryEvent.class;
-    }
-
+    /**
+     * Get the handler switch.
+     *
+     * @return the handler switch.
+     */
     @Override
     public Switch getSwitch() {
+        // load the switch status from the config
+        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
+        }
         return eventSwitch;
     }
 
+    @Override
+    public Class<ClusterRepositoryEvent> getType() {
+        return ClusterRepositoryEvent.class;
+    }
 }

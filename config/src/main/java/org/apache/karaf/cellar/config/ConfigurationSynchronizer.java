@@ -49,10 +49,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     private NodeConfiguration nodeConfiguration;
     private DistributedExecutionContext executionContext;
 
-    public ConfigurationSynchronizer() {
-        // nothing to do
-    }
-
     public void init() {
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {

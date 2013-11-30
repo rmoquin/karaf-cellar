@@ -49,10 +49,9 @@ public class ExportServiceListener implements ServiceListener {
         bundleContext.addServiceListener(this);
 
         // lookup for already exported services
-        ServiceReference[] references = null;
         try {
             String filter = "(" + Constants.EXPORTED_INTERFACES + "=" + Constants.ALL_INTERFACES + ")";
-            references = bundleContext.getServiceReferences((String) null, filter);
+            ServiceReference[] references = bundleContext.getServiceReferences((String) null, filter);
 
             if (references != null) {
                 for (ServiceReference reference : references) {
@@ -156,7 +155,8 @@ public class ExportServiceListener implements ServiceListener {
                 // if the endpoint is used for export from other nodes too, then put it back.
                 if (endpointDescription.getNodes().size() > 0) {
                     remoteEndpoints.put(endpointId, endpointDescription);
-                }
+				}
+                consumers.remove(endpointId);
             }
         }
     }

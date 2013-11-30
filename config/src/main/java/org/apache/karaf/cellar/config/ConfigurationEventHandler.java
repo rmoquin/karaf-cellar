@@ -64,7 +64,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
-            if (cellarSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
+            if (configSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
 
                 Properties clusterDictionary = clusterConfigurations.get(pid);
                 Configuration conf = configAdmin.getConfiguration(pid, null);
@@ -109,25 +109,18 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
     }
 
     /**
-     * Get the cluster configuration event handler switch.
+     * Get the handler switch.
      *
-     * @return the cluster configuration event handler switch.
+     * @return the handler switch.
      */
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        try {
-            Configuration configuration = configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
-            if (configuration != null) {
-                Boolean status = Boolean.valueOf((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("An error occurred handling a configuration event.", e);
+        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }

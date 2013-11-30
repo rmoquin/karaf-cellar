@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.shell.group;
 
-import java.io.IOException;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -25,11 +24,7 @@ public class GroupCreateCommand extends GroupSupport {
 
     @Override
     protected Object doExecute() throws Exception {
-        try {
-            groupManager.createGroup(groupName);
-        } catch (IOException e) {
-            e.printStackTrace(System.err);
-        }
+        groupManager.createGroup(groupName);
         return null;
     }
 

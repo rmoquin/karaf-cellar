@@ -26,7 +26,7 @@ public abstract class CellarCommandSupport extends OsgiCommandSupport {
     protected ClusterManager clusterManager;
     protected GroupManager groupManager;
     protected DistributedExecutionContext executionContext;
-    
+
     public ClusterManager getClusterManager() {
         return clusterManager;
     }

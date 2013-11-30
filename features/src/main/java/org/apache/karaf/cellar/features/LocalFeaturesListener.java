@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.features.FeaturesListener;
 
 /**
@@ -33,7 +34,8 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
 
-	private FeatureSupport featuresSupport;
+    private FeaturesSupport featuresSupport;
+
     /**
      * This method is called when a local feature has changed.
      *
@@ -98,7 +100,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
 
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
-            		ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
+                    ClusterRepositoryEvent clusterRepositoryEvent = new ClusterRepositoryEvent(event.getRepository().getURI().toString(), event.getType());
                     clusterRepositoryEvent.setSourceGroup(group);
                     RepositoryEvent.EventType type = event.getType();
 

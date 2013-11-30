@@ -19,6 +19,7 @@ import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
     private final ClusterManager clusterManager;
     private final DistributedExecutionContext executionContext;
 
-    public RemoteServiceInvocationHandler(String endpointId,String serviceClass, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
+    public RemoteServiceInvocationHandler(String endpointId, String serviceClass, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
         this.endpointId = endpointId;
         this.serviceClass = serviceClass;
         this.clusterManager = clusterManager;
@@ -42,23 +43,21 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object o, Method method, Object[] arguments) throws Throwable {
-        RemoteServiceCallTask remoteServiceCall = new RemoteServiceCallTask();
+        RemoteServiceCall remoteServiceCall = new RemoteServiceCall();
         remoteServiceCall.setEndpointId(endpointId);
         remoteServiceCall.setMethod(method.getName());
         remoteServiceCall.setServiceClass(serviceClass);
         List argumentList = new LinkedList();
 
-        if(arguments != null && arguments.length > 0) {
-            for(Object arg:arguments) {
-                argumentList.add(arg);
-            }
+        if (arguments != null && arguments.length > 0) {
+            argumentList.addAll(Arrays.asList(arguments));
         }
 
         remoteServiceCall.setArguments(argumentList);
-        Map<Node,RemoteServiceResult> results =  executionContext.execute(remoteServiceCall, this.clusterManager.getMasterCluster().getLocalNode());
+        Map<Node, RemoteServiceResult> results = executionContext.execute(remoteServiceCall, this.clusterManager.getMasterCluster().getLocalNode());
 
-        if(results != null) {
-            for(Map.Entry<Node,RemoteServiceResult> entry:results.entrySet()) {
+        if (results != null) {
+            for (Map.Entry<Node, RemoteServiceResult> entry : results.entrySet()) {
                 RemoteServiceResult result = entry.getValue();
                 return result.getResult();
             }

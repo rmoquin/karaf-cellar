@@ -15,7 +15,7 @@ package org.apache.karaf.cellar.shell.group;
 
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.core.control.ManageGroupActions;
+import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
 
@@ -62,11 +62,11 @@ public class GroupPickCommand extends GroupSupport {
             }
             List<String> recipients = new LinkedList<String>();
             recipients.add(node.getName());
-            doExecute(ManageGroupActions.SET, targetGroupName, sourceGroup, recipients);
+            doExecute(ManageGroupAction.SET, targetGroupName, sourceGroup, recipients);
             i++;
         }
 
-        return doExecute(ManageGroupActions.LIST, null, null, new ArrayList(), false);
+        return doExecute(ManageGroupAction.LIST, null, null, new ArrayList(), false);
     }
 
 }

@@ -30,16 +30,17 @@ import org.slf4j.LoggerFactory;
  * @author rmoquin
  */
 public class BundleClassLoader extends ClassLoader {
-    private static Logger LOGGER = LoggerFactory.getLogger(BundleClassLoader.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BundleClassLoader.class);
     private BundleContext bundleContext;
     private Bundle bundle;
     private HazelcastBundleListener bundleListener;
-    private int length = "META-INF/services/".length();
+    private final int length = "META-INF/services/".length();
 
     public void init() {
         this.bundle = bundleContext.getBundle();
     }
-    
+
     public void destroy() {
         this.bundleContext = null;
         this.bundle = null;
@@ -81,7 +82,7 @@ public class BundleClassLoader extends ClassLoader {
         LOGGER.warn(metainfClazz);
         if (bundleListener.getResources().containsKey(metainfClazz)) {
             return Collections.enumeration(bundleListener.getResources().get(metainfClazz));
-       } else {
+        } else {
             return bundle.findEntries(name, "*", false);
         }
     }

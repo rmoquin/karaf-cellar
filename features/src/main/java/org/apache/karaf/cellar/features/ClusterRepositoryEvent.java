@@ -13,15 +13,15 @@
  */
 package org.apache.karaf.cellar.features;
 
-import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.features.RepositoryEvent.EventType;
 
 /**
  * Cluster features repository event.
  */
-public class ClusterRepositoryEvent extends Event {
+public class ClusterRepositoryEvent extends Command<RespositoryEventResponse> {
 
-	private EventType type;
+    private final EventType type;
     private Boolean install;
     private Boolean uninstall;
 
@@ -51,11 +51,11 @@ public class ClusterRepositoryEvent extends Event {
     }
 
     @Override
-	public String toString() {
-		return "ClusterRepositoryEvent [type=" + type + ", id=" + id
-				+ ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
-				+ ", destination=" + destination + ", force=" + force
-				+ ", postPublish=" + postPublish + "]";
-	}
-    
+    public String toString() {
+        return "ClusterRepositoryEvent [type=" + type + ", id=" + id
+                + ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
+                + ", destination=" + destination + ", force=" + force
+                + ", postPublish=" + postPublish + "]";
+    }
+
 }

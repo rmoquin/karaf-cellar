@@ -64,7 +64,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
             }
             result.setSuccessful(true);
         } catch (Exception ex) {
-            LOGGER.error("Task wasn't processed for some reason.", ex);
+            LOGGER.error("Command wasn't processed for some reason.", ex);
             result.setThrowable(ex);
             result.setSuccessful(false);
         }

@@ -40,7 +40,7 @@
             <version>${karaf.version}</version>
             <type>zip</type>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
@@ -67,10 +67,19 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.instance</groupId>
+            <artifactId>org.apache.karaf.instance.core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-container-karaf</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.ops4j.pax.exam</groupId>
             <artifactId>pax-exam-junit4</artifactId>

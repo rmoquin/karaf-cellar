@@ -53,11 +53,11 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
     public void start() {
         super.activate(bundleContext);
         this.classLoader = this.getClass().getClassLoader();
-        this.LOGGER.info("{} plugin activated", LABEL);
+        LOGGER.info("{} plugin activated", LABEL);
     }
 
     public void stop() {
-        this.LOGGER.info("{} plugin deactivated", LABEL);
+        LOGGER.info("{} plugin deactivated", LABEL);
         super.deactivate();
     }
 
@@ -83,8 +83,12 @@ public class CellarPlugin extends AbstractWebConsolePlugin {
         if (action == null) {
             success = true;
         } else if (action.equals("createGroup")) {
-            groupManager.createGroup(group);
-            success = true;
+            try {
+                groupManager.createGroup(group);
+                success = true;
+            } catch (ConfigurationException ex) {
+                throw new ServletException("Error creating group.", ex);
+            }
         } else if (action.equals("deleteGroup")) {
             groupManager.deregisterNodeFromGroup(group);
             success = true;

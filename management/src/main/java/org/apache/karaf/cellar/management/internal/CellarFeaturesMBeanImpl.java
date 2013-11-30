@@ -38,8 +38,8 @@ import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.features.FeaturesEventCommand;
-import org.apache.karaf.cellar.features.RepositoryEventCommand;
+import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
+import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
 
 /**
  * Implementation of the Cellar Features MBean.
@@ -119,7 +119,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         }
 
         // broadcast the cluster event
-        FeaturesEventCommand event = new FeaturesEventCommand(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
+        ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceGroup(group);
         executionContext.execute(event, group.getNodes());
     }
@@ -189,7 +189,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
         clusterFeatures.put(feature, false);
 
         // broadcast the cluster event
-        FeaturesEventCommand event = new FeaturesEventCommand(name, version, FeatureEvent.EventType.FeatureUninstalled);
+        ClusterFeaturesEvent event = new ClusterFeaturesEvent(name, version, FeatureEvent.EventType.FeatureUninstalled);
         event.setSourceGroup(group);
         executionContext.execute(event, group.getNodes());
     }
@@ -302,6 +302,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
                 localRegistered = true;
             }
 
+            if (repository == null) {
+                throw new IllegalArgumentException("Features repository URL " + url + " not found in cluster group " + groupName);
+            }
+
             // update the cluster group
             clusterRepositories.add(url);
 
@@ -316,7 +320,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // broadcast the cluster event
-            RepositoryEventCommand event = new RepositoryEventCommand(url, RepositoryEvent.EventType.RepositoryAdded);
+            ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
             event.setInstall(install);
             event.setSourceGroup(group);
             executionContext.execute(event, group.getNodes());
@@ -384,6 +388,10 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
                 localRegistered = true;
             }
 
+            if (repository == null) {
+                throw new IllegalArgumentException("Features repository URL " + url + " not found in cluster group " + groupName);
+            }
+
             // update the cluster group
             clusterRepositories.remove(url);
 
@@ -398,7 +406,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
             }
 
             // broadcast a cluster event
-            RepositoryEventCommand event = new RepositoryEventCommand(url, RepositoryEvent.EventType.RepositoryRemoved);
+            ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
             event.setUninstall(uninstall);
             event.setSourceGroup(group);
             executionContext.execute(event, group.getNodes());

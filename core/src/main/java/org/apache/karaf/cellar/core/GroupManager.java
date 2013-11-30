@@ -109,7 +109,11 @@ public interface GroupManager {
     public Set<String> listGroupNames(Node node);
 
     public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties);
-
+    /**
+     * Register the local node in a given cluster group.
+     *
+     * @param group the cluster group to join.
+     */
     public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException;
 
     /**

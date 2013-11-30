@@ -40,16 +40,15 @@ public class StopBundleCommand extends BundleCommandSupport {
         }
 
         //TODO turn back on at some point.
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
         // update the bundle in the cluster group
         String location;
-        String key = null;
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-        key = selector(clusterBundles);
+        String key = selector(clusterBundles);
 
         if (key == null) {
             System.err.println("Bundle " + key + " not found in cluster group " + groupName);

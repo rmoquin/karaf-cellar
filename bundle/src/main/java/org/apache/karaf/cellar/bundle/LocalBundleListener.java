@@ -25,9 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * LocalBundleListener is listening for local bundles changes. When a local bundle change occurs, this listener updates
@@ -38,7 +38,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalBundleListener.class);
     private GroupManager groupManager;
     private CellarCluster masterCluster;
-    private CellarSupport cellarSupport;
+    private DistributedExecutionContext executionContext;
 
     /**
      * Callback method called when a local bundle status change.
@@ -85,7 +85,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                     Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
                     Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
-                    if (cellarSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
+                    if (isAllowed(bundleLocation, whitelist, blacklist)) {
                         try {
                             // update bundles in the cluster group
                             Map<String, BundleState> clusterBundles = masterCluster.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + group.getName());
@@ -107,7 +107,7 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
                             Set<String> featuresWhitelist = groupConfig.getOutboundFeatureWhitelist();
                             Set<String> featuresBlacklist = groupConfig.getOutboundFeatureBlacklist();
                             for (Feature feature : matchingFeatures) {
-                                if (!cellarSupport.isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
+                                if (!isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
                                     LOGGER.debug("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED OUTBOUND for cluster group {}", bundleLocation, feature.getName(), group.getName());
                                     return;
                                 }
@@ -166,16 +166,16 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
     }
 
     /**
-     * @return the cellarSupport
+     * @return the executionContext
      */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
     }
 
     /**
-     * @param cellarSupport the cellarSupport to set
+     * @param executionContext the executionContext to set
      */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

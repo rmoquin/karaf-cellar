@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 /**
  * Implementation of the Cellar OBR MBean.
@@ -96,10 +97,9 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         }
 
         // check if the producer is ON
-        //TODO Implement this.
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
@@ -127,7 +127,7 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_ADD_EVENT_TYPE);
         event.setSourceGroup(group);
-//        event.setForce(true);
+        event.setForce(true);
         executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
     }
 
@@ -139,11 +139,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-//TODO figure out how to handle this
         // check if the producer is ON
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // check if the URL is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
@@ -182,11 +181,10 @@ public class CellarOBRMBeanImpl extends StandardMBean implements CellarOBRMBean 
             throw new IllegalArgumentException("Cluster group " + groupName + " doesn't exist");
         }
 
-//TODO figure out how to handle this
         // check if the producer is ON
-//        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         // check if the bundle ID is allowed outbound
         CellarSupport support = new CellarSupport();
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());

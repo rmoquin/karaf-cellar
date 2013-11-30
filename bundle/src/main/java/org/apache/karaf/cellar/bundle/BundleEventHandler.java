@@ -28,7 +28,6 @@ import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
-import org.osgi.service.cm.Configuration;
 
 /**
  * The BundleEventHandler is responsible to process received cluster event for bundles.
@@ -77,19 +76,19 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
                         return result;
                     }
                 }
-                if (command.getTyoe() == BundleEvent.INSTALLED) {
+                if (command.getType() == BundleEvent.INSTALLED) {
                     LOGGER.debug("CELLAR BUNDLE: installing bundle {} from {}", command.getId(), command.getLocation());
                     bundleSupport.installBundleFromLocation(command.getLocation());
-                } else if (command.getTyoe() == BundleEvent.UNINSTALLED) {
+                } else if (command.getType() == BundleEvent.UNINSTALLED) {
                     LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}/{}", command.getSymbolicName(), command.getVersion());
                     bundleSupport.uninstallBundle(command.getSymbolicName(), command.getVersion());
-                } else if (command.getTyoe() == BundleEvent.STARTED) {
+                } else if (command.getType() == BundleEvent.STARTED) {
                     LOGGER.debug("CELLAR BUNDLE: starting bundle {}/{}", command.getSymbolicName(), command.getVersion());
                     bundleSupport.startBundle(command.getSymbolicName(), command.getVersion());
-                } else if (command.getTyoe() == BundleEvent.STOPPED) {
+                } else if (command.getType() == BundleEvent.STOPPED) {
                     LOGGER.debug("CELLAR BUNDLE: stopping bundle {}/{}", command.getSymbolicName(), command.getVersion());
                     bundleSupport.stopBundle(command.getSymbolicName(), command.getVersion());
-                } else if (command.getTyoe() == BundleEvent.UPDATED) {
+                } else if (command.getType() == BundleEvent.UPDATED) {
                     LOGGER.debug("CELLAR BUNDLE: updating bundle {}/{}", command.getSymbolicName(), command.getVersion());
                     bundleSupport.updateBundle(command.getSymbolicName(), command.getVersion());
                 }
@@ -115,25 +114,18 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     }
 
     /**
-     * Get the cluster bundle event handler switch.
+     * Get the handler switch.
      *
-     * @return the cluster bundle event handler switch.
+     * @return the handler switch.
      */
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        try {
-            Configuration configuration = configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
-            if (configuration != null) {
-                Boolean status = new Boolean((String) configuration.getProperties().get(Configurations.HANDLER + "." + this.getClass().getName()));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
-            }
-        } catch (Exception e) {
-            // ignore
+        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }

@@ -23,6 +23,7 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
@@ -52,7 +53,7 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
             Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
-            if (cellarSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
+            if (eventSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
                 Map<String, Serializable> properties = event.getProperties();
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
@@ -84,15 +85,11 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        try {
-            boolean status = nodeConfiguration.getEnabledEvents().contains(this.getClass().getName());
-            if (status) {
-                eventSwitch.turnOn();
-            } else {
-                eventSwitch.turnOff();
-            }
-        } catch (Exception e) {
-            // ignore
+        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }

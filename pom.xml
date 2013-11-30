@@ -43,7 +43,7 @@
         <felix.webconsole.version>4.2.0</felix.webconsole.version>
         <felix.annotations.version>1.9.6</felix.annotations.version>
         <felix.scr.plugin.version>1.15.0</felix.scr.plugin.version>
-        <hazelcast.version>3.1</hazelcast.version>
+        <hazelcast.version>3.1.1</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
@@ -258,6 +258,11 @@
             <dependency>
                 <groupId>org.apache.karaf.shell</groupId>
                 <artifactId>org.apache.karaf.shell.console</artifactId>
+                <version>${karaf.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.karaf.instance</groupId>
+                <artifactId>org.apache.karaf.instance.core</artifactId>
                 <version>${karaf.version}</version>
             </dependency>
 

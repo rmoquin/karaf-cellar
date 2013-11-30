@@ -14,10 +14,11 @@
 package org.apache.karaf.cellar.obr.shell;
 
 import java.util.Set;
+import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventProducer;
+import org.apache.karaf.cellar.core.shell.CellarCommandSupport;
 import org.apache.karaf.cellar.obr.ClusterObrBundleEvent;
 import org.apache.karaf.cellar.obr.Constants;
 import org.apache.karaf.shell.commands.Argument;
@@ -25,18 +26,18 @@ import org.apache.karaf.shell.commands.Command;
 import org.apache.karaf.shell.commands.Option;
 
 @Command(scope = "cluster", name = "obr-deploy", description = "Deploy an OBR bundle in a cluster group")
-public class ObrDeployCommand extends ObrCommandSupport {
+public class ObrDeployCommand extends CellarCommandSupport {
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
     String groupName;
 
-    @Argument(index = 1, name="bundleId", description = "The bundle ID (symbolicname,version in the OBR) to deploy", required = true, multiValued = false)
+    @Argument(index = 1, name = "bundleId", description = "The bundle ID (symbolicname,version in the OBR) to deploy", required = true, multiValued = false)
     String bundleId;
 
-    @Option(name = "-s", aliases = { "--start" }, description = "Start the deployed bundles.", required = false, multiValued = false)
+    @Option(name = "-s", aliases = {"--start"}, description = "Start the deployed bundles.", required = false, multiValued = false)
     boolean start = false;
 
-    private EventProducer eventProducer;
+    protected CellarSupport cellarSupport = new CellarSupport();
 
     @Override
     public Object doExecute() throws Exception {
@@ -48,7 +49,7 @@ public class ObrDeployCommand extends ObrCommandSupport {
         }
 
         // check if the producer is ON
-        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
         }
@@ -57,27 +58,20 @@ public class ObrDeployCommand extends ObrCommandSupport {
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
         Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
-        if (!isAllowed(bundleId, whitelist, blacklist)) {
+        if (!cellarSupport.isAllowed(bundleId, whitelist, blacklist)) {
             System.err.println("OBR bundle " + bundleId + " is blocked outbound for cluster group " + groupName);
             return null;
         }
 
         // broadcast a cluster event
         int type = 0;
-        if (start) type = Constants.BUNDLE_START_EVENT_TYPE;
+        if (start) {
+            type = Constants.BUNDLE_START_EVENT_TYPE;
+        }
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
         event.setSourceGroup(group);
-        eventProducer.produce(event);
+        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
 
         return null;
     }
-
-    public EventProducer getEventProducer() {
-        return eventProducer;
-    }
-
-    public void setEventProducer(EventProducer eventProducer) {
-        this.eventProducer = eventProducer;
-    }
-
 }

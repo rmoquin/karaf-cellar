@@ -73,8 +73,8 @@
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>
         </dependency>
-<!-- Configuration Admin -->
-<dependency>
+        <!-- Configuration Admin -->
+        <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
         </dependency>

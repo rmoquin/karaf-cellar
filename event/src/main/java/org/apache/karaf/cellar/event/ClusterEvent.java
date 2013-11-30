@@ -25,6 +25,9 @@ public class ClusterEvent extends Command<ClusterEventResult> {
     private String topicName;
     private Map<String, Serializable> properties;
 
+    public ClusterEvent() {
+    }
+
     public ClusterEvent(String topicName, Map<String, Serializable> properties) {
         super(topicName);
         this.topicName = topicName;
@@ -34,7 +37,7 @@ public class ClusterEvent extends Command<ClusterEventResult> {
     public String getTopicName() {
         return this.topicName;
     }
-    
+
     public void setTopicName(String topicName) {
         this.topicName = topicName;
     }

@@ -13,21 +13,21 @@
  */
 package org.apache.karaf.cellar.features;
 
-import org.apache.karaf.cellar.core.event.Event;
+import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.features.FeatureEvent.EventType;
 
 /**
  * Cluster features event.
  */
-public class ClusterFeaturesEvent extends Event {
+public class ClusterFeaturesEvent extends Command<FeatureEventResponse> {
 
     private static final String separator = "/";
 
-    private String name;
-    private String version;
-    private Boolean noClean;
-    private Boolean noRefresh;
-    private EventType type;
+    private final String name;
+    private final String version;
+    private final Boolean noClean;
+    private final Boolean noRefresh;
+    private final EventType type;
 
     public ClusterFeaturesEvent(String name, String version, EventType type) {
         super(name + separator + version);

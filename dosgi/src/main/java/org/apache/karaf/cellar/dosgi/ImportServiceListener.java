@@ -36,11 +36,12 @@ import org.osgi.framework.ServiceReference;
  * Listener for the service import.
  */
 public class ImportServiceListener implements ListenerHook, Runnable {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ImportServiceListener.class);
     private BundleContext bundleContext;
     private ClusterManager clusterManager;
     private Map<String, EndpointDescription> remoteEndpoints;
-    private Set<ListenerInfo> pendingListeners = new LinkedHashSet<ListenerInfo>();
+    private final Set<ListenerInfo> pendingListeners = new LinkedHashSet<ListenerInfo>();
     private final Map<EndpointDescription, ServiceRegistration> registrations = new HashMap<EndpointDescription, ServiceRegistration>();
     private final Map<String, String> producers = new HashMap<String, String>();
     private final Map<String, String> consumers = new HashMap<String, String>();

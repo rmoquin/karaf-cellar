@@ -19,11 +19,16 @@ import org.osgi.service.event.EventAdmin;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.karaf.cellar.core.CellarSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic Cellar OSGi event support.
  */
-public class EventSupport {
+public class EventSupport extends CellarSupport {
+
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(EventSupport.class);
     protected EventAdmin eventAdmin;
 
     /**
@@ -41,8 +46,9 @@ public class EventSupport {
             // event property (org.osgi.framework.ServiceEvent for instance) contains non serializable objects (like source or service reference)
             if (!propertyName.equals("event")) {
                 Object property = event.getProperty(propertyName);
-                if (property instanceof Serializable)
+                if (property instanceof Serializable) {
                     properties.put(propertyName, (Serializable) property);
+                }
             }
         }
 

@@ -16,7 +16,7 @@ package org.apache.karaf.cellar.features.shell;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.features.FeaturesEventTask;
+import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
@@ -25,10 +25,10 @@ import org.apache.karaf.shell.commands.Option;
 @Command(scope = "cluster", name = "feature-install", description = "Install a feature in a cluster group")
 public class InstallFeatureCommand extends FeatureCommandSupport {
 
-    @Option(name = "-c", aliases = { "--no-clean" }, description = "Do not uninstall bundles on failure", required = false, multiValued = false)
+    @Option(name = "-c", aliases = {"--no-clean"}, description = "Do not uninstall bundles on failure", required = false, multiValued = false)
     boolean noClean;
 
-    @Option(name = "-r", aliases = { "--no-auto-refresh" }, description = "Do not automatically refresh bundles", required = false, multiValued = false)
+    @Option(name = "-r", aliases = {"--no-auto-refresh"}, description = "Do not automatically refresh bundles", required = false, multiValued = false)
     boolean noRefresh;
 
     @Argument(index = 0, name = "group", description = "The cluster group name", required = true, multiValued = false)
@@ -78,7 +78,7 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
         updateFeatureStatus(groupName, feature, version, true);
 
         // broadcast the cluster event
-        FeaturesEventTask event = new FeaturesEventTask(feature, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
+        ClusterFeaturesEvent event = new ClusterFeaturesEvent(feature, version, noClean, noRefresh, FeatureEvent.EventType.FeatureInstalled);
         event.setSourceGroup(group);
         executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
         return null;

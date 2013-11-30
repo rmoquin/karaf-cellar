@@ -47,11 +47,10 @@
                             org.apache.karaf.cellar.core*;version="${project.version}",
                             org.apache.karaf.cellar*;version="${project.version}",
                             org.apache.felix.service.command,
-                            org.apache.karaf.shell.console;version="[3,4)",
-                            org.apache.karaf.shell.console.commands;version="[3,4)",
-                            org.apache.karaf.shell.console.completer;version="[3,4)",
-                            org.apache.karaf.shell.commands;version="[3,4)",
-                            org.osgi*,
+                            org.apache.karaf.shell.console,
+                            org.apache.karaf.shell.console.commands,
+                            org.apache.karaf.shell.console.completer,
+                            org.apache.karaf.shell.commands,
                             *
                         </Import-Package>
                     </instructions>
@@ -61,6 +60,14 @@
     </build>
 
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+        </dependency>
 
         <!-- Internal Dependencies -->
         <dependency>

@@ -17,7 +17,7 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.features.Constants;
 import org.apache.karaf.cellar.features.FeatureInfo;
-import org.apache.karaf.cellar.features.RepositoryEventTask;
+import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.Repository;
 import org.apache.karaf.features.RepositoryEvent;
@@ -38,7 +38,7 @@ public class UrlAddCommand extends FeatureCommandSupport {
     @Argument(index = 1, name = "urls", description = "One or more features repository URLs separated by whitespaces", required = true, multiValued = true)
     List<String> urls;
 
-    @Option(name = "-i", aliases = { "--install-all" }, description = "Install all features contained in the repository URLs", required = false, multiValued = false)
+    @Option(name = "-i", aliases = {"--install-all"}, description = "Install all features contained in the repository URLs", required = false, multiValued = false)
     boolean install;
 
     @Override
@@ -52,75 +52,76 @@ public class UrlAddCommand extends FeatureCommandSupport {
 
 		//TODO Re-enable this functionaity,
         /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            System.err.println("Cluster event producer is OFF");
-            return null;
-        }*/
-            // get the features repositories in the cluster group
-            List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
-            // get the features in the cluster group
-            Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+         System.err.println("Cluster event producer is OFF");
+         return null;
+         }*/
+        // get the features repositories in the cluster group
+        List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
+        // get the features in the cluster group
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
 
-            for (String url : urls) {
-                // check if the URL is already registered
-                boolean found = false;
-                for (String repository : clusterRepositories) {
-                    if (repository.equals(url)) {
-                        found = true;
+        for (String url : urls) {
+            // check if the URL is already registered
+            boolean found = false;
+            for (String repository : clusterRepositories) {
+                if (repository.equals(url)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                // update the repository temporary locally
+                Repository repository = null;
+                boolean localRegistered = false;
+                // local lookup
+                for (Repository registeredRepository : featuresService.listRepositories()) {
+                    if (registeredRepository.getURI().equals(new URI(url))) {
+                        repository = registeredRepository;
                         break;
                     }
                 }
-                if (!found) {
-                    // update the repository temporary locally
-                    Repository repository  = null;
-                    boolean localRegistered = false;
-                    // local lookup
+                if (repository == null) {
+                    // registered locally
+                    try {
+                        featuresService.addRepository(new URI(url));
+                    } catch (Exception e) {
+                        System.err.println("Repository URL " + url + " is not valid: " + e.getMessage());
+                        continue;
+                    }
+                    // get the repository
                     for (Repository registeredRepository : featuresService.listRepositories()) {
                         if (registeredRepository.getURI().equals(new URI(url))) {
                             repository = registeredRepository;
                             break;
                         }
                     }
-                    if (repository == null) {
-                        // registered locally
-                        try {
-                            featuresService.addRepository(new URI(url));
-                        } catch (Exception e) {
-                            System.err.println("Repository URL " + url + " is not valid: " + e.getMessage());
-                            continue;
-                        }
-                        // get the repository
-                        for (Repository registeredRepository : featuresService.listRepositories()) {
-                            if (registeredRepository.getURI().equals(new URI(url))) {
-                                repository = registeredRepository;
-                                break;
-                            }
-                        }
-                    } else {
-                        localRegistered = true;
-                    }
-
-                    // update the features repositories in the cluster group
-                    clusterRepositories.add(url);
-
-                    // update the features in the cluster group
-                    for (Feature feature : repository.getFeatures()) {
-                        FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
-                        clusterFeatures.put(info, false);
-                    }
-
-                    // un-register the repository if it's not local registered
-                    if (!localRegistered)
-                        featuresService.removeRepository(new URI(url));
-
-                    // broadcast the cluster event
-                    RepositoryEventTask event = new RepositoryEventTask(url, RepositoryEvent.EventType.RepositoryAdded);
-                    event.setInstall(install);
-                    event.setSourceGroup(group);
-                    executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
                 } else {
-                    System.err.println("Features repository URL " + url + " already registered");
+                    localRegistered = true;
                 }
+
+                // update the features repositories in the cluster group
+                clusterRepositories.add(url);
+
+                // update the features in the cluster group
+                for (Feature feature : repository.getFeatures()) {
+                    FeatureInfo info = new FeatureInfo(feature.getName(), feature.getVersion());
+                    clusterFeatures.put(info, false);
+                }
+
+                // un-register the repository if it's not local registered
+                if (!localRegistered) {
+                    featuresService.removeRepository(new URI(url));
+                }
+
+                // broadcast the cluster event
+                ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
+                event.setInstall(install);
+                event.setSourceGroup(group);
+                executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+            } else {
+                System.err.println("Features repository URL " + url + " already registered");
             }
+        }
 
         return null;
     }

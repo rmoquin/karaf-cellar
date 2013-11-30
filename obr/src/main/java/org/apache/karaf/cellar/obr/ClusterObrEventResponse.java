@@ -15,41 +15,18 @@
  */
 package org.apache.karaf.cellar.obr;
 
-import org.apache.karaf.cellar.core.command.DistributedResult;
+import org.apache.karaf.cellar.core.command.Result;
 
 /**
  *
  * @author Ryan
  */
-public class ClusterObrEventResponse implements DistributedResult {
-
-    private boolean successful = true;
-    private Throwable throwable;
+public class ClusterObrEventResponse extends Result {
 
     public ClusterObrEventResponse() {
     }
 
-    @Override
-    public boolean isSuccessful() {
-        return successful;
-    }
-
-    @Override
-    public Throwable getThrowable() {
-        return throwable;
-    }
-
-    /**
-     * @param throwable the throwable to set
-     */
-    public void setThrowable(Throwable throwable) {
-        this.throwable = throwable;
-    }
-
-    /**
-     * @param successful the successful to set
-     */
-    public void setSuccessful(boolean successful) {
-        this.successful = successful;
+    public ClusterObrEventResponse(String id) {
+        super(id);
     }
 }

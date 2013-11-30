@@ -13,38 +13,30 @@
  */
 package org.apache.karaf.cellar.obr;
 
+import java.text.MessageFormat;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarSupport;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
+import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.apache.karaf.cellar.core.event.EventHandler;
+import org.apache.karaf.cellar.core.exception.CommandExecutionException;
+import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Handler for cluster OBR URL event.
  */
-public class ObrUrlEventHandler extends ObrSupport implements EventHandler<ClusterObrUrlEvent> {
+public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, ClusterObrEventResponse> {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlEventHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.urls.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private CellarSupport cellarSupport;
-    private NodeConfiguration nodeConfiguration;
-    private GroupManager groupManager;
-
-    @Override
-    public void init() {
-        super.init();
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-    }
+    private RepositoryAdmin obrService;
+    private BundleContext bundleContext;
 
     /**
      * Handle a received cluster OBR URL event.
@@ -52,30 +44,27 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
      * @param event the received cluster OBR URL event.
      */
     @Override
-    public void handle(ClusterObrUrlEvent event) {
-
+    public ClusterObrEventResponse execute(ClusterObrUrlEvent event) {
+        ClusterObrEventResponse response = new ClusterObrEventResponse(event.getId());
         // check if the handler is ON
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR OBR: {} switch is OFF", SWITCH_ID);
-            return;
+            response.setSuccessful(false);
+            response.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID)));
+            return response;
         }
 
-        // check if the group is local
-        if (!groupManager.isLocalGroup(event.getSourceGroup().getName())) {
-            LOGGER.debug("CELLAR OBR: node is not part of the event cluster group {}", event.getSourceGroup().getName());
-            return;
-        }
         String url = event.getUrl();
         try {
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
-        	Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
-        	Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
+            Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
+            Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
             if (cellarSupport.isAllowed(url, whitelist, blacklist) || event.getForce()) {
-                if (event.getType() == Constants.URL_ADD_EVENT_TYPE) {
+                if (event.getType() == Constants.UrlEventTypes.URL_ADD_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: adding repository URL {}", url);
                     obrService.addRepository(url);
                 }
-                if (event.getType() == Constants.URL_REMOVE_EVENT_TYPE) {
+                if (event.getType() == Constants.UrlEventTypes.URL_REMOVE_EVENT_TYPE) {
                     LOGGER.debug("CELLAR OBR: removing repository URL {}", url);
                     boolean removed = obrService.removeRepository(url);
                     if (!removed) {
@@ -85,7 +74,10 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
             }
         } catch (Exception e) {
             LOGGER.error("CELLAR OBR: failed to register repository URL {}", url, e);
+            response.setThrowable(e);
+            response.setSuccessful(false);
         }
+        return response;
     }
 
     @Override
@@ -93,61 +85,48 @@ public class ObrUrlEventHandler extends ObrSupport implements EventHandler<Clust
         return ClusterObrUrlEvent.class;
     }
 
+    /**
+     * Get the handler switch.
+     *
+     * @return the handler switch.
+     */
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        try {
-            Boolean status = this.nodeConfiguration.getEnabledEvents().contains(this.getClass().getName());
-            if (status) {
-                eventSwitch.turnOn();
-            } else {
-                eventSwitch.turnOff();
-            }
-        } catch (Exception e) {
-            // ignore
+        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
-        return this.eventSwitch;
+        return eventSwitch;
     }
 
     /**
-     * @return the cellarSupport
+     * @return the obrService
      */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
+    public RepositoryAdmin getObrService() {
+        return obrService;
     }
 
     /**
-     * @param cellarSupport the cellarSupport to set
+     * @param obrService the obrService to set
      */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
+    public void setObrService(RepositoryAdmin obrService) {
+        this.obrService = obrService;
     }
 
     /**
-     * @return the groupManager
+     * @return the bundleContext
      */
-    public GroupManager getGroupManager() {
-        return groupManager;
+    public BundleContext getBundleContext() {
+        return bundleContext;
     }
 
     /**
-     * @param groupManager the groupManager to set
+     * @param bundleContext the bundleContext to set
      */
-    public void setGroupManager(GroupManager groupManager) {
-        this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the nodeConfiguration
-     */
-    public NodeConfiguration getNodeConfiguration() {
-        return nodeConfiguration;
-    }
-
-    /**
-     * @param nodeConfiguration the nodeConfiguration to set
-     */
-    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
-        this.nodeConfiguration = nodeConfiguration;
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }
