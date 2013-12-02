@@ -24,7 +24,7 @@
         <property name="eventProducer" ref="eventProducer"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="cellarSupport" ref="cellarSupport"/>
-        <property name="executionContext" ref="executionContext"/>`
+        <property name="executionContext" ref="executionContext"/>
     </bean>
     
     <service ref="localEventListener">
