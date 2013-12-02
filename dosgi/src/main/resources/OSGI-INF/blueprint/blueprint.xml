@@ -7,13 +7,18 @@
 
          http://www.apache.org/licenses/LICENSE-2.0
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-  -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<blueprint default-availability="mandatory"
+           xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="
+           http://www.osgi.org/xmlns/blueprint/v1.0.0
+           http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Import Service Listener -->
     <bean id="importServiceListener" class="org.apache.karaf.cellar.dosgi.ImportServiceListener" init-method="init" destroy-method="destroy">
@@ -30,17 +35,23 @@
     </bean>
 
     <!-- Remote Service Call Event Handler -->
-    <bean id="remoteServiceCallTask" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallTask">
+    <bean id="remoteServiceCallHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler">
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configAdmin" ref="configAdmin"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
-    
-    <service ref="remoteServiceCallTask" interface="org.apache.karaf.cellar.core.command.DistributedTask">
+
+    <service ref="remoteServiceCallHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
 
-    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional"/>
+    <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager" availability="optional"/>
+    <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager" availability="optional"/>
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 </blueprint>

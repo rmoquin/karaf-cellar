@@ -21,12 +21,12 @@
        http://aries.apache.org/blueprint/xmlns/blueprint-cm/v1.1.0 http://aries.apache.org/schemas/blueprint-cm/blueprint-cm-1.1.0.xsd">
 
     <ext:property-placeholder />
-    
+
     <bean id="bundleListener" class="org.apache.karaf.cellar.hazelcast.HazelcastBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
-    
+
     <bean id="bundleClassLoader" class="org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader" init-method="init"
           destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
@@ -38,27 +38,27 @@
         <property name="discoveryServices" ref="discoveryServices"/>
         <property name="configurationAdmin" ref="configurationAdmin"/>
     </bean>
-    
+
     <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="shutdown">
         <property name="name" value="default"/>
         <property name="nodeName" value="${karaf.name}"/>
         <property name="configManager" ref="configManager"/>
     </bean>
-    
+
     <service ref="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster">
         <service-properties>
             <entry key="name" value="${karaf.name}"/>
             <entry key="type" value="master"/>
         </service-properties>
     </service>
-    
+
     <bean id="configManager" class="org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager">
         <cm:managed-properties persistent-id="org.apache.karaf.cellar.discovery" update-strategy="component-managed"
                                update-method="update"/>
         <property name="hzClassLoader" ref="bundleClassLoader"/>
         <property name="xmlConfig" value="${karaf.home}/etc/hazelcast.xml"/>
     </bean>
-    
+
     <service ref="configManager" auto-export="interfaces"/>
 
     <bean id="nodeConfiguration" class="org.apache.karaf.cellar.hazelcast.internal.NodeConfigurationImpl">
@@ -72,7 +72,7 @@
         <property name="consumer" value="true"/>
         <property name="enabledEvents">
             <set>
-                <value>org.apache.karaf.cellar.bundle.BundleEventTask</value>
+                <value>org.apache.karaf.cellar.bundle.BundleEventHandler</value>
                 <value>org.apache.karaf.cellar.config.ConfigurationEventHandler</value>
                 <value>org.apache.karaf.cellar.features.FeaturesEventHandler</value>
                 <value>org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler</value>
@@ -210,24 +210,24 @@
     </bean>
 
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
-    
+
     <!-- Members Listener -->
     <bean id="membershipListener" class="org.apache.karaf.cellar.hazelcast.CellarMembershipListener" init-method="init">
         <property name="synchronizers" ref="synchronizers"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="masterCluster" ref="masterCluster"/>
     </bean>
-    
-    <bean id="executionContext" class="org.apache.karaf.cellar.core.command.DistributedExecutionContextImpl"
+
+    <bean id="executionContext" class="org.apache.karaf.cellar.hazelcast.internal.DistributedExecutionContextImpl"
           init-method="init" destroy-method="destroy">
         <property name="name" value="commandExecution"/>
         <property name="cluster" ref="masterCluster"/>
     </bean>
 
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
-    
+
     <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
-    
+
     <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
     <reference id="nodeConfigRef" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional">

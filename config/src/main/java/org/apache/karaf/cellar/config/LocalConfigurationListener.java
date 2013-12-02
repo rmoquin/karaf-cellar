@@ -37,7 +37,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class LocalConfigurationListener extends ConfigurationSupport implements ConfigurationListener {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalConfigurationListener.class);
-    private ConfigurationAdmin configurationAdmin;
+    private ConfigurationAdmin configAdmin;
     private GroupManager groupManager;
     private ClusterManager clusterManager;
     private CellarSupport cellarSupport;
@@ -59,7 +59,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Dictionary localDictionary = null;
         if (event.getType() != ConfigurationEvent.CM_DELETED) {
             try {
-                Configuration conf = configurationAdmin.getConfiguration(pid, null);
+                Configuration conf = configAdmin.getConfiguration(pid, null);
                 localDictionary = conf.getProperties();
             } catch (Exception e) {
                 LOGGER.error("CELLAR CONFIG: can't retrieve configuration with PID {}", pid, e);
@@ -89,7 +89,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 executionContext.executeAsync(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()), null);
                             }
                         } else {
-                            Configuration conf = configurationAdmin.getConfiguration(pid, null);
+                            Configuration conf = configAdmin.getConfiguration(pid, null);
                             localDictionary = conf.getProperties();
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
@@ -123,17 +123,17 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
     }
 
     /**
-     * @return the configurationAdmin
+     * @return the configAdmin
      */
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
     }
 
     /**
-     * @param configurationAdmin the configurationAdmin to set
+     * @param configAdmin the configAdmin to set
      */
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 
     /**

@@ -29,7 +29,7 @@ public abstract class CommandHandler<C extends Command<R>, R extends Distributed
     protected NodeConfiguration nodeConfiguration;
     protected GroupManager groupManager;
     protected ClusterManager clusterManager;
-    protected CellarSupport cellarSupport;
+    protected CellarSupport cellarSupport = new CellarSupport();
     protected ConfigurationAdmin configAdmin;
 
     /**
@@ -61,20 +61,6 @@ public abstract class CommandHandler<C extends Command<R>, R extends Distributed
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**

@@ -52,8 +52,6 @@
         <property name="cellarSupport" ref="cellarSupport"/>
 	<property name="featuresService" ref="featuresService"/>
     </bean>
-    
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
 
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>

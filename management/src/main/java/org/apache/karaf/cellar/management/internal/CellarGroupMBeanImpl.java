@@ -35,7 +35,7 @@ import org.apache.karaf.cellar.core.control.ManageGroupCommand;
 public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMBean {
 
     private ClusterManager clusterManager;
-    private DistributedExecutionContext commandExecutionContext;
+    private DistributedExecutionContext executionContext;
     private GroupManager groupManager;
 
     public CellarGroupMBeanImpl() throws NotCompliantMBeanException {
@@ -63,7 +63,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
             command.setAction(ManageGroupAction.QUIT);
             command.setDestinationGroup(name);
             Set<Node> recipientList = clusterManager.listNodes(nodes);
-            commandExecutionContext.execute(command, recipientList);
+            executionContext.execute(command, recipientList);
         }
         groupManager.deregisterNodeFromGroup(name);
     }
@@ -92,7 +92,7 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         ManageGroupCommand command = new ManageGroupCommand();
         command.setAction(action);
         command.setDestinationGroup(groupName);
-        commandExecutionContext.execute(command, node);
+        executionContext.execute(command, node);
     }
 
     @Override
@@ -135,25 +135,25 @@ public class CellarGroupMBeanImpl extends StandardMBean implements CellarGroupMB
         this.clusterManager = clusterManager;
     }
 
-    /**
-     * @return the commandExecutionContext
-     */
-    public DistributedExecutionContext getCommandExecutionContext() {
-        return commandExecutionContext;
-    }
-
-    /**
-     * @param commandExecutionContext the commandExecutionContext to set
-     */
-    public void setCommandExecutionContext(DistributedExecutionContext commandExecutionContext) {
-        this.commandExecutionContext = commandExecutionContext;
-    }
-
     public GroupManager getGroupManager() {
         return this.groupManager;
     }
 
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

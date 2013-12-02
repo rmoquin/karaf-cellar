@@ -12,31 +12,36 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+           http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd" default-activation="lazy">
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="cluster/bundle-list">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.cellar.bundle.shell.ListBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
-        <command name="cluster/bundle-install">
+        <command>
             <action class="org.apache.karaf.cellar.bundle.shell.InstallBundleCommand">
+                <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
-        <command name="cluster/bundle-uninstall">
+        <command>
             <action class="org.apache.karaf.cellar.bundle.shell.UninstallBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="groupManager" ref="groupManager"/>
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -44,10 +49,11 @@
                 <ref component-id="allBundlesVersionCompleter"/>
             </completers>
         </command>
-        <command name="cluster/bundle-start">
+        <command>
             <action class="org.apache.karaf.cellar.bundle.shell.StartBundleCommand">
+                <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -55,10 +61,11 @@
                 <ref component-id="allBundlesVersionCompleter"/>
             </completers>
         </command>
-        <command name="cluster/bundle-stop">
+        <command>
             <action class="org.apache.karaf.cellar.bundle.shell.StopBundleCommand">
+                <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -79,6 +86,4 @@
     <bean id="allBundlesVersionCompleter" class="org.apache.karaf.cellar.bundle.shell.completers.AllBundlesVersionCompleter">
         <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
-    
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

@@ -13,15 +13,6 @@
  */
 package org.apache.karaf.cellar.core;
 
-import org.apache.karaf.cellar.core.event.EventType;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,17 +21,18 @@ import java.util.regex.Pattern;
  * Cellar generic support. This class provides a set of util methods used by other classes.
  */
 public class CellarSupport {
+
     /**
      * Check if a resource is allowed for a type of cluster event.
      *
      * @param url the resource name.
      * @param whiteList the whitelisted items for a particular event.
      * @param blackList the blacklisted items for a particular event.
-     * @return 
+     * @return
      */
     public boolean isAllowed(String event, Set<String> whiteList, Set<String> blackList) {
         boolean result = true;
-        
+
         // if no white listed items we assume all are accepted.
         if (whiteList != null && !whiteList.isEmpty()) {
             result = false;
