@@ -33,7 +33,7 @@ public class BundleSupport extends CellarSupport {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
-    private FeaturesService featuresService;
+    protected FeaturesService featuresService;
 
     /**
      * Locally install a bundle.

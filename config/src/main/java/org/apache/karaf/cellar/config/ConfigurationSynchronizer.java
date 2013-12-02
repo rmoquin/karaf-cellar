@@ -42,10 +42,10 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class ConfigurationSynchronizer extends ConfigurationSupport implements Synchronizer {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationSynchronizer.class);
-    private ConfigurationAdmin configurationAdmin;
+    private ConfigurationAdmin configAdmin;
     private GroupManager groupManager;
     private ClusterManager clusterManager;
-    private CellarSupport cellarSupport;
+    private final CellarSupport cellarSupport = new CellarSupport();
     private NodeConfiguration nodeConfiguration;
     private DistributedExecutionContext executionContext;
 
@@ -87,7 +87,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                     Dictionary clusterDictionary = clusterConfigurations.get(pid);
                     try {
                         // update the local configuration if needed
-                        Configuration localConfiguration = configurationAdmin.getConfiguration(pid, null);
+                        Configuration localConfiguration = configAdmin.getConfiguration(pid, null);
                         Dictionary localDictionary = localConfiguration.getProperties();
                         if (localDictionary == null) {
                             localDictionary = new Properties();
@@ -96,7 +96,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         localDictionary = filter(localDictionary);
                         if (!equals(localDictionary, clusterDictionary)) {
                             localConfiguration.update(localDictionary);
-                            persistConfiguration(configurationAdmin, pid, localDictionary);
+                            persistConfiguration(configAdmin, pid, localDictionary);
                         }
                     } catch (IOException ex) {
                         LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
@@ -128,7 +128,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Configuration[] localConfigurations;
             try {
-                localConfigurations = configurationAdmin.listConfigurations(null);
+                localConfigurations = configAdmin.listConfigurations(null);
                 for (Configuration localConfiguration : localConfigurations) {
                     String pid = localConfiguration.getPid();
                     // check if the pid is marked as local.
@@ -170,17 +170,17 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
     }
 
     /**
-     * @return the configurationAdmin
+     * @return the configAdmin
      */
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
     }
 
     /**
-     * @param configurationAdmin the configurationAdmin to set
+     * @param configAdmin the configAdmin to set
      */
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 
     /**
@@ -195,20 +195,6 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**

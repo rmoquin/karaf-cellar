@@ -28,6 +28,8 @@ import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
+import org.apache.karaf.features.FeaturesService;
+import org.osgi.framework.BundleContext;
 
 /**
  * The BundleEventHandler is responsible to process received cluster event for bundles.
@@ -39,7 +41,9 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     public static final String SWITCH_ID = "org.apache.karaf.cellar.bundle.handler";
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private BundleSupport bundleSupport;
+    private final BundleSupport bundleSupport = new BundleSupport();
+    private BundleContext bundleContext;
+    private FeaturesService featuresService;
 
     /**
      * Handle received bundle cluster events.
@@ -106,7 +110,8 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     }
 
     public void init() {
-        // nothing to do
+        bundleSupport.setBundleContext(bundleContext);
+        bundleSupport.setFeaturesService(featuresService);
     }
 
     public void destroy() {
@@ -138,5 +143,21 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     @Override
     public Class<ClusterBundleEvent> getType() {
         return ClusterBundleEvent.class;
+    }
+
+    public BundleContext getBundleContext() {
+        return this.bundleContext;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
+    }
+
+    public FeaturesService getFeaturesService() {
+        return featuresService;
+    }
+
+    public void setFeaturesService(FeaturesService featureService) {
+        this.featuresService = featureService;
     }
 }

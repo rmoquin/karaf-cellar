@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.features.FeaturesService;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -42,11 +43,14 @@ public class BundleSynchronizer implements Synchronizer {
     private final BundleSupport bundleSupport = new BundleSupport();
     private DistributedExecutionContext executionContext;
     private BundleContext bundleContext;
+    private FeaturesService featuresService;
     private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarCluster masterCluster;
 
     public void init() {
+        bundleSupport.setBundleContext(bundleContext);
+        bundleSupport.setFeaturesService(featuresService);
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
@@ -264,5 +268,19 @@ public class BundleSynchronizer implements Synchronizer {
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    /**
+     * @return the featuresService
+     */
+    public FeaturesService getFeaturesService() {
+        return featuresService;
+    }
+
+    /**
+     * @param featuresService the featuresService to set
+     */
+    public void setFeaturesService(FeaturesService featuresService) {
+        this.featuresService = featuresService;
     }
 }

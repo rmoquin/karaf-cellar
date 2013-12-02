@@ -12,35 +12,36 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+           http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd" default-activation="lazy">
 
-    <!-- Command Bundle -->
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="cluster/feature-install">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.cellar.features.shell.InstallFeatureCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
                 <ref component-id="allFeatureCompleter"/>
             </completers>
         </command>
-        <command name="cluster/feature-uninstall">
+        <command>
             <action class="org.apache.karaf.cellar.features.shell.UninstallFeatureCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
                 <ref component-id="allFeatureCompleter"/>
             </completers>
         </command>
-        <command name="cluster/feature-list">
+        <command>
             <action class="org.apache.karaf.cellar.features.shell.ListGroupFeatures">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
@@ -50,7 +51,7 @@
                 <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
-        <command name="cluster/feature-url-list">
+        <command>
             <action class="org.apache.karaf.cellar.features.shell.UrlListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
@@ -59,23 +60,23 @@
                 <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
-        <command name="cluster/feature-url-add">
+        <command>
             <action class="org.apache.karaf.cellar.features.shell.UrlAddCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
             </completers>
         </command>
-        <command name="cluster/feature-url-remove">
+        <command>
             <action class="org.apache.karaf.cellar.features.shell.UrlRemoveCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
                 <property name="featuresService" ref="featuresService"/>
-                <property name="executionContext" ref="executionContext"/>`
+                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
@@ -90,6 +91,4 @@
     <bean id="allFeatureCompleter" class="org.apache.karaf.features.command.completers.AllFeatureCompleter">
         <property name="featuresService" ref="featuresService"/>
     </bean>
-
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 </blueprint>

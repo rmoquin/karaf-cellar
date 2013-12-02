@@ -18,14 +18,12 @@
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Bundle Listener -->
-    <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init" 
+    <bean id="localListener" class="org.apache.karaf.cellar.bundle.LocalBundleListener" init-method="init"
           destroy-method="destroy">
         <property name="masterCluster" ref="masterCluster"/>
-	<property name="groupManager" ref="groupManager"/>
-        
+        <property name="groupManager" ref="groupManager"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
-        <property name="cellarSupport" ref="cellarSupport"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
 
@@ -35,11 +33,10 @@
         <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
-	<property name="masterCluster" ref="masterCluster"/>
-        <property name="cellarSupport" ref="cellarSupport"/>
+        <property name="masterCluster" ref="masterCluster"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
-    
+
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Bundle Event Handler -->
@@ -48,9 +45,7 @@
         <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="executionContext" ref="executionContext"/>
-        <property name="cellarSupport" ref="cellarSupport"/>
-	<property name="featuresService" ref="featuresService"/>
+        <property name="featuresService" ref="featuresService"/>
     </bean>
 
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -60,7 +55,8 @@
     </service>
 
     <!-- Cluster Core Services -->
-    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
+    <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
+    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
