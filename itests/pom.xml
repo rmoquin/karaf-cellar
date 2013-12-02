@@ -33,19 +33,17 @@
     <name>Apache Karaf :: Cellar :: Integration Tests</name>
 
     <dependencies>
-
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>apache-karaf</artifactId>
-            <version>${karaf.version}</version>
-            <type>zip</type>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>apache-karaf</artifactId>
             <version>${karaf.version}</version>
             <type>tar.gz</type>
+            <exclusions>
+                <exclusion>
+                    <artifactId>org.apache.karaf.client</artifactId>
+                    <groupId>org.apache.karaf</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
@@ -53,19 +51,18 @@
             <classifier>features</classifier>
             <type>xml</type>
         </dependency>
-
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>
-            <scope>test</scope>
         </dependency>
-
         <dependency>
-            <groupId>org.apache.karaf.cellar</groupId>
-            <artifactId>org.apache.karaf.cellar.hazelcast</artifactId>
-            <scope>test</scope>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.gogo.runtime</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.features</groupId>
             <artifactId>org.apache.karaf.features.core</artifactId>
@@ -101,13 +98,54 @@
                 </executions>
             </plugin>
             <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jar-test-classes</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <useFile>false</useFile>
-                    <!--<test>CellarGroupsTest</test>-->
+                    <systemPropertyVariables>
+                        <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>ci-build-profile</id>
+            <activation>
+                <property>
+                    <name>maven.repo.local</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <!-- when the local repo location has been specified, we need to pass on this information to PAX mvn url -->
+                            <argLine>-Dorg.ops4j.pax.url.mvn.localRepository=${maven.repo.local}</argLine>
+                            <systemPropertyVariables>
+                                <org.ops4j.pax.logging.DefaultServiceLog.level>INFO</org.ops4j.pax.logging.DefaultServiceLog.level>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
 </project>

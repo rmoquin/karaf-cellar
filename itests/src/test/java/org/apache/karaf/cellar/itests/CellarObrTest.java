@@ -24,15 +24,14 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class CellarObrTest extends CellarTestSupport {
-    
+
     @Test
-    //@Ignore
     public void testCellarObrFeatureInstall() throws Exception {
         installCellar();
         Thread.sleep(DELAY_TIMEOUT);
         featureService.installFeature("cellar-obr");
     }
-    
+
     @After
     public void tearDown() {
         try {
@@ -41,5 +40,5 @@ public class CellarObrTest extends CellarTestSupport {
             //Ignore
         }
     }
-    
+
 }

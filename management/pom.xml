@@ -33,32 +33,24 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Management</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Private-Package>
-                            org.apache.karaf.cellar.management.internal
-                        </Private-Package>
-                        <Export-Package>
-                            org.apache.karaf.cellar.management*;version="${project.version}"
-                        </Export-Package>
-                        <Import-Package>
-                            javax.management,
-                            javax.management.loading,
-                            javax.management.openmbean,
-                            org.apache.karaf.features*;version="${project.version}",
-                            org.apache.karaf.cellar*;version="${project.version}",
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <osgi.export>
+            org.apache.karaf.cellar.management*;version="${project.version}"
+        </osgi.export>
+        <osgi.import>
+            javax.management,
+            javax.management.loading,
+            javax.management.openmbean,
+            org.apache.karaf.features*;version="[3,4)",
+            org.apache.karaf.cellar*;version="${project.version}",
+            org.osgi.framework,
+            org.osgi.service.cm,
+            org.osgi.service.blueprint
+        </osgi.import>
+        <osgi.private>
+            org.apache.karaf.cellar.management.internal
+        </osgi.private>
+    </properties>
 
     <dependencies>
         <dependency>

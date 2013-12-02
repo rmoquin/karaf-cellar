@@ -48,12 +48,17 @@
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>
         <karaf.version>3.0.0-SNAPSHOT</karaf.version>
+        <karaf.maven.version>3.0.0-SNAPSHOT</karaf.maven.version>
         <osgi.version>5.0.0</osgi.version>
-        <osgi.compendium.version>4.3.1</osgi.compendium.version>
-        <pax.exam.version>3.3.0</pax.exam.version>
-        <servlet.api.version>2.5</servlet.api.version>
+        <osgi.compendium.version>5.0.0</osgi.compendium.version>
+        <pax.exam.version>3.4.0-SNAPSHOT</pax.exam.version>
+        <servlet.api.version>3.0</servlet.api.version>
         <slf4j.version>1.7.2</slf4j.version>
-        <jackson.version>2.2.3</jackson.version>
+        <jackson.version>2.3.0</jackson.version>
+        <servlet.spec.groupId>org.apache.geronimo.specs</servlet.spec.groupId>
+        <servlet.spec.artifactId>geronimo-servlet_3.0_spec</servlet.spec.artifactId>
+        <servlet.spec.version>1.0</servlet.spec.version>
+        <org.json.version>20131018</org.json.version>
     </properties>
 
     <modules>
@@ -80,7 +85,20 @@
         <developerConnection>scm:svn:https://svn.apache.org/repos/asf/karaf/cellar/trunk</developerConnection>
         <url>http://svn.apache.org/repos/asf/karaf/cellar/trunk</url>
     </scm>
+    <repositories>
+        <repository>
+            <id>ops4j.sonatype.snapshots.deploy</id>
+            <name>OPS4J snapshot repository</name>
+            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
 
+    </repositories>
     <pluginRepositories>
         <pluginRepository>
             <releases>
@@ -233,8 +251,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                <version>0.10.0</version>
-                <scope>provided</scope>
+                <version>0.11.0-SNAPSHOT</version>
             </dependency>
 
             <!-- Hazelcast -->
@@ -247,11 +264,6 @@
             <!-- Karaf -->
             <dependency>
                 <groupId>org.apache.karaf.features</groupId>
-                <artifactId>org.apache.karaf.features.command</artifactId>
-                <version>${karaf.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.karaf.features</groupId>
                 <artifactId>org.apache.karaf.features.core</artifactId>
                 <version>${karaf.version}</version>
             </dependency>
@@ -260,10 +272,11 @@
                 <artifactId>org.apache.karaf.shell.console</artifactId>
                 <version>${karaf.version}</version>
             </dependency>
+
             <dependency>
-                <groupId>org.apache.karaf.instance</groupId>
-                <artifactId>org.apache.karaf.instance.core</artifactId>
-                <version>${karaf.version}</version>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${org.json.version}</version>
             </dependency>
 
             <!-- OSGi -->
@@ -281,6 +294,11 @@
             </dependency>
 
             <!-- Servlet API -->
+            <dependency>
+                <groupId>${servlet.spec.groupId}</groupId>
+                <artifactId>${servlet.spec.artifactId}</artifactId>
+                <version>${servlet.spec.version}</version>
+            </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>servlet-api</artifactId>
@@ -443,7 +461,7 @@
                 <plugin>
                     <groupId>org.apache.karaf.tooling</groupId>
                     <artifactId>karaf-maven-plugin</artifactId>
-                    <version>${karaf.version}</version>
+                    <version>${karaf.maven.version}</version>
                     <extensions>true</extensions>
                 </plugin>
                 <plugin>

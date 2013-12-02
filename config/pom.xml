@@ -33,34 +33,27 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Config</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Private-Package>
-                            org.apache.felix.utils*;-split-package:=merge-first
-                        </Private-Package>
-                        <Export-Package>
-                            org.apache.karaf.cellar.config;version="${project.version}",
-                            org.apache.karaf.cellar.config.shell;version="${project.version}",
-                            org.apache.karaf.cellar.config.shell.completers;version="${project.version}"
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.karaf.cellar.core*;version="${project.version}",
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            org.slf4j;resolution:=optional,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <properties>
+        <osgi.import>
+            org.apache.karaf.cellar.core*;version="${project.version}",
+            org.apache.felix.service.command,
+            org.apache.karaf.shell.console;version="[3,4)",
+            org.apache.karaf.shell.console.completer;version="[3,4)",
+            org.apache.karaf.shell.console.commands;version="[3,4)",
+            org.apache.karaf.shell.commands;version="[3,4)",
+            org.osgi*,
+            org.slf4j;resolution:=optional
+        </osgi.import>
+        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,*</osgi.dynamic.import>
+        <osgi.export>
+            org.apache.karaf.cellar.config;version="${project.version}",
+            org.apache.karaf.cellar.config.shell;version="${project.version}",
+            org.apache.karaf.cellar.config.shell.completers;version="${project.version}"
+        </osgi.export>
+        <osgi.private>
+            org.apache.felix.utils*;-split-package:=merge-first
+        </osgi.private>
+    </properties>
 
     <dependencies>
         <!-- Internal Dependencies -->

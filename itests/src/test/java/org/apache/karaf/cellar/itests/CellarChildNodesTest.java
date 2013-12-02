@@ -30,7 +30,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 public class CellarChildNodesTest extends CellarTestSupport {
 
     @Test
-    //@Ignore
     public void testClusterWithChildNodes() throws Exception {
         installCellar();
         createCellarChild("child1");

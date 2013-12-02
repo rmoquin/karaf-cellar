@@ -37,7 +37,6 @@
         <osgi.import>
             org.apache.karaf.cellar.core*;version="${project.version}",
             org.apache.felix.service.command,
-            org.apache.felix.gogo.commands,
             org.apache.karaf.shell.console;version="[3,4)",
             org.apache.karaf.shell.console.commands;version="[3,4)",
             org.apache.karaf.shell.console.completer;version="[3,4)",

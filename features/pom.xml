@@ -33,31 +33,25 @@
     <packaging>bundle</packaging>
     <name>Apache Karaf :: Cellar :: Features</name>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Export-Package>
-                            org.apache.karaf.cellar.features*;version="${project.version}"
-                        </Export-Package>
-                        <Import-Package>
-                            org.apache.karaf.cellar.core*;version="${project.version}",
-                            org.apache.felix.service.command,
-                            org.apache.karaf.shell.commands,
-                            org.apache.karaf.shell.console,
-                            org.apache.karaf.features*;version="[3,4)",
-                            org.slf4j;resolution:=optional,
-                            *
-                        </Import-Package>
-                    </instructions>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <osgi.import>
+            org.apache.karaf.cellar.core*;version="${project.version}",
+            org.apache.felix.service.command,
+            org.apache.karaf.shell.console;version="[3,4)",
+            org.apache.karaf.shell.console.commands;version="[3,4)",
+            org.apache.karaf.shell.console.completer;version="[3,4)",
+            org.apache.karaf.features*;version="[3,4)",
+            org.apache.karaf.shell.commands;version="[3,4)",
+            org.osgi*,
+            org.slf4j;resolution:=optional
+        </osgi.import>
+        <osgi.dynamic.import>javax.*,org.w3c.*,org.xml.*,*</osgi.dynamic.import>
+        <osgi.export>
+            org.apache.karaf.cellar.features*;version="${project.version}"
+        </osgi.export>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.osgi</groupId>
@@ -80,10 +74,6 @@
             <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.command</artifactId>
-        </dependency>
         <!-- Logging -->
         <dependency>
             <groupId>org.slf4j</groupId>

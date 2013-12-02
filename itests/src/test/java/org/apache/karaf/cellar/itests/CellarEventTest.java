@@ -25,7 +25,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 public class CellarEventTest extends CellarTestSupport {
 
     @Test
-    //@Ignore
     public void testCellarEventFeatureInstall() throws Exception {
         installCellar();
         featureService.installFeature("cellar-eventadmin");

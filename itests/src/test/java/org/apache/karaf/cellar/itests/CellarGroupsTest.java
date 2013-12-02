@@ -25,19 +25,18 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
-import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.junit.PaxExam;
+import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class CellarGroupsTest extends CellarTestSupport {
+
     private boolean createdChildren = false;
 
     @Test
-    //@Ignore
     public void testGroupManagerService() throws Exception {
         installCellar();
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);

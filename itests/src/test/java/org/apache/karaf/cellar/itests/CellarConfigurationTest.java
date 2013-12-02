@@ -33,16 +33,16 @@ import org.osgi.service.cm.ConfigurationAdmin;
 public class CellarConfigurationTest extends CellarTestSupport {
 
     private static final String TESTPID = "org.apache.karaf.cellar.tst";
-    @Inject ConfigurationAdmin configAdmin;
-    
+    @Inject
+    ConfigurationAdmin configAdmin;
+
     @Test
-    @Ignore
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
         Configuration configuration = configAdmin.createFactoryConfiguration(TESTPID);
         configuration.update(new Hashtable());
         System.out.println("Created a new configuration with pid: " + configuration.getPid());
-        
+
         createCellarChild("child1");
         if (!waitForInstanceToCluster(2)) {
             throw new Exception("Failed waiting for node to connect to cluster..");
@@ -51,7 +51,7 @@ public class CellarConfigurationTest extends CellarTestSupport {
         if (!waitForInstanceToCluster(3)) {
             throw new Exception("Failed waiting for node to connect to cluster..");
         }
-                
+
         String node1 = getNodeIdOfChild("child1");
         String node2 = getNodeIdOfChild("child2");
 

@@ -13,12 +13,8 @@
  */
 package org.apache.karaf.cellar.itests;
 
-
-import org.apache.karaf.cellar.core.ClusterManager;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
@@ -29,7 +25,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 public class CellarInstallationTest extends CellarTestSupport {
 
     @Test
-    //@Ignore
     public void testInstallation() throws Exception {
         installCellar();
         System.out.println(executeCommand("bundle:list"));

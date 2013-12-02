@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.itests;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Set;

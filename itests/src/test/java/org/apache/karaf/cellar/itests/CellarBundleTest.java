@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.itests;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -24,8 +23,8 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @RunWith(PaxExam.class)
 @ExamReactorStrategy(PerMethod.class)
 public class CellarBundleTest extends CellarTestSupport {
+
     @Test
-    //@Ignore
     public void testCellarBundleModule() throws Exception {
 
         installCellar();
