@@ -12,10 +12,12 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" default-activation="lazy">
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.osgi.org/xmlns/blueprint/v1.0.0
+           http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd" default-activation="lazy">
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="cluster/obr-list">
+        <command>
             <action class="org.apache.karaf.cellar.obr.shell.ObrListCommand">
                 <property name="clusterManager" ref="clusterManager"/>
             </action>
@@ -24,7 +26,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cluster/obr-deploy">
+        <command>
             <action class="org.apache.karaf.cellar.obr.shell.ObrDeployCommand">
                 <property name="clusterManager" ref="clusterManager"/>
             </action>
@@ -33,7 +35,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cluster/obr-list-url">
+        <command>
             <action class="org.apache.karaf.cellar.obr.shell.ObrListUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
             </action>
@@ -42,7 +44,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cluster/obr-add-url">
+        <command>
             <action class="org.apache.karaf.cellar.obr.shell.ObrAddUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="obrService" ref="repositoryAdmin"/>
@@ -52,7 +54,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cluster/obr-remove-url">
+        <command>
             <action class="org.apache.karaf.cellar.obr.shell.ObrRemoveUrlCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="obrService" ref="repositoryAdmin"/>

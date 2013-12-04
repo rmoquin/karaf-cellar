@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.core;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,7 +21,9 @@ import java.util.Set;
  * Cellar cluster group.
  */
 public class Group implements MultiNode {
+
     private String name;
+    @JsonIgnore
     private Set<Node> nodes = new HashSet<Node>();
 
     public Group() {
@@ -37,6 +40,7 @@ public class Group implements MultiNode {
     public void setName(String name) {
         this.name = name;
     }
+
     /**
      * Removes a node from this group.
      *
@@ -62,7 +66,7 @@ public class Group implements MultiNode {
      * Checks if a node is part of the specified group.
      *
      * @param node the node to check
-     * @return 
+     * @return
      */
     @Override
     public boolean containsNode(Node node) {
@@ -73,7 +77,7 @@ public class Group implements MultiNode {
     public Set<Node> getNodes() {
         return nodes;
     }
-    
+
     @Override
     public Set<Node> getNodesExcluding(Node node) {
         Set<Node> nodesCopy = new HashSet<Node>();

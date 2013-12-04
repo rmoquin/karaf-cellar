@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
@@ -32,7 +31,6 @@ public class LocalEventListener extends EventSupport implements EventHandler {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalEventListener.class);
     private GroupManager groupManager;
-    private CellarSupport cellarSupport;
     private DistributedExecutionContext executionContext;
 
     @Override
@@ -74,11 +72,11 @@ public class LocalEventListener extends EventSupport implements EventHandler {
                         String topicName = event.getTopic();
                         Map<String, Serializable> properties = getEventProperties(event);
                         //TODO Figure out how to handle this.
-                        if (cellarSupport.isAllowed(topicName, whitelist, blacklist)) {
+                        if (this.isAllowed(topicName, whitelist, blacklist)) {
                             // broadcast the event
                             ClusterEvent clusterEvent = new ClusterEvent(topicName, properties);
                             clusterEvent.setSourceGroup(group);
-                            executionContext.executeAsync(clusterEvent, group.getNodesExcluding(groupManager.getNode()), null);
+                            executionContext.execute(clusterEvent, group.getNodesExcluding(groupManager.getNode()));
                         } else {
                             LOGGER.warn("CELLAR EVENT: event {} is marked as BLOCKED OUTBOUND", topicName);
                         }
@@ -114,20 +112,6 @@ public class LocalEventListener extends EventSupport implements EventHandler {
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**

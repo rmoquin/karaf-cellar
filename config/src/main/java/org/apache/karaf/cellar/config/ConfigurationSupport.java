@@ -22,12 +22,15 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import org.apache.karaf.cellar.core.CellarSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Generic configuration support.
  */
 public class ConfigurationSupport extends CellarSupport {
 
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationSupport.class);
     private static final String[] EXCLUDED_PROPERTIES = {"service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories"};
     private static final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
     protected File storage;
@@ -138,9 +141,10 @@ public class ConfigurationSupport extends CellarSupport {
      * @param pid the configuration PID to store.
      * @param props the properties to store, linked to the configuration PID.
      */
-    protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) {
+    protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) throws IOException {
         try {
             if (pid.matches(".*-.*-.*-.*-.*")) {
+                LOGGER.warn("PID matches regex filter, config won't be persisted for pid {}", pid);
                 // it's UUID
                 return;
             }
@@ -148,18 +152,14 @@ public class ConfigurationSupport extends CellarSupport {
             Configuration cfg = admin.getConfiguration(pid, null);
             if (cfg != null && cfg.getProperties() != null) {
                 Object val = cfg.getProperties().get(FELIX_FILEINSTALL_FILENAME);
-                try {
-                    if (val instanceof URL) {
-                        storageFile = new File(((URL) val).toURI());
-                    }
-                    if (val instanceof URI) {
-                        storageFile = new File((URI) val);
-                    }
-                    if (val instanceof String) {
-                        storageFile = new File(new URL((String) val).toURI());
-                    }
-                } catch (Exception e) {
-                    throw new IOException(e.getMessage(), e);
+                if (val instanceof URL) {
+                    storageFile = new File(((URL) val).toURI());
+                }
+                if (val instanceof URI) {
+                    storageFile = new File((URI) val);
+                }
+                if (val instanceof String) {
+                    storageFile = new File(new URL((String) val).toURI());
                 }
             }
 
@@ -192,7 +192,7 @@ public class ConfigurationSupport extends CellarSupport {
             storage.mkdirs();
             p.save();
         } catch (Exception e) {
-            // nothing to do
+            throw new IOException(e.getMessage(), e);
         }
     }
 

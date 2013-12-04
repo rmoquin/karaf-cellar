@@ -27,6 +27,7 @@ import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
+import org.osgi.service.event.EventAdmin;
 
 /**
  * Handler for cluster event.
@@ -37,6 +38,7 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
     private final EventSupport eventSupport = new EventSupport();
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
+    private EventAdmin eventAdmin;
 
     @Override
     public ClusterEventResult execute(ClusterEvent event) {
@@ -70,7 +72,7 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
     }
 
     public void init() {
-        // nothing to do
+        eventSupport.setEventAdmin(eventAdmin);
     }
 
     public void destroy() {
@@ -102,5 +104,19 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
     @Override
     public Class<ClusterEvent> getType() {
         return ClusterEvent.class;
+    }
+
+    /**
+     * @return the eventAdmin
+     */
+    public EventAdmin getEventAdmin() {
+        return eventAdmin;
+    }
+
+    /**
+     * @param eventAdmin the eventAdmin to set
+     */
+    public void setEventAdmin(EventAdmin eventAdmin) {
+        this.eventAdmin = eventAdmin;
     }
 }

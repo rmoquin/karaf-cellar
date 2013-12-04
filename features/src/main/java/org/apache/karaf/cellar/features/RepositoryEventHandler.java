@@ -40,6 +40,16 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
     private final FeaturesSupport featuresSupport = new FeaturesSupport();
     private FeaturesService featuresService;
 
+    public void init() {
+        featuresSupport.setClusterManager(clusterManager);
+        featuresSupport.setGroupManager(groupManager);
+        featuresSupport.setFeaturesService(featuresService);
+    }
+
+    public void destroy() {
+        // nothing to do
+    }
+
     /**
      * Handle cluster features repository event.
      *
@@ -105,5 +115,19 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
     @Override
     public Class<ClusterRepositoryEvent> getType() {
         return ClusterRepositoryEvent.class;
+    }
+
+    /**
+     * @return the featuresService
+     */
+    public FeaturesService getFeaturesService() {
+        return featuresService;
+    }
+
+    /**
+     * @param featuresService the featuresService to set
+     */
+    public void setFeaturesService(FeaturesService featuresService) {
+        this.featuresService = featuresService;
     }
 }

@@ -42,6 +42,16 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
     private final FeaturesSupport featuresSupport = new FeaturesSupport();
     private FeaturesService featuresService;
 
+    public void init() {
+        featuresSupport.setClusterManager(clusterManager);
+        featuresSupport.setGroupManager(groupManager);
+        featuresSupport.setFeaturesService(featuresService);
+    }
+
+    public void destroy() {
+        // nothing to do
+    }
+
     /**
      * Handle a received cluster features event.
      *
@@ -145,5 +155,4 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
     }
-
 }

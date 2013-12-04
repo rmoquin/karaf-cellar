@@ -33,17 +33,17 @@ public class DiscoveryTask implements Runnable {
     private static final transient Logger LOGGER = LoggerFactory.getLogger(DiscoveryTask.class);
 
     private List<DiscoveryService> discoveryServices;
-    private ConfigurationAdmin configurationAdmin;
+    private ConfigurationAdmin configAdmin;
 
-    private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public void init() {
-    	LOGGER.debug("CELLAR DISCOVERY: a new Task initialized");
+        LOGGER.debug("CELLAR DISCOVERY: a new Task initialized");
         scheduler.scheduleWithFixedDelay(this, 10, 10, TimeUnit.SECONDS);
     }
 
     public void destroy() {
-    	LOGGER.debug("CELLAR DISCOVERY: task is being destroyed");
+        LOGGER.debug("CELLAR DISCOVERY: task is being destroyed");
         scheduler.shutdown();
     }
 
@@ -51,7 +51,7 @@ public class DiscoveryTask implements Runnable {
     public void run() {
         LOGGER.trace("CELLAR DISCOVERY: starting the discovery task");
 
-        if (configurationAdmin != null) {
+        if (configAdmin != null) {
             Set<String> members = new LinkedHashSet<String>();
             if (discoveryServices != null && !discoveryServices.isEmpty()) {
                 for (DiscoveryService service : discoveryServices) {
@@ -61,13 +61,13 @@ public class DiscoveryTask implements Runnable {
                     LOGGER.trace("CELLAR DISCOVERY: service {} found members {}", service, discovered);
                 }
                 try {
-                	LOGGER.trace("CELLAR DISCOVERY: retrieving configuration for PID={}", Discovery.PID);
-                    Configuration configuration = configurationAdmin.getConfiguration(Discovery.PID);
+                    LOGGER.trace("CELLAR DISCOVERY: retrieving configuration for PID={}", Discovery.PID);
+                    Configuration configuration = configAdmin.getConfiguration(Discovery.PID);
                     Dictionary properties = configuration.getProperties();
                     if (properties == null) {
-                    	// this is a new configuration ...
-                    	LOGGER.trace("CELLAR DISCOVERY: configuration is new");
-                    	properties = new Hashtable();
+                        // this is a new configuration ...
+                        LOGGER.trace("CELLAR DISCOVERY: configuration is new");
+                        properties = new Hashtable();
                     }
                     String newMemberText = CellarUtils.createStringFromSet(members, true);
                     String memberText = (String) properties.get(Discovery.MEMBERS_PROPERTY_NAME);
@@ -76,16 +76,16 @@ public class DiscoveryTask implements Runnable {
                         LOGGER.trace("CELLAR DISCOVERY: adding a new member {} to configuration and updating it", newMemberText);
                         configuration.update(properties);
                     } else {
-                    	LOGGER.trace("CELLAR DISCOVERY: found a valid member in the configuration will skip");
+                        LOGGER.trace("CELLAR DISCOVERY: found a valid member in the configuration will skip");
                     }
                 } catch (IOException e) {
                     LOGGER.error("CELLAR DISCOVERY: failed to update member list", e);
                 }
             } else {
-            	LOGGER.trace("CELLAR DISCOVERY: no discovery services found ... ");
+                LOGGER.trace("CELLAR DISCOVERY: no discovery services found ... ");
             }
         } else {
-        	LOGGER.trace("CELLAR DISCOVERY: no config admin found");
+            LOGGER.trace("CELLAR DISCOVERY: no config admin found");
         }
     }
 
@@ -97,12 +97,12 @@ public class DiscoveryTask implements Runnable {
         this.discoveryServices = discoveryServices;
     }
 
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
     }
 
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 
 }

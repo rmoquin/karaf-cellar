@@ -55,9 +55,6 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
 
         Group group = command.getSourceGroup();
         String groupName = group.getName();
-
-        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
-
         String pid = command.getId();
 
         try {
@@ -65,8 +62,6 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
             if (configSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
-
-                Properties clusterDictionary = clusterConfigurations.get(pid);
                 Configuration conf = configAdmin.getConfiguration(pid, null);
                 if (command.getType() == ConfigurationEvent.CM_DELETED) {
                     if (conf.getProperties() != null) {
@@ -75,6 +70,8 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                         configSupport.deleteStorage(pid);
                     }
                 } else {
+                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+                    Properties clusterDictionary = clusterConfigurations.get(pid);
                     if (clusterDictionary != null) {
                         Dictionary localDictionary = conf.getProperties();
                         if (localDictionary == null) {

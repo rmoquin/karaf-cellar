@@ -46,7 +46,7 @@ public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeCon
             } else if (SwitchType.OUTBOUND.equals(type)) {
                 nodeConfiguration.setProducer(SwitchStatus.ON.equals(status));
             }
-            Configuration configuration = getConfigAdmin().getConfiguration(NodeConfiguration.class.getCanonicalName());
+            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName());
             configuration.update(nodeConfiguration.getProperties());
             result.setSwitchStatus(status);
             result.setSwitchType(type);

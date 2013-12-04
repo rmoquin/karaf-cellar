@@ -46,10 +46,9 @@ public class UninstallBundleCommand extends BundleCommandSupport {
         }
         // update the bundle in the cluster group
         String location;
-        String key = null;
         Map<String, BundleState> clusterBundles = clusterManager.getMap(Constants.BUNDLE_MAP + Configurations.SEPARATOR + groupName);
 
-        key = selector(clusterBundles);
+        String key = selector(clusterBundles);
 
         if (key == null) {
             System.err.println("Bundle " + key + " not found in cluster group " + groupName);

@@ -38,7 +38,8 @@ public class GenericCellarSerializer<T> implements ByteArraySerializer<T> {
     static {
         SimpleModule module = new SimpleModule();
         module.addAbstractTypeMapping(Node.class, HazelcastNode.class);
-        mapper.registerModule(new AfterburnerModule().setUseValueClassLoader(false));
+        AfterburnerModule abModule = new AfterburnerModule();
+        mapper.registerModule(abModule);
         mapper.registerModule(module);
         mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_CONCRETE_AND_ARRAYS);
     }

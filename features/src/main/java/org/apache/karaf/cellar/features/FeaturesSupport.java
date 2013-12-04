@@ -29,7 +29,6 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
-import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
@@ -41,9 +40,7 @@ public class FeaturesSupport extends CellarSupport {
 
     protected FeaturesService featuresService;
     protected ClusterManager clusterManager;
-    protected CellarSupport cellarSupport;
     protected GroupManager groupManager;
-    protected NodeConfiguration nodeConfiguration;
     protected DistributedExecutionContext executionContext;
 
     public void init() {
@@ -67,8 +64,9 @@ public class FeaturesSupport extends CellarSupport {
 
             if (localFeatures != null && localFeatures.length > 0) {
                 for (Feature localFeature : localFeatures) {
-                    if (localFeature.getName().equals(name) && (localFeature.getVersion().equals(version) || version == null))
+                    if (localFeature.getName().equals(name) && (localFeature.getVersion().equals(version) || version == null)) {
                         return true;
+                    }
                 }
             }
         }
@@ -119,8 +117,8 @@ public class FeaturesSupport extends CellarSupport {
     }
 
     /**
-     * Push a {@code Feature} and its status in a cluster group.
-     * This version of the method force the bundle status, without looking the features service.
+     * Push a {@code Feature} and its status in a cluster group. This version of the method force the bundle status,
+     * without looking the features service.
      *
      * @param feature the feature to push in the cluster group.
      * @param group the cluster group.
@@ -209,20 +207,6 @@ public class FeaturesSupport extends CellarSupport {
     }
 
     /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
-    }
-
-    /**
      * @return the groupManager
      */
     public GroupManager getGroupManager() {
@@ -234,20 +218,6 @@ public class FeaturesSupport extends CellarSupport {
      */
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the nodeConfiguration
-     */
-    public NodeConfiguration getNodeConfiguration() {
-        return nodeConfiguration;
-    }
-
-    /**
-     * @param nodeConfiguration the nodeConfiguration to set
-     */
-    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
-        this.nodeConfiguration = nodeConfiguration;
     }
 
     /**

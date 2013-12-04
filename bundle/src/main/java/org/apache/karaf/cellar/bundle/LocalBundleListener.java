@@ -28,6 +28,7 @@ import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 /**
  * LocalBundleListener is listening for local bundles changes. When a local bundle change occurs, this listener updates
@@ -58,7 +59,8 @@ public class LocalBundleListener extends BundleSupport implements SynchronousBun
             return;
         }
 
-        if (!groupManager.isProducibleEvent(event)) {
+        // check if the producer is ON
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
             return;
         }

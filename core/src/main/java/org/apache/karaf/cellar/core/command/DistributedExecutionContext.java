@@ -17,7 +17,6 @@ package org.apache.karaf.cellar.core.command;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.control.Switch;
 
@@ -26,14 +25,15 @@ import org.apache.karaf.cellar.core.control.Switch;
  * @author rmoquin
  */
 public interface DistributedExecutionContext<T, R> {
+
     /**
      * @return the name
      */
     String getName();
 
-    public Map<Node, Future<R>> execute(T command, Set<Node> destinations);
+    public Map<Node, R> execute(T command, Set<Node> destinations);
 
-    public Map<Node, Future<R>> execute(T command, Node destination);
+    public Map<Node, R> execute(T command, Node destination);
 
     public Map<Node, R> executeAndWait(T command, Set<Node> destinations);
 

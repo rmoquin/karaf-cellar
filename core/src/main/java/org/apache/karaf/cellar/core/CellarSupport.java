@@ -25,7 +25,7 @@ public class CellarSupport {
     /**
      * Check if a resource is allowed for a type of cluster event.
      *
-     * @param url the resource name.
+     * @param event the resource name.
      * @param whiteList the whitelisted items for a particular event.
      * @param blackList the blacklisted items for a particular event.
      * @return

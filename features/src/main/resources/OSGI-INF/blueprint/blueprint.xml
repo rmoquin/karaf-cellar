@@ -18,8 +18,8 @@
            http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd">
 
     <!-- Local Features Listener -->
-    <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener">
-        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+    <bean id="localListener" class="org.apache.karaf.cellar.features.LocalFeaturesListener" init-method="init"
+          destroy-method="destroy">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="executionContext" ref="executionContext"/>
@@ -29,8 +29,8 @@
     <service ref="localListener" interface="org.apache.karaf.features.FeaturesListener"/>
 
     <!-- Features/Repositories Synchronizer -->
-    <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer">
-        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+    <bean id="synchronizer" class="org.apache.karaf.cellar.features.FeaturesSynchronizer"
+          init-method="init" destroy-method="destroy">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="featuresService" ref="featuresService"/>
@@ -40,22 +40,24 @@
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
 
     <!-- Cluster Features Event Handler -->
-    <bean id="featuresEventHandler" class="org.apache.karaf.cellar.features.FeaturesEventTask">
+    <bean id="featuresEventHandler" class="org.apache.karaf.cellar.features.FeaturesEventHandler"
+          init-method="init" destroy-method="destroy">
+        <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="configAdmin" ref="configAdmin"/>
-        <property name="featuresService" ref="featuresService"/>
     </bean>
 
-    <service ref="featuresEventHandler" interface="org.apache.karaf.cellar.core.command.DistributedTask">
+    <service ref="featuresEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
         <service-properties>
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
 
     <!-- Cluster Features Repositories Event Handler -->
-    <bean id="repositoryEventHandler" class="org.apache.karaf.cellar.features.RepositoryEventTask">
+    <bean id="repositoryEventHandler" class="org.apache.karaf.cellar.features.RepositoryEventHandler"
+          init-method="init" destroy-method="destroy">
         <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
@@ -63,7 +65,7 @@
         <property name="configAdmin" ref="configAdmin"/>
     </bean>
 
-    <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.command.DistributedTask"/>
+    <service ref="repositoryEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager" availability="optional"/>

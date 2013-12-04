@@ -157,7 +157,7 @@ public class CellarTestSupport {
             instances = Integer.parseInt(response.trim());
             System.err.print(".");
             try {
-                Thread.sleep(2000);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 //Ignore
             }
@@ -219,35 +219,21 @@ public class CellarTestSupport {
     }
 
     protected boolean waitForInstanceToCluster(final int desiredTotal) {
-        return waitForInstanceToCluster(desiredTotal, 15000L);
+        return waitForInstanceToCluster(desiredTotal, 10);
     }
 
-    protected boolean waitForInstanceToCluster(final int desiredTotal, final Long timeout) {
-        final FutureTask<Boolean> commandFuture = new FutureTask<Boolean>(
-                new Callable<Boolean>() {
-                    @Override
-                    public Boolean call() throws Exception {
-                        ClusterManager manager = CellarTestSupport.this.getOsgiService(ClusterManager.class, timeout);
-                        boolean found = false;
-                        while (!found) {
-                            Set<Node> nodes = manager.listNodes();
-                            if (nodes.size() >= desiredTotal) {
-                                return true;
-                            }
-                            Thread.sleep(1000);
-                            if (Thread.interrupted()) {
-                                return false;
-                            }
-                        }
-                        return false;
-                    }
-                });
-
+    protected boolean waitForInstanceToCluster(final int desiredTotal, final int attempts) {
+        final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
         try {
-            executor.submit(commandFuture);
-            boolean result = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
-            System.err.println("Total nodes found successfully: " + desiredTotal);
-            return result;
+            for (int i = 0; i < attempts; i++) {
+                Set<Node> nodes = manager.listNodes();
+                if (nodes.size() >= desiredTotal) {
+                    System.err.println("Total nodes found successfully: " + desiredTotal);
+                    return true;
+                }
+                Thread.sleep(1000);
+            }
+            return false;
         } catch (Exception e) {
             e.printStackTrace(System.err);
             return false;
@@ -379,16 +365,16 @@ public class CellarTestSupport {
             // This is buggy, as the service reference may change i think
             Object svc = type.cast(tracker.waitForService(timeout));
             if (svc == null) {
-                Dictionary dic = bundleContext.getBundle().getHeaders();
-                System.err.println("Test bundle headers: " + explode(dic));
-
-                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
-                    System.err.println("ServiceReference: " + ref);
-                }
-
-                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
-                    System.err.println("Filtered ServiceReference: " + ref);
-                }
+//                Dictionary dic = bundleContext.getBundle().getHeaders();
+//                System.err.println("Test bundle headers: " + explode(dic));
+//
+//                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
+//                    System.err.println("ServiceReference: " + ref);
+//                }
+//
+//                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
+//                    System.err.println("Filtered ServiceReference: " + ref);
+//                }
 
                 throw new RuntimeException("Gave up waiting for service " + flt);
             }

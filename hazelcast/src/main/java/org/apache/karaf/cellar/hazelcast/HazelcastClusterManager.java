@@ -18,7 +18,6 @@ import com.hazelcast.core.ITopic;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import org.apache.karaf.cellar.core.ClusterManager;
 import java.util.Map;
@@ -26,16 +25,14 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Cluster manager implementation powered by Hazelcast.
  */
 public class HazelcastClusterManager implements ClusterManager {
-    private static transient Logger LOGGER = LoggerFactory.getLogger(HazelcastClusterManager.class);
+
     private CellarCluster masterCluster;
-    private Map<String, CellarCluster> clusterMap = new ConcurrentHashMap<String, CellarCluster>();
+    private final Map<String, CellarCluster> clusterMap = new ConcurrentHashMap<String, CellarCluster>();
 
     public void init() {
         this.clusterMap.put(masterCluster.getName(), masterCluster);
@@ -119,8 +116,7 @@ public class HazelcastClusterManager implements ClusterManager {
     public Set<Node> listNodes(Collection<String> ids) {
         Set<Node> nodeList = new HashSet<Node>();
         if (ids != null && !ids.isEmpty()) {
-            for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
-                CellarCluster cellarCluster = it.next();
+            for (CellarCluster cellarCluster : clusterMap.values()) {
                 Set<Node> nodes = cellarCluster.listNodes();
                 for (Node node : nodes) {
                     if (ids.contains(node.getId())) {
@@ -142,8 +138,7 @@ public class HazelcastClusterManager implements ClusterManager {
     public Set<Node> listNodesByName(Collection<String> names) {
         Set<Node> nodeList = new HashSet<Node>();
         if (names != null && !names.isEmpty()) {
-            for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
-                CellarCluster cellarCluster = it.next();
+            for (CellarCluster cellarCluster : clusterMap.values()) {
                 Set<Node> nodes = cellarCluster.listNodes();
                 for (Node node : nodes) {
                     if (names.contains(node.getName())) {
@@ -157,8 +152,7 @@ public class HazelcastClusterManager implements ClusterManager {
 
     @Override
     public Node findNodeById(String nodeId) {
-        for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
-            CellarCluster cellarCluster = it.next();
+        for (CellarCluster cellarCluster : clusterMap.values()) {
             Node node = cellarCluster.findNodeById(nodeId);
             if (node != null) {
                 return node;
@@ -169,8 +163,7 @@ public class HazelcastClusterManager implements ClusterManager {
 
     @Override
     public Node findNodeByName(String nodeName) {
-        for (Iterator<CellarCluster> it = clusterMap.values().iterator(); it.hasNext();) {
-            CellarCluster cellarCluster = it.next();
+        for (CellarCluster cellarCluster : clusterMap.values()) {
             Node node = cellarCluster.findNodeByName(nodeName);
             if (node != null) {
                 return node;

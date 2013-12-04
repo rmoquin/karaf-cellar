@@ -34,8 +34,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(LocalFeaturesListener.class);
 
-    private FeaturesSupport featuresSupport;
-
     /**
      * This method is called when a local feature has changed.
      *
@@ -60,7 +58,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                     Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
                     Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
-                    if (featuresSupport.isAllowed(name, whitelist, blacklist)) {
+                    if (this.isAllowed(name, whitelist, blacklist)) {
                         FeatureEvent.EventType type = event.getType();
 
                         // update the features in the cluster group
@@ -73,7 +71,7 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                         // broadcast the event
                         ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
                         featureEvent.setSourceGroup(group);
-                        executionContext.executeAsync(featureEvent, group.getNodesExcluding(groupManager.getNode()), null);
+                        executionContext.execute(featureEvent, group.getNodesExcluding(groupManager.getNode()));
                     } else {
                         LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
                     }

@@ -30,27 +30,20 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.apache.karaf.features.FeaturesService;
-import org.osgi.framework.BundleContext;
 
 /**
  * The BundleSynchronizer is called when Cellar starts or a node joins a cluster group. The purpose is to synchronize
  * bundles local state with the states in the cluster groups.
  */
-public class BundleSynchronizer implements Synchronizer {
+public class BundleSynchronizer extends BundleSupport implements Synchronizer {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSynchronizer.class);
-    private final BundleSupport bundleSupport = new BundleSupport();
     private DistributedExecutionContext executionContext;
-    private BundleContext bundleContext;
-    private FeaturesService featuresService;
     private NodeConfiguration nodeConfiguration;
     private GroupManager groupManager;
     private CellarCluster masterCluster;
 
     public void init() {
-        bundleSupport.setBundleContext(bundleContext);
-        bundleSupport.setFeaturesService(featuresService);
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
@@ -93,13 +86,13 @@ public class BundleSynchronizer implements Synchronizer {
                         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
                         Set<String> whitelist = groupConfig.getInboundBundleWhitelist();
                         Set<String> blacklist = groupConfig.getInboundBundleBlacklist();
-                        if (bundleSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
+                        if (this.isAllowed(bundleLocation, whitelist, blacklist)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {
-                                    bundleSupport.installBundleFromLocation(state.getLocation());
+                                    this.installBundleFromLocation(state.getLocation());
                                 } else if (state.getStatus() == BundleEvent.STARTED) {
-                                    bundleSupport.installBundleFromLocation(state.getLocation());
-                                    bundleSupport.startBundle(symbolicName, version);
+                                    this.installBundleFromLocation(state.getLocation());
+                                    this.startBundle(symbolicName, version);
                                 }
                             } catch (BundleException e) {
                                 LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
@@ -120,7 +113,6 @@ public class BundleSynchronizer implements Synchronizer {
     @Override
     public void push(Group group) {
 
-        //TODO turn back on at some point.
         if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR BUNDLE: cluster event producer is OFF");
             return;
@@ -142,7 +134,7 @@ public class BundleSynchronizer implements Synchronizer {
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                 Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
                 Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
-                if (bundleSupport.isAllowed(bundleLocation, whitelist, blacklist)) {
+                if (this.isAllowed(bundleLocation, whitelist, blacklist)) {
                     BundleState bundleState = new BundleState();
                     // get the bundle name or location.
                     String name = (String) bundle.getHeaders().get(org.osgi.framework.Constants.BUNDLE_NAME);
@@ -254,33 +246,5 @@ public class BundleSynchronizer implements Synchronizer {
      */
     public void setExecutionContext(DistributedExecutionContext executionContext) {
         this.executionContext = executionContext;
-    }
-
-    /**
-     * @return the bundleContext
-     */
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    /**
-     * @param bundleContext the bundleContext to set
-     */
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
-    }
-
-    /**
-     * @return the featuresService
-     */
-    public FeaturesService getFeaturesService() {
-        return featuresService;
-    }
-
-    /**
-     * @param featuresService the featuresService to set
-     */
-    public void setFeaturesService(FeaturesService featuresService) {
-        this.featuresService = featuresService;
     }
 }

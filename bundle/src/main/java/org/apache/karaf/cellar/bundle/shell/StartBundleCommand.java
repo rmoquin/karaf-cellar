@@ -39,7 +39,6 @@ public class StartBundleCommand extends BundleCommandSupport {
             return null;
         }
 
-        //TODO turn back on at some point.
         if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
@@ -52,6 +51,7 @@ public class StartBundleCommand extends BundleCommandSupport {
 
         if (key == null) {
             System.err.println("Bundle " + key + " not found in cluster group " + groupName);
+            return null;
         }
 
         BundleState state = clusterBundles.get(key);
@@ -63,6 +63,7 @@ public class StartBundleCommand extends BundleCommandSupport {
 
         // check if the bundle is allowed
         CellarSupport support = new CellarSupport();
+
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
         Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();

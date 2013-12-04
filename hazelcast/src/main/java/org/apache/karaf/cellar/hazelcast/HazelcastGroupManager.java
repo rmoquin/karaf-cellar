@@ -42,7 +42,7 @@ public class HazelcastGroupManager implements GroupManager {
     private final Map<String, GroupConfiguration> groupMemberships = new ConcurrentHashMap<String, GroupConfiguration>();
     private final Map<String, String> pidGroupNameMap = new HashMap<String, String>();
     private HazelcastCluster masterCluster;
-    private ConfigurationAdmin configurationAdmin;
+    private ConfigurationAdmin configAdmin;
 
     public void init() {
     }
@@ -101,6 +101,7 @@ public class HazelcastGroupManager implements GroupManager {
      *
      * @param groupConfig the group configuration.
      * @param properties the group service properties.
+     * @throws org.osgi.service.cm.ConfigurationException
      */
     public void groupConfigured(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException {
         LOGGER.warn("Group service was created: " + properties);
@@ -251,8 +252,7 @@ public class HazelcastGroupManager implements GroupManager {
     protected void removeNodeFromAllGroups(boolean saveNodeConfig) throws IOException {
         IMap<String, Group> map = getGroupMapStore();
         Set<String> groupNames = nodeConfiguration.getGroups();
-        for (Iterator<String> it = groupNames.iterator(); it.hasNext();) {
-            String groupName = it.next();
+        for (String groupName : groupNames) {
             map.lock(groupName);
             Group group = map.get(groupName);
             group.addNode(getNode());
@@ -272,11 +272,6 @@ public class HazelcastGroupManager implements GroupManager {
     @Override
     public Set<Group> listAllGroups() {
         return new HashSet<Group>(getGroupMapStore().values());
-    }
-
-    @Override
-    public boolean isProducibleEvent(Object event) {
-        return this.nodeConfiguration.isProducer() && this.nodeConfiguration.getEnabledEvents().contains(event);
     }
 
     @Override
@@ -326,7 +321,7 @@ public class HazelcastGroupManager implements GroupManager {
     private void addGroupToNodeConfiguration(String groupName) throws IOException {
         if (!nodeConfiguration.getGroups().contains(groupName)) {
             nodeConfiguration.getGroups().add(groupName);
-            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
+            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
             configuration.update(nodeConfiguration.getProperties());
         }
     }
@@ -339,7 +334,7 @@ public class HazelcastGroupManager implements GroupManager {
                 LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
                 groups.add(Configurations.DEFAULT_GROUP_NAME);
             }
-            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
+            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class
                     .getCanonicalName(), null);
             configuration.update(nodeConfiguration.getProperties());
         }
@@ -351,14 +346,14 @@ public class HazelcastGroupManager implements GroupManager {
             groups.clear();
             LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
             groups.add(Configurations.DEFAULT_GROUP_NAME);
-            Configuration configuration = configurationAdmin.getConfiguration(NodeConfiguration.class
+            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class
                     .getCanonicalName(), null);
             configuration.update(nodeConfiguration.getProperties());
         }
     }
 
     protected void createNewGroupConfiguration(String groupName) throws IOException {
-        Configuration configuration = configurationAdmin.createFactoryConfiguration(GroupConfiguration.class
+        Configuration configuration = configAdmin.createFactoryConfiguration(GroupConfiguration.class
                 .getCanonicalName(), "?");
         Dictionary<String, Object> properties = configuration.getProperties();
         if (properties == null) {
@@ -375,7 +370,7 @@ public class HazelcastGroupManager implements GroupManager {
             return;
         }
         LOGGER.info("Attempting to delete group configuration {}.", groupName);
-        Configuration[] configurations = configurationAdmin.listConfigurations("(service.pid = " + pid + ")");
+        Configuration[] configurations = configAdmin.listConfigurations("(service.pid = " + pid + ")");
         //Shouldn't ever be more than one but just in case.
         if (configurations != null) {
             for (Configuration configuration : configurations) {
@@ -383,7 +378,7 @@ public class HazelcastGroupManager implements GroupManager {
             }
         } else {
             LOGGER.warn("There were no configurations to delete for pid filter: (service.pid = {}", pid);
-            configurations = configurationAdmin.listConfigurations(null);
+            configurations = configAdmin.listConfigurations(null);
             //Shouldn't ever be more than one but just in case.
             if (configurations != null) {
                 for (Configuration configuration : configurations) {
@@ -402,12 +397,12 @@ public class HazelcastGroupManager implements GroupManager {
         this.masterCluster = masterCluster;
     }
 
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
     }
 
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 
     @Override

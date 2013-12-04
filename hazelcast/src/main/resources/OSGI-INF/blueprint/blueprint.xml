@@ -36,7 +36,7 @@
     <!-- Discovery Task -->
     <bean id="discoveryTask" class="org.apache.karaf.cellar.core.discovery.DiscoveryTask" init-method="init" destroy-method="destroy">
         <property name="discoveryServices" ref="discoveryServices"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="configAdmin" ref="configAdmin"/>
     </bean>
 
     <bean id="masterCluster" class="org.apache.karaf.cellar.hazelcast.HazelcastCluster" init-method="init" destroy-method="shutdown">
@@ -198,7 +198,7 @@
 
     <bean id="groupManager" class="org.apache.karaf.cellar.hazelcast.HazelcastGroupManager" init-method="init" destroy-method="destroy">
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="configurationAdmin" ref="configurationAdmin"/>
+        <property name="configAdmin" ref="configAdmin"/>
         <property name="nodeConfiguration" ref="nodeConfigRef"/>
     </bean>
 
@@ -222,13 +222,41 @@
           init-method="init" destroy-method="destroy">
         <property name="name" value="commandExecution"/>
         <property name="cluster" ref="masterCluster"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
     </bean>
 
     <service ref="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
 
-    <bean id="cellarSupport" class="org.apache.karaf.cellar.core.CellarSupport"/>
+    <bean id="nodeEventConfigurationCommandHandler" class="org.apache.karaf.cellar.core.control.NodeEventConfigurationCommandHandler">
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configAdmin" ref="configAdmin"/>
+    </bean>
 
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
+    <service ref="nodeEventConfigurationCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
+
+    <bean id="manageHandlersCommandHandler" class="org.apache.karaf.cellar.core.control.ManageHandlersCommandHandler">
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configAdmin" ref="configAdmin"/>
+    </bean>
+
+    <service ref="manageHandlersCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
+
+    <bean id="manageGroupCommandHandler" class="org.apache.karaf.cellar.core.control.ManageGroupCommandHandler">
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+        <property name="groupManager" ref="groupManager"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configAdmin" ref="configAdmin"/>
+    </bean>
+
+    <service ref="manageGroupCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
+
+    <reference id="registry" interface="org.apache.karaf.cellar.core.event.EventHandlerRegistry" availability="optional"/>
+
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
 
     <reference id="nodeConfigRef" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional">
         <reference-listener ref="groupManager" bind-method="nodeMembershipsReceived" unbind-method="nodeMembershipsRemoved"/>

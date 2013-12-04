@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.command.DistributedResult;
@@ -37,8 +37,6 @@ import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
-import org.osgi.service.cm.Configuration;
-import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +49,8 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedExecutionContextImpl.class);
     private String name;
     private HazelcastCluster cluster;
+    private NodeConfiguration nodeConfiguration;
     private IExecutorService executorService;
-    private ConfigurationAdmin configurationAdmin;
     private int timeoutSeconds = 60;
     public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.producer";
 
@@ -74,24 +72,64 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      * @return
      */
     @Override
-    public Map<Node, R> executeAndWait(C command, Set<Node> destinations) {
-        Map<Node, Future<R>> results = this.execute(command, destinations);
+    public Map<Node, R> execute(C command, Set<Node> destinations) {
         Map<Node, R> finishedResults = new HashMap<Node, R>();
-        for (Map.Entry<Node, Future<R>> entry : results.entrySet()) {
-            Node node = entry.getKey();
+        Set<Member> members = new HashSet<Member>();
+        for (Node node : destinations) {
+            Member member = cluster.findMemberById(node.getId());
+            members.add(member);
+        }
+        DistributedTask task = new DistributedTask(command);
+        Map<Member, Future<R>> executedResult = this.executorService.submitToMembers(task, members);
+        for (Map.Entry<Member, Future<R>> entry : executedResult.entrySet()) {
+            Member member = entry.getKey();
+            Node node = new HazelcastNode(member);
             try {
                 R result = entry.getValue().get(timeoutSeconds, TimeUnit.SECONDS);
                 finishedResults.put(node, result);
+                LOGGER.info("Task completed on node {} with result {} for command {}.", node, result, command);
             } catch (Exception ex) {
-                LOGGER.error("Node {} generated an error executing task {}", node.getName(), command, ex);
+                LOGGER.error("Node {} generated an error executing task {}", node, command, ex);
             }
         }
-        LOGGER.info("Completed task {} on selected nodes." + command);
+        LOGGER.info("All taska completed for command {}.", command);
+        return finishedResults;
+    }
+
+    @Override
+    public Map<Node, R> execute(C command, Node destination) {
+        Member member = cluster.findMemberById(destination.getId());
+        DistributedTask task = new DistributedTask(command);
+        Future<R> future = this.executorService.submitToMember(task, member);
+        Map<Node, R> finishedResults = new HashMap<Node, R>();
+        Node node = new HazelcastNode(member);
+        try {
+            R result = future.get(timeoutSeconds, TimeUnit.SECONDS);
+            finishedResults.put(node, result);
+            LOGGER.info("Task completed on node {} with result {} for command {}.", destination, result, command);
+        } catch (Exception ex) {
+            LOGGER.error("Node {} generated an error executing task {}", node, command, ex);
+        }
+        LOGGER.info("All taska completed for command {}.", command);
         return finishedResults;
     }
 
     /**
-     * Executes the distributed task and waits for each Future to return rather than let the caller manually handle it.
+     * Executes the distributed task synchronously and returns a <code>Map<Node, Result></code> containing the results
+     * of the tasks for each node.
+     *
+     * @param command the task to execute
+     * @param destinations the destinations to sent to.
+     * @return
+     */
+    @Override
+    public Map<Node, R> executeAndWait(C command, Set<Node> destinations) {
+        return this.executeAndWait(command, destinations);
+    }
+
+    /**
+     * Executes the distributed task synchronously and returns a <code>Map<Node, Result></code> containing the result of
+     * the task for the destination node.
      *
      * @param command the task to execute
      * @param destination the destination to sent to.
@@ -99,29 +137,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      */
     @Override
     public Map<Node, R> executeAndWait(C command, Node destination) {
-        Map<Node, Future<R>> results = this.execute(command, destination);
-        Map<Node, R> finishedResults = new HashMap<Node, R>();
-        Map.Entry<Node, Future<R>> entry = results.entrySet().iterator().next();
-        Node node = entry.getKey();
-        try {
-            R result = entry.getValue().get(timeoutSeconds, TimeUnit.SECONDS);
-            finishedResults.put(node, result);
-        } catch (Exception ex) {
-            LOGGER.error("Node {} generated an error executing task {}", node.getName(), command, ex);
-        }
-        LOGGER.info("Completed task {}" + command);
-        return finishedResults;
-    }
-
-    @Override
-    public Map<Node, Future<R>> execute(C command, Node node) {
-        Map<Node, Future<R>> results = new HashMap<Node, Future<R>>();
-        Member member = cluster.findMemberById(node.getId());
-        Future<R> result;
-        DistributedTask task = new DistributedTask(command);
-        result = this.executorService.submitToMember(task, member);
-        results.put(node, result);
-        return results;
+        return this.execute(command, destination);
     }
 
     @Override
@@ -133,25 +149,6 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         Member member = cluster.findMemberById(node.getId());
         DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMember(task, member, distributedCallback);
-    }
-
-    @Override
-    public Map<Node, Future<R>> execute(C command, Set<Node> destinations) {
-        Map<Node, Future<R>> results = new HashMap<Node, Future<R>>();
-        Set<Member> members = new HashSet<Member>();
-        for (Node node : destinations) {
-            Member member = cluster.findMemberById(node.getId());
-            members.add(member);
-        }
-        DistributedTask task = new DistributedTask(command);
-        Map<Member, Future<R>> executedResult = this.executorService.submitToMembers(task, members);
-        for (Map.Entry<Member, Future<R>> entry : executedResult.entrySet()) {
-            Member member = entry.getKey();
-            Future<R> future = entry.getValue();
-            results.put(new HazelcastNode(member), future);
-        }
-        LOGGER.info("Completed task {}" + command);
-        return results;
     }
 
     @Override
@@ -169,24 +166,19 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         this.executorService.submitToMembers(task, members, distributedCallback);
     }
 
+    @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        try {
-            Configuration configuration = configurationAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
-            if (configuration != null) {
-                Boolean status = Boolean.valueOf((String) configuration.getProperties().get(Configurations.PRODUCER));
-                if (status) {
-                    eventSwitch.turnOn();
-                } else {
-                    eventSwitch.turnOff();
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error retrieving switch, {}, for execution context.", Configurations.PRODUCER, e);
+        boolean status = nodeConfiguration.isProducer();
+        if (status) {
+            eventSwitch.turnOn();
+        } else {
+            eventSwitch.turnOff();
         }
         return eventSwitch;
     }
 
+    @Override
     public String getTopic() {
         return name;
     }
@@ -236,11 +228,17 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         this.timeoutSeconds = timeoutSeconds;
     }
 
-    public ConfigurationAdmin getConfigurationAdmin() {
-        return configurationAdmin;
+    /**
+     * @return the nodeConfiguration
+     */
+    public NodeConfiguration getNodeConfiguration() {
+        return nodeConfiguration;
     }
 
-    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
-        this.configurationAdmin = configurationAdmin;
+    /**
+     * @param nodeConfiguration the nodeConfiguration to set
+     */
+    public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
+        this.nodeConfiguration = nodeConfiguration;
     }
 }

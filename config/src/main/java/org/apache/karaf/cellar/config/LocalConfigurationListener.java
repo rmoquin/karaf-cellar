@@ -23,7 +23,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import org.apache.karaf.cellar.core.CellarSupport;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -40,7 +39,6 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
     private ConfigurationAdmin configAdmin;
     private GroupManager groupManager;
     private ClusterManager clusterManager;
-    private CellarSupport cellarSupport;
     private DistributedExecutionContext executionContext;
 
     /**
@@ -56,17 +54,6 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         }
         String pid = event.getPid();
 
-        Dictionary localDictionary = null;
-        if (event.getType() != ConfigurationEvent.CM_DELETED) {
-            try {
-                Configuration conf = configAdmin.getConfiguration(pid, null);
-                localDictionary = conf.getProperties();
-            } catch (Exception e) {
-                LOGGER.error("CELLAR CONFIG: can't retrieve configuration with PID {}", pid, e);
-                return;
-            }
-        }
-
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
@@ -74,9 +61,10 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                 Set<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
                 Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
                 // check if the pid is allowed for outbound.
-                if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
+                if (this.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
                     try {
+                        Configuration conf = configAdmin.getConfiguration(pid, null);
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
                             if (clusterConfigurations.containsKey(pid)) {
                                 // update the configurations in the cluster group
@@ -86,11 +74,10 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 clusterConfigurationEvent.setType(event.getType());
                                 clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                                 clusterConfigurationEvent.setSourceGroup(group);
-                                executionContext.executeAsync(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()), null);
+                                executionContext.execute(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()));
                             }
                         } else {
-                            Configuration conf = configAdmin.getConfiguration(pid, null);
-                            localDictionary = conf.getProperties();
+                            Dictionary<String, Object> localDictionary = conf.getProperties();
                             localDictionary = filter(localDictionary);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
                             if (!equals(localDictionary, distributedDictionary)) {
@@ -101,7 +88,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
                                 clusterConfigurationEvent.setSourceGroup(group);
                                 clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
-                                executionContext.executeAsync(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()), null);
+                                executionContext.execute(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()));
                             }
                         }
                     } catch (Exception e) {
@@ -162,20 +149,6 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
      */
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**

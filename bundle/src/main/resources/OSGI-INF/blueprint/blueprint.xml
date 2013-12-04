@@ -30,6 +30,7 @@
     <!-- Bundle Synchronizer -->
     <bean id="synchronizer" class="org.apache.karaf.cellar.bundle.BundleSynchronizer"
           init-method="init" destroy-method="destroy" depends-on="eventHandler">
+        <property name="bundleContext" ref="blueprintBundleContext"/>
         <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
@@ -43,9 +44,11 @@
     <bean id="eventHandler" class="org.apache.karaf.cellar.bundle.BundleEventHandler"
           init-method="init" destroy-method="destroy">
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="featuresService" ref="featuresService"/>
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="featuresService" ref="featuresService"/>
+        <property name="clusterManager" ref="clusterManager"/>
+        <property name="configAdmin" ref="configAdmin"/>
     </bean>
 
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -60,5 +63,6 @@
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
+    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 </blueprint>

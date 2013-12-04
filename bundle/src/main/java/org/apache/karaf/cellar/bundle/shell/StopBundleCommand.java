@@ -39,7 +39,6 @@ public class StopBundleCommand extends BundleCommandSupport {
             return null;
         }
 
-        //TODO turn back on at some point.
         if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             System.err.println("Cluster event producer is OFF");
             return null;
@@ -65,6 +64,7 @@ public class StopBundleCommand extends BundleCommandSupport {
 
         // check if the bundle is allowed
         CellarSupport support = new CellarSupport();
+
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
         Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
