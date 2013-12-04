@@ -41,7 +41,6 @@
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configAdmin" ref="configAdmin"/>
     </bean>
 
     <service ref="clusterEventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
@@ -52,7 +51,6 @@
 
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
-    <reference id="configAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="eventAdmin" interface="org.osgi.service.event.EventAdmin" />
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>

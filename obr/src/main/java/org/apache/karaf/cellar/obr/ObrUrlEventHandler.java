@@ -23,7 +23,6 @@ import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
-import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +35,12 @@ public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, Clust
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.obr.urls.handler";
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private RepositoryAdmin obrService;
-    private BundleContext bundleContext;
+
+    public void init() {
+    }
+
+    public void destroy() {
+    }
 
     /**
      * Handle a received cluster OBR URL event.
@@ -114,19 +118,5 @@ public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, Clust
      */
     public void setObrService(RepositoryAdmin obrService) {
         this.obrService = obrService;
-    }
-
-    /**
-     * @return the bundleContext
-     */
-    public BundleContext getBundleContext() {
-        return bundleContext;
-    }
-
-    /**
-     * @param bundleContext the bundleContext to set
-     */
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 }

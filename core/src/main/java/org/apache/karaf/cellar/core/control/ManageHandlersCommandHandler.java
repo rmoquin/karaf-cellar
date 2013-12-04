@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Manage handlers command handler.
@@ -36,6 +37,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.listhandlers.switch";
 
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
+    private ConfigurationAdmin configAdmin;
 
     /**
      * Return a map containing all managed {@code EventHandler}s and their status.
@@ -94,7 +96,7 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
      */
     private void persist(String handler, SwitchStatus switchStatus) {
         try {
-            Configuration configuration = super.configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+            Configuration configuration = configAdmin.getConfiguration(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
             if (configuration != null) {
                 Dictionary<String, Object> properties = configuration.getProperties();
                 if (properties != null) {
@@ -115,6 +117,20 @@ public class ManageHandlersCommandHandler extends CommandHandler<ManageHandlersC
     @Override
     public Switch getSwitch() {
         return commandSwitch;
+    }
+
+    /**
+     * @return the configAdmin
+     */
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
+    }
+
+    /**
+     * @param configAdmin the configAdmin to set
+     */
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 
 }

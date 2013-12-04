@@ -21,9 +21,7 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceCo
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 
 import java.io.ByteArrayOutputStream;
-import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.security.Principal;
@@ -31,8 +29,6 @@ import java.security.PrivilegedExceptionAction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -80,7 +76,7 @@ import org.slf4j.LoggerFactory;
 
 public class CellarTestSupport {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(CellarTestSupport.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CellarTestSupport.class);
     public static final Long DELAY_TIMEOUT = 5000L;
     public static final Long COMMAND_TIMEOUT = 10000L;
     public static final Long SERVICE_TIMEOUT = 30000L;
@@ -175,8 +171,16 @@ public class CellarTestSupport {
      * Destroys the child node.
      */
     protected void destroyCellarChild(String name) {
-        System.err.println(executeCommand(generateSSH(name, "feature:uninstall cellar")));
-        System.err.println(executeCommand("instance:stop " + name));
+        try {
+            System.err.println(executeCommand(generateSSH(name, "feature:uninstall cellar")));
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        try {
+            System.err.println(executeCommand("instance:stop " + name));
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
     }
 
     /**
@@ -424,23 +428,6 @@ public class CellarTestSupport {
         }
     }
 
-    /*
-     * Explode the dictionary into a ,-delimited list of key=value pairs
-     */
-    @SuppressWarnings("rawtypes")
-    private static String explode(Dictionary dictionary) {
-        Enumeration keys = dictionary.keys();
-        StringBuilder result = new StringBuilder();
-        while (keys.hasMoreElements()) {
-            Object key = keys.nextElement();
-            result.append(String.format("%s=%s", key, dictionary.get(key)));
-            if (keys.hasMoreElements()) {
-                result.append(", ");
-            }
-        }
-        return result.toString();
-    }
-
     /**
      * Provides an iterable collection of references, even if the original array is null
      */
@@ -545,15 +532,4 @@ public class CellarTestSupport {
             }
         }
     }
-
-    protected void close(Closeable closeAble) {
-        if (closeAble != null) {
-            try {
-                closeAble.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-    }
-
 }

@@ -28,6 +28,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
 
 /**
@@ -41,6 +42,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
     private final ConfigurationSupport configSupport = new ConfigurationSupport();
+    private ConfigurationAdmin configAdmin;
 
     @Override
     public ConfigurationTaskResult execute(ClusterConfigurationEvent command) {
@@ -130,5 +132,19 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
     @Override
     public Class<ClusterConfigurationEvent> getType() {
         return ClusterConfigurationEvent.class;
+    }
+
+    /**
+     * @return the configAdmin
+     */
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
+    }
+
+    /**
+     * @param configAdmin the configAdmin to set
+     */
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 }

@@ -249,7 +249,6 @@
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
-        <property name="configAdmin" ref="configAdmin"/>
     </bean>
 
     <service ref="manageGroupCommandHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>

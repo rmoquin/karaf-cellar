@@ -48,6 +48,12 @@ public class ObrBundleEventHandler extends CommandHandler<ClusterObrBundleEvent,
     private RepositoryAdmin obrService;
     private BundleContext bundleContext;
 
+    public void init() {
+    }
+
+    public void destroy() {
+    }
+
     protected String[] getTarget(String bundle) {
         String[] target;
         int idx = bundle.indexOf(VERSION_DELIM);
@@ -79,7 +85,7 @@ public class ObrBundleEventHandler extends CommandHandler<ClusterObrBundleEvent,
 
     protected Resource[] searchRepository(String targetId, String targetVersion) throws InvalidSyntaxException {
         try {
-            Bundle bundle = getBundleContext().getBundle(Long.parseLong(targetId));
+            Bundle bundle = bundleContext.getBundle(Long.parseLong(targetId));
             targetId = bundle.getSymbolicName();
         } catch (NumberFormatException e) {
             // it was not a number, so ignore.
@@ -133,8 +139,8 @@ public class ObrBundleEventHandler extends CommandHandler<ClusterObrBundleEvent,
                 } else {
                     LOGGER.warn("CELLAR OBR: bundle {} unknown", target[0]);
                 }
-                if ((resolver.getAddedResources() != null) &&
-                        (resolver.getAddedResources().length > 0)) {
+                if ((resolver.getAddedResources() != null)
+                        && (resolver.getAddedResources().length > 0)) {
                     if (resolver.resolve()) {
                         if (event.getType() == Constants.BUNDLE_START_EVENT_TYPE) {
                             resolver.deploy(Resolver.START);
@@ -199,5 +205,19 @@ public class ObrBundleEventHandler extends CommandHandler<ClusterObrBundleEvent,
      */
     public void setBundleContext(BundleContext bundleContext) {
         this.bundleContext = bundleContext;
+    }
+
+    /**
+     * @return the obrService
+     */
+    public RepositoryAdmin getObrService() {
+        return obrService;
+    }
+
+    /**
+     * @param obrService the obrService to set
+     */
+    public void setObrService(RepositoryAdmin obrService) {
+        this.obrService = obrService;
     }
 }

@@ -19,8 +19,6 @@
     <reference id="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager"/>
     <reference id="executionContext" interface="org.apache.karaf.cellar.core.command.DistributedExecutionContext"/>
-    <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration"/>
-    <reference id="configurationAdmin" interface="org.osgi.service.cm.ConfigurationAdmin"/>
     <reference id="featuresService" interface="org.apache.karaf.features.FeaturesService"/>
 
     <!-- Core Cellar MBean -->
@@ -55,7 +53,6 @@
     <bean id="cellarConfigMBean" class="org.apache.karaf.cellar.management.internal.CellarConfigMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="cellarSupport" ref="cellarSupport"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>
 
@@ -69,7 +66,6 @@
     <bean id="cellarFeaturesMBean" class="org.apache.karaf.cellar.management.internal.CellarFeaturesMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
-        <property name="cellarSupport" ref="cellarSupport"/>
         <property name="featuresService" ref="featuresService"/>
         <property name="executionContext" ref="executionContext"/>
     </bean>

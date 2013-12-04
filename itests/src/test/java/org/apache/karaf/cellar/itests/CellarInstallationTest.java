@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import org.junit.After;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -31,4 +32,8 @@ public class CellarInstallationTest extends CellarTestSupport {
         System.out.println(executeCommand("cluster:node-list"));
     }
 
+    @After
+    public void tearDown() {
+        unInstallCellar();
+    }
 }

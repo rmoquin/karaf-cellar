@@ -19,7 +19,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -87,13 +86,9 @@ public class CellarConfigurationTest extends CellarTestSupport {
 
     @After
     public void tearDown() {
-        try {
-            destroyCellarChild("child1");
-            destroyCellarChild("child2");
-            unInstallCellar();
-        } catch (Exception ex) {
-            //Ignore
-        }
+        destroyCellarChild("child1");
+        destroyCellarChild("child2");
+        unInstallCellar();
     }
 
 }

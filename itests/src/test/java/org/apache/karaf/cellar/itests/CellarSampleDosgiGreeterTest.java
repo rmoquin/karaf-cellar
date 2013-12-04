@@ -99,13 +99,9 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
     @After
     public void tearDown() {
-        try {
-            destroyCellarChild("node1");
-            destroyCellarChild("node2");
-            unInstallCellar();
-        } catch (Exception ex) {
-            //Ignore
-        }
+        destroyCellarChild("node1");
+        destroyCellarChild("node2");
+        super.unInstallCellar();
     }
 
 }

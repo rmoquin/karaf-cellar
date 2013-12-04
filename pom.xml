@@ -198,6 +198,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.karaf.shell</groupId>
+                <artifactId>org.apache.karaf.shell.ssh</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.karaf.cellar</groupId>
                 <artifactId>org.apache.karaf.cellar.utils</artifactId>
                 <version>${project.version}</version>

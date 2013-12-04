@@ -87,13 +87,9 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
     @After
     public void tearDown() {
-        try {
-            destroyCellarChild("node1");
-            destroyCellarChild("node2");
-            unInstallCellar();
-        } catch (Exception e) {
-            //Ignore
-        }
+        destroyCellarChild("node1");
+        destroyCellarChild("node2");
+        unInstallCellar();
     }
 
 }

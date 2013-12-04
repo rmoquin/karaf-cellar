@@ -50,7 +50,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
     private GroupManager groupManager;
     private DistributedExecutionContext executionContext;
     private FeaturesService featuresService;
-    private CellarSupport cellarSupport;
+    private final CellarSupport cellarSupport = new CellarSupport();
 
     public CellarFeaturesMBeanImpl() throws NotCompliantMBeanException {
         super(CellarFeaturesMBean.class);
@@ -115,7 +115,7 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
                 clusterBundles.put(bundle.toString(), state);
             }
         } catch (Exception e) {
-            // ignore
+            throw new IllegalStateException("Error updating feature bundles in the cluster.", e);
         }
 
         // broadcast the cluster event
@@ -437,20 +437,6 @@ public class CellarFeaturesMBeanImpl extends StandardMBean implements CellarFeat
 
     public void setFeaturesService(FeaturesService featuresService) {
         this.featuresService = featuresService;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**

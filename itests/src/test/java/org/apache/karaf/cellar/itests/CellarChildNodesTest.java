@@ -47,12 +47,8 @@ public class CellarChildNodesTest extends CellarTestSupport {
 
     @After
     public void tearDown() {
-        try {
-            destroyCellarChild("child1");
-            unInstallCellar();
-        } catch (Exception ex) {
-            //Ignore
-        }
+        destroyCellarChild("child1");
+        unInstallCellar();
     }
 
 }

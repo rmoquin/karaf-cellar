@@ -34,8 +34,6 @@ import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 @ExamReactorStrategy(PerMethod.class)
 public class CellarGroupsTest extends CellarTestSupport {
 
-    private boolean createdChildren = false;
-
     @Test
     public void testGroupManagerService() throws Exception {
         installCellar();
@@ -58,7 +56,6 @@ public class CellarGroupsTest extends CellarTestSupport {
     @Test
     public void testGroupsWithChildNodes() throws Exception {
         installCellar();
-        createdChildren = true;
         createCellarChild("child1");
         if (!waitForInstanceToCluster(2)) {
             throw new Exception("Failed waiting for second node to connect to cluster..");
@@ -85,13 +82,7 @@ public class CellarGroupsTest extends CellarTestSupport {
 
     @After
     public void tearDown() {
-        if (createdChildren) {
-            try {
-                destroyCellarChild("child1");
-                unInstallCellar();
-            } catch (Exception ex) {
-                //Ignore
-            }
-        }
+        destroyCellarChild("child1");
+        unInstallCellar();
     }
 }

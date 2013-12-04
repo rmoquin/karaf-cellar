@@ -19,7 +19,6 @@ import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.event.EventHandler;
-import org.osgi.service.cm.ConfigurationAdmin;
 
 /**
  * Command handler.
@@ -30,7 +29,6 @@ public abstract class CommandHandler<C extends Command<R>, R extends Distributed
     protected GroupManager groupManager;
     protected ClusterManager clusterManager;
     protected CellarSupport cellarSupport = new CellarSupport();
-    protected ConfigurationAdmin configAdmin;
 
     /**
      * /**
@@ -89,19 +87,5 @@ public abstract class CommandHandler<C extends Command<R>, R extends Distributed
      */
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
-    }
-
-    /**
-     * @return the configAdmin
-     */
-    public ConfigurationAdmin getConfigAdmin() {
-        return configAdmin;
-    }
-
-    /**
-     * @param configAdmin the configAdmin to set
-     */
-    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
-        this.configAdmin = configAdmin;
     }
 }

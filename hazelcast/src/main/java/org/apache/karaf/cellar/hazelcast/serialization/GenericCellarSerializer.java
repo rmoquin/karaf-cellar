@@ -57,14 +57,14 @@ public class GenericCellarSerializer<T> implements ByteArraySerializer<T> {
 
     @Override
     public byte[] write(T object) throws IOException {
-        LOGGER.warn("Writing value object: " + object);
+        LOGGER.debug("Writing value object {}", object);
         return mapper.writeValueAsBytes(object);
     }
 
     @Override
     public T read(byte[] in) throws IOException {
         T val = mapper.readValue(in, clazz);
-        LOGGER.warn("Read value object: " + val);
+        LOGGER.debug("Read value object {}", val);
         return val;
     }
 

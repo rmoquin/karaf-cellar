@@ -34,7 +34,7 @@ import org.apache.karaf.cellar.core.GroupManager;
 public class ObrUrlSynchronizer implements Synchronizer {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ObrUrlSynchronizer.class);
-    private CellarSupport cellarSupport;
+    private final CellarSupport cellarSupport = new CellarSupport();
     private ClusterManager clusterManager;
     private GroupManager groupManager;
     private RepositoryAdmin obrService;

@@ -33,7 +33,7 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
     private ClusterManager clusterManager;
     private GroupManager groupManager;
-    private CellarSupport cellarSupport;
+    private final CellarSupport cellarSupport = new CellarSupport();
     private DistributedExecutionContext executionContext;
 
     public CellarConfigMBeanImpl() throws NotCompliantMBeanException {
@@ -129,9 +129,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is ON
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
@@ -167,9 +167,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the producer is on
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
@@ -212,9 +212,9 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
         }
 
         // check if the event producer is ON
-//        if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-//            throw new IllegalStateException("Cluster event producer is OFF");
-//        }
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            throw new IllegalStateException("Cluster event producer is OFF");
+        }
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
         Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
@@ -254,20 +254,6 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
 
     public void setGroupManager(GroupManager groupManager) {
         this.groupManager = groupManager;
-    }
-
-    /**
-     * @return the cellarSupport
-     */
-    public CellarSupport getCellarSupport() {
-        return cellarSupport;
-    }
-
-    /**
-     * @param cellarSupport the cellarSupport to set
-     */
-    public void setCellarSupport(CellarSupport cellarSupport) {
-        this.cellarSupport = cellarSupport;
     }
 
     /**

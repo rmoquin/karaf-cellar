@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import org.junit.After;
 import org.junit.Test;
 
 import org.junit.runner.RunWith;
@@ -31,14 +30,4 @@ public class CellarObrTest extends CellarTestSupport {
         Thread.sleep(DELAY_TIMEOUT);
         featureService.installFeature("cellar-obr");
     }
-
-    @After
-    public void tearDown() {
-        try {
-            unInstallCellar();
-        } catch (Exception ex) {
-            //Ignore
-        }
-    }
-
 }

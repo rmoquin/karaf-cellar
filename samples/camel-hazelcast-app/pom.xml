@@ -34,7 +34,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <camel.version>2.9.0</camel.version>
+        <camel.version>2.12.2</camel.version>
     </properties>
 
     <modules>
@@ -42,7 +42,7 @@
         <module>consumer</module>
     </modules>
 
-   <build>
+    <build>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

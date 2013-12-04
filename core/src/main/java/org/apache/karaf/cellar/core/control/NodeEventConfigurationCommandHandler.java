@@ -19,6 +19,7 @@ import java.io.IOException;
 import org.apache.karaf.cellar.core.NodeConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,7 @@ public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeCon
     private static final transient Logger LOGGER = LoggerFactory.getLogger(NodeEventConfigurationCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.nodeconfig.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
+    private ConfigurationAdmin configAdmin;
 
     public NodeEventConfigurationCommandHandler() {
     }
@@ -67,5 +69,19 @@ public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeCon
     @Override
     public Switch getSwitch() {
         return commandSwitch;
+    }
+
+    /**
+     * @return the configAdmin
+     */
+    public ConfigurationAdmin getConfigAdmin() {
+        return configAdmin;
+    }
+
+    /**
+     * @param configAdmin the configAdmin to set
+     */
+    public void setConfigAdmin(ConfigurationAdmin configAdmin) {
+        this.configAdmin = configAdmin;
     }
 }

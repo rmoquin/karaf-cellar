@@ -32,11 +32,7 @@ public class CellarEventTest extends CellarTestSupport {
 
     @After
     public void tearDown() {
-        try {
-            unInstallCellar();
-        } catch (Exception ex) {
-            //Ignore
-        }
+        unInstallCellar();
     }
 
 }
