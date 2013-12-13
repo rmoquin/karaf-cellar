@@ -54,6 +54,7 @@ import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.Feature;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.instance.core.InstanceService;
+import org.apache.karaf.instance.core.InstanceSettings;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
 import org.junit.Rule;
@@ -132,6 +133,8 @@ public class CellarTestSupport {
 
     /**
      * Creates a child instance that runs cellar.
+     *
+     * @param name of the new cellar child.
      */
     protected void createCellarChild(String name) {
         createCellarChild(name, false, 0);
@@ -140,10 +143,11 @@ public class CellarTestSupport {
     protected void createCellarChild(String name, boolean debug, int port) {
         int instances = 0;
         String createCommand = "instance:create --featureURL " + cellarFeatureURI + " --feature cellar ";
+        String debugOpts = "";
         if (debug && port > 0) {
-            createCommand = createCommand + String.format(DEBUG_OPTS, port);
+            debugOpts = String.format(DEBUG_OPTS, port);
         }
-        System.err.println(executeCommand(createCommand + " " + name));
+        System.err.println(executeCommand(createCommand + " " + name + " " + debugOpts));
         System.err.println(executeCommand("instance:start " + name));
 
         //Wait till the node is listed as Starting
@@ -208,7 +212,7 @@ public class CellarTestSupport {
             configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
-            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,management"),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,ssh,kar,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
