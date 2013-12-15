@@ -43,6 +43,7 @@
         <felix.webconsole.version>4.2.0</felix.webconsole.version>
         <felix.annotations.version>1.9.6</felix.annotations.version>
         <felix.scr.plugin.version>1.15.0</felix.scr.plugin.version>
+        <felix.gogo.version>0.10.0</felix.gogo.version>
         <hazelcast.version>3.1.1</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
@@ -51,7 +52,7 @@
         <karaf.maven.version>3.0.0-SNAPSHOT</karaf.maven.version>
         <osgi.version>5.0.0</osgi.version>
         <osgi.compendium.version>5.0.0</osgi.compendium.version>
-        <pax.exam.version>3.4.0-SNAPSHOT</pax.exam.version>
+        <pax.exam.version>3.4.0</pax.exam.version>
         <servlet.api.version>3.0</servlet.api.version>
         <slf4j.version>1.7.2</slf4j.version>
         <jackson.version>2.3.0</jackson.version>
@@ -87,9 +88,9 @@
     </scm>
     <repositories>
         <repository>
-            <id>ops4j.sonatype.snapshots.deploy</id>
-            <name>OPS4J snapshot repository</name>
-            <url>https://oss.sonatype.org/content/repositories/ops4j-snapshots/</url>
+            <id>sonatype</id>
+            <name>sonatype</name>
+            <url>http://repository.sonatype.org/content/groups/sonatype-public-grid</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -97,7 +98,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -256,7 +256,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.gogo.runtime</artifactId>
-                <version>0.11.0-SNAPSHOT</version>
+                <version>${felix.gogo.version}</version>
             </dependency>
 
             <!-- Hazelcast -->
