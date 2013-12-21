@@ -35,7 +35,7 @@ public class CellarTestWatcher extends TestWatcher {
 
     @Override
     protected void failed(Throwable e, Description description) {
-        LOGGER.error(">>>>>> FAILED: {} , cause: {}", description.getDisplayName(), e.getMessage());
+        LOGGER.error(">>>>>> FAILED: {}", description.getDisplayName(), e);
     }
 
     @Override

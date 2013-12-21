@@ -35,13 +35,7 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
     public void testCamelSampleApp() throws Exception {
         installCellar();
         createCellarChild("node1");
-        if (!waitForInstanceToCluster(2)) {
-            throw new Exception("Failed waiting for second node to connect to cluster..");
-        }
         createCellarChild("node2");
-        if (!waitForInstanceToCluster(3)) {
-            throw new Exception("Failed waiting for third node to connect to cluster..");
-        }
 
         System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/3.0.0-SNAPSHOT/xml/features"));
         System.out.println(executeCommand("instance:list"));
@@ -69,12 +63,12 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         System.out.println(executeCommand("bundle:list"));
 
         System.out.println(executeCommand("cluster:group-list"));
-        System.out.println(executeCommand(generateSSH("node2", "bundle:list -t 0")));
+        System.out.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
 
         Thread.sleep(DELAY_TIMEOUT);
-        String output1 = executeCommand(generateSSH("node1", "log:display | grep \"Hallo Cellar\""));
+        String output1 = executeCommand("instance:connect -u karaf -p karaf node1 log:display | grep \"Hallo Cellar\"");
         System.out.println(output1);
-        String output2 = executeCommand(generateSSH("node2", "log:display | grep \"Hallo Cellar\""));
+        String output2 = executeCommand("instance:connect -u karaf -p karaf node2 log:display | grep \"Hallo Cellar\"");
         System.out.println(output2);
         assertTrue("Expected at least 2 lines", countOutputEntires(output1) >= 2);
         assertTrue("Expected at least 2 lines", countOutputEntires(output2) >= 2);

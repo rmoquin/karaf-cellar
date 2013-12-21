@@ -60,9 +60,6 @@ public class CellarGroupsTest extends CellarTestSupport {
         installCellar();
         createsChildren = true;
         createCellarChild("child1");
-        if (!waitForInstanceToCluster(2)) {
-            throw new Exception("Failed waiting for second node to connect to cluster..");
-        }
         String child1Id = getNodeIdOfChild("child1");
         System.out.println(executeCommand("cluster:group-list"));
         System.out.println(executeCommand("cluster:group-create testgroup"));

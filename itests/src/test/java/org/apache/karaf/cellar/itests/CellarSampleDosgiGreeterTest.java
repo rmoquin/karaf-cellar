@@ -36,16 +36,8 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
     public void testDosgiGreeter() throws Exception {
         installCellar();
         createCellarChild("node1");
-        if (!waitForInstanceToCluster(2)) {
-            throw new Exception("Failed waiting for second node to connect to cluster..");
-        }
         createCellarChild("node2");
-        if (!waitForInstanceToCluster(3)) {
-            throw new Exception("Failed waiting for third node to connect to cluster..");
-        }
-
         System.out.println(executeCommand("instance:list"));
-
         System.out.println(executeCommand("cluster:node-list"));
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
