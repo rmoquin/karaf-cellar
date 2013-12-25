@@ -28,8 +28,8 @@ public class CellarInstallationTest extends CellarTestSupport {
     @Test
     public void testInstallation() throws Exception {
         installCellar();
-        System.out.println(executeCommand("bundle:list"));
-        System.out.println(executeCommand("cluster:node-list"));
+        System.err.println(executeCommand("bundle:list"));
+        System.err.println(executeCommand("cluster:node-list"));
     }
 
     @After

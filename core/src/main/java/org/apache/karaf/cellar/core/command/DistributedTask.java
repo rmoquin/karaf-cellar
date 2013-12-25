@@ -26,6 +26,7 @@ import org.apache.karaf.cellar.core.event.EventHandlerRegistry;
 import org.apache.karaf.shell.console.BundleContextAware;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceException;
 import org.osgi.framework.ServiceReference;
 
@@ -33,7 +34,7 @@ import org.osgi.framework.ServiceReference;
  *
  * @author rmoquin
  */
-public class DistributedTask<T extends DistributedResult> implements Callable<T>, Serializable, BundleContextAware {
+public class DistributedTask<T extends DistributedResult> implements Callable<T>, Serializable {
 
     protected transient BundleContext bundleContext;
     protected List<ServiceReference<?>> usedReferences;
@@ -49,6 +50,7 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
     @Override
     public T call() throws Exception {
         try {
+            bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
             EventHandlerRegistry handlerRegistry = this.getService(EventHandlerRegistry.class);
             EventHandler<Event, T> handler = handlerRegistry.getHandler(event);
             if (handler != null) {
@@ -62,7 +64,7 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
     }
 
     protected <T> T getService(String clazz) {
-        ServiceReference<T> sr = (ServiceReference<T>) getBundleContext().getServiceReference(clazz);
+        ServiceReference<T> sr = (ServiceReference<T>) bundleContext.getServiceReference(clazz);
         if (sr != null) {
             return getService(sr);
         } else {
@@ -71,7 +73,7 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
     }
 
     protected <T> T getService(Class<T> clazz) {
-        ServiceReference<T> sr = getBundleContext().getServiceReference(clazz);
+        ServiceReference<T> sr = bundleContext.getServiceReference(clazz);
         if (sr != null) {
             return getService(sr);
         } else {
@@ -80,7 +82,7 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
     }
 
     protected <T> T getService(ServiceReference<T> reference) {
-        T t = getBundleContext().getService(reference);
+        T t = bundleContext.getService(reference);
         if (t != null) {
             if (usedReferences == null) {
                 usedReferences = new ArrayList<ServiceReference<?>>();
@@ -93,19 +95,9 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
     protected void ungetServices() {
         if (usedReferences != null) {
             for (ServiceReference<?> ref : usedReferences) {
-                getBundleContext().ungetService(ref);
+                bundleContext.ungetService(ref);
             }
         }
-    }
-
-    public BundleContext getBundleContext() {
-        Bundle framework = bundleContext.getBundle(0);
-        return framework == null ? bundleContext : framework.getBundleContext();
-    }
-
-    @Override
-    public void setBundleContext(BundleContext bundleContext) {
-        this.bundleContext = bundleContext;
     }
 
     /**

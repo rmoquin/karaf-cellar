@@ -27,7 +27,6 @@ public class CellarObrTest extends CellarTestSupport {
     @Test
     public void testCellarObrFeatureInstall() throws Exception {
         installCellar();
-        Thread.sleep(DELAY_TIMEOUT);
         featureService.installFeature("cellar-obr");
     }
 }

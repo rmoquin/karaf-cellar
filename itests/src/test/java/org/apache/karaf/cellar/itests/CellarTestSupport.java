@@ -18,35 +18,29 @@ import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfi
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.URI;
-import java.security.Principal;
-import java.security.PrivilegedExceptionAction;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
-import javax.security.auth.Subject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
+import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
 import org.junit.Rule;
 import org.ops4j.pax.exam.Configuration;
@@ -61,7 +55,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +69,8 @@ public class CellarTestSupport {
     public static final String HTTP_PORT = "9081";
     public static final String SSH_PORT = "8101";
     public static final String RMI_REG_PORT = "1100";
+    static final String KARAF_VERSION = "3.0.0";
+    static final String CELLAR_VERSION = "3.0.0-SNAPSHOT";
     static final String INSTANCE_STARTED = "Started";
     static final String INSTANCE_STARTING = "Starting";
     static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
@@ -106,7 +101,7 @@ public class CellarTestSupport {
      */
     protected void configureLocalDiscovery(int members) {
         StringBuilder membersBuilder = new StringBuilder();
-        membersBuilder.append("config:propset tcpIpMembers ");
+        membersBuilder.append("config:property-set tcpIpMembers ");
         membersBuilder.append("localhost:5701");
         for (int i = 1; i < members; i++) {
             membersBuilder.append(",").append("localhost:").append(String.valueOf(5701 + i));
@@ -116,9 +111,7 @@ public class CellarTestSupport {
         String propsetCmd = membersBuilder.toString();
         String updateCmd = "config:update";
 
-        executeCommand(editCmd);
-        executeCommand(propsetCmd);
-        executeCommand(updateCmd);
+        executeCommands(editCmd, propsetCmd, updateCmd);
     }
 
     public File getConfigFile(String path) {
@@ -130,7 +123,7 @@ public class CellarTestSupport {
      */
     protected void installCellar() {
         try {
-            cellarFeatureURI = maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version("3.0.0-SNAPSHOT").classifier("features").type("xml").getURL();
+            cellarFeatureURI = maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version(CELLAR_VERSION).classifier("features").type("xml").getURL();
             featureService.addRepository(new URI(cellarFeatureURI), false);
             featureService.installFeature("cellar");
         } catch (Exception ex) {
@@ -147,42 +140,76 @@ public class CellarTestSupport {
     }
 
     /**
-     * Creates a child instance that runs cellar.
+     * Creates one or more karaf containers with cellar installed.
      *
-     * @param name of the new cellar child.
+     * @param names of the new cellar child instances.
      */
-    protected void createCellarChild(String name) {
-        createCellarChild(name, false, 0);
+    protected void createCellarChild(String... names) throws Exception {
+        final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
+        //Create and start each child node
+        List<String> startingNodes = new ArrayList<String>(names.length);
+        for (int i = 0; i < names.length; i++) {
+            String name = names[i];
+            System.err.println("Creating and starting cellar node " + name + ".");
+            System.err.println(executeCommands("instance:create " + name, "instance:start " + name));
+            startingNodes.add(name);
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            //Ignore
+        }
+
+        List<String> connectingNodes = new ArrayList<String>(names.length);
+        //Wait till the node is listed as Started.
+        for (int i = 0; i < 30; i++) {
+            for (Iterator<String> it = startingNodes.iterator(); it.hasNext();) {
+                String name = it.next();
+                Instance instance = instanceService.getInstance(name);
+                if (Instance.STARTED.equals(instance.getState())) {
+                    System.err.println(executeRemoteCommand(name, "feature:repo-add " + cellarFeatureURI, "feature:install cellar"));
+                    String nodeId = this.getNodeIdOfChild(name);
+                    it.remove();
+                    connectingNodes.add(nodeId);
+                }
+                try {
+                    Thread.sleep(250);
+                } catch (InterruptedException e) {
+                    //Ignore
+                }
+            }
+            for (Iterator<String> it = connectingNodes.iterator(); it.hasNext();) {
+                String name = it.next();
+                if (manager.findNodeById(name) != null) {
+                    it.remove();
+                }
+                try {
+                    Thread.sleep(150);
+                } catch (InterruptedException e) {
+                    //Ignore
+                }
+            }
+            if (startingNodes.isEmpty() && connectingNodes.isEmpty()) {
+                System.err.println("All node(s) " + names + "are registered.");
+                return;
+            } else {
+                System.out.print(".");
+            }
+        }
+        if (!startingNodes.isEmpty()) {
+            throw new RuntimeException("Failed waiting for node(s) " + startingNodes + " to start..");
+        }
+        if (!connectingNodes.isEmpty()) {
+            throw new RuntimeException("Failed waiting for node(s) " + connectingNodes + " to connect to cluster..");
+        }
     }
 
-    protected void createCellarChild(String name, boolean debug, int port) {
-        String createCommand = "instance:create --featureURL " + cellarFeatureURI + " --feature cellar ";
-        String debugOpts = "";
-        if (debug && port > 0) {
-            debugOpts = String.format(DEBUG_OPTS, port);
+    protected String executeRemoteCommand(String name, String... commands) {
+        String instanceCmd = "instance:connect -u karaf -p karaf " + name + " ";
+        for (int i = 0; i < commands.length; i++) {
+            commands[i] = instanceCmd + commands[i];
         }
-        final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
-        int numNodes = manager.listNodes().size();
-        System.out.println(executeCommand(createCommand + " " + name + " " + debugOpts));
-        System.out.println(executeCommand("instance:start " + name));
-
-        //Wait till the node is listed as Starting
-        System.err.print("Waiting for " + name + " to start ");
-        for (int i = 0; i < 30; i++) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                //Ignore
-            }
-            int newNumNodes = manager.listNodes().size();
-            if (numNodes == newNumNodes) {
-                System.err.print(".");
-            } else {
-                System.out.println("Node " + name + " registered.");
-                return;
-            }
-        }
-        throw new RuntimeException("Failed waiting for node " + name + " to connect to cluster..");
+        return executeCommands(commands);
     }
 
     /**
@@ -190,13 +217,12 @@ public class CellarTestSupport {
      */
     protected void destroyCellarChild(String name) {
         try {
-            System.out.println(executeCommand("instance:connect -u karaf -p karaf " + name + " feature:uninstall cellar"));
+            System.err.println(executeRemoteCommand(name, "feature:uninstall cellar"));
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
         try {
-//            System.out.println(executeCommand("instance:connect " + name + " instance:stop"));
-            instanceService.getInstance(name).stop();
+            System.err.println(executeCommand("instance:stop " + name));
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -209,25 +235,28 @@ public class CellarTestSupport {
      * @return
      */
     protected String getNodeIdOfChild(String name) {
-        String nodesList = executeCommand("instance:connect -u karaf -p karaf " + name + " cluster:node-list | grep \\\\*", COMMAND_TIMEOUT, false);
+        String nodesList = executeCommand("cluster:node-list | grep \\\\*");
         int stop = nodesList.indexOf(']');
-        String node = nodesList.substring(0, stop);
-        int start = node.lastIndexOf('[');
-        node = node.substring(start + 1);
-        node = node.trim();
-        return node;
+        if (stop > -1) {
+            String node = nodesList.substring(0, stop);
+            int start = node.lastIndexOf('[');
+            if (start > -1) {
+                node = node.substring(start + 1);
+                node = node.trim();
+                return node;
+            }
+        }
+        throw new IllegalStateException("Couldn't detect the node id for child instance " + name + " from node response " + nodesList);
     }
 
     @Configuration
     public Option[] config() {
-        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").versionAsInProject().type("tar.gz");
+        MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
         Option[] options = new Option[]{
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
-            // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
-            configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
-            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,package,ssh,management"),
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
             editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
             editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
@@ -241,28 +270,6 @@ public class CellarTestSupport {
         return options;
     }
 
-    protected boolean waitForInstanceToCluster(final int desiredTotal) {
-        return waitForInstanceToCluster(desiredTotal, 10);
-    }
-
-    protected boolean waitForInstanceToCluster(final int desiredTotal, final int attempts) {
-        final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
-        try {
-            for (int i = 0; i < attempts; i++) {
-                Set<Node> nodes = manager.listNodes();
-                if (nodes.size() >= desiredTotal) {
-                    System.out.println("Total nodes found successfully: " + desiredTotal);
-                    return true;
-                }
-                Thread.sleep(1000);
-            }
-            return false;
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            return false;
-        }
-    }
-
     public String generateSSH(String instanceName, String command) {
         return "ssh:ssh -q -l karaf -P karaf -p " + SSH_PORT + " 127.0.0.1 " + command;
     }
@@ -270,12 +277,11 @@ public class CellarTestSupport {
     /**
      * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
      *
-     * @param command The command to execute
-     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
+     * @param command
      * @return
      */
-    protected String executeCommand(final String command, Principal... principals) {
-        return executeCommand(command, COMMAND_TIMEOUT, false, principals);
+    protected String executeCommand(final String command) {
+        return executeCommand(command, COMMAND_TIMEOUT, false);
     }
 
     /**
@@ -284,10 +290,9 @@ public class CellarTestSupport {
      * @param command The command to execute.
      * @param timeout The amount of time in millis to wait for the command to execute.
      * @param silent Specifies if the command should be displayed in the screen.
-     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal... principals) {
+    protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
         waitForCommandService(command);
 
         String response;
@@ -295,53 +300,60 @@ public class CellarTestSupport {
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
         final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
-
-        final Callable<String> commandCallable = new Callable<String>() {
-            @Override
-            public String call() throws Exception {
-                try {
-                    if (!silent) {
-                        System.out.println(command);
-                    }
-                    commandSession.execute(command);
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), e);
-                }
-                printStream.flush();
-                return byteArrayOutputStream.toString();
-            }
-        };
-
-        FutureTask<String> commandFuture;
-        if (principals.length == 0) {
-            commandFuture = new FutureTask<String>(commandCallable);
-        } else {
-            // If principals are defined, run the command callable via Subject.doAs()
-            commandFuture = new FutureTask<String>(new Callable<String>() {
-                @Override
-                public String call() throws Exception {
-                    Subject subject = new Subject();
-                    subject.getPrincipals().addAll(Arrays.asList(principals));
-                    return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
-                        @Override
-                        public String run() throws Exception {
-                            return commandCallable.call();
+        FutureTask<String> commandFuture = new FutureTask<String>(
+                new Callable<String>() {
+                    public String call() {
+                        try {
+                            if (!silent) {
+                                System.err.println(command);
+                            }
+                            commandSession.execute(command);
+                        } catch (Exception e) {
+                            e.printStackTrace(System.err);
+                        } finally {
+                            printStream.flush();
+                            return byteArrayOutputStream.toString();
                         }
-                    });
-                }
-            });
-        }
-
+                    }
+                });
         try {
             executor.submit(commandFuture);
             response = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
+        } catch (Exception e) {
             e.printStackTrace(System.err);
-            response = "SHELL COMMAND TIMED OUT for command " + command;
-        } catch (ExecutionException e) {
-            Throwable cause = e.getCause().getCause();
-            throw new RuntimeException(cause.getMessage(), cause);
-        } catch (InterruptedException e) {
+            response = "SHELL COMMAND TIMED OUT: ";
+        }
+        return response;
+    }
+
+    protected String executeCommands(final String... commands) {
+        String response;
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final PrintStream printStream = new PrintStream(byteArrayOutputStream);
+        final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class
+        );
+        final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
+        FutureTask<String> commandFuture = new FutureTask<String>(
+                new Callable<String>() {
+                    public String call() {
+                        try {
+                            for (String command : commands) {
+                                System.err.println(command);
+                                commandSession.execute(command);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace(System.err);
+                        } finally {
+                            printStream.flush();
+                        }
+                        return byteArrayOutputStream.toString();
+                    }
+                });
+
+        try {
+            executor.submit(commandFuture);
+            response = commandFuture.get(COMMAND_TIMEOUT, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         }
         return response;
@@ -354,7 +366,7 @@ public class CellarTestSupport {
             }
         }
         for (Bundle b : bundleContext.getBundles()) {
-            System.out.println("Bundle: " + b.getSymbolicName());
+            System.err.println("Bundle: " + b.getSymbolicName());
         }
         throw new RuntimeException("Bundle " + symbolicName + " does not exist");
     }
@@ -388,14 +400,14 @@ public class CellarTestSupport {
             Object svc = type.cast(tracker.waitForService(timeout));
             if (svc == null) {
 //                Dictionary dic = bundleContext.getBundle().getHeaders();
-//                System.out.println("Test bundle headers: " + explode(dic));
+//                System.err.println("Test bundle headers: " + explode(dic));
 //
 //                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, null))) {
-//                    System.out.println("ServiceReference: " + ref);
+//                    System.err.println("ServiceReference: " + ref);
 //                }
 //
 //                for (ServiceReference ref : asCollection(bundleContext.getAllServiceReferences(null, flt))) {
-//                    System.out.println("Filtered ServiceReference: " + ref);
+//                    System.err.println("Filtered ServiceReference: " + ref);
 //                }
 
                 throw new RuntimeException("Gave up waiting for service " + flt);
@@ -444,12 +456,5 @@ public class CellarTestSupport {
         } finally {
             st.close();
         }
-    }
-
-    /**
-     * Provides an iterable collection of references, even if the original array is null
-     */
-    private static Collection<ServiceReference> asCollection(ServiceReference[] references) {
-        return references != null ? Arrays.asList(references) : Collections.<ServiceReference>emptyList();
     }
 }

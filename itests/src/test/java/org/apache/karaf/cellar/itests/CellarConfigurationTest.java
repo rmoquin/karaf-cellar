@@ -32,42 +32,42 @@ public class CellarConfigurationTest extends CellarTestSupport {
     @Test
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
-        createCellarChild("child1");
-        createCellarChild("child2");
+        createCellarChild("child1", "child2");
 
         String node1 = getNodeIdOfChild("child1");
         String node2 = getNodeIdOfChild("child2");
-        System.out.println(executeCommand("instance:list"));
+        System.err.println(executeCommand("instance:list"));
 
-        String properties = executeCommand("instance:connect -u karaf -p karaf child1 config:property-list --pid " + TESTPID);
-        System.out.println(properties);
+        String properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        System.err.println(properties);
         assertFalse((properties.contains("myKey")));
 
         //Test configuration sync - add property
-        System.out.println(executeCommand("config:property-set --pid " + TESTPID + " myKey myValue"));
+        System.err.println(executeCommand("config:property-set --pid " + TESTPID + " myKey myValue"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeCommand("instance:connect -u karaf -p karaf child1 config:property-list --pid " + TESTPID);
-        System.out.println(properties);
+        properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        System.err.println(properties);
         assertTrue(properties.contains("myKey = myValue"));
 
         //Test configuration sync - remove property
-        System.out.println(executeCommand("config:property-delete --pid " + TESTPID + " myKey"));
+        System.err.println(executeCommand("config:property-delete --pid " + TESTPID + " myKey"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeCommand("instance:connect -u karaf -p karaf child1 config:property-list --pid " + TESTPID);
-        System.out.println(properties);
+        properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        System.err.println(properties);
         assertFalse(properties.contains("myKey"));
 
         //Test configuration sync - add property - join later
-        System.out.println(executeCommand("cluster:group-set new-grp " + node1));
+        System.err.println(executeCommand("cluster:group-set new-grp " + node1));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("instance:connect -u karaf -p karaf child1 config:property-set --pid " + TESTPID + " myKey2 myValue2"));
-        properties = executeCommand("instance:connect -u karaf -p karaf child1 config:property-list --pid " + TESTPID);
-        System.out.println(properties);
+        executeRemoteCommand("child1", "config:property-set --pid " + TESTPID + " myKey2 myValue2");
+
+        properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        System.err.println(properties);
 
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:group-set new-grp " + node2));
-        properties = executeCommand("instance:connect -u karaf -p karaf child2 config:property-list --pid " + TESTPID);
-        System.out.println(properties);
+        System.err.println(executeCommand("cluster:group-set new-grp " + node2));
+        properties = executeRemoteCommand("child2", "config:property-list --pid " + TESTPID);
+        System.err.println(properties);
         assertTrue(properties.contains("myKey2 = myValue2"));
     }
 

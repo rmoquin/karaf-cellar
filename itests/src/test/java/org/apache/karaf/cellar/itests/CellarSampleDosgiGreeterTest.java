@@ -35,10 +35,9 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
     //@Ignore
     public void testDosgiGreeter() throws Exception {
         installCellar();
-        createCellarChild("node1");
-        createCellarChild("node2");
-        System.out.println(executeCommand("instance:list"));
-        System.out.println(executeCommand("cluster:node-list"));
+        createCellarChild("node1", "node2");
+        System.err.println(executeCommand("instance:list"));
+        System.err.println(executeCommand("cluster:node-list"));
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
@@ -47,33 +46,33 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         String node1 = getNodeIdOfChild("node1");
         String node2 = getNodeIdOfChild("node2");
 
-        System.out.println("Node 1: " + node1);
-        System.out.println("Node 2: " + node2);
+        System.err.println("Node 1: " + node1);
+        System.err.println("Node 2: " + node2);
 
         executeCommand("cluster:group-create client-grp");
         executeCommand("cluster:group-create service-grp");
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:group-list"));
-        System.out.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
-        System.out.println(executeCommand("cluster:group-set service-grp " + node1));
+        System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
+        System.err.println(executeCommand("cluster:group-set service-grp " + node1));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:feature-url-add client-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
-        System.out.println(executeCommand("cluster:feature-url-add service-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/3.0.0-SNAPSHOT/xml/features"));
+        System.err.println(executeCommand("cluster:feature-url-add client-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/" + CELLAR_VERSION + "/xml/features"));
+        System.err.println(executeCommand("cluster:feature-url-add service-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/" + CELLAR_VERSION + "/xml/features"));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:feature-install client-grp greeter-client"));
-        System.out.println(executeCommand("cluster:feature-install service-grp greeter-service"));
+        System.err.println(executeCommand("cluster:feature-install client-grp greeter-client"));
+        System.err.println(executeCommand("cluster:feature-install service-grp greeter-service"));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:service-list"));
+        System.err.println(executeCommand("cluster:service-list"));
 
         String greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
-        System.out.println(greetOutput);
+        System.err.println(greetOutput);
         assertEquals("Expected 10 greets", 10, countGreetsFromNode(greetOutput, node1));
-        System.out.println(executeCommand("cluster:group-set service-grp " + node2));
+        System.err.println(executeCommand("cluster:group-set service-grp " + node2));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:group-list"));
-        System.out.println(executeCommand("cluster:list-services"));
+        System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:list-services"));
         greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
-        System.out.println(greetOutput);
+        System.err.println(greetOutput);
         assertEquals("Expected 5 greets", 5, countGreetsFromNode(greetOutput, node1));
         assertEquals("Expected 5 greets", 5, countGreetsFromNode(greetOutput, node2));
     }

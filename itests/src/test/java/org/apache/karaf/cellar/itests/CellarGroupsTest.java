@@ -61,21 +61,21 @@ public class CellarGroupsTest extends CellarTestSupport {
         createsChildren = true;
         createCellarChild("child1");
         String child1Id = getNodeIdOfChild("child1");
-        System.out.println(executeCommand("cluster:group-list"));
-        System.out.println(executeCommand("cluster:group-create testgroup"));
+        System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:group-create testgroup"));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:group-set testgroup " + child1Id));
+        System.err.println(executeCommand("cluster:group-set testgroup " + child1Id));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:group-list"));
 
         GroupManager groupManager = getOsgiService(GroupManager.class);
         assertNotNull(groupManager);
         Set<Group> groups = groupManager.listAllGroups();
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 
-        System.out.println(executeCommand("cluster:group-delete testgroup"));
+        System.err.println(executeCommand("cluster:group-delete testgroup"));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:group-list"));
         groups = groupManager.listAllGroups();
         assertEquals("There should be a single cellar group", 1, groups.size());
     }

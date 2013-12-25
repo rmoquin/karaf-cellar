@@ -18,10 +18,6 @@
 
     <ext:property-placeholder/>
 
-    <reference id="mbeanServer" interface="javax.management.MBeanServer">
-        <reference-listener ref="mbeanRegister" bind-method="registerMBeanServer" unbind-method="unregisterMBeanServer"/>
-    </reference>
-
     <bean id="cellarOBRMBean" class="org.apache.karaf.cellar.obr.management.internal.CellarOBRMBeanImpl">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="groupManager" ref="groupManager"/>
@@ -29,12 +25,9 @@
         <property name="obrService" ref="repositoryAdmin"/>
     </bean>
 
-    <bean id="mbeanRegister" class="org.apache.karaf.management.MBeanRegistrer">
-        <property name="mbeans">
-            <map>
-                <entry value="org.apache.karaf.cellar:type=obr,name=${karaf.name}" key-ref="cellarOBRMBean"/>
-            </map>
-        </property>
-    </bean>
-
+    <service ref="cellarOBRMBean" auto-export="interfaces">
+        <service-properties>
+            <entry key="jmx.objectname" value="org.apache.karaf.cellar:type=obr,name=${karaf.name}"/>
+        </service-properties>
+    </service>
 </blueprint>

@@ -34,12 +34,11 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
     //@Ignore
     public void testCamelSampleApp() throws Exception {
         installCellar();
-        createCellarChild("node1");
-        createCellarChild("node2");
+        createCellarChild("node1", "node2");
 
-        System.out.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/3.0.0-SNAPSHOT/xml/features"));
-        System.out.println(executeCommand("instance:list"));
-        System.out.println(executeCommand("cluster:node-list"));
+        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/" + CELLAR_VERSION + "/xml/features"));
+        System.err.println(executeCommand("instance:list"));
+        System.err.println(executeCommand("cluster:node-list"));
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
@@ -51,25 +50,25 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
 
         executeCommand("cluster:group-create producer-grp");
         executeCommand("cluster:group-create consumer-grp");
-        System.out.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
-        System.out.println(executeCommand("cluster:group-set consumer-grp " + node1));
-        System.out.println(executeCommand("cluster:group-set consumer-grp " + node2));
-        System.out.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
+        System.err.println(executeCommand("cluster:group-set consumer-grp " + node1));
+        System.err.println(executeCommand("cluster:group-set consumer-grp " + node2));
+        System.err.println(executeCommand("cluster:group-list"));
 
-        System.out.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
-        System.out.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
+        System.err.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
+        System.err.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
         Thread.sleep(DELAY_TIMEOUT);
-        System.out.println(executeCommand("feature:list"));
-        System.out.println(executeCommand("bundle:list"));
+        System.err.println(executeCommand("feature:list"));
+        System.err.println(executeCommand("bundle:list"));
 
-        System.out.println(executeCommand("cluster:group-list"));
-        System.out.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
+        System.err.println(executeCommand("cluster:group-list"));
+        System.err.println(executeCommand("instance:connect -u karaf -p karaf node2 bundle:list -t 0"));
 
         Thread.sleep(DELAY_TIMEOUT);
         String output1 = executeCommand("instance:connect -u karaf -p karaf node1 log:display | grep \"Hallo Cellar\"");
-        System.out.println(output1);
+        System.err.println(output1);
         String output2 = executeCommand("instance:connect -u karaf -p karaf node2 log:display | grep \"Hallo Cellar\"");
-        System.out.println(output2);
+        System.err.println(output2);
         assertTrue("Expected at least 2 lines", countOutputEntires(output1) >= 2);
         assertTrue("Expected at least 2 lines", countOutputEntires(output2) >= 2);
     }

@@ -28,7 +28,7 @@ public class CellarBundleTest extends CellarTestSupport {
     public void testCellarBundleModule() throws Exception {
 
         installCellar();
-        System.out.println(executeCommand("cluster:bundle-list default"));
+        System.err.println(executeCommand("cluster:bundle-list default"));
     }
 
     @After

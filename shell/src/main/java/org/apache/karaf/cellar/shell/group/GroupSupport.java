@@ -20,8 +20,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.ManageGroupAction;
@@ -94,12 +92,12 @@ public abstract class GroupSupport extends CellarCommandSupport {
             command.setDestinationGroup(group);
         }
 
-        Map<Node, Future<ManageGroupResult>> future = executionContext.execute(command, recipientList);
+        Map<Node, ManageGroupResult> results = executionContext.execute(command, recipientList);
         System.out.println(String.format(HEADER_FORMAT, "Group", "Members"));
-        for (Map.Entry<Node, Future<ManageGroupResult>> entry : future.entrySet()) {
+        for (Map.Entry<Node, ManageGroupResult> entry : results.entrySet()) {
             Node node = entry.getKey();
             try {
-                ManageGroupResult result = entry.getValue().get(5, TimeUnit.SECONDS);
+                ManageGroupResult result = entry.getValue();
                 if (!suppressOutput) {
                     if (result != null && result.getGroups() != null) {
                         printGroups(result.getGroups());

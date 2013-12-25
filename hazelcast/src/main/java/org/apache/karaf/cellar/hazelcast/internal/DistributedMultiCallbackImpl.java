@@ -25,6 +25,7 @@ import java.util.Map;
  * @author rmoquin
  */
 public class DistributedMultiCallbackImpl implements MultiExecutionCallback {
+
     private final DistributedMultiCallback callback;
 
     public DistributedMultiCallbackImpl(DistributedMultiCallback callback) {
@@ -33,24 +34,24 @@ public class DistributedMultiCallbackImpl implements MultiExecutionCallback {
 
     @Override
     public void onResponse(Member member, Object value) {
-        /*    Map<Member, Future<R>> executedResult = this.executorService.submitToMembers(task, members);
-        for (Map.Entry<Member, Future<R>> entry : executedResult.entrySet()) {
-            Member member = entry.getKey();
-            Future<R> future = entry.getValue();
-            results.put(new HazelcastNode(member), future);
-        }
-        LOGGER.info("Completed task {}" + task);*/
+        /*Map<Member, R> executedResult = this.executorService.submitToMembers(task, members);
+         for (Map.Entry<Member, R> entry : executedResult.entrySet()) {
+         Member member = entry.getKey();
+         R result = entry.getValue();
+         results.put(new HazelcastNode(member), result);
+         }*/
+        //LOGGER.info("Completed task {}" + task);*/
 //        callback.onResponse(member, value);
     }
 
     @Override
     public void onComplete(Map<Member, Object> values) {
-        /*Map<Member, Future<R>> executedResult = this.executorService.submitToMembers(task, members);
-        for (Map.Entry<Member, Future<R>> entry : executedResult.entrySet()) {
-            Member member = entry.getKey();
-            Future<R> future = entry.getValue();
-            results.put(new HazelcastNode(member), future);
-        }*/
+        /*Map<Member, R> executedResult = this.executorService.submitToMembers(task, members);
+         for (Map.Entry<Member, R> entry : executedResult.entrySet()) {
+         Member member = entry.getKey();
+         R result = entry.getValue();
+         results.put(new HazelcastNode(member), result);
+         }*/
         //LOGGER.info("Completed task {}" + task);
 //        callback.onComplete(values);
     }

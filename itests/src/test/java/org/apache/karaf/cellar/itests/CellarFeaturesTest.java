@@ -41,50 +41,50 @@ public class CellarFeaturesTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.out.println(executeCommand("instance:list"));
+        System.err.println(executeCommand("instance:list"));
 
         String eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
+        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
 
         //Test feature command - install
-        System.out.println(executeCommand("cluster:feature-install default eventadmin"));
+        System.err.println(executeCommand("cluster:feature-install default eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child feature:list | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
+        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
 
         //Test feature sync - uninstall
-        System.out.println(executeCommand("feature:uninstall eventadmin"));
+        System.err.println(executeCommand("feature:uninstall eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
+        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
 
         //Test feature command - install - before a node joins
-        System.out.println(executeCommand("cluster:feature-install default eventadmin"));
+        System.err.println(executeCommand("cluster:feature-install default eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
+        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
 
         //Test feature command - uninstall
-        System.out.println(executeCommand("cluster:feature-uninstall default eventadmin"));
+        System.err.println(executeCommand("cluster:feature-uninstall default eventadmin"));
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
+        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
 
         //Test feature command - install - before a node joins
-        System.out.println(executeCommand("cluster:feature-install testgroup eventadmin"));
-        System.out.println(executeCommand("cluster:group-set testgroup " + getNodeIdOfChild("child1")));
+        System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
+        System.err.println(executeCommand("cluster:group-set testgroup " + getNodeIdOfChild("child1")));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeCommand("instance:connect -u karaf -p karaf child1 feature:list | grep eventadmin");
-        System.out.println(eventadminFeatureStatus);
+        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
 
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
-        System.out.println(executeCommand("cluster:node-list"));
+        System.err.println(executeCommand("cluster:node-list"));
         assertNotNull(localNode);
         assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
     }
