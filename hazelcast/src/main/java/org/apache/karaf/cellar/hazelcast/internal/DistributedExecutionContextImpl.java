@@ -124,7 +124,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      */
     @Override
     public Map<Node, R> executeAndWait(C command, Set<Node> destinations) {
-        return this.executeAndWait(command, destinations);
+        return this.execute(command, destinations);
     }
 
     /**

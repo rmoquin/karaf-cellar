@@ -38,35 +38,35 @@ public class CellarConfigurationTest extends CellarTestSupport {
         String node2 = getNodeIdOfChild("child2");
         System.err.println(executeCommand("instance:list"));
 
-        String properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        String properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
         System.err.println(properties);
         assertFalse((properties.contains("myKey")));
 
         //Test configuration sync - add property
-        System.err.println(executeCommand("config:property-set --pid " + TESTPID + " myKey myValue"));
+        System.err.println(executeCommand("cluster:config-propset --pid " + TESTPID + " myKey myValue"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
         System.err.println(properties);
         assertTrue(properties.contains("myKey = myValue"));
 
         //Test configuration sync - remove property
-        System.err.println(executeCommand("config:property-delete --pid " + TESTPID + " myKey"));
+        System.err.println(executeCommand("cluster:config-propdel --pid " + TESTPID + " myKey"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
         System.err.println(properties);
         assertFalse(properties.contains("myKey"));
 
         //Test configuration sync - add property - join later
         System.err.println(executeCommand("cluster:group-set new-grp " + node1));
         Thread.sleep(DELAY_TIMEOUT);
-        executeRemoteCommand("child1", "config:property-set --pid " + TESTPID + " myKey2 myValue2");
+        executeRemoteCommand("child1", "cluster:config-propset --pid " + TESTPID + " myKey2 myValue2");
 
-        properties = executeRemoteCommand("child1", "config:property-list --pid " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
         System.err.println(properties);
 
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set new-grp " + node2));
-        properties = executeRemoteCommand("child2", "config:property-list --pid " + TESTPID);
+        properties = executeRemoteCommand("child2", "cluster:config-proplist --pid " + TESTPID);
         System.err.println(properties);
         assertTrue(properties.contains("myKey2 = myValue2"));
     }

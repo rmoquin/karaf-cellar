@@ -23,6 +23,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.URI;
+import java.security.Principal;
+import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -34,6 +36,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
+import javax.security.auth.Subject;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -48,6 +51,7 @@ import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
 import org.ops4j.pax.exam.TestProbeBuilder;
 import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.configureSecurity;
 import org.ops4j.pax.exam.options.MavenArtifactUrlReference;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -101,7 +105,7 @@ public class CellarTestSupport {
      */
     protected void configureLocalDiscovery(int members) {
         StringBuilder membersBuilder = new StringBuilder();
-        membersBuilder.append("config:property-set tcpIpMembers ");
+        membersBuilder.append("config:propset tcpIpMembers ");
         membersBuilder.append("localhost:5701");
         for (int i = 1; i < members; i++) {
             membersBuilder.append(",").append("localhost:").append(String.valueOf(5701 + i));
@@ -111,7 +115,9 @@ public class CellarTestSupport {
         String propsetCmd = membersBuilder.toString();
         String updateCmd = "config:update";
 
-        executeCommands(editCmd, propsetCmd, updateCmd);
+        executeCommand(editCmd);
+        executeCommand(propsetCmd);
+        executeCommand(updateCmd);
     }
 
     public File getConfigFile(String path) {
@@ -148,10 +154,12 @@ public class CellarTestSupport {
         final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
         //Create and start each child node
         List<String> startingNodes = new ArrayList<String>(names.length);
+        List<String> connectingNodes = new ArrayList<String>();
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
             System.err.println("Creating and starting cellar node " + name + ".");
-            System.err.println(executeCommands("instance:create " + name, "instance:start " + name));
+            System.err.println(executeCommand("instance:create " + name));
+            System.err.println(executeCommand("instance:start " + name));
             startingNodes.add(name);
         }
         try {
@@ -160,20 +168,23 @@ public class CellarTestSupport {
             //Ignore
         }
 
-        List<String> connectingNodes = new ArrayList<String>(names.length);
         //Wait till the node is listed as Started.
         for (int i = 0; i < 30; i++) {
             for (Iterator<String> it = startingNodes.iterator(); it.hasNext();) {
                 String name = it.next();
                 Instance instance = instanceService.getInstance(name);
+                System.err.println("Checking state for instance with name: " + name + ", " + instance.getState());
                 if (Instance.STARTED.equals(instance.getState())) {
-                    System.err.println(executeRemoteCommand(name, "feature:repo-add " + cellarFeatureURI, "feature:install cellar"));
+                    System.err.println(executeRemoteCommand(name, "feature:repo-add " + cellarFeatureURI));
+                    System.err.println(executeRemoteCommand(name, "feature:install cellar"));
                     String nodeId = this.getNodeIdOfChild(name);
-                    it.remove();
-                    connectingNodes.add(nodeId);
+                    if (nodeId != null) {
+                        it.remove();
+                        connectingNodes.add(nodeId);
+                    }
                 }
                 try {
-                    Thread.sleep(250);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     //Ignore
                 }
@@ -183,33 +194,27 @@ public class CellarTestSupport {
                 if (manager.findNodeById(name) != null) {
                     it.remove();
                 }
-                try {
-                    Thread.sleep(150);
-                } catch (InterruptedException e) {
-                    //Ignore
-                }
+            }
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                //Ignore
             }
             if (startingNodes.isEmpty() && connectingNodes.isEmpty()) {
-                System.err.println("All node(s) " + names + "are registered.");
+                System.err.println("All node(s) " + Arrays.toString(names) + "are registered.");
                 return;
             } else {
                 System.out.print(".");
             }
         }
-        if (!startingNodes.isEmpty()) {
-            throw new RuntimeException("Failed waiting for node(s) " + startingNodes + " to start..");
-        }
-        if (!connectingNodes.isEmpty()) {
-            throw new RuntimeException("Failed waiting for node(s) " + connectingNodes + " to connect to cluster..");
+        if (!startingNodes.isEmpty() && !connectingNodes.isEmpty()) {
+            throw new RuntimeException("Failed waiting for node(s) in starting state" + startingNodes + " and node(s) in connecting state" + connectingNodes);
         }
     }
 
-    protected String executeRemoteCommand(String name, String... commands) {
+    protected String executeRemoteCommand(String name, String command) {
         String instanceCmd = "instance:connect -u karaf -p karaf " + name + " ";
-        for (int i = 0; i < commands.length; i++) {
-            commands[i] = instanceCmd + commands[i];
-        }
-        return executeCommands(commands);
+        return executeCommand(instanceCmd + command);
     }
 
     /**
@@ -235,7 +240,7 @@ public class CellarTestSupport {
      * @return
      */
     protected String getNodeIdOfChild(String name) {
-        String nodesList = executeCommand("cluster:node-list | grep \\\\*");
+        String nodesList = executeRemoteCommand(name, "cluster:node-list | grep \\\\*");
         int stop = nodesList.indexOf(']');
         if (stop > -1) {
             String node = nodesList.substring(0, stop);
@@ -246,7 +251,8 @@ public class CellarTestSupport {
                 return node;
             }
         }
-        throw new IllegalStateException("Couldn't detect the node id for child instance " + name + " from node response " + nodesList);
+        System.err.println("Couldn't detect the node id for child instance " + name + " from node response " + nodesList);
+        return null;
     }
 
     @Configuration
@@ -254,6 +260,8 @@ public class CellarTestSupport {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
         Option[] options = new Option[]{
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
+            // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
+            configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
@@ -277,11 +285,12 @@ public class CellarTestSupport {
     /**
      * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
      *
-     * @param command
+     * @param command The command to execute
+     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command) {
-        return executeCommand(command, COMMAND_TIMEOUT, false);
+    protected String executeCommand(final String command, Principal... principals) {
+        return executeCommand(command, COMMAND_TIMEOUT, false, principals);
     }
 
     /**
@@ -290,71 +299,61 @@ public class CellarTestSupport {
      * @param command The command to execute.
      * @param timeout The amount of time in millis to wait for the command to execute.
      * @param silent Specifies if the command should be displayed in the screen.
+     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command, final Long timeout, final Boolean silent) {
-        waitForCommandService(command);
+    protected String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal... principals) {
+        //waitForCommandService(command);
 
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
         final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
         final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
-        FutureTask<String> commandFuture = new FutureTask<String>(
-                new Callable<String>() {
-                    public String call() {
-                        try {
-                            if (!silent) {
-                                System.err.println(command);
-                            }
-                            commandSession.execute(command);
-                        } catch (Exception e) {
-                            e.printStackTrace(System.err);
-                        } finally {
-                            printStream.flush();
-                            return byteArrayOutputStream.toString();
-                        }
+
+        final Callable<String> commandCallable = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                try {
+                    if (!silent) {
+                        System.err.println(command);
                     }
-                });
+                    commandSession.execute(command);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                } finally {
+                    printStream.flush();
+                }
+                return byteArrayOutputStream.toString();
+            }
+        };
+
+        FutureTask<String> commandFuture;
+        if (principals.length == 0) {
+            commandFuture = new FutureTask<String>(commandCallable);
+        } else {
+            // If principals are defined, run the command callable via Subject.doAs()
+            commandFuture = new FutureTask<String>(new Callable<String>() {
+                @Override
+                public String call() throws Exception {
+                    Subject subject = new Subject();
+                    subject.getPrincipals().addAll(Arrays.asList(principals));
+                    return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
+                        @Override
+                        public String run() throws Exception {
+                            return commandCallable.call();
+                        }
+                    });
+                }
+            });
+        }
+
         try {
             executor.submit(commandFuture);
             response = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
             e.printStackTrace(System.err);
             response = "SHELL COMMAND TIMED OUT: ";
-        }
-        return response;
-    }
-
-    protected String executeCommands(final String... commands) {
-        String response;
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        final PrintStream printStream = new PrintStream(byteArrayOutputStream);
-        final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class
-        );
-        final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
-        FutureTask<String> commandFuture = new FutureTask<String>(
-                new Callable<String>() {
-                    public String call() {
-                        try {
-                            for (String command : commands) {
-                                System.err.println(command);
-                                commandSession.execute(command);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace(System.err);
-                        } finally {
-                            printStream.flush();
-                        }
-                        return byteArrayOutputStream.toString();
-                    }
-                });
-
-        try {
-            executor.submit(commandFuture);
-            response = commandFuture.get(COMMAND_TIMEOUT, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            throw new RuntimeException(e.getMessage(), e);
         }
         return response;
     }

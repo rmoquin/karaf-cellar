@@ -398,7 +398,7 @@ public class GroupConfigurationImpl implements GroupConfiguration {
      * @param syncOBRUrls the syncOBRUrls to set
      */
     public void setSyncOBRUrls(boolean syncOBRUrls) {
-        this.properties.put(SYNC_OBR_BUNDLES_PROPERTY, syncOBRUrls);
+        this.properties.put(SYNC_OBR_URLS_PROPERTY, syncOBRUrls);
     }
 
     /**

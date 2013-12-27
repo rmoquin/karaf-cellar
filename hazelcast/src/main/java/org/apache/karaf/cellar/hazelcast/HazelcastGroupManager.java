@@ -342,6 +342,8 @@ public class HazelcastGroupManager implements GroupManager {
 
     private void removeAllGroupsFromNodeConfiguration() throws IOException {
         Set<String> groups = nodeConfiguration.getGroups();
+        LOGGER.info("Groups node is in before remove from all. " + groups);
+        LOGGER.info("Stack leading to remove all.", new Exception());
         if (groups.size() > 0) {
             groups.clear();
             LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());

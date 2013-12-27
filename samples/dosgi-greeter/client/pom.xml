@@ -45,8 +45,10 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.karaf.cellar.samples.dosgi.greeter.api,
-                            org.apache.karaf.shell.commands;version="[3,4)",
+                            org.apache.felix.service.command,
                             org.apache.karaf.shell.console;version="[3,4)",
+                            org.apache.karaf.shell.console.commands;version="[3,4)",
+                            org.apache.karaf.shell.commands;version="[3,4)",
                             org.osgi*,
                             *
                         </Import-Package>
@@ -56,6 +58,10 @@
         </plugins>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.apache.karaf.cellar</groupId>
             <artifactId>org.apache.karaf.cellar.core</artifactId>

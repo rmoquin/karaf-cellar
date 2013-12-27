@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.core;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +22,6 @@ import java.util.Set;
 public class Group implements MultiNode {
 
     private String name;
-    @JsonIgnore
     private Set<Node> nodes = new HashSet<Node>();
 
     public Group() {
