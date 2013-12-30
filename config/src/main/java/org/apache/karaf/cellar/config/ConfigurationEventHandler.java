@@ -41,7 +41,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
     public static final String SWITCH_ID = "org.apache.karaf.cellar.configuration.handler";
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
-    private final ConfigurationSupport configSupport = new ConfigurationSupport();
+    private ConfigurationSupport configurationSupport;
     private ConfigurationAdmin configAdmin;
 
     @Override
@@ -63,13 +63,13 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
-            if (configSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
+            if (configurationSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
                 Configuration conf = configAdmin.getConfiguration(pid, null);
                 if (command.getType() == ConfigurationEvent.CM_DELETED) {
                     if (conf.getProperties() != null) {
                         // delete the properties
                         conf.delete();
-                        configSupport.deleteStorage(pid);
+                        configurationSupport.deleteStorage(pid);
                     }
                 } else {
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
@@ -79,10 +79,10 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                         if (localDictionary == null) {
                             localDictionary = new Properties();
                         }
-                        localDictionary = configSupport.filter(localDictionary);
-                        if (!configSupport.equals(clusterDictionary, localDictionary)) {
+                        localDictionary = configurationSupport.filter(localDictionary);
+                        if (!configurationSupport.equals(clusterDictionary, localDictionary)) {
                             conf.update((Dictionary) clusterDictionary);
-                            configSupport.persistConfiguration(configAdmin, pid, clusterDictionary);
+                            configurationSupport.persistConfiguration(configAdmin, pid, clusterDictionary);
                         }
                     }
                 }
@@ -146,5 +146,19 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
      */
     public void setConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configAdmin = configAdmin;
+    }
+
+    /**
+     * @return the configurationSupport
+     */
+    public ConfigurationSupport getConfigurationSupport() {
+        return configurationSupport;
+    }
+
+    /**
+     * @param configurationSupport the configurationSupport to set
+     */
+    public void setConfigurationSupport(ConfigurationSupport configurationSupport) {
+        this.configurationSupport = configurationSupport;
     }
 }

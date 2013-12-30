@@ -60,16 +60,16 @@ public class CellarGroupsTest extends CellarTestSupport {
         installCellar();
         createsChildren = true;
         createCellarChild("child1");
-        String child1Id = getNodeIdOfChild("child1");
         System.err.println(executeCommand("cluster:group-list"));
         System.err.println(executeCommand("cluster:group-create testgroup"));
         Thread.sleep(DELAY_TIMEOUT);
-        System.err.println(executeCommand("cluster:group-set testgroup " + child1Id));
-        Thread.sleep(DELAY_TIMEOUT);
-        System.err.println(executeCommand("cluster:group-list"));
 
         GroupManager groupManager = getOsgiService(GroupManager.class);
-        assertNotNull(groupManager);
+        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
+        String child11 = clusterManager.getMasterCluster().findNodeByName("child1").getId();
+        System.err.println(executeCommand("cluster:group-set testgroup " + child11));
+        Thread.sleep(DELAY_TIMEOUT);
+        System.err.println(executeCommand("cluster:group-list"));
         Set<Group> groups = groupManager.listAllGroups();
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 

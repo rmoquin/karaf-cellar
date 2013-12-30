@@ -16,28 +16,32 @@ package org.apache.karaf.cellar.core;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Cellar generic support. This class provides a set of util methods used by other classes.
  */
 public class CellarSupport {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CellarSupport.class);
+
     /**
      * Check if a resource is allowed for a type of cluster event.
      *
-     * @param event the resource name.
+     * @param resource the resource name.
      * @param whiteList the whitelisted items for a particular event.
      * @param blackList the blacklisted items for a particular event.
      * @return
      */
-    public boolean isAllowed(String event, Set<String> whiteList, Set<String> blackList) {
+    public boolean isAllowed(String resource, Set<String> whiteList, Set<String> blackList) {
         boolean result = true;
 
         // if no white listed items we assume all are accepted.
         if (whiteList != null && !whiteList.isEmpty()) {
             result = false;
             for (String whiteListItem : whiteList) {
-                if (wildCardMatch(event, whiteListItem)) {
+                if (wildCardMatch(resource, whiteListItem)) {
                     result = true;
                 }
             }
@@ -46,7 +50,7 @@ public class CellarSupport {
         // if any blackList item matched, then false is returned.
         if (blackList != null && !blackList.isEmpty()) {
             for (String blackListItem : blackList) {
-                if (wildCardMatch(event, blackListItem)) {
+                if (wildCardMatch(resource, blackListItem)) {
                     result = false;
                 }
             }

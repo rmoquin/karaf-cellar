@@ -189,7 +189,9 @@ public class ConfigurationSupport extends CellarSupport {
             }
 
             // save the cfg file
-            storage.mkdirs();
+            if (!storage.exists()) {
+                storage.mkdirs();
+            }
             p.save();
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);

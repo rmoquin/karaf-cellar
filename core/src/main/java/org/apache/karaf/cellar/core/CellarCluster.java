@@ -25,6 +25,7 @@ import java.util.Set;
  * @author rmoquin
  */
 public interface CellarCluster {
+
     /**
      * Get a map in the cluster.
      *
@@ -73,7 +74,7 @@ public interface CellarCluster {
     public Node findNodeById(String id);
 
     /**
-     * Get a node identified by a given name.
+     * Get a node identified by it's instance name.
      *
      * @param name the name of the node to look for.
      * @return the node.

@@ -87,4 +87,9 @@ public class Event implements Serializable {
         this.postPublish = postPublish;
     }
 
+    @Override
+    public String toString() {
+        return "Event{" + "id=" + id + ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup + ", destination=" + destination + ", force=" + force + ", postPublish=" + postPublish + '}';
+    }
+
 }

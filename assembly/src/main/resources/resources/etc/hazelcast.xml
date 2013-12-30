@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.0.xsd"
+<hazelcast xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.1.xsd"
            xmlns="http://www.hazelcast.com/schema/config"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <properties>
@@ -9,9 +9,9 @@
         <name>cellar</name>
         <password>pass</password>
     </group>
-    <management-center enabled="true">http://localhost:8080/mancenter</management-center>
+    <management-center enabled="false">http://localhost:8080/mancenter</management-center>
     <network>
-        <port auto-increment="true">5701</port>
+        <port auto-increment="true" port-count="100">5701</port>
         <outbound-ports>
             <!--
                 Allowed port range when connecting to other nodes.
@@ -66,7 +66,7 @@
     <partition-group enabled="false"/>
     <executor-service name="default">
         <pool-size>16</pool-size>
-        <queue-capacity>1000</queue-capacity>
+        <queue-capacity>100</queue-capacity>
     </executor-service>
     <queue name="default">
         <!--
@@ -165,17 +165,21 @@
         -->
         <merge-policy>com.hazelcast.map.merge.PassThroughMergePolicy</merge-policy>
     </map>
-    <semaphore name="def">
-        <initial-permits>100</initial-permits>
+    <multimap name="default">
+        <backup-count>1</backup-count>
+        <value-collection-type>SET</value-collection-type>
+    </multimap>
+    <list name="default">
+        <backup-count>1</backup-count>
+    </list>
+    <set name="default">
+        <backup-count>1</backup-count>
+    </set>
+    <semaphore name="default">
+        <initial-permits>0</initial-permits>
         <backup-count>1</backup-count>
         <async-backup-count>0</async-backup-count>
     </semaphore>
-            
-    <!-- Add your own semaphore configurations here:
-        <semaphore name="default">
-            <initial-permits>10</initial-permits>
-        </semaphore>
-    -->
 
     <serialization>
         <portable-version>0</portable-version>

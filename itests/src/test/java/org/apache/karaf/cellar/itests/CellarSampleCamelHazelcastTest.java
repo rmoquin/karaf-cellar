@@ -45,8 +45,8 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 Cellar nodes running", nodes.size() >= 3);
 
-        String node1 = getNodeIdOfChild("node1");
-        String node2 = getNodeIdOfChild("node2");
+        String node1 = clusterManager.getMasterCluster().findNodeByName("node1").getId();
+        String node2 = clusterManager.getMasterCluster().findNodeByName("node2").getId();
 
         executeCommand("cluster:group-create producer-grp");
         executeCommand("cluster:group-create consumer-grp");

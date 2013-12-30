@@ -32,7 +32,6 @@ import org.ops4j.pax.exam.junit.PaxExam;
 public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
 
     @Test
-    //@Ignore
     public void testDosgiGreeter() throws Exception {
         installCellar();
         createCellarChild("node1", "node2");
@@ -43,8 +42,8 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
-        String node1 = getNodeIdOfChild("node1");
-        String node2 = getNodeIdOfChild("node2");
+        String node1 = clusterManager.getMasterCluster().findNodeByName("node1").getId();
+        String node2 = clusterManager.getMasterCluster().findNodeByName("node2").getId();
 
         System.err.println("Node 1: " + node1);
         System.err.println("Node 2: " + node2);

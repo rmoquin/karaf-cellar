@@ -40,4 +40,9 @@ public class Command<R extends DistributedResult> extends Event {
     public void setTimeout(long timeout) {
         this.timeout = timeout;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\nCommand{" + "timeout=" + timeout + '}';
+    }
 }

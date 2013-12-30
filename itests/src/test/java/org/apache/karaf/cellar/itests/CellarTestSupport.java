@@ -15,6 +15,7 @@ package org.apache.karaf.cellar.itests;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
+import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFileExtend;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
@@ -41,11 +42,11 @@ import javax.security.auth.Subject;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.cellar.core.ClusterManager;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
-import org.junit.Rule;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
@@ -60,27 +61,18 @@ import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CellarTestSupport {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CellarTestSupport.class);
     public static final Long DELAY_TIMEOUT = 5000L;
     public static final Long COMMAND_TIMEOUT = 10000L;
     public static final Long SERVICE_TIMEOUT = 30000L;
-    public static final String RMI_SERVER_PORT = "44445";
-    public static final String HTTP_PORT = "9081";
     public static final String SSH_PORT = "8101";
-    public static final String RMI_REG_PORT = "1100";
     static final String KARAF_VERSION = "3.0.0";
     static final String CELLAR_VERSION = "3.0.0-SNAPSHOT";
     static final String INSTANCE_STARTED = "Started";
     static final String INSTANCE_STARTING = "Starting";
     static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
-    protected String cellarFeatureURI;
-    @Rule
-    public CellarTestWatcher baseTestWatcher = new CellarTestWatcher();
     ExecutorService executor = Executors.newCachedThreadPool();
     @Inject
     protected BundleContext bundleContext;
@@ -97,29 +89,6 @@ public class CellarTestSupport {
         return probe;
     }
 
-    /**
-     * This method configures Hazelcast TcpIp discovery for a given number of members. This configuration is required,
-     * when working with karaf instances.
-     *
-     * @param members
-     */
-    protected void configureLocalDiscovery(int members) {
-        StringBuilder membersBuilder = new StringBuilder();
-        membersBuilder.append("config:propset tcpIpMembers ");
-        membersBuilder.append("localhost:5701");
-        for (int i = 1; i < members; i++) {
-            membersBuilder.append(",").append("localhost:").append(String.valueOf(5701 + i));
-        }
-
-        String editCmd = "config:edit org.apache.karaf.cellar.discovery";
-        String propsetCmd = membersBuilder.toString();
-        String updateCmd = "config:update";
-
-        executeCommand(editCmd);
-        executeCommand(propsetCmd);
-        executeCommand(updateCmd);
-    }
-
     public File getConfigFile(String path) {
         return new File(this.getClass().getResource(path).getFile());
     }
@@ -129,8 +98,7 @@ public class CellarTestSupport {
      */
     protected void installCellar() {
         try {
-            cellarFeatureURI = maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version(CELLAR_VERSION).classifier("features").type("xml").getURL();
-            featureService.addRepository(new URI(cellarFeatureURI), false);
+            featureService.addRepository(new URI(getCellarUri()), false);
             featureService.installFeature("cellar");
         } catch (Exception ex) {
             throw new RuntimeException("Error installing cellar feature", ex);
@@ -158,7 +126,7 @@ public class CellarTestSupport {
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
             System.err.println("Creating and starting cellar node " + name + ".");
-            System.err.println(executeCommand("instance:create " + name));
+            System.err.println(executeCommand("instance:create " + " --featureURL " + getCellarUri() + " --feature cellar " + name));
             System.err.println(executeCommand("instance:start " + name));
             startingNodes.add(name);
         }
@@ -175,10 +143,11 @@ public class CellarTestSupport {
                 Instance instance = instanceService.getInstance(name);
                 System.err.println("Checking state for instance with name: " + name + ", " + instance.getState());
                 if (Instance.STARTED.equals(instance.getState())) {
-                    System.err.println(executeRemoteCommand(name, "feature:repo-add " + cellarFeatureURI));
-                    System.err.println(executeRemoteCommand(name, "feature:install cellar"));
-                    String nodeId = this.getNodeIdOfChild(name);
-                    if (nodeId != null) {
+//                    System.err.println(executeRemoteCommand(name, "feature:repo-add " + cellarFeatureURI));
+//                    System.err.println(executeRemoteCommand(name, "feature:install cellar"));
+                    Node node = manager.getMasterCluster().findNodeByName(name);
+                    if (node != null) {
+                        String nodeId = node.getId();
                         it.remove();
                         connectingNodes.add(nodeId);
                     }
@@ -233,28 +202,6 @@ public class CellarTestSupport {
         }
     }
 
-    /**
-     * Returns the node id of a specific child instance.
-     *
-     * @param name
-     * @return
-     */
-    protected String getNodeIdOfChild(String name) {
-        String nodesList = executeRemoteCommand(name, "cluster:node-list | grep \\\\*");
-        int stop = nodesList.indexOf(']');
-        if (stop > -1) {
-            String node = nodesList.substring(0, stop);
-            int start = node.lastIndexOf('[');
-            if (start > -1) {
-                node = node.substring(start + 1);
-                node = node.trim();
-                return node;
-            }
-        }
-        System.err.println("Couldn't detect the node id for child instance " + name + " from node response " + nodesList);
-        return null;
-    }
-
     @Configuration
     public Option[] config() {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
@@ -263,12 +210,10 @@ public class CellarTestSupport {
             // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
+            //            editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", getCellarUri()),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
-            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management"),
-            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiRegistryPort", RMI_REG_PORT),
-            editConfigurationFilePut("etc/org.apache.karaf.management.cfg", "rmiServerPort", RMI_SERVER_PORT)
-        };
+            editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management")};
+        //            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),};
         String debug = System.getProperty("debugMain");
         if (debug != null) {
             int l = options.length;
@@ -276,6 +221,10 @@ public class CellarTestSupport {
             options[l] = KarafDistributionOption.debugConfiguration();
         }
         return options;
+    }
+
+    protected String getCellarUri() {
+        return maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version(CELLAR_VERSION).classifier("features").type("xml").getURL();
     }
 
     public String generateSSH(String instanceName, String command) {
@@ -303,7 +252,7 @@ public class CellarTestSupport {
      * @return
      */
     protected String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal... principals) {
-        //waitForCommandService(command);
+        waitForCommandService(command);
 
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

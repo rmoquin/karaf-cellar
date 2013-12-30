@@ -69,15 +69,15 @@ public class HazelcastConfigurationManager {
          globalConfig.setClassName("java.lang.Object");
          globalConfig.setImplementation(new GenericCellarSerializer<Object>(10, Object.class));
          cfg.getSerializationConfig().setGlobalSerializerConfig(globalConfig);*/
-        SerializerConfig serializerConfig1 = new SerializerConfig();
-        serializerConfig1.setImplementation(new GenericCellarSerializer<Node>(11, Node.class));
-        serializerConfig1.setTypeClass(Node.class);
-        SerializerConfig serializerConfig2 = new SerializerConfig();
-        serializerConfig2.setImplementation(new GenericCellarSerializer<Group>(12, Group.class));
-        serializerConfig2.setTypeClass(Group.class);
-
-        cfg.getSerializationConfig().addSerializerConfig(serializerConfig1);
-        cfg.getSerializationConfig().addSerializerConfig(serializerConfig2);
+//        SerializerConfig serializerConfig1 = new SerializerConfig();
+//        serializerConfig1.setImplementation(new GenericCellarSerializer<Node>(11, Node.class));
+//        serializerConfig1.setTypeClass(Node.class);
+//        SerializerConfig serializerConfig2 = new SerializerConfig();
+//        serializerConfig2.setImplementation(new GenericCellarSerializer<Group>(12, Group.class));
+//        serializerConfig2.setTypeClass(Group.class);
+//
+//        cfg.getSerializationConfig().addSerializerConfig(serializerConfig1);
+//        cfg.getSerializationConfig().addSerializerConfig(serializerConfig2);
         if (discoveredMemberSet != null) {
             TcpIpConfig tcpIpConfig = cfg.getNetworkConfig().getJoin().getTcpIpConfig();
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);

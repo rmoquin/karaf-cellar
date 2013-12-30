@@ -76,7 +76,6 @@
         <feature version="${project.version}">cellar-bundle</feature>
         <feature version="${project.version}">cellar-features</feature>
         <feature version="${project.version}">cellar-management</feature>
-        <feature version="${project.version}">cellar-dosgi</feature>
     </feature>
 
     <feature name="cellar-dosgi" description="DOSGi support" version="${project.version}" resolver="(obr)">

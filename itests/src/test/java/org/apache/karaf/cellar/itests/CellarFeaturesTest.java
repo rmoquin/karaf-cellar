@@ -76,7 +76,7 @@ public class CellarFeaturesTest extends CellarTestSupport {
 
         //Test feature command - install - before a node joins
         System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
-        System.err.println(executeCommand("cluster:group-set testgroup " + getNodeIdOfChild("child1")));
+        System.err.println(executeCommand("cluster:group-set testgroup " + clusterManager.getMasterCluster().findNodeByName("node1").getId()));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);

@@ -71,4 +71,9 @@ public class ClusterBundleEvent extends Command<BundleEventResponse> {
     public void setType(int type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "\nClusterBundleEvent{" + "symbolicName=" + symbolicName + ", version=" + version + ", location=" + location + ", type=" + type + '}';
+    }
 }

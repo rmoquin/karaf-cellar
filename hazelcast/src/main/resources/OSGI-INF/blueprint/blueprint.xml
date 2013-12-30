@@ -138,6 +138,7 @@
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
+                    <value>ops4j*</value>
                 </set>
             </property>
             <property name="outboundFeatureBlacklist">
@@ -146,6 +147,7 @@
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
+                    <value>ops4j*</value>
                 </set>
             </property>
             <property name="syncBundles" value="true"/>
@@ -161,12 +163,16 @@
             </property>
             <property name="inboundBundleBlacklist">
                 <set>
-                    <value>none</value>
+                    <value>org.ops4j*</value>
+                    <value>org.junit*</value>
+                    <value>PAXEXAM-PROBE*</value>
                 </set>
             </property>
             <property name="outboundBundleBlacklist">
                 <set>
-                    <value>none</value>
+                    <value>org.ops4j*</value>
+                    <value>org.junit*</value>
+                    <value>PAXEXAM-PROBE*</value>
                 </set>
             </property>
             <property name="syncOBRUrls" value="true"/>

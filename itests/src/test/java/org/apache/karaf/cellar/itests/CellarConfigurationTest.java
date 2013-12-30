@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import org.apache.karaf.cellar.core.ClusterManager;
+import static org.apache.karaf.cellar.itests.CellarTestSupport.SERVICE_TIMEOUT;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -34,25 +36,26 @@ public class CellarConfigurationTest extends CellarTestSupport {
         installCellar();
         createCellarChild("child1", "child2");
 
-        String node1 = getNodeIdOfChild("child1");
-        String node2 = getNodeIdOfChild("child2");
+        final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
+        String node1 = manager.findNodeByName("child1").getId();
+        String node2 = manager.findNodeByName("child2").getId();
         System.err.println(executeCommand("instance:list"));
 
-        String properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
+        String properties = super.executeRemoteCommand("child1", "cluster:config-proplist " + TESTPID);
         System.err.println(properties);
         assertFalse((properties.contains("myKey")));
 
         //Test configuration sync - add property
         System.err.println(executeCommand("cluster:config-propset --pid " + TESTPID + " myKey myValue"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist  " + TESTPID);
         System.err.println(properties);
         assertTrue(properties.contains("myKey = myValue"));
 
         //Test configuration sync - remove property
         System.err.println(executeCommand("cluster:config-propdel --pid " + TESTPID + " myKey"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist " + TESTPID);
         System.err.println(properties);
         assertFalse(properties.contains("myKey"));
 
@@ -61,7 +64,7 @@ public class CellarConfigurationTest extends CellarTestSupport {
         Thread.sleep(DELAY_TIMEOUT);
         executeRemoteCommand("child1", "cluster:config-propset --pid " + TESTPID + " myKey2 myValue2");
 
-        properties = executeRemoteCommand("child1", "cluster:config-proplist --pid " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist " + TESTPID);
         System.err.println(properties);
 
         Thread.sleep(DELAY_TIMEOUT);

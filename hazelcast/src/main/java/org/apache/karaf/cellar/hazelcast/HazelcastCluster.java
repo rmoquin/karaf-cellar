@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author rmoquin
  */
 public class HazelcastCluster implements CellarCluster, MembershipListener {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
     private IdGenerator idgenerator;
@@ -65,13 +66,13 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public void init() {
         try {
             this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));
-            this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
+            this.localNode = new HazelcastNode(name, instance.getCluster().getLocalMember());
             this.memberNodesByName.put(this.localNode.getName(), this.localNode);
             this.memberNodesById.put(this.localNode.getId(), this.localNode);
             this.memberListenerId = instance.getCluster().addMembershipListener(this);
             Set<Member> members = instance.getCluster().getMembers();
             for (Member member : members) {
-                this.addNewNode(member);
+                this.addNewNode(name, member);
             }
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
@@ -161,9 +162,9 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     }
 
     /**
-     * Get a node with a given name..
+     * Geta a node by it's instance name..
      *
-     * @param name the node name.
+     * @param name the instance name..
      * @return the node.
      */
     @Override
@@ -215,8 +216,8 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         return String.valueOf(idgenerator.newId());
     }
 
-    public ILock getLock(Object o) {
-        return instance.getLock(o);
+    public ILock getLock(String s) {
+        return instance.getLock(s);
     }
 
     public IExecutorService getExecutorService(String name) {
@@ -242,7 +243,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
-        addNewNode(member);
+        addNewNode(this.nodeName, member);
     }
 
     @Override
@@ -404,8 +405,8 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         this.nodeName = nodeName;
     }
 
-    private void addNewNode(Member member) {
-        HazelcastNode newNode = new HazelcastNode(member);
+    private void addNewNode(String clusterName, Member member) {
+        HazelcastNode newNode = new HazelcastNode(clusterName, member);
         this.memberNodesByName.put(newNode.getName(), newNode);
         this.memberNodesById.put(newNode.getId(), newNode);
     }
