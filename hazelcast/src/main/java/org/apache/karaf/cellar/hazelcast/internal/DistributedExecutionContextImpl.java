@@ -83,7 +83,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         Map<Member, Future<R>> executedResult = this.executorService.submitToMembers(task, members);
         for (Map.Entry<Member, Future<R>> entry : executedResult.entrySet()) {
             Member member = entry.getKey();
-            Node node = new HazelcastNode(cluster.getName(), member);
+            Node node = new HazelcastNode(member);
             try {
                 R result = entry.getValue().get(timeoutSeconds, TimeUnit.SECONDS);
                 finishedResults.put(node, result);
@@ -102,7 +102,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         DistributedTask task = new DistributedTask(command);
         Future<R> future = this.executorService.submitToMember(task, member);
         Map<Node, R> finishedResults = new HashMap<Node, R>();
-        Node node = new HazelcastNode(cluster.getName(), member);
+        Node node = new HazelcastNode(member);
         try {
             R result = future.get(timeoutSeconds, TimeUnit.SECONDS);
             finishedResults.put(node, result);

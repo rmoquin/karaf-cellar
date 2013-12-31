@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.Member;
-import java.text.MessageFormat;
 import org.apache.karaf.cellar.core.Node;
 
 /**
@@ -24,22 +23,21 @@ public class HazelcastNode implements Node {
 
     private String id;
     private String name;
-    private String clusterName;
     private String host;
     private int port;
 
     public HazelcastNode() {
     }
 
-    public HazelcastNode(String instanceName, Member member) {
-        this.init(instanceName, member);
+    public HazelcastNode(Member member) {
+        this.init(member);
     }
 
-    public void init(String instanceName, Member hzMember) {
+    public void init(Member hzMember) {
         this.id = hzMember.getUuid();
-        this.name = instanceName;
         this.host = hzMember.getInetSocketAddress().getHostString();
         this.port = hzMember.getInetSocketAddress().getPort();
+        this.name = host + ":" + port;
     }
 
     public void destroy() {
@@ -92,7 +90,7 @@ public class HazelcastNode implements Node {
 
     @Override
     public String toString() {
-        return MessageFormat.format("HazelcastNode [id={0}, host={1}, port={2}]", getId(), host, port);
+        return "HazelcastNode{" + "id=" + id + ", name=" + name + ", host=" + host + ", port=" + port + '}';
     }
 
     /**

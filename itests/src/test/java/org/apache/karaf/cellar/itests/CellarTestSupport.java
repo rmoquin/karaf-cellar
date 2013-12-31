@@ -145,9 +145,8 @@ public class CellarTestSupport {
                 if (Instance.STARTED.equals(instance.getState())) {
 //                    System.err.println(executeRemoteCommand(name, "feature:repo-add " + cellarFeatureURI));
 //                    System.err.println(executeRemoteCommand(name, "feature:install cellar"));
-                    Node node = manager.getMasterCluster().findNodeByName(name);
-                    if (node != null) {
-                        String nodeId = node.getId();
+                    String nodeId = this.getNodeIdOfChild(name);
+                    if (nodeId != null) {
                         it.remove();
                         connectingNodes.add(nodeId);
                     }
@@ -200,6 +199,28 @@ public class CellarTestSupport {
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
+    }
+
+    /**
+     * Returns the node id of a specific child instance.
+     *
+     * @param name
+     * @return
+     */
+    protected String getNodeIdOfChild(String name) {
+        String nodesList = executeRemoteCommand(name, "cluster:node-list | grep \\\\*");
+        int stop = nodesList.indexOf(']');
+        if (stop > -1) {
+            String node = nodesList.substring(0, stop);
+            int start = node.lastIndexOf('[');
+            if (start > -1) {
+                node = node.substring(start + 1);
+                node = node.trim();
+                return node;
+            }
+        }
+        System.err.println("Couldn't detect the node id for child instance " + name + " from node response " + nodesList);
+        return null;
     }
 
     @Configuration

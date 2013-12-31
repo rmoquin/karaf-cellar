@@ -66,14 +66,10 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     public void init() {
         try {
             this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));
-            this.localNode = new HazelcastNode(name, instance.getCluster().getLocalMember());
+            this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
             this.memberNodesByName.put(this.localNode.getName(), this.localNode);
             this.memberNodesById.put(this.localNode.getId(), this.localNode);
             this.memberListenerId = instance.getCluster().addMembershipListener(this);
-            Set<Member> members = instance.getCluster().getMembers();
-            for (Member member : members) {
-                this.addNewNode(name, member);
-            }
         } catch (FileNotFoundException ex) {
             throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
         }
@@ -243,7 +239,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         Member member = membershipEvent.getMember();
-        addNewNode(this.nodeName, member);
+        addNewNode(member);
     }
 
     @Override
@@ -405,8 +401,8 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         this.nodeName = nodeName;
     }
 
-    private void addNewNode(String clusterName, Member member) {
-        HazelcastNode newNode = new HazelcastNode(clusterName, member);
+    private void addNewNode(Member member) {
+        HazelcastNode newNode = new HazelcastNode(member);
         this.memberNodesByName.put(newNode.getName(), newNode);
         this.memberNodesById.put(newNode.getId(), newNode);
     }

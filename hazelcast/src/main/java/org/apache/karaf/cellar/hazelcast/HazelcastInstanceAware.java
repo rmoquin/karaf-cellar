@@ -38,16 +38,15 @@ public class HazelcastInstanceAware {
      *
      * @return the local node.
      */
-    public Node getNode() {
-        Cluster cluster = instance.getCluster();
-        if (cluster != null) {
-            Member member = cluster.getLocalMember();
-            return new HazelcastNode(instance.getName(), member);
-        } else {
-            return null;
-        }
-    }
-
+    /*    public Node getNode() {
+     Cluster cluster = instance.getCluster();
+     if (cluster != null) {
+     Member member = cluster.getLocalMember();
+     return new HazelcastNode(member);
+     } else {
+     return null;
+     }
+     }*/
     public HazelcastInstance getInstance() {
         return instance;
     }
