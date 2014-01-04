@@ -42,7 +42,9 @@ public class CellarSupport {
             result = false;
             for (String whiteListItem : whiteList) {
                 if (wildCardMatch(resource, whiteListItem)) {
+                    LOGGER.debug("Resource {} matched whitelisted resource item {}.", resource, whiteListItem);
                     result = true;
+                    break;
                 }
             }
         }
@@ -51,7 +53,9 @@ public class CellarSupport {
         if (blackList != null && !blackList.isEmpty()) {
             for (String blackListItem : blackList) {
                 if (wildCardMatch(resource, blackListItem)) {
+                    LOGGER.debug("Resource {} matched whitelisted resource item {}.", resource, blackListItem);
                     result = false;
+                    break;
                 }
             }
         }

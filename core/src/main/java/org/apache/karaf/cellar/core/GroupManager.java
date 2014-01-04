@@ -108,7 +108,7 @@ public interface GroupManager {
      */
     public Set<String> listGroupNames(Node node);
 
-    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties);
+    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws IOException, ConfigurationException;
 
     /**
      * Register the local node in a given cluster group.

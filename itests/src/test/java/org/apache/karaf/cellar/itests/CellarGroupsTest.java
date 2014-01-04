@@ -66,7 +66,7 @@ public class CellarGroupsTest extends CellarTestSupport {
 
         GroupManager groupManager = getOsgiService(GroupManager.class);
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        String child11 = clusterManager.getMasterCluster().findNodeByName("child1").getId();
+        String child11 = this.getNodeIdOfChild("child1");
         System.err.println(executeCommand("cluster:group-set testgroup " + child11));
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));

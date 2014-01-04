@@ -49,6 +49,7 @@ public class HazelcastGroupManager implements GroupManager {
 
     public void destroy() {
         try {
+            //Make sure the node has been cleaned up if it hasn't destroyed yet.
             this.removeNodeFromAllGroups(false);
         } catch (IOException ex) {
             LOGGER.error("Error trying to deregister node from all groups for shutdown.", ex);
@@ -115,7 +116,7 @@ public class HazelcastGroupManager implements GroupManager {
      * @param group the group configuration.
      * @param properties the group service properties.
      */
-    public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) {
+    public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) throws IOException, ConfigurationException {
         LOGGER.warn("Group service was removed: " + properties);
         this.deregisterGroup(group, properties);
     }
@@ -140,7 +141,7 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     @Override
-    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties) {
+    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws IOException, ConfigurationException {
         LOGGER.warn("A group configuration is removed {}", properties);
         String servicePid = (String) properties.get(org.osgi.framework.Constants.SERVICE_PID);
         if (pidGroupNameMap.containsKey(servicePid)) {
@@ -217,36 +218,30 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     protected Group addGrouptoStore(Group group) {
-        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+        IMap<String, Group> map = getGroupMapStore();
         return map.putIfAbsent(group.getName(), group);
     }
 
     protected void addNodeToGroupStore(String groupName) throws IOException {
-        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+        IMap<String, Group> map = getGroupMapStore();
         map.lock(groupName);
         Group group = map.get(groupName);
         group.addNode(getNode());
         map.put(groupName, group);
         map.unlock(groupName);
-        this.addGroupToNodeConfiguration(groupName);
+        nodeConfiguration.getGroups().add(groupName);
+        saveNodeConfiguration();
     }
 
-    protected void removeGroupStore(String groupName) {
-        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
+    protected void removeNodeFromGroupStore(String groupName) throws IOException {
+        IMap<String, Group> map = getGroupMapStore();
         map.lock(groupName);
         Group group = map.get(groupName);
         group.removeNode(getNode());
         map.put(groupName, group);
         map.unlock(groupName);
-    }
-
-    protected void removeNodeFromGroupStore(String groupName) {
-        IMap<String, Group> map = masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
-        map.lock(groupName);
-        Group group = map.get(groupName);
-        group.removeNode(getNode());
-        map.put(groupName, group);
-        map.unlock(groupName);
+        nodeConfiguration.getGroups().remove(groupName);
+        saveNodeConfiguration();
     }
 
     protected void removeNodeFromAllGroups(boolean saveNodeConfig) throws IOException {
@@ -254,14 +249,20 @@ public class HazelcastGroupManager implements GroupManager {
         Set<String> groupNames = nodeConfiguration.getGroups();
         for (String groupName : groupNames) {
             map.lock(groupName);
-            Group group = map.get(groupName);
-            group.addNode(getNode());
+            Group group = map.remove(groupName);
+            group.removeNode(getNode());
             map.put(groupName, group);
             map.unlock(groupName);
+            nodeConfiguration.getGroups().remove(groupName);
         }
         if (saveNodeConfig) {
-            this.removeAllGroupsFromNodeConfiguration();
+            saveNodeConfiguration();
         }
+    }
+
+    protected void saveNodeConfiguration() throws IOException {
+        Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), null);
+        configuration.update(nodeConfiguration.getProperties());
     }
 
     @Override
@@ -318,39 +319,16 @@ public class HazelcastGroupManager implements GroupManager {
         return masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE);
     }
 
-    private void addGroupToNodeConfiguration(String groupName) throws IOException {
-        if (!nodeConfiguration.getGroups().contains(groupName)) {
-            nodeConfiguration.getGroups().add(groupName);
-            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class.getCanonicalName(), "?");
-            configuration.update(nodeConfiguration.getProperties());
-        }
-    }
-
     private void removeGroupFromNodeConfiguration(String groupName) throws IOException {
         Set<String> groups = nodeConfiguration.getGroups();
         if (groups.contains(groupName)) {
             groups.remove(groupName);
             if (groups.isEmpty()) {
                 LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
-                groups.add(Configurations.DEFAULT_GROUP_NAME);
+                this.addNodeToGroupStore(Configurations.DEFAULT_GROUP_NAME);
+            } else {
+                saveNodeConfiguration();
             }
-            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class
-                    .getCanonicalName(), null);
-            configuration.update(nodeConfiguration.getProperties());
-        }
-    }
-
-    private void removeAllGroupsFromNodeConfiguration() throws IOException {
-        Set<String> groups = nodeConfiguration.getGroups();
-        LOGGER.info("Groups node is in before remove from all. " + groups);
-        LOGGER.info("Stack leading to remove all.", new Exception());
-        if (groups.size() > 0) {
-            groups.clear();
-            LOGGER.warn("Node, {}, was removed from all it's groups, it will be placed into the default group.", this.getNode().getName());
-            groups.add(Configurations.DEFAULT_GROUP_NAME);
-            Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class
-                    .getCanonicalName(), null);
-            configuration.update(nodeConfiguration.getProperties());
         }
     }
 

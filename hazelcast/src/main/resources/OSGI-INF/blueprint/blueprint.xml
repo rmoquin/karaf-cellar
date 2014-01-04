@@ -108,6 +108,10 @@
                     <value>org.apache.karaf.shell</value>
                     <value>org.ops4j.pax.logging</value>
                     <value>org.ops4j.pax.web</value>
+                    <value>org.apache.karaf.service.acl*</value>
+                    <value>org.apache.karaf.command.acl*</value>
+                    <value>org.ops4j.pax*</value>
+                    <value>jmx.acl*</value>
                 </set>
             </property>
             <property name="outboundConfigurationBlacklist">
@@ -118,6 +122,10 @@
                     <value>org.apache.karaf.shell</value>
                     <value>org.ops4j.pax.logging</value>
                     <value>org.ops4j.pax.web</value>
+                    <value>org.apache.karaf.service.acl*</value>
+                    <value>org.apache.karaf.command.acl*</value>
+                    <value>org.ops4j.pax*</value>
+                    <value>jmx.acl*</value>
                 </set>
             </property>
             <property name="syncFeatures" value="true"/>
@@ -138,7 +146,8 @@
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
-                    <value>ops4j*</value>
+					<value>ops4j*</value>
+                    <value>exam*</value>
                 </set>
             </property>
             <property name="outboundFeatureBlacklist">
@@ -148,6 +157,7 @@
                     <value>hazelcast</value>
                     <value>cellar*</value>
                     <value>ops4j*</value>
+                    <value>exam*</value>
                 </set>
             </property>
             <property name="syncBundles" value="true"/>
@@ -163,15 +173,15 @@
             </property>
             <property name="inboundBundleBlacklist">
                 <set>
-                    <value>org.ops4j*</value>
-                    <value>org.junit*</value>
+                    <value>org.ops4j.*</value>
+                    <value>org.hamcrest**</value>
                     <value>PAXEXAM-PROBE*</value>
                 </set>
             </property>
             <property name="outboundBundleBlacklist">
                 <set>
-                    <value>org.ops4j*</value>
-                    <value>org.junit*</value>
+                    <value>org.ops4j.*</value>
+                    <value>org.hamcrest*</value>
                     <value>PAXEXAM-PROBE*</value>
                 </set>
             </property>

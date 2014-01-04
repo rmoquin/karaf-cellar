@@ -13,8 +13,6 @@
  */
 package org.apache.karaf.cellar.itests;
 
-import org.apache.karaf.cellar.core.ClusterManager;
-import static org.apache.karaf.cellar.itests.CellarTestSupport.SERVICE_TIMEOUT;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -29,49 +27,48 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @ExamReactorStrategy(PerMethod.class)
 public class CellarConfigurationTest extends CellarTestSupport {
 
-    private static final String TESTPID = "org.apache.karaf.cellar.tst";
+    private static final String TESTPID = "cellar.config.tst";
 
     @Test
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
         createCellarChild("child1", "child2");
 
-        final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
-        String node1 = manager.findNodeByName("child1").getId();
-        String node2 = manager.findNodeByName("child2").getId();
+        String node1 = this.getNodeIdOfChild("child1");
+        String node2 = this.getNodeIdOfChild("child2");
         System.err.println(executeCommand("instance:list"));
 
-        String properties = super.executeRemoteCommand("child1", "cluster:config-proplist " + TESTPID);
-        System.err.println(properties);
+        String properties = super.executeRemoteCommand("child1", "cluster:config-proplist default " + TESTPID);
         assertFalse((properties.contains("myKey")));
 
         //Test configuration sync - add property
-        System.err.println(executeCommand("cluster:config-propset --pid " + TESTPID + " myKey myValue"));
+        System.err.println(executeCommand("cluster:config-propset default " + TESTPID + " myKey myValue"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeRemoteCommand("child1", "cluster:config-proplist  " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist default " + TESTPID);
         System.err.println(properties);
-        assertTrue(properties.contains("myKey = myValue"));
+        assertTrue(properties.contains("myKey") && properties.contains("myValue"));
 
         //Test configuration sync - remove property
-        System.err.println(executeCommand("cluster:config-propdel --pid " + TESTPID + " myKey"));
+        System.err.println(executeCommand("cluster:config-propdel default " + TESTPID + " myKey"));
         Thread.sleep(DELAY_TIMEOUT);
-        properties = executeRemoteCommand("child1", "cluster:config-proplist " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist default " + TESTPID);
         System.err.println(properties);
         assertFalse(properties.contains("myKey"));
 
         //Test configuration sync - add property - join later
+        System.err.println(executeCommand("cluster:group-create new-grp"));
         System.err.println(executeCommand("cluster:group-set new-grp " + node1));
         Thread.sleep(DELAY_TIMEOUT);
-        executeRemoteCommand("child1", "cluster:config-propset --pid " + TESTPID + " myKey2 myValue2");
+        executeRemoteCommand("child1", "cluster:config-propset new-grp " + TESTPID + " myKey2 myValue2");
 
-        properties = executeRemoteCommand("child1", "cluster:config-proplist " + TESTPID);
+        properties = executeRemoteCommand("child1", "cluster:config-proplist new-grp " + TESTPID);
         System.err.println(properties);
 
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set new-grp " + node2));
-        properties = executeRemoteCommand("child2", "cluster:config-proplist --pid " + TESTPID);
+        properties = executeRemoteCommand("child2", "cluster:config-proplist new-grp " + TESTPID);
         System.err.println(properties);
-        assertTrue(properties.contains("myKey2 = myValue2"));
+        assertTrue(properties.contains("myKey2") && properties.contains("myValue2"));
     }
 
     @After
