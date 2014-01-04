@@ -125,7 +125,7 @@ public class CellarTestSupport {
         List<String> connectingNodes = new ArrayList<String>();
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
-            System.err.println(executeCommand("instance:create " + " --featureURL " + getCellarUri() + " --feature cellar " + name));
+            System.err.println(executeCommand("instance:create --featureURL " + getCellarUri() + " " + name));
             System.err.println(executeCommand("instance:start " + name));
             startingNodes.add(name);
         }
@@ -142,11 +142,12 @@ public class CellarTestSupport {
                 Instance instance = instanceService.getInstance(name);
                 System.err.println("Checking state for instance with name: " + name + ", " + instance.getState());
                 if (Instance.STARTED.equals(instance.getState())) {
+                    System.err.println(executeRemoteCommand(name, "feature:install cellar"));
                     String nodeId = this.getNodeIdOfChild(name);
                     if (nodeId != null) {
                         it.remove();
                         connectingNodes.add(nodeId);
-                        //If everything checks out, don't boskip the sleep that is after this loop.
+                        //If everything checks out, don't skip the sleep that is after this loop.
                         continue;
                     }
                 }
