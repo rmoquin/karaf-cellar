@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.itests;
 
 import static org.ops4j.pax.exam.CoreOptions.maven;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFilePut;
-import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.editConfigurationFileExtend;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.karafDistributionConfiguration;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.keepRuntimeFolder;
 import static org.ops4j.pax.exam.karaf.options.KarafDistributionOption.replaceConfigurationFile;
@@ -42,7 +41,6 @@ import javax.security.auth.Subject;
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.karaf.cellar.core.ClusterManager;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.instance.core.Instance;
@@ -122,7 +120,8 @@ public class CellarTestSupport {
         final ClusterManager manager = this.getOsgiService(ClusterManager.class, SERVICE_TIMEOUT);
         //Create and start each child node
         List<String> startingNodes = new ArrayList<String>(names.length);
-        List<String> connectingNodes = new ArrayList<String>();
+        List<String> startedNodes = new ArrayList<String>(names.length);
+        List<String> connectingNodes = new ArrayList<String>(names.length);
         for (int i = 0; i < names.length; i++) {
             String name = names[i];
             System.err.println(executeCommand("instance:create --featureURL " + getCellarUri() + " " + name));
@@ -137,24 +136,36 @@ public class CellarTestSupport {
 
         //Wait till the node is listed as Started.
         for (int i = 0; i < 30; i++) {
+            //Wait till the node is listed as Started.
             for (Iterator<String> it = startingNodes.iterator(); it.hasNext();) {
                 String name = it.next();
                 Instance instance = instanceService.getInstance(name);
                 System.err.println("Checking state for instance with name: " + name + ", " + instance.getState());
                 if (Instance.STARTED.equals(instance.getState())) {
                     System.err.println(executeRemoteCommand(name, "feature:install cellar"));
-                    String nodeId = this.getNodeIdOfChild(name);
-                    if (nodeId != null) {
-                        it.remove();
-                        connectingNodes.add(nodeId);
-                        //If everything checks out, don't skip the sleep that is after this loop.
-                        continue;
+                    it.remove();
+                    startedNodes.add(name);
+                } else {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        //Ignore
                     }
                 }
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    //Ignore
+            }
+            for (Iterator<String> it = startedNodes.iterator(); it.hasNext();) {
+                String name = it.next();
+                System.err.println("Checking to see if instance, " + name + ", connected to cluster.");
+                String nodeId = this.getNodeIdOfChild(name);
+                if (nodeId != null) {
+                    it.remove();
+                    connectingNodes.add(nodeId);
+                } else {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        //Ignore
+                    }
                 }
             }
             for (Iterator<String> it = connectingNodes.iterator(); it.hasNext();) {
@@ -169,15 +180,16 @@ public class CellarTestSupport {
                     }
                 }
             }
-            if (startingNodes.isEmpty() && connectingNodes.isEmpty()) {
+            if (startingNodes.isEmpty() && connectingNodes.isEmpty() && startedNodes.isEmpty()) {
                 System.err.println("All node(s) " + Arrays.toString(names) + " are registered.");
                 return;
             } else {
                 System.out.print(".");
             }
         }
-        if (!startingNodes.isEmpty() && !connectingNodes.isEmpty()) {
-            throw new RuntimeException("Failed waiting for node(s) in starting state" + startingNodes + " and node(s) in connecting state" + connectingNodes);
+        if (!startingNodes.isEmpty() && !connectingNodes.isEmpty() && !startedNodes.isEmpty()) {
+            throw new RuntimeException("Failed waiting for node(s) in starting state " + startingNodes + " and node(s) in started state " + startedNodes
+                    + " and node(s) in connecting state " + connectingNodes);
         }
     }
 
@@ -261,7 +273,7 @@ public class CellarTestSupport {
      * @return
      */
     protected String executeCommand(final String command, Principal... principals) {
-        return executeCommand(command, COMMAND_TIMEOUT, false, principals);
+        return executeCommand(command, COMMAND_TIMEOUT, true, principals);
     }
 
     /**
