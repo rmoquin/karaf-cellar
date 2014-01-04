@@ -47,6 +47,11 @@ public class ClusterFeaturesEvent extends Command<FeatureEventResponse> {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return "ClusterFeaturesEvent{" + "name=" + name + ", version=" + version + ", noClean=" + noClean + ", noRefresh=" + noRefresh + ", type=" + type + '}';
+    }
+
     public String getName() {
         return name;
     }

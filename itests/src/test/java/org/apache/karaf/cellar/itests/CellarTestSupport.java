@@ -162,7 +162,7 @@ public class CellarTestSupport {
                     connectingNodes.add(nodeId);
                 } else {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         //Ignore
                     }
@@ -232,7 +232,6 @@ public class CellarTestSupport {
                 return node;
             }
         }
-        System.err.println("Couldn't detect the node id for child instance " + name + " from node response " + nodesList);
         return null;
     }
 
@@ -273,7 +272,7 @@ public class CellarTestSupport {
      * @return
      */
     protected String executeCommand(final String command, Principal... principals) {
-        return executeCommand(command, COMMAND_TIMEOUT, true, principals);
+        return executeCommand(command, COMMAND_TIMEOUT, false, principals);
     }
 
     /**

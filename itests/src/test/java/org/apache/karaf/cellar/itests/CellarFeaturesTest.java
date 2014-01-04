@@ -31,8 +31,8 @@ import org.ops4j.pax.exam.junit.PaxExam;
 @ExamReactorStrategy(PerMethod.class)
 public class CellarFeaturesTest extends CellarTestSupport {
 
-    private static final String UNINSTALLED = "[uninstalled]";
-    private static final String INSTALLED = "[installed  ]";
+    private static final String UNINSTALLED = "|           |";
+    private static final String INSTALLED = "| x         |";
 
     @Test
     public void testCellarFeaturesModule() throws Exception {
@@ -41,38 +41,36 @@ public class CellarFeaturesTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
 
-        System.err.println(executeCommand("instance:list"));
-
         String eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
+        assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install
         System.err.println(executeCommand("cluster:feature-install default eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
+        assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
         //Test feature sync - uninstall
         System.err.println(executeCommand("feature:uninstall eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
+        assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install - before a node joins
         System.err.println(executeCommand("cluster:feature-install default eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
+        assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
         //Test feature command - uninstall
         System.err.println(executeCommand("cluster:feature-uninstall default eventadmin"));
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(UNINSTALLED));
+        assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install - before a node joins
         System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
@@ -80,7 +78,7 @@ public class CellarFeaturesTest extends CellarTestSupport {
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);
-        assertTrue(eventadminFeatureStatus.startsWith(INSTALLED));
+        assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();

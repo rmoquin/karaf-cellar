@@ -104,12 +104,7 @@
                 <set>
                     <value>org.apache.felix.fileinstall*</value>
                     <value>org.apache.karaf.cellar*</value>
-                    <value>org.apache.karaf.management</value>
-                    <value>org.apache.karaf.shell</value>
-                    <value>org.ops4j.pax.logging</value>
-                    <value>org.ops4j.pax.web</value>
-                    <value>org.apache.karaf.service.acl*</value>
-                    <value>org.apache.karaf.command.acl*</value>
+                    <value>org.apache.karaf*</value>
                     <value>org.ops4j.pax*</value>
                     <value>jmx.acl*</value>
                 </set>
@@ -118,12 +113,7 @@
                 <set>
                     <value>org.apache.felix.fileinstall*</value>
                     <value>org.apache.karaf.cellar*</value>
-                    <value>org.apache.karaf.management</value>
-                    <value>org.apache.karaf.shell</value>
-                    <value>org.ops4j.pax.logging</value>
-                    <value>org.ops4j.pax.web</value>
-                    <value>org.apache.karaf.service.acl*</value>
-                    <value>org.apache.karaf.command.acl*</value>
+                    <value>org.apache.karaf*</value>
                     <value>org.ops4j.pax*</value>
                     <value>jmx.acl*</value>
                 </set>
@@ -146,7 +136,7 @@
                     <value>management</value>
                     <value>hazelcast</value>
                     <value>cellar*</value>
-					<value>ops4j*</value>
+                    <value>ops4j*</value>
                     <value>exam*</value>
                 </set>
             </property>
@@ -174,7 +164,7 @@
             <property name="inboundBundleBlacklist">
                 <set>
                     <value>org.ops4j.*</value>
-                    <value>org.hamcrest**</value>
+                    <value>org.hamcrest*</value>
                     <value>PAXEXAM-PROBE*</value>
                 </set>
             </property>

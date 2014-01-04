@@ -82,11 +82,10 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                 String version = tokens[1];
                 if (tokens != null && tokens.length == 2) {
                     if (state != null) {
-                        String bundleLocation = state.getLocation();
                         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
                         Set<String> whitelist = groupConfig.getInboundBundleWhitelist();
                         Set<String> blacklist = groupConfig.getInboundBundleBlacklist();
-                        if (this.isAllowed(bundleLocation, whitelist, blacklist)) {
+                        if (this.isAllowed(symbolicName, whitelist, blacklist)) {
                             try {
                                 if (state.getStatus() == BundleEvent.INSTALLED) {
                                     this.installBundleFromLocation(state.getLocation());
@@ -98,7 +97,7 @@ public class BundleSynchronizer extends BundleSupport implements Synchronizer {
                                 LOGGER.error("CELLAR BUNDLE: failed to pull bundle {}", id, e);
                             }
                         } else {
-                            LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", bundleLocation, groupName);
+                            LOGGER.debug("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND for cluster group {}", symbolicName, groupName);
                         }
                     }
                 }
