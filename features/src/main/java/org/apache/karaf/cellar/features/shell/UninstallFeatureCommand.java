@@ -13,9 +13,13 @@
  */
 package org.apache.karaf.cellar.features.shell;
 
+import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
+import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.command.Result;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.features.ClusterFeaturesEvent;
 import org.apache.karaf.features.FeatureEvent;
 import org.apache.karaf.shell.commands.Argument;
@@ -42,11 +46,11 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
             return null;
         }
 
-		//TODO Re-enable this functionaity,
-        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-         System.err.println("Cluster event producer is OFF for this node");
-         return null;
-         }*/
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF for this node");
+            return null;
+        }
+
         // check if the feature exists in the map
         if (!featureExists(groupName, feature, version)) {
             if (version != null) {
@@ -71,8 +75,10 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
 
         // broadcast the cluster event
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(feature, version, FeatureEvent.EventType.FeatureUninstalled);
+        event.setForce(true);
         event.setSourceGroup(group);
-        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+        Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+        printTaskResults(responses);
         return null;
     }
 }

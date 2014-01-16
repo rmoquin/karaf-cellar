@@ -13,9 +13,12 @@
  */
 package org.apache.karaf.cellar.core.shell;
 
+import java.util.Map;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupManager;
+import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**
@@ -26,6 +29,18 @@ public abstract class CellarCommandSupport extends OsgiCommandSupport {
     protected ClusterManager clusterManager;
     protected GroupManager groupManager;
     protected DistributedExecutionContext executionContext;
+
+    public void printTaskResults(Map<Node, Result> results) {
+        for (Map.Entry<Node, Result> response : results.entrySet()) {
+            Node node = response.getKey();
+            Result featureEventResult = response.getValue();
+            System.err.println("Node, " + node.getName() + " task successful: " + featureEventResult.isSuccessful());
+            if (featureEventResult.getThrowable() != null) {
+                System.err.println("Task error details: ");
+                featureEventResult.getThrowable().printStackTrace(System.err);
+            }
+        }
+    }
 
     public ClusterManager getClusterManager() {
         return clusterManager;

@@ -27,6 +27,9 @@ import org.apache.karaf.shell.commands.Option;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.command.Result;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.cellar.features.ClusterRepositoryEvent;
 
 @Command(scope = "cluster", name = "feature-url-remove", description = "Remove features repository URLs from a cluster group")
@@ -49,11 +52,11 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
-		//TODO Re-enable this functionaity,
-        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-         System.err.println("Cluster event producer is OFF");
-         return null;
-         }*/
+
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }
 
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
@@ -117,7 +120,8 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
                 event.setUninstall(uninstall);
                 event.setSourceGroup(group);
-                executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+                Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+                printTaskResults(responses);
             } else {
                 System.err.println("Features repository URL " + url + " not found in cluster group " + groupName);
             }

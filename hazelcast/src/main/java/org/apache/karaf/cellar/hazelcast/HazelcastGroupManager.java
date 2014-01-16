@@ -48,11 +48,13 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     public void destroy() {
-        try {
-            //Make sure the node has been cleaned up if it hasn't destroyed yet.
-            this.removeNodeFromAllGroups(false);
-        } catch (IOException ex) {
-            LOGGER.error("Error trying to deregister node from all groups for shutdown.", ex);
+        if (nodeConfiguration != null) {
+            try {
+                //Make sure the node has been cleaned up if it hasn't destroyed yet.
+                this.removeNodeFromAllGroups(false);
+            } catch (IOException ex) {
+                LOGGER.error("Error trying to deregister node from all groups for shutdown.", ex);
+            }
         }
     }
 
@@ -85,6 +87,7 @@ public class HazelcastGroupManager implements GroupManager {
      * @throws org.osgi.service.cm.ConfigurationException
      */
     public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) throws ConfigurationException {
+        LOGGER.warn("Node membership was removed for node configuration: {}.", nodeConfiguration);
         if (this.nodeConfiguration != null) {
             try {
                 removeNodeFromAllGroups(false);
@@ -93,7 +96,7 @@ public class HazelcastGroupManager implements GroupManager {
             }
             this.nodeConfiguration = null;
         } else {
-            LOGGER.info("No node was configured to remove, skipping.");
+            LOGGER.warn("No node was configured to remove, skipping.");
         }
     }
 
@@ -149,10 +152,14 @@ public class HazelcastGroupManager implements GroupManager {
         } else {
             LOGGER.info("Group to remove has null pid, skipping.");
         }
-        if (groupConfig != null) {
-            removeNodeFromGroupStore(groupConfig.getName());
+        if (nodeConfiguration != null) {
+            if (groupConfig != null) {
+                removeNodeFromGroupStore(groupConfig.getName());
+            } else {
+                LOGGER.info("Group to remove was null so it was already de-registered, skipping.");
+            }
         } else {
-            LOGGER.info("Group to remove was so can't deregister it, skipping.");
+            LOGGER.info("Node configuration is null, group configuration would have been already removed from it, skipping.");
         }
     }
 

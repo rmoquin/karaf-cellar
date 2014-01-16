@@ -28,6 +28,9 @@ import org.apache.karaf.shell.commands.Option;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.command.Result;
+import org.apache.karaf.cellar.core.control.SwitchStatus;
 
 @Command(scope = "cluster", name = "feature-url-add", description = "Add a list of features repository URLs in a cluster group")
 public class UrlAddCommand extends FeatureCommandSupport {
@@ -50,11 +53,10 @@ public class UrlAddCommand extends FeatureCommandSupport {
             return null;
         }
 
-		//TODO Re-enable this functionaity,
-        /*if (eventProducer.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-         System.err.println("Cluster event producer is OFF");
-         return null;
-         }*/
+        if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
+            System.err.println("Cluster event producer is OFF");
+            return null;
+        }
         // get the features repositories in the cluster group
         List<String> clusterRepositories = clusterManager.getList(Constants.REPOSITORIES + Configurations.SEPARATOR + groupName);
         // get the features in the cluster group
@@ -117,7 +119,8 @@ public class UrlAddCommand extends FeatureCommandSupport {
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
                 event.setInstall(install);
                 event.setSourceGroup(group);
-                executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+                Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+                printTaskResults(responses);
             } else {
                 System.err.println("Features repository URL " + url + " already registered");
             }
