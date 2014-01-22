@@ -120,7 +120,7 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
                 event.setUninstall(uninstall);
                 event.setSourceGroup(group);
-                Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+                Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodes());
                 printTaskResults(responses);
             } else {
                 System.err.println("Features repository URL " + url + " not found in cluster group " + groupName);

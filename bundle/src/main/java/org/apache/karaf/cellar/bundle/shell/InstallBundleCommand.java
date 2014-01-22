@@ -96,7 +96,7 @@ public class InstallBundleCommand extends CellarCommandSupport {
                 // broadcast the cluster event
                 ClusterBundleEvent event = new ClusterBundleEvent(symbolicName, version, url, BundleEvent.INSTALLED);
                 event.setSourceGroup(group);
-                getExecutionContext().executeAndWait(event, group.getNodesExcluding(this.groupManager.getNode()));
+                getExecutionContext().executeAndWait(event, group.getNodes());
             } else {
                 System.err.println("Bundle location " + url + " is blocked outbound for cluster group " + groupName);
             }

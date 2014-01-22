@@ -119,7 +119,7 @@ public class UrlAddCommand extends FeatureCommandSupport {
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
                 event.setInstall(install);
                 event.setSourceGroup(group);
-                Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+                Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodes());
                 printTaskResults(responses);
             } else {
                 System.err.println("Features repository URL " + url + " already registered");

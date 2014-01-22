@@ -70,7 +70,7 @@ public class ObrDeployCommand extends CellarCommandSupport {
         }
         ClusterObrBundleEvent event = new ClusterObrBundleEvent(bundleId, type);
         event.setSourceGroup(group);
-        executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+        executionContext.executeAndWait(event, group.getNodes());
 
         return null;
     }

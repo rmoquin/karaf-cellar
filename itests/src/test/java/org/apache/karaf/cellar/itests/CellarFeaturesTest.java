@@ -73,8 +73,9 @@ public class CellarFeaturesTest extends CellarTestSupport {
         assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install - before a node joins
+        System.err.println(executeCommand("cluster:create-group testgroup"));
         System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
-        System.err.println(executeCommand("cluster:group-set testgroup " + this.getNodeIdOfChild("node1")));
+        System.err.println(executeCommand("cluster:group-set testgroup " + this.getNodeIdOfChild("child1")));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         System.err.println(eventadminFeatureStatus);

@@ -23,7 +23,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.URI;
-import java.security.Principal;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.security.auth.Subject;
+import javax.security.auth.login.LoginContext;
 
 import org.apache.felix.service.command.CommandProcessor;
 import org.apache.felix.service.command.CommandSession;
@@ -78,6 +78,7 @@ public class CellarTestSupport {
     protected FeaturesService featureService;
     @Inject
     protected InstanceService instanceService;
+    private Subject authSubject;
     @Inject
     BootFinished bootFinished;
 
@@ -96,6 +97,7 @@ public class CellarTestSupport {
      */
     protected void installCellar() {
         try {
+            System.out.println("auth " + authSubject.toString());
             featureService.addRepository(new URI(getCellarUri()), false);
             featureService.installFeature("cellar");
         } catch (Exception ex) {
@@ -244,6 +246,7 @@ public class CellarTestSupport {
             configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
             //            editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", getCellarUri()),
+            editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", ""),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management")};
         //            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),};
@@ -261,18 +264,28 @@ public class CellarTestSupport {
     }
 
     public String generateSSH(String instanceName, String command) {
-        return "ssh:ssh -q -l karaf -P karaf -p " + SSH_PORT + " 127.0.0.1 " + command;
+        return "ssh:ssh -q -P karaf -p " + SSH_PORT + " karaf@localhost " + command;
     }
 
     /**
      * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
      *
      * @param command The command to execute
-     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
-     * @return
+     * @return the result
      */
-    protected String executeCommand(final String command, Principal... principals) {
-        return executeCommand(command, COMMAND_TIMEOUT, false, principals);
+    protected String executeCommand(final String command) {
+        return executeCommand(command, COMMAND_TIMEOUT, false, null);
+    }
+
+    /**
+     * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
+     *
+     * @param command The command to execute
+     * @param subject The principals (e.g. RolePrincipal objects) to run the command under
+     * @return the result
+     */
+    protected String executeCommand(final String command, Subject subject) {
+        return executeCommand(command, COMMAND_TIMEOUT, false, subject);
     }
 
     /**
@@ -281,12 +294,11 @@ public class CellarTestSupport {
      * @param command The command to execute.
      * @param timeout The amount of time in millis to wait for the command to execute.
      * @param silent Specifies if the command should be displayed in the screen.
-     * @param principals The principals (e.g. RolePrincipal objects) to run the command under
+     * @param subject The principals (e.g. RolePrincipal objects) to run the command under
      * @return
      */
-    protected String executeCommand(final String command, final Long timeout, final Boolean silent, final Principal... principals) {
+    protected String executeCommand(final String command, final Long timeout, final Boolean silent, Subject subject) {
         waitForCommandService(command);
-
         String response;
         final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         final PrintStream printStream = new PrintStream(byteArrayOutputStream);
@@ -311,16 +323,15 @@ public class CellarTestSupport {
         };
 
         FutureTask<String> commandFuture;
-        if (principals.length == 0) {
+        final Subject auth = (subject == null) ? authSubject : subject;
+        if (auth == null) {
             commandFuture = new FutureTask<String>(commandCallable);
         } else {
             // If principals are defined, run the command callable via Subject.doAs()
             commandFuture = new FutureTask<String>(new Callable<String>() {
                 @Override
                 public String call() throws Exception {
-                    Subject subject = new Subject();
-                    subject.getPrincipals().addAll(Arrays.asList(principals));
-                    return Subject.doAs(subject, new PrivilegedExceptionAction<String>() {
+                    return Subject.doAs(auth, new PrivilegedExceptionAction<String>() {
                         @Override
                         public String run() throws Exception {
                             return commandCallable.call();

@@ -83,7 +83,7 @@ public class ObrAddUrlCommand extends CellarCommandSupport {
         // broadcast a cluster event
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_ADD_EVENT_TYPE);
         event.setSourceGroup(group);
-        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+        executionContext.execute(event, group.getNodes());
         return null;
     }
 

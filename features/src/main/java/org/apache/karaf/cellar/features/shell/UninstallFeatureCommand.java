@@ -77,7 +77,7 @@ public class UninstallFeatureCommand extends FeatureCommandSupport {
         ClusterFeaturesEvent event = new ClusterFeaturesEvent(feature, version, FeatureEvent.EventType.FeatureUninstalled);
         event.setForce(true);
         event.setSourceGroup(group);
-        Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodesExcluding(groupManager.getNode()));
+        Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodes());
         printTaskResults(responses);
         return null;
     }

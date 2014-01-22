@@ -33,6 +33,7 @@ import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.command.DistributedResult;
 import org.apache.karaf.cellar.core.command.DistributedTask;
+import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
@@ -87,11 +88,12 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
             try {
                 R result = entry.getValue().get(timeoutSeconds, TimeUnit.SECONDS);
                 finishedResults.put(node, result);
-                LOGGER.info("Task completed on node {} with result {} for command {}.", node, result, command);
+//                LOGGER.info("Task completed on node {} with result {} for command {}.", node, result, command);
             } catch (Exception ex) {
                 LOGGER.error("Node {} generated an error executing task {}", node, command, ex);
             }
         }
+        printTaskResults(finishedResults);
         LOGGER.info("All tasks completed for command {}.", command);
         return finishedResults;
     }
@@ -106,11 +108,12 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         try {
             R result = future.get(timeoutSeconds, TimeUnit.SECONDS);
             finishedResults.put(node, result);
-            LOGGER.info("Task completed on node {} with result {} for command {}.", destination, result, command);
+//            LOGGER.info("Task completed on node {} with result {} for command {}.", destination, result, command);
         } catch (Exception ex) {
             LOGGER.error("Node {} generated an error executing task {}", node, command, ex);
         }
-        LOGGER.info("All taska completed for command {}.", command);
+        printTaskResults(finishedResults);
+        LOGGER.info("All tasks completed for command {}.", command);
         return finishedResults;
     }
 
@@ -124,7 +127,8 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      */
     @Override
     public Map<Node, R> executeAndWait(C command, Set<Node> destinations) {
-        return this.execute(command, destinations);
+        Map<Node, R> results = this.execute(command, destinations);
+        return results;
     }
 
     /**
@@ -137,7 +141,8 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      */
     @Override
     public Map<Node, R> executeAndWait(C command, Node destination) {
-        return this.execute(command, destination);
+        Map<Node, R> results = this.execute(command, destination);
+        return results;
     }
 
     @Override
@@ -176,6 +181,18 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
             eventSwitch.turnOff();
         }
         return eventSwitch;
+    }
+
+    private void printTaskResults(Map<Node, R> results) {
+        LOGGER.error("Printing results from distributed tasks: " + results);
+        for (Map.Entry<Node, R> response : results.entrySet()) {
+            Node node = response.getKey();
+            R featureEventResult = response.getValue();
+            LOGGER.info("Node, " + node.getName() + " task successful: " + featureEventResult.isSuccessful());
+            if (featureEventResult.getThrowable() != null) {
+                LOGGER.error("Task error details: ", featureEventResult.getThrowable());
+            }
+        }
     }
 
     @Override

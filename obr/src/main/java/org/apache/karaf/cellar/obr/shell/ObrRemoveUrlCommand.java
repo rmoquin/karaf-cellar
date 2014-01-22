@@ -84,7 +84,7 @@ public class ObrRemoveUrlCommand extends CellarCommandSupport {
         // create an event and produce it
         ClusterObrUrlEvent event = new ClusterObrUrlEvent(url, Constants.UrlEventTypes.URL_REMOVE_EVENT_TYPE);
         event.setSourceGroup(group);
-        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+        executionContext.execute(event, group.getNodes());
         return null;
     }
 
