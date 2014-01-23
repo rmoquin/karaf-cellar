@@ -56,7 +56,7 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
             if (handler != null) {
                 return handler.execute(event);
             } else {
-                throw new ServiceException(MessageFormat.format("The required command handler could not be looked up in the command registry for event type {}", event.getClass()));
+                throw new ServiceException(MessageFormat.format("The required command handler could not be looked up in the command registry for event type {}", event));
             }
         } finally {
             ungetServices();

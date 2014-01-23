@@ -44,7 +44,7 @@
         <felix.annotations.version>1.9.6</felix.annotations.version>
         <felix.scr.plugin.version>1.15.0</felix.scr.plugin.version>
         <felix.gogo.version>0.10.0</felix.gogo.version>
-        <hazelcast.version>3.1.4</hazelcast.version>
+        <hazelcast.version>3.1.5</hazelcast.version>
         <jclouds.version>1.4.0</jclouds.version>
         <joda-time.version>2.1</joda-time.version>
         <junit.version>4.10</junit.version>

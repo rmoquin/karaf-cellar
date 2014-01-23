@@ -42,43 +42,38 @@ public class CellarFeaturesTest extends CellarTestSupport {
         assertNotNull(clusterManager);
 
         String eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install
         System.err.println(executeCommand("cluster:feature-install default eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
         //Test feature sync - uninstall
         System.err.println(executeCommand("feature:uninstall eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install - before a node joins
         System.err.println(executeCommand("cluster:feature-install default eventadmin"));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
         //Test feature command - uninstall
         System.err.println(executeCommand("cluster:feature-uninstall default eventadmin"));
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
 
         //Test feature command - install - before a node joins
-        System.err.println(executeCommand("cluster:create-group testgroup"));
+        System.err.println(executeCommand("cluster:group-create testgroup"));
+        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:feature-install testgroup eventadmin"));
         System.err.println(executeCommand("cluster:group-set testgroup " + this.getNodeIdOfChild("child1")));
         Thread.sleep(DELAY_TIMEOUT);
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
-        System.err.println(eventadminFeatureStatus);
         assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
         Node localNode = clusterManager.getMasterCluster().getLocalNode();

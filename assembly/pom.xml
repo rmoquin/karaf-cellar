@@ -38,7 +38,7 @@
             <resource>
                 <directory>src/main/resources/resources</directory>
                 <targetPath>resources</targetPath>
-		<filtering>true</filtering>
+                <filtering>true</filtering>
                 <includes>
                     <include>**/*</include>
                 </includes>

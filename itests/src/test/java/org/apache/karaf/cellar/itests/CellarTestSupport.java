@@ -36,6 +36,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.ConfirmationCallback;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
+import javax.security.auth.callback.TextOutputCallback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 
 import org.apache.felix.service.command.CommandProcessor;
@@ -65,12 +72,8 @@ public class CellarTestSupport {
     public static final Long DELAY_TIMEOUT = 5000L;
     public static final Long COMMAND_TIMEOUT = 10000L;
     public static final Long SERVICE_TIMEOUT = 30000L;
-    public static final String SSH_PORT = "8101";
     static final String KARAF_VERSION = "3.0.0";
     static final String CELLAR_VERSION = "3.0.0-SNAPSHOT";
-    static final String INSTANCE_STARTED = "Started";
-    static final String INSTANCE_STARTING = "Starting";
-    static final String DEBUG_OPTS = " --java-opts \"-Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=%s\"";
     ExecutorService executor = Executors.newCachedThreadPool();
     @Inject
     protected BundleContext bundleContext;
@@ -97,6 +100,9 @@ public class CellarTestSupport {
      */
     protected void installCellar() {
         try {
+            LoginContext loginContext = new LoginContext("karaf", new KarafCallbackHandler());
+            loginContext.login();
+            authSubject = loginContext.getSubject();
             System.out.println("auth " + authSubject.toString());
             featureService.addRepository(new URI(getCellarUri()), false);
             featureService.installFeature("cellar");
@@ -195,11 +201,6 @@ public class CellarTestSupport {
         }
     }
 
-    protected String executeRemoteCommand(String name, String command) {
-        String instanceCmd = "instance:connect -u karaf -p karaf " + name + " ";
-        return executeCommand(instanceCmd + command);
-    }
-
     /**
      * Destroys the child node.
      */
@@ -242,11 +243,10 @@ public class CellarTestSupport {
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
         Option[] options = new Option[]{
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
-            // enable JMX RBAC security, thanks to the KarafMBeanServerBuilder
             configureSecurity().enableKarafMBeanServerBuilder(),
             keepRuntimeFolder(),
             //            editConfigurationFileExtend("etc/system.properties", "cellar.feature.url", getCellarUri()),
-            editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", ""),
+            //            editConfigurationFilePut("etc/org.apache.karaf.shell.cfg", "hostKey", ""),
             replaceConfigurationFile("etc/org.ops4j.pax.logging.cfg", getConfigFile("/etc/org.ops4j.pax.logging.cfg")),
             editConfigurationFilePut("etc/org.apache.karaf.features.cfg", "featuresBoot", "config,standard,region,package,kar,ssh,management")};
         //            editConfigurationFilePut("etc/org.ops4j.pax.web.cfg", "org.osgi.service.http.port", HTTP_PORT),};
@@ -263,9 +263,14 @@ public class CellarTestSupport {
         return maven().groupId("org.apache.karaf.cellar").artifactId("apache-karaf-cellar").version(CELLAR_VERSION).classifier("features").type("xml").getURL();
     }
 
-    public String generateSSH(String instanceName, String command) {
-        return "ssh:ssh -q -P karaf -p " + SSH_PORT + " karaf@localhost " + command;
+    protected String executeRemoteCommand(String instanceName, String command) {
+        String instanceCmd = "instance:connect -u karaf -p karaf " + instanceName + " ";
+        return executeCommand(instanceCmd + command);
     }
+//    public String executeRemoteCommand(String instanceName, String command) {
+//        int port = instanceService.getInstance(instanceName).getSshPort();
+//        return "ssh:ssh -q -l karaf -P karaf -p " + port + " localhost '" + command.replaceAll("'", "\\'") + "'";
+//    }
 
     /**
      * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
@@ -447,6 +452,32 @@ public class CellarTestSupport {
             st.waitForService(timeout);
         } finally {
             st.close();
+        }
+    }
+
+    class KarafCallbackHandler implements CallbackHandler {
+
+        @Override
+        public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
+            for (int i = 0; i < callbacks.length; i++) {
+                if (callbacks[i] instanceof TextOutputCallback) {
+                    TextOutputCallback tc = (TextOutputCallback) callbacks[i];
+
+                    System.out.println("Authentication Message:" + tc.getMessage());
+                } else if (callbacks[i] instanceof NameCallback) {
+                    final NameCallback nc = (NameCallback) callbacks[i];
+                    nc.setName("karaf");
+                } else if (callbacks[i] instanceof PasswordCallback) {
+                    final PasswordCallback pc = (PasswordCallback) callbacks[i];
+                    pc.setPassword("karaf".toCharArray());
+                } else if (callbacks[i] instanceof ConfirmationCallback) {
+                    ConfirmationCallback cc = (ConfirmationCallback) callbacks[i];
+                    System.out.println(cc.toString());
+                } else {
+                    throw new UnsupportedCallbackException(callbacks[i], "Unrecognized Callback");
+                }
+
+            }
         }
     }
 }

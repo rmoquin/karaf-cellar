@@ -66,7 +66,7 @@
     <partition-group enabled="false"/>
     <executor-service name="default">
         <pool-size>16</pool-size>
-        <queue-capacity>100</queue-capacity>
+        <queue-capacity>0</queue-capacity>
     </executor-service>
     <queue name="default">
         <!--
@@ -88,9 +88,8 @@
             Number of async backups. 0 means no backup.
         -->
         <async-backup-count>0</async-backup-count>
+
         <empty-queue-ttl>-1</empty-queue-ttl>
-
-
     </queue>
     <map name="default">
         <!--
