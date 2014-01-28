@@ -47,7 +47,7 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
             clusterEventResult.setSuccessful(false);
-            clusterEventResult.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID)));
+            clusterEventResult.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR EVENT: {0} is OFF, cluster event not handled", SWITCH_ID)));
             return clusterEventResult;
         }
 
@@ -87,7 +87,7 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        boolean status = nodeConfiguration.getEnabledEvents().contains(this.getType().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

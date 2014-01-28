@@ -64,7 +64,7 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
         if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.warn("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID);
             result.setSuccessful(false);
-            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {I0} switch is OFF, cluster event is not handled", SWITCH_ID)));
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {0} switch is OFF, cluster event is not handled", SWITCH_ID)));
             return result;
         }
 
@@ -103,7 +103,7 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        boolean status = nodeConfiguration.getEnabledEvents().contains(this.getType().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

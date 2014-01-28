@@ -72,13 +72,14 @@
         <property name="consumer" value="true"/>
         <property name="enabledEvents">
             <set>
-                <value>org.apache.karaf.cellar.bundle.BundleEventHandler</value>
-                <value>org.apache.karaf.cellar.config.ConfigurationEventHandler</value>
-                <value>org.apache.karaf.cellar.features.FeaturesEventHandler</value>
-                <value>org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler</value>
-                <value>org.apache.karaf.cellar.event.ClusterEventHandler</value>
-                <value>org.apache.karaf.cellar.obr.ObrBundleEventHandler</value>
-                <value>org.apache.karaf.cellar.obr.ObrUrlEventHandler</value>
+                <value>org.apache.karaf.cellar.bundle.ClusterBundleEvent</value>
+                <value>org.apache.karaf.cellar.config.ClusterConfigurationEvent</value>
+                <value>org.apache.karaf.cellar.features.ClusterFeaturesEvent</value>
+                <value>org.apache.karaf.cellar.features.ClusterRepositoryEvent</value>
+                <value>org.apache.karaf.cellar.dosgi.RemoteServiceCall</value>
+                <value>org.apache.karaf.cellar.event.ClusterEvent</value>
+                <value>org.apache.karaf.cellar.obr.ClusterObrBundleEvent</value>
+                <value>org.apache.karaf.cellar.obr.ClusterObrUrlEvent</value>
             </set>
         </property>
     </bean>

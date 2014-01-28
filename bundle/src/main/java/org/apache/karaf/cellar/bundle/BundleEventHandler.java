@@ -56,7 +56,7 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
         BundleEventResponse result = new BundleEventResponse();
         // check if the handler switch is ON
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
-            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR BUNDLE: {} switch is OFF, cluster event is not handled", SWITCH_ID)));
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR BUNDLE: {0} switch is OFF, cluster event is not handled", SWITCH_ID)));
             LOGGER.debug("CELLAR BUNDLE: {} switch is OFF, cluster event is not handled", SWITCH_ID);
             result.setSuccessful(false);
             return result;
@@ -126,7 +126,7 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        boolean status = nodeConfiguration.getEnabledEvents().contains(this.getType().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

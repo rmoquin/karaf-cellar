@@ -115,7 +115,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        boolean status = nodeConfiguration.getEnabledEvents().contains(this.getType().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

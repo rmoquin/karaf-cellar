@@ -33,6 +33,11 @@ public class Result implements DistributedResult {
     }
 
     @Override
+    public String toString() {
+        return "Result{" + "id=" + id + ", successful=" + successful + ", throwable=" + throwable + '}';
+    }
+
+    @Override
     public boolean isSuccessful() {
         return successful;
     }

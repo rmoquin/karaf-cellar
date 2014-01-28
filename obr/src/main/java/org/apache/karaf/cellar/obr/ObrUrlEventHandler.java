@@ -54,7 +54,7 @@ public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, Clust
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR OBR: {} switch is OFF", SWITCH_ID);
             response.setSuccessful(false);
-            response.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID)));
+            response.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {0} switch is OFF, cluster event is not handled", SWITCH_ID)));
             return response;
         }
 
@@ -97,7 +97,7 @@ public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, Clust
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        boolean status = nodeConfiguration.getEnabledEvents().contains(this.getType().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

@@ -33,7 +33,6 @@ import org.apache.karaf.cellar.core.command.Command;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.command.DistributedResult;
 import org.apache.karaf.cellar.core.command.DistributedTask;
-import org.apache.karaf.cellar.core.command.Result;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
@@ -66,15 +65,19 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     }
 
     /**
-     * Executes the distributed task and waits for each Future to return rather than let the caller manually handle it.
+     * Executes the distributed task on the specified nodes and waits for them to finish.
      *
      * @param command the task to execute
-     * @param destinations the destinations to sent to.
+     * @param destinations the destinations to send to.
      * @return
      */
     @Override
     public Map<Node, R> execute(C command, Set<Node> destinations) {
         Map<Node, R> finishedResults = new HashMap<Node, R>();
+        if (destinations == null || destinations.isEmpty()) {
+            LOGGER.warn("No destination nodes were provided to execute command, {}", command);
+            return finishedResults;
+        }
         Set<Member> members = new HashSet<Member>();
         for (Node node : destinations) {
             Member member = cluster.findMemberById(node.getId());
@@ -98,8 +101,18 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         return finishedResults;
     }
 
+    /**
+     * Executes the distributed task on the specified nodes and waits for them to finish.
+     *
+     * @param command the task to execute
+     * @param destination the destinations to sent to.
+     * @return
+     */
     @Override
     public Map<Node, R> execute(C command, Node destination) {
+        if (destination == null) {
+            throw new IllegalArgumentException("Destination node cannot be null, cannot execute command, " + command);
+        }
         Member member = cluster.findMemberById(destination.getId());
         DistributedTask task = new DistributedTask(command);
         Future<R> future = this.executorService.submitToMember(task, member);
@@ -118,8 +131,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     }
 
     /**
-     * Executes the distributed task synchronously and returns a <code>Map<Node, Result></code> containing the results
-     * of the tasks for each node.
+     * Executes the distributed task on the specified nodes and waits for them to finish.
      *
      * @param command the task to execute
      * @param destinations the destinations to sent to.
@@ -132,12 +144,11 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     }
 
     /**
-     * Executes the distributed task synchronously and returns a <code>Map<Node, Result></code> containing the result of
-     * the task for the destination node.
+     * Executes the distributed task on the specified node and waits for it to finish.
      *
      * @param command the task to execute
      * @param destination the destination to sent to.
-     * @return
+     * @return a map containing the results from each node.
      */
     @Override
     public Map<Node, R> executeAndWait(C command, Node destination) {
@@ -145,19 +156,34 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         return results;
     }
 
+    /**
+     * Executes the distributed task on the specified node asynchonously with the specified callback handling each
+     * results.
+     *
+     * @param command the task to execute
+     * @param destination the destin
+     * @param callbackation to send to.
+     */
     @Override
-    public void executeAsync(C command, Node node, DistributedCallback<R> callback) {
+    public void executeAsync(C command, Node destination, DistributedCallback<R> callback) {
+        if (destination == null) {
+            throw new IllegalArgumentException("Destination node cannot be null, cannot execute command, " + command);
+        }
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null.");
         }
         ExecutionCallback<R> distributedCallback = new DistributedCallbackImpl<R>(callback);
-        Member member = cluster.findMemberById(node.getId());
+        Member member = cluster.findMemberById(destination.getId());
         DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMember(task, member, distributedCallback);
     }
 
     @Override
     public void executeAsync(C command, Set<Node> destinations, DistributedMultiCallback callback) {
+        if (destinations == null || destinations.isEmpty()) {
+            LOGGER.warn("No destination nodes were provided to execute command, {}", command);
+            return;
+        }
         if (callback == null) {
             throw new IllegalArgumentException("Callback cannot be null.");
         }

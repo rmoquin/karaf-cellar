@@ -13,7 +13,6 @@
  */
 package org.apache.karaf.cellar.dosgi;
 
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -78,7 +77,7 @@ public class RemoteServiceCallHandler extends CommandHandler<RemoteServiceCall, 
 
             if (targetService == null) {
                 result.setSuccessful(false);
-                result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR DOSGI: Couldn't find a service for class {}", event.getServiceClass())));
+                result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR DOSGI: Couldn't find a service for class {0}", event.getServiceClass())));
                 return result;
             }
             Class[] classes = new Class[0];
@@ -134,7 +133,7 @@ public class RemoteServiceCallHandler extends CommandHandler<RemoteServiceCall, 
     @Override
     public Switch getSwitch() {
         // load the switch status from the config
-        boolean status = nodeConfiguration.getEnabledEvents().contains(Configurations.HANDLER + "." + this.getType().getName());
+        boolean status = nodeConfiguration.getEnabledEvents().contains(this.getType().getName());
         if (status) {
             eventSwitch.turnOn();
         } else {

@@ -36,10 +36,6 @@ public class ClusterBundleEvent extends Command<BundleEventResponse> {
         this.type = type;
     }
 
-    public String getId() {
-        return this.id;
-    }
-
     public String getSymbolicName() {
         return symbolicName;
     }

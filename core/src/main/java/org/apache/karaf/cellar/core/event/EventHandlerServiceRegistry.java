@@ -16,13 +16,16 @@ package org.apache.karaf.cellar.core.event;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.command.DistributedResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Event handler service registry.
  */
 public class EventHandlerServiceRegistry<E extends Event, R extends DistributedResult> implements EventHandlerRegistry<E, R> {
 
-    private final Map<Class, EventHandler> eventHandlerMap = new ConcurrentHashMap<Class, EventHandler>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventHandlerServiceRegistry.class);
+    private final Map<String, EventHandler> eventHandlerMap = new ConcurrentHashMap<String, EventHandler>();
 
     /**
      * Return the appropriate cluster {@code EventHandler} found inside the cluster {@code HandlerRegistry}.
@@ -34,20 +37,25 @@ public class EventHandlerServiceRegistry<E extends Event, R extends DistributedR
     public EventHandler<E, R> getHandler(E event) {
         if (event != null) {
             Class clazz = event.getClass();
-            return eventHandlerMap.get(clazz);
+            if (eventHandlerMap.get(clazz.getCanonicalName()) == null) {
+                LOGGER.warn("Couldn't find handler for event class {} in {}", clazz.getCanonicalName(), eventHandlerMap);
+            }
+            return eventHandlerMap.get(clazz.getCanonicalName());
         }
         return null;
     }
 
     public void bind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            eventHandlerMap.put(handler.getType(), handler);
+            LOGGER.error("BINDING EVENT HANDLER EVENT: {}", handler.getType().getCanonicalName());
+            eventHandlerMap.put(handler.getType().getName(), handler);
         }
     }
 
     public void unbind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            eventHandlerMap.remove(handler.getType());
+            LOGGER.error("UNBINDING EVENT HANDLER EVENT: {}", handler.getType().getCanonicalName());
+            eventHandlerMap.remove(handler.getType().getCanonicalName());
         }
     }
 

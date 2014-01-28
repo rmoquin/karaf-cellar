@@ -113,7 +113,7 @@ public class CellarTestSupport {
 
     protected void unInstallCellar() {
         try {
-            featureService.uninstallFeature("cellar");
+            System.err.println(executeCommand("feature:uninstall cellar"));
         } catch (Exception ex) {
             throw new RuntimeException("Error uninstalling cellar feature", ex);
         }
@@ -223,7 +223,7 @@ public class CellarTestSupport {
      * @param name
      * @return
      */
-    protected String getNodeIdOfChild(String name) {
+    protected String getNodeIdOfChild(String name) throws Exception {
         String nodesList = executeRemoteCommand(name, "cluster:node-list | grep \\\\*");
         int stop = nodesList.indexOf(']');
         if (stop > -1) {
@@ -240,6 +240,10 @@ public class CellarTestSupport {
 
     @Configuration
     public Option[] config() {
+        String userHome = System.getProperty("user.home");
+        File file = new File(userHome + "/.sshkaraf/known_hosts");
+        System.out.println(file);
+        file.delete();
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
         Option[] options = new Option[]{
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
@@ -267,7 +271,7 @@ public class CellarTestSupport {
         String instanceCmd = "instance:connect -u karaf -p karaf " + instanceName + " ";
         return executeCommand(instanceCmd + command);
     }
-//    public String executeRemoteCommand(String instanceName, String command) {
+//    public String executeRemoteCommand(String instanceName, String command) throws IOException, Exception {
 //        int port = instanceService.getInstance(instanceName).getSshPort();
 //        return "ssh:ssh -q -l karaf -P karaf -p " + port + " localhost '" + command.replaceAll("'", "\\'") + "'";
 //    }

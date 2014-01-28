@@ -23,8 +23,6 @@ import java.util.concurrent.Callable;
 import org.apache.karaf.cellar.core.event.Event;
 import org.apache.karaf.cellar.core.event.EventHandler;
 import org.apache.karaf.cellar.core.event.EventHandlerRegistry;
-import org.apache.karaf.shell.console.BundleContextAware;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceException;
@@ -37,7 +35,7 @@ import org.osgi.framework.ServiceReference;
 public class DistributedTask<T extends DistributedResult> implements Callable<T>, Serializable {
 
     protected transient BundleContext bundleContext;
-    protected List<ServiceReference<?>> usedReferences;
+    protected transient List<ServiceReference<?>> usedReferences;
     private Event event;
 
     public DistributedTask() {
@@ -56,7 +54,7 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
             if (handler != null) {
                 return handler.execute(event);
             } else {
-                throw new ServiceException(MessageFormat.format("The required command handler could not be looked up in the command registry for event type {}", event));
+                throw new ServiceException(MessageFormat.format("The required command handler could not be looked up in the command registry for event type {0}", event));
             }
         } finally {
             ungetServices();

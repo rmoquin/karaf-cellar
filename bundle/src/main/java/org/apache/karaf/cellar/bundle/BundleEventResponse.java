@@ -15,40 +15,18 @@
  */
 package org.apache.karaf.cellar.bundle;
 
-import org.apache.karaf.cellar.core.command.DistributedResult;
+import org.apache.karaf.cellar.core.command.Result;
 
 /**
  *
  * @author rmoquin
  */
-public class BundleEventResponse implements DistributedResult {
-    private boolean successful = true;
-    private Throwable throwable;
+public class BundleEventResponse extends Result {
 
     public BundleEventResponse() {
     }
 
-    @Override
-    public boolean isSuccessful() {
-        return successful;
-    }
-
-    @Override
-    public Throwable getThrowable() {
-        return throwable;
-    }
-
-    /**
-     * @param throwable the throwable to set
-     */
-    public void setThrowable(Throwable throwable) {
-        this.throwable = throwable;
-    }
-
-    /**
-     * @param successful the successful to set
-     */
-    public void setSuccessful(boolean successful) {
-        this.successful = successful;
+    public BundleEventResponse(String id) {
+        super(id);
     }
 }

@@ -79,6 +79,7 @@ public class Group implements MultiNode {
     @Override
     public Set<Node> getNodesExcluding(Node node) {
         Set<Node> nodesCopy = new HashSet<Node>();
+        nodesCopy.addAll(this.nodes);
         nodesCopy.remove(node);
         return nodesCopy;
     }

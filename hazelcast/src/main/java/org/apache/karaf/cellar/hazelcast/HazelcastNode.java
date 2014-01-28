@@ -67,30 +67,30 @@ public class HazelcastNode implements Node {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
         }
-
-        HazelcastNode that = (HazelcastNode) o;
-        if (this.getId() != null ? !this.getId().equals(that.getId()) : that.getId() != null) {
+        if (getClass() != obj.getClass()) {
             return false;
         }
-
+        final HazelcastNode other = (HazelcastNode) obj;
+        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+            return false;
+        }
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        return this.getId() != null ? this.getId().hashCode() : 0;
     }
 
     @Override
     public String toString() {
         return "HazelcastNode{" + "id=" + id + ", name=" + name + ", host=" + host + ", port=" + port + '}';
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 97 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
     }
 
     /**
@@ -106,5 +106,12 @@ public class HazelcastNode implements Node {
     @Override
     public String getName() {
         return name;
+    }
+
+    /**
+     * @param hzMember the hzMember to set
+     */
+    public void setHzMember(Member hzMember) {
+        this.init(hzMember);
     }
 }
