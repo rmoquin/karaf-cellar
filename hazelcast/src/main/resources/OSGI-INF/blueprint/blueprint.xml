@@ -166,14 +166,14 @@
                 <set>
                     <value>org.ops4j.*</value>
                     <value>org.hamcrest*</value>
-                    <value>PAXEXAM-PROBE*</value>
+                    <value>PAXEXAM*</value>
                 </set>
             </property>
             <property name="outboundBundleBlacklist">
                 <set>
                     <value>org.ops4j.*</value>
                     <value>org.hamcrest*</value>
-                    <value>PAXEXAM-PROBE*</value>
+                    <value>PAXEXAM*</value>
                 </set>
             </property>
             <property name="syncOBRUrls" value="true"/>

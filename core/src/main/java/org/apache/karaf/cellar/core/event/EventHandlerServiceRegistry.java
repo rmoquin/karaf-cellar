@@ -37,9 +37,6 @@ public class EventHandlerServiceRegistry<E extends Event, R extends DistributedR
     public EventHandler<E, R> getHandler(E event) {
         if (event != null) {
             Class clazz = event.getClass();
-            if (eventHandlerMap.get(clazz.getCanonicalName()) == null) {
-                LOGGER.warn("Couldn't find handler for event class {} in {}", clazz.getCanonicalName(), eventHandlerMap);
-            }
             return eventHandlerMap.get(clazz.getCanonicalName());
         }
         return null;
@@ -47,14 +44,12 @@ public class EventHandlerServiceRegistry<E extends Event, R extends DistributedR
 
     public void bind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            LOGGER.error("BINDING EVENT HANDLER EVENT: {}", handler.getType().getCanonicalName());
-            eventHandlerMap.put(handler.getType().getName(), handler);
+            eventHandlerMap.put(handler.getType().getCanonicalName(), handler);
         }
     }
 
     public void unbind(EventHandler handler) {
         if (handler != null && handler.getType() != null) {
-            LOGGER.error("UNBINDING EVENT HANDLER EVENT: {}", handler.getType().getCanonicalName());
             eventHandlerMap.remove(handler.getType().getCanonicalName());
         }
     }

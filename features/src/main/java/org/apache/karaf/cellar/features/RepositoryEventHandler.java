@@ -59,7 +59,7 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
     @Override
     public RespositoryEventResponse execute(ClusterRepositoryEvent event) {
 
-        RespositoryEventResponse result = new RespositoryEventResponse();
+        RespositoryEventResponse result = new RespositoryEventResponse(event.getId());
         // check if the handler is ON
         if (eventSwitch.getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.warn("CELLAR FEATURES: {} switch is OFF, cluster event is not handled", SWITCH_ID);

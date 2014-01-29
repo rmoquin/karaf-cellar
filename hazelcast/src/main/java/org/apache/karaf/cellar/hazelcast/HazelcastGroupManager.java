@@ -122,6 +122,7 @@ public class HazelcastGroupManager implements GroupManager {
     public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) throws IOException, ConfigurationException {
         LOGGER.warn("Group service was removed: " + properties);
         this.deregisterGroup(group, properties);
+        this.groupMemberships.remove(group.getName());
     }
 
     @Override
@@ -192,8 +193,7 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     /**
-     * Removes all the groups from the this nodes configuration which triggers the appropriate de-registration actions
-     * to be done.
+     * Removes the specified node as a member of the specified group.
      *
      * @param groupName
      * @throws java.io.IOException
@@ -319,7 +319,16 @@ public class HazelcastGroupManager implements GroupManager {
 
     @Override
     public Set<String> listGroupNames(Node node) {
-        return nodeConfiguration.getGroups();
+        Set<String> result = new HashSet<String>();
+
+        IMap<String, Group> map = getGroupMapStore();
+        for (Iterator<Group> it = map.values().iterator(); it.hasNext();) {
+            Group group = it.next();
+            if (group.containsNode(node)) {
+                result.add(group.getName());
+            }
+        }
+        return result;
     }
 
     private IMap<String, Group> getGroupMapStore() {
