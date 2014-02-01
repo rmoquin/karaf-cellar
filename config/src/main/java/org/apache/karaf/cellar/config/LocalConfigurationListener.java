@@ -54,7 +54,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         }
         String pid = event.getPid();
 
-        Set<Group> groups = groupManager.listLocalGroups();
+        Set<Group> groups = groupManager.listAllGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
                 GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());

@@ -73,7 +73,7 @@ public class CellarGroupsTest extends CellarTestSupport {
         Set<Group> groups = groupManager.listAllGroups();
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 
-        System.err.println(executeRemoteCommand("child1", "cluster:group-delete testgroup"));
+        System.err.println(executeCommand("cluster:group-delete testgroup"));
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
         groups = groupManager.listAllGroups();
