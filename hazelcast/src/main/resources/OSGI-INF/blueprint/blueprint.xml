@@ -214,6 +214,7 @@
     <!-- Cluster Manager -->
     <bean id="clusterManager" class="org.apache.karaf.cellar.hazelcast.HazelcastClusterManager" init-method="init" destroy-method="destroy">
         <property name="masterCluster" ref="masterCluster"/>
+        <property name="executionContext" ref="executionContext/>
     </bean>
 
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>

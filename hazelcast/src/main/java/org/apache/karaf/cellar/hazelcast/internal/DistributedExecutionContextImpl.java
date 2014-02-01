@@ -75,7 +75,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     public Map<Node, R> execute(C command, Set<Node> destinations) {
         Map<Node, R> finishedResults = new HashMap<Node, R>();
         if (destinations == null || destinations.isEmpty()) {
-            LOGGER.warn("No destination nodes were provided to execute command, {}", command);
+            LOGGER.debug("No destination nodes were provided to execute command, {}", command);
             return finishedResults;
         }
         Set<Member> members = new HashSet<Member>();
@@ -181,7 +181,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     @Override
     public void executeAsync(C command, Set<Node> destinations, DistributedMultiCallback callback) {
         if (destinations == null || destinations.isEmpty()) {
-            LOGGER.warn("No destination nodes were provided to execute command, {}", command);
+            LOGGER.debug("No destination nodes were provided to execute command, {}", command);
             return;
         }
         if (callback == null) {
@@ -210,7 +210,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     }
 
     private void printTaskResults(Map<Node, R> results) {
-        LOGGER.error("Printing results from distributed tasks: " + results);
+        LOGGER.info("Printing results from distributed tasks: " + results);
         for (Map.Entry<Node, R> response : results.entrySet()) {
             Node node = response.getKey();
             R featureEventResult = response.getValue();

@@ -75,7 +75,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         }
     }
 
-    @Override
     public void shutdown() {
         instance.getCluster().removeMembershipListener(memberListenerId);
         this.memberNodesByName.clear();

@@ -119,8 +119,8 @@ public class HazelcastGroupManager implements GroupManager {
     public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) throws IOException, ConfigurationException {
         if (group != null) {
             LOGGER.warn("Group service was removed: " + properties);
-            this.deregisterGroup(group, properties);
             this.groupMemberships.remove(group.getName());
+            this.deregisterGroup(group, properties);
         }
     }
 
@@ -300,8 +300,9 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     protected void deleteGroupConfiguration(String groupName) throws IOException, InvalidSyntaxException {
-        String pid = pidGroupNameMap.get(groupName);
+        String pid = pidGroupNameMap.remove(groupName);
         LOGGER.info("Attempting to delete group configuration {} with pid {}.", groupName, pid);
+//                Configuration[] configurations = configAdmin.listConfigurations("(&(" + GroupConfigurationImpl.GROUP_NAME_PROPERTY + "=" + groupName + "))");
         Configuration configuration = configAdmin.getConfiguration(pid);
         configuration.delete();
     }

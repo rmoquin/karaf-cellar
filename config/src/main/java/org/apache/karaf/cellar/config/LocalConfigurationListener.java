@@ -52,6 +52,11 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
             LOGGER.debug("CELLAR CONFIG: cluster event producer is OFF");
             return;
         }
+        if (GroupConfiguration.class.toString().equals(event.getFactoryPid())) {
+            LOGGER.info("Config listener received notification of a new group config change, config listener can be skipped. " + clusterManager.getMasterCluster().getLocalNode().getName());
+            return;
+        }
+
         String pid = event.getPid();
 
         Set<Group> groups = groupManager.listAllGroups();

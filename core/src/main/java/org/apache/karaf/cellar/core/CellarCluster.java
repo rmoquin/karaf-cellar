@@ -115,6 +115,4 @@ public interface CellarCluster {
      * @return the cluster Name
      */
     public String getName();
-
-    void shutdown();
 }

@@ -14,7 +14,6 @@
 package org.apache.karaf.cellar.features;
 
 import java.text.MessageFormat;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;

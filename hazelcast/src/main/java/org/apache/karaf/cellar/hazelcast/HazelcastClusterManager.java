@@ -25,20 +25,25 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.slf4j.Logger;
 
 /**
  * Cluster manager implementation powered by Hazelcast.
  */
 public class HazelcastClusterManager implements ClusterManager {
 
+    private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastClusterManager.class);
     private CellarCluster masterCluster;
     private final Map<String, CellarCluster> clusterMap = new ConcurrentHashMap<String, CellarCluster>();
+    private DistributedExecutionContext executionContext;
 
     public void init() {
         this.clusterMap.put(masterCluster.getName(), masterCluster);
     }
 
     public void destroy() {
+        executionContext.getSwitch().turnOff();
         this.clusterMap.clear();
         this.masterCluster = null;
     }
@@ -83,7 +88,7 @@ public class HazelcastClusterManager implements ClusterManager {
      * @return the Topic with the specifed name.
      */
     public ITopic getTopic(String topicName) {
-        return ((HazelcastClusterManager) this.masterCluster).getTopic(topicName);
+        return ((HazelcastCluster) this.masterCluster).getTopic(topicName);
     }
 
     /**
@@ -93,7 +98,7 @@ public class HazelcastClusterManager implements ClusterManager {
      * @return the Queue with the specifed name.
      */
     public IQueue getQueue(String queueName) {
-        return ((HazelcastClusterManager) this.masterCluster).getQueue(queueName);
+        return ((HazelcastCluster) this.masterCluster).getQueue(queueName);
     }
 
     /**
@@ -205,5 +210,19 @@ public class HazelcastClusterManager implements ClusterManager {
      */
     public void setMasterCluster(CellarCluster masterCluster) {
         this.masterCluster = masterCluster;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }
