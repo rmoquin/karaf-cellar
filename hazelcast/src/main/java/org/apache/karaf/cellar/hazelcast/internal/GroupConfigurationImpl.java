@@ -22,13 +22,9 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.PropertyUnbounded;
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
-import org.apache.karaf.cellar.core.Synchronizer;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,25 +106,6 @@ public class GroupConfigurationImpl implements GroupConfiguration {
     public Group register() {
         String groupName = this.getName();
         return new Group(groupName);
-    }
-
-    public void synchronizeNodes() {
-        Group group = (Group) masterCluster.getMap(Configurations.GROUP_MEMBERSHIP_LIST_DO_STORE).get(this.getName());
-        try {
-            ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences(Synchronizer.class.getCanonicalName(), null);
-            if (serviceReferences != null && serviceReferences.length > 0) {
-                for (ServiceReference ref : serviceReferences) {
-                    Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
-                    if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
-                        synchronizer.pull(group);
-                        synchronizer.push(group);
-                    }
-                    bundleContext.ungetService(ref);
-                }
-            }
-        } catch (InvalidSyntaxException e) {
-            LOGGER.error("CELLAR HAZELCAST: failed to lookup available synchronizers", e);
-        }
     }
 
     /**

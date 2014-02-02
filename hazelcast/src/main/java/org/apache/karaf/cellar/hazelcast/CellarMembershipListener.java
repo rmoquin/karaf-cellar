@@ -16,7 +16,6 @@ package org.apache.karaf.cellar.hazelcast;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupManager;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.slf4j.Logger;
@@ -24,19 +23,22 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
 
 /**
  * Cellar membership listener.
  */
 public class CellarMembershipListener implements MembershipListener {
+
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarMembershipListener.class);
     private HazelcastCluster masterCluster;
     private GroupManager groupManager;
     private List<? extends Synchronizer> synchronizers;
 
     public void init() {
-        this.masterCluster.addMembershipListener(this);
+        //If a member was just added to the cluster, I don't think it shouldn't be bombarded by every node in each group with synchronizations.
+//        this.masterCluster.addMembershipListener(this);
     }
 
     @Override

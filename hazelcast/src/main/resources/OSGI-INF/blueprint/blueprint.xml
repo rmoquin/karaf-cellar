@@ -43,6 +43,7 @@
         <property name="name" value="default"/>
         <property name="nodeName" value="${karaf.name}"/>
         <property name="configManager" ref="configManager"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
     <service ref="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster">
@@ -214,7 +215,7 @@
     <!-- Cluster Manager -->
     <bean id="clusterManager" class="org.apache.karaf.cellar.hazelcast.HazelcastClusterManager" init-method="init" destroy-method="destroy">
         <property name="masterCluster" ref="masterCluster"/>
-        <property name="executionContext" ref="executionContext/>
+        <property name="executionContext" ref="executionContext"/>
     </bean>
 
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>

@@ -40,8 +40,13 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
+import org.apache.karaf.cellar.core.Synchronizer;
 import org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +58,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HazelcastCluster.class);
     private static final String GENERATOR_ID = "org.apache.karaf.cellar.idgen";
+    private BundleContext bundleContext;
     private IdGenerator idgenerator;
     private HazelcastInstance instance;
     private HazelcastConfigurationManager configManager;
@@ -84,6 +90,27 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         this.localNode = null;
         instance.shutdown();
         instance = null;
+    }
+
+    public void synchronizeNodes(Group group) {
+        try {
+            ServiceReference[] serviceReferences = bundleContext.getAllServiceReferences(Synchronizer.class.getCanonicalName(), null);
+            if (serviceReferences != null && serviceReferences.length > 0) {
+                for (ServiceReference ref : serviceReferences) {
+                    try {
+                        Synchronizer synchronizer = (Synchronizer) bundleContext.getService(ref);
+                        if (synchronizer != null && synchronizer.isSyncEnabled(group)) {
+                            synchronizer.pull(group);
+                            synchronizer.push(group);
+                        }
+                    } finally {
+                        bundleContext.ungetService(ref);
+                    }
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            LOGGER.error("CELLAR HAZELCAST: failed to lookup available synchronizers", e);
+        }
     }
 
     public String addMembershipListener(MembershipListener listener) {
@@ -405,5 +432,19 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
         HazelcastNode newNode = new HazelcastNode(member);
         this.memberNodesByName.put(newNode.getName(), newNode);
         this.memberNodesById.put(newNode.getId(), newNode);
+    }
+
+    /**
+     * @return the bundleContext
+     */
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    /**
+     * @param bundleContext the bundleContext to set
+     */
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 }

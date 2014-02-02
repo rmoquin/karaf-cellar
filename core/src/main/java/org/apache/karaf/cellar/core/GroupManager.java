@@ -108,15 +108,6 @@ public interface GroupManager {
      */
     public Set<String> listGroupNames(Node node);
 
-    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws IOException, ConfigurationException;
-
-    /**
-     * Register the local node in a given cluster group.
-     *
-     * @param group the cluster group to join.
-     */
-    public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException;
-
     /**
      * Removes the specified cellar group from the local nodes configuration which triggers the appropriate
      * deregistration actions to be done.

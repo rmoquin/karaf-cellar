@@ -15,8 +15,6 @@
  */
 package org.apache.karaf.cellar.core.control;
 
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.Command;
 
 /**
@@ -39,26 +37,6 @@ public class NodeConfigurationCommand extends Command<NodeConfigurationResult> {
         super(id);
         this.status = status;
         this.type = type;
-    }
-
-    @Override
-    public Node getSourceNode() {
-        return getSourceNode();
-    }
-
-    @Override
-    public void setSourceNode(Node sourceNode) {
-        this.setSourceNode(sourceNode);
-    }
-
-    @Override
-    public Group getSourceGroup() {
-        return getSourceGroup();
-    }
-
-    @Override
-    public void setSourceGroup(Group sourceGroup) {
-        this.setSourceGroup(sourceGroup);
     }
 
     /**

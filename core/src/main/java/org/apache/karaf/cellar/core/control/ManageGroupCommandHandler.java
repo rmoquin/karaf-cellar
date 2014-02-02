@@ -42,8 +42,6 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
             } else if (ManageGroupAction.PURGE.equals(action)) {
                 groupManager.deregisterNodeFromAllGroups();
             } else if (ManageGroupAction.SET.equals(action)) {
-                Group localGroup = groupManager.listLocalGroups().iterator().next();
-                groupManager.deregisterNodeFromGroup(localGroup.getName());
                 groupManager.joinGroup(destinationGroup);
             }
             Set<Group> groups = groupManager.listAllGroups();

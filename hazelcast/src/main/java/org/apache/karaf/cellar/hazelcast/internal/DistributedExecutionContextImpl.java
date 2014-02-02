@@ -61,7 +61,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     }
 
     public void destroy() {
-        //I think the executor service shuts itself down automatically.
+        executorService.shutdown();
     }
 
     /**

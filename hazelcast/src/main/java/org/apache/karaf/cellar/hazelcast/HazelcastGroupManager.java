@@ -28,7 +28,6 @@ import org.apache.karaf.cellar.hazelcast.internal.GroupConfigurationImpl;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationException;
 import org.slf4j.Logger;
 
 /**
@@ -40,7 +39,6 @@ public class HazelcastGroupManager implements GroupManager {
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastGroupManager.class);
     private NodeConfiguration nodeConfiguration;
     private final Map<String, GroupConfiguration> groupMemberships = new ConcurrentHashMap<String, GroupConfiguration>();
-    private final Map<String, String> pidGroupNameMap = new HashMap<String, String>();
     private HazelcastCluster masterCluster;
     private ConfigurationAdmin configAdmin;
 
@@ -54,21 +52,19 @@ public class HazelcastGroupManager implements GroupManager {
      * Listens for node configurations to be bound.
      *
      * @param node the node configuration.
-     * @throws org.osgi.service.cm.ConfigurationException
+     * @throws java.io.IOException
      */
-    public void nodeMembershipsReceived(NodeConfiguration node) throws ConfigurationException {
+    public void nodeMembershipsReceived(NodeConfiguration node) throws IOException {
+        LOGGER.info("Local Node was configured {}.", getNode().getName());
         this.nodeConfiguration = node;
-        try {
-            Set<String> groupList = this.nodeConfiguration.getGroups();
-            for (String groupName : groupList) {
-                if (this.pidGroupNameMap.containsKey(groupName)) {
-                    addNodeToGroupStore(groupName);
-                } else {
-                    LOGGER.warn("No configuration exists yet for group {}, node will be added when it does.", groupName);
-                }
+        Set<String> groupList = this.nodeConfiguration.getGroups();
+        for (String groupName : groupList) {
+            if (this.groupMemberships.containsKey(groupName)) {
+                LOGGER.info("Registering node {} to group {}.", getNode().getName(), groupName);
+                addNodeToGroupStore(groupName);
+            } else {
+                LOGGER.warn("No configuration exists yet for group {}, node will be added when it does.", groupName);
             }
-        } catch (Exception ex) {
-            throw new ConfigurationException(null, "Error handling configuration node update", ex);
         }
     }
 
@@ -76,17 +72,16 @@ public class HazelcastGroupManager implements GroupManager {
      * Listens for node configurations to be unbound.
      *
      * @param nodeConfiguration the node configuration.
-     * @throws org.osgi.service.cm.ConfigurationException
+     * @throws java.io.IOException
      */
-    public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) throws ConfigurationException {
+    public void nodeMembershipsRemoved(NodeConfiguration nodeConfiguration) throws IOException {
         LOGGER.warn("Node membership was removed for node configuration: {}.", nodeConfiguration);
         if (this.nodeConfiguration != null) {
             try {
                 removeNodeFromAllGroups(false);
-            } catch (IOException ex) {
-                throw new ConfigurationException(null, "Error when attempting to deregister node from all groups.", ex);
+            } finally {
+                this.nodeConfiguration = null;
             }
-            this.nodeConfiguration = null;
         } else {
             LOGGER.warn("No node was configured to remove, skipping.");
         }
@@ -97,15 +92,20 @@ public class HazelcastGroupManager implements GroupManager {
      *
      * @param groupConfig the group configuration.
      * @param properties the group service properties.
-     * @throws org.osgi.service.cm.ConfigurationException
+     * @throws java.io.IOException
      */
-    public void groupConfigured(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException, IOException {
-        LOGGER.warn("Group service was created: " + properties);
-        this.groupMemberships.put(groupConfig.getName(), groupConfig);
-        this.registerGroup(groupConfig, properties);
+    public void groupConfigured(GroupConfiguration groupConfig, Map<String, Object> properties) throws IOException {
+        LOGGER.warn("Group service was created and being registered: " + properties);
+        String groupName = groupConfig.getName();
+        this.groupMemberships.put(groupName, groupConfig);
+
+        Group group = groupConfig.register();
+        this.addGrouptoStore(group);
+        LOGGER.warn("A new group is being registered: {}", groupName);
         if (nodeConfiguration != null) {
-            if (nodeConfiguration.getGroups().contains(groupConfig.getName())) {
-                this.addNodeToGroupStore(groupConfig.getName());
+            LOGGER.info("Node is configured {}, checking if it's been registered to each group", getNode().getName());
+            if (nodeConfiguration.getGroups().contains(groupName)) {
+                this.addNodeToGroupStore(groupName);
             }
         }
     }
@@ -116,59 +116,31 @@ public class HazelcastGroupManager implements GroupManager {
      * @param group the group configuration.
      * @param properties the group service properties.
      */
-    public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) throws IOException, ConfigurationException {
+    public void groupRemoved(GroupConfiguration group, Map<String, Object> properties) {
         if (group != null) {
-            LOGGER.warn("Group service was removed: " + properties);
-            this.groupMemberships.remove(group.getName());
-            this.deregisterGroup(group, properties);
-        }
-    }
-
-    @Override
-    public void registerGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws ConfigurationException {
-        Group group = groupConfig.register();
-        this.addGrouptoStore(group);
-        String servicePid = (String) properties.get(org.osgi.framework.Constants.SERVICE_PID);
-        String groupName = groupConfig.getName();
-        pidGroupNameMap.put(groupName, servicePid);
-        LOGGER.warn("A new group is being registered: {}", groupName);
-        if (nodeConfiguration != null) {
-            if (!nodeConfiguration.getGroups().contains(groupName)) {
-                try {
-                    this.addNodeToGroupStore(groupName);
-                } catch (Exception ex) {
-                    throw new ConfigurationException(null, "Error when attempting to register the node to group " + groupName, ex);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void deregisterGroup(GroupConfiguration groupConfig, Map<String, Object> properties) throws IOException, ConfigurationException {
-        LOGGER.warn("A group configuration is removed {}", properties);
-        if (groupConfig != null) {
-            pidGroupNameMap.remove(groupConfig.getName());
-            if (nodeConfiguration != null) {
-                removeNodeFromGroupStore(groupConfig.getName());
-            } else {
-                LOGGER.info("Node configuration is null, group configuration would have been already removed from it, skipping.");
-            }
+            String groupName = group.getName();
+            LOGGER.warn("Group service was removed: {}", groupName);
         } else {
             LOGGER.info("Group to remove was null so it was already de-registered, skipping.");
         }
     }
 
     @Override
-    public void createGroup(String groupName) throws IOException, ConfigurationException {
-        if (pidGroupNameMap.containsKey(groupName)) {
+    public void createGroup(String groupName) throws IOException {
+        if (groupMemberships.containsKey(groupName)) {
             LOGGER.warn("Group can't be created because it already exists: + " + groupName);
-            throw new ConfigurationException(GroupConfigurationImpl.GROUP_NAME_PROPERTY, "The group cannot be created because one already exists with name: " + groupName);
+            throw new IllegalArgumentException("The group cannot be created because one already exists with name: " + groupName);
         }
         this.createNewGroupConfiguration(groupName);
     }
 
     @Override
     public void deleteGroup(String groupName) throws IOException, InvalidSyntaxException {
+        if (this.isDefaultGroup(groupName)) {
+            throw new IllegalArgumentException("Can't delete the default group.");
+        }
+        this.groupMemberships.remove(groupName);
+        removeGroupFromStore(groupName);
         this.deleteGroupConfiguration(groupName);
     }
 
@@ -194,6 +166,9 @@ public class HazelcastGroupManager implements GroupManager {
      */
     @Override
     public void deregisterNodeFromGroup(String groupName) throws IOException {
+        if (this.isDefaultGroup(groupName)) {
+            throw new IllegalArgumentException("Can't remove a node from the default group.");
+        }
         this.removeNodeFromGroupStore(groupName);
     }
 
@@ -220,31 +195,41 @@ public class HazelcastGroupManager implements GroupManager {
 
     private Group addGrouptoStore(Group group) {
         IMap<String, Group> map = getGroupMapStore();
-        return map.put(group.getName(), group);
+        return map.putIfAbsent(group.getName(), group);
+    }
+
+    private void removeGroupFromStore(String groupName) {
+        IMap<String, Group> map = getGroupMapStore();
+        map.remove(groupName);
     }
 
     private void addNodeToGroupStore(String groupName) throws IOException {
+        boolean nodeAdded = false;
         IMap<String, Group> map = getGroupMapStore();
         map.lock(groupName);
         Group group = map.get(groupName);
-        group.addNode(getNode());
-        map.put(groupName, group);
+        if (!group.containsNode(getNode())) {
+            group.addNode(getNode());
+            map.put(groupName, group);
+            nodeAdded = true;
+        }
         map.unlock(groupName);
         if (nodeConfiguration.getGroups().add(groupName)) {
             this.saveNodeConfiguration();
         }
+        if (nodeAdded) {
+            //TODO fix this this.masterCluster.synchronizeNodes(group);
+        }
     }
 
     protected void removeNodeFromGroupStore(String groupName) throws IOException {
-        if (this.isDefaultGroup(groupName)) {
-            LOGGER.warn("Can't remove a node from the default group.");
-            return;
-        }
         IMap<String, Group> map = getGroupMapStore();
         map.lock(groupName);
         Group group = map.get(groupName);
-        group.removeNode(getNode());
-        map.put(groupName, group);
+        if (group.containsNode(getNode())) {
+            group.removeNode(getNode());
+            map.put(groupName, group);
+        }
         map.unlock(groupName);
         if (nodeConfiguration.getGroups().remove(groupName)) {
             this.saveNodeConfiguration();
@@ -274,7 +259,7 @@ public class HazelcastGroupManager implements GroupManager {
 
     protected void saveNodeConfiguration() throws IOException {
         Configuration configuration = configAdmin.getConfiguration(NodeConfiguration.class
-                .getCanonicalName(), null);
+                .getCanonicalName(), "?");
         configuration.update(nodeConfiguration.getProperties());
     }
 
@@ -284,26 +269,23 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     protected void createNewGroupConfiguration(String groupName) throws IOException {
-        Configuration configuration = configAdmin.createFactoryConfiguration(GroupConfiguration.class
-                .getCanonicalName(), "?");
+        Configuration configuration = configAdmin.createFactoryConfiguration(GroupConfiguration.class.getCanonicalName(), "?");
         Dictionary<String, Object> properties = configuration.getProperties();
-        if (properties
-                == null) {
+        if (properties == null) {
             properties = new Hashtable<String, Object>();
         }
 
         properties.put(GroupConfigurationImpl.GROUP_NAME_PROPERTY, groupName);
-
         configuration.update(properties);
-
-        pidGroupNameMap.put(groupName, configuration.getPid());
     }
 
     protected void deleteGroupConfiguration(String groupName) throws IOException, InvalidSyntaxException {
-        String pid = pidGroupNameMap.remove(groupName);
-        LOGGER.info("Attempting to delete group configuration {} with pid {}.", groupName, pid);
-//                Configuration[] configurations = configAdmin.listConfigurations("(&(" + GroupConfigurationImpl.GROUP_NAME_PROPERTY + "=" + groupName + "))");
-        Configuration configuration = configAdmin.getConfiguration(pid);
+        LOGGER.info("Delete group configuration {}.", groupName);
+        Configuration[] configurations = configAdmin.listConfigurations("(&(" + GroupConfigurationImpl.GROUP_NAME_PROPERTY + "=" + groupName + "))");
+        if (configurations.length == 0) {
+            throw new IllegalStateException("No confguration could be found for group: " + groupName);
+        }
+        Configuration configuration = configurations[0];
         configuration.delete();
     }
 

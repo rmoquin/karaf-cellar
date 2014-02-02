@@ -25,6 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -58,6 +59,7 @@ public class CellarGroupsTest extends CellarTestSupport {
     @Test
     public void testGroupsWithChildNodes() throws Exception {
         installCellar();
+        System.err.println(executeCommand("cluster:group-list"));
         createsChildren = true;
         createCellarChild("child1");
         System.err.println(executeCommand("cluster:group-list"));
