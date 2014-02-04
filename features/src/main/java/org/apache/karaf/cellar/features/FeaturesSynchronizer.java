@@ -174,8 +174,13 @@ public class FeaturesSynchronizer extends FeaturesSupport implements Synchronize
      * @return true if the sync flag is enabled, false else.
      */
     @Override
-    public Boolean isSyncEnabled(Group group) {
+    public boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
-        return this.groupManager.findGroupConfigurationByName(groupName).isSyncFeatures();
+        GroupConfiguration groupConfig = this.groupManager.findGroupConfigurationByName(groupName);
+        if (groupConfig == null) {
+            LOGGER.warn("Cannot check if synchronization is allowed because group {} appears to no longer exist.  Assuming it's not.", groupName);
+            return false;
+        }
+        return groupConfig.isSyncFeatures();
     }
 }

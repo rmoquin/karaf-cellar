@@ -80,20 +80,21 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
                         return result;
                     }
                 }
-                if (command.getType() == BundleEvent.INSTALLED) {
-                    LOGGER.debug("CELLAR BUNDLE: installing bundle {} from {}", command.getId(), command.getLocation());
+                int type = command.getType();
+                if (type == BundleEvent.INSTALLED) {
+                    LOGGER.debug("CELLAR BUNDLE: installing bundle {}", command);
                     bundleSupport.installBundleFromLocation(command.getLocation());
-                } else if (command.getType() == BundleEvent.UNINSTALLED) {
-                    LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                } else if (type == BundleEvent.UNINSTALLED) {
+                    LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}", command);
                     bundleSupport.uninstallBundle(command.getSymbolicName(), command.getVersion());
-                } else if (command.getType() == BundleEvent.STARTED) {
-                    LOGGER.debug("CELLAR BUNDLE: starting bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                } else if (type == BundleEvent.STARTED) {
+                    LOGGER.debug("CELLAR BUNDLE: starting bundle {}", command);
                     bundleSupport.startBundle(command.getSymbolicName(), command.getVersion());
-                } else if (command.getType() == BundleEvent.STOPPED) {
-                    LOGGER.debug("CELLAR BUNDLE: stopping bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                } else if (type == BundleEvent.STOPPED) {
+                    LOGGER.debug("CELLAR BUNDLE: stopping bundle {}", command);
                     bundleSupport.stopBundle(command.getSymbolicName(), command.getVersion());
-                } else if (command.getType() == BundleEvent.UPDATED) {
-                    LOGGER.debug("CELLAR BUNDLE: updating bundle {}/{}", command.getSymbolicName(), command.getVersion());
+                } else if (type == BundleEvent.UPDATED) {
+                    LOGGER.debug("CELLAR BUNDLE: updating bundle {}", command);
                     bundleSupport.updateBundle(command.getSymbolicName(), command.getVersion());
                 }
             } else {

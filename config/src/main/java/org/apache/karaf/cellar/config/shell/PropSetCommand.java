@@ -25,6 +25,7 @@ import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 import org.apache.karaf.shell.commands.Argument;
 import org.apache.karaf.shell.commands.Command;
+import org.osgi.service.cm.ConfigurationEvent;
 
 @Command(scope = "cluster", name = "config-propset", description = "Set a property value for a configuration in a cluster group")
 public class PropSetCommand extends ConfigCommandSupport {
@@ -77,6 +78,7 @@ public class PropSetCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
+            event.setType(ConfigurationEvent.CM_UPDATED);
             executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {
             System.out.println("No configuration found in cluster group " + groupName);

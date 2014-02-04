@@ -90,6 +90,37 @@ public class FeaturesSupport extends CellarSupport {
     }
 
     /**
+     * Check if a feature is present in the cluster group.
+     *
+     * @param groupName the cluster group.
+     * @param feature the feature name.
+     * @param version the feature version.
+     * @return true if the feature exists in the cluster group, false else.
+     */
+    //TODO This is a duplicate copy of a function in FeaturesCommandSupport and should be consolidted at some point.
+    public boolean featureExists(String groupName, String feature, String version) {
+        Map<FeatureInfo, Boolean> clusterFeatures = clusterManager.getMap(Constants.FEATURES + Configurations.SEPARATOR + groupName);
+
+        if (clusterFeatures == null) {
+            return false;
+        }
+
+        for (FeatureInfo distributedFeature : clusterFeatures.keySet()) {
+            if (version == null) {
+                if (distributedFeature.getName().equals(feature)) {
+                    return true;
+                }
+            } else {
+                if (distributedFeature.getName().equals(feature) && distributedFeature.getVersion().equals(version)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Push a {@code Feature} and its status in a cluster group.
      *
      * @param feature the feature to push in the cluster group.

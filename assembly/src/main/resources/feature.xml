@@ -72,11 +72,11 @@
     </feature>
 
     <feature name="cellar" description="Karaf clustering" version="${project.version}" resolver="(obr)">
-        <feature version="${project.version}">cellar-hazelcast</feature>
-        <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-config</feature>
         <feature version="${project.version}">cellar-bundle</feature>
         <feature version="${project.version}">cellar-features</feature>
+        <feature version="${project.version}">cellar-hazelcast</feature>
+        <feature version="${project.version}">cellar-shell</feature>
         <feature version="${project.version}">cellar-management</feature>
     </feature>
 

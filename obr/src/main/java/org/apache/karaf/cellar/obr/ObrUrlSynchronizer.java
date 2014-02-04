@@ -97,8 +97,8 @@ public class ObrUrlSynchronizer implements Synchronizer {
             Repository[] repositories = obrService.listRepositories();
             for (Repository repository : repositories) {
 
-                if (cellarSupport.isAllowed(repository.getURI().toString(), whitelist, blacklist)) {
-                    clusterUrls.add(repository.getURI().toString());
+                if (cellarSupport.isAllowed(repository.getURI(), whitelist, blacklist)) {
+                    clusterUrls.add(repository.getURI());
                     // update OBR bundles in the cluster group
                     Set<ObrBundleInfo> clusterBundles = clusterManager.getSet(Constants.BUNDLES_DISTRIBUTED_SET_NAME + Configurations.SEPARATOR + groupName);
                     Resource[] resources = repository.getResources();
@@ -108,16 +108,21 @@ public class ObrUrlSynchronizer implements Synchronizer {
                         // TODO fire event to the other nodes ?
                     }
                 } else {
-                    LOGGER.debug("CELLAR OBR: URL {} is marked BLOCKED OUTBOUND for cluster group {}", repository.getURI().toString(), groupName);
+                    LOGGER.debug("CELLAR OBR: URL {} is marked BLOCKED OUTBOUND for cluster group {}", repository.getURI(), groupName);
                 }
             }
         }
     }
 
     @Override
-    public Boolean isSyncEnabled(Group group) {
+    public boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
-        return this.groupManager.findGroupConfigurationByName(groupName).isSyncOBRUrls();
+        GroupConfiguration groupConfig = this.groupManager.findGroupConfigurationByName(groupName);
+        if (groupConfig == null) {
+            LOGGER.warn("Cannot check if synchronization is allowed because group {} appears to no longer exist.  Assuming it's not.", groupName);
+            return false;
+        }
+        return groupConfig.isSyncOBRUrls();
     }
 
     /**

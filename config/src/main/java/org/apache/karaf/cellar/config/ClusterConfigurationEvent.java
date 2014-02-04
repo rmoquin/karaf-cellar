@@ -20,7 +20,7 @@ import org.apache.karaf.cellar.core.command.Command;
  */
 public class ClusterConfigurationEvent extends Command<ConfigurationTaskResult> {
 
-    private Integer type;
+    private int type;
 
     public ClusterConfigurationEvent() {
     }
@@ -29,11 +29,11 @@ public class ClusterConfigurationEvent extends Command<ConfigurationTaskResult> 
         super(id);
     }
 
-    public Integer getType() {
+    public int getType() {
         return type;
     }
 
-    public void setType(Integer type) {
+    public void setType(int type) {
         this.type = type;
     }
 

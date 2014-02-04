@@ -59,7 +59,6 @@ public class CellarGroupsTest extends CellarTestSupport {
     @Test
     public void testGroupsWithChildNodes() throws Exception {
         installCellar();
-        System.err.println(executeCommand("cluster:group-list"));
         createsChildren = true;
         createCellarChild("child1");
         System.err.println(executeCommand("cluster:group-list"));

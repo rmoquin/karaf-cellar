@@ -69,7 +69,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                     if (conf.getProperties() != null) {
                         // delete the properties
                         conf.delete();
-                        configurationSupport.deleteStorage(pid);
+//TODO are these necessary?                        configurationSupport.deleteStorage(pid);
                     }
                 } else {
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);

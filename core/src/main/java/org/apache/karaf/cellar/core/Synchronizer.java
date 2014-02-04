@@ -38,6 +38,6 @@ public interface Synchronizer {
      * @param group the cluster group.
      * @return true if sync flag is enabled, false else.
      */
-    public Boolean isSyncEnabled(Group group);
+    public boolean isSyncEnabled(Group group);
 
 }

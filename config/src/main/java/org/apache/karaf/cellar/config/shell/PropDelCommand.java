@@ -25,6 +25,7 @@ import java.util.Set;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.osgi.service.cm.ConfigurationEvent;
 
 @Command(scope = "cluster", name = "config-propdel", description = "Delete a property from a configuration in a cluster group")
 public class PropDelCommand extends ConfigCommandSupport {
@@ -73,6 +74,7 @@ public class PropDelCommand extends ConfigCommandSupport {
                 // broadcast the cluster event
                 ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                 event.setSourceGroup(group);
+                event.setType(ConfigurationEvent.CM_DELETED);
                 executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
             }
         } else {

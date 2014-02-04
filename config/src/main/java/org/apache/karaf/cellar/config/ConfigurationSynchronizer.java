@@ -144,6 +144,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                         event.setSourceGroup(group);
                         event.setSourceNode(groupManager.getNode());
+                        event.setType(event.getType());
                         executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
                     } else {
                         LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
@@ -164,9 +165,14 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
      * @return true if the configuration sync flag is enabled for the cluster group, false else.
      */
     @Override
-    public Boolean isSyncEnabled(Group group) {
+    public boolean isSyncEnabled(Group group) {
         String groupName = group.getName();
-        return this.groupManager.findGroupConfigurationByName(groupName).isSyncConfiguration();
+        GroupConfiguration groupConfig = this.groupManager.findGroupConfigurationByName(groupName);
+        if (groupConfig == null) {
+            LOGGER.warn("Cannot check if synchronization is allowed because group {} appears to no longer exist.  Assuming it's not.", groupName);
+            return false;
+        }
+        return groupConfig.isSyncConfiguration();
     }
 
     /**

@@ -86,7 +86,7 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                                clusterConfigurationEvent.setType(ConfigurationEvent.CM_UPDATED);
+                                clusterConfigurationEvent.setType(event.getType());
                                 clusterConfigurationEvent.setSourceGroup(group);
                                 clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                                 executionContext.execute(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()));

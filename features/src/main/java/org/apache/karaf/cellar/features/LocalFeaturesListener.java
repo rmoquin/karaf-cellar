@@ -53,27 +53,32 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
             if (groups != null && !groups.isEmpty()) {
                 for (Group group : groups) {
                     Feature feature = event.getFeature();
-                    String name = feature.getName();
-                    String version = feature.getVersion();
+                    String featureName = feature.getName();
+                    String featureVersion = feature.getVersion();
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                     Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
                     Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();
-                    if (this.isAllowed(name, whitelist, blacklist)) {
+                    if (this.isAllowed(featureName, whitelist, blacklist)) {
                         FeatureEvent.EventType type = event.getType();
-
+                        boolean installedInGroup = featureExists(group.getName(), featureName, featureVersion);
+                        boolean needsBroadcast = false;
                         // update the features in the cluster group
                         if (FeatureEvent.EventType.FeatureInstalled.equals(event.getType())) {
-                            pushFeature(event.getFeature(), group, true);
+                            pushFeature(feature, group, true);
+                            needsBroadcast = !installedInGroup;
                         } else {
-                            pushFeature(event.getFeature(), group, false);
+                            pushFeature(feature, group, false);
+                            needsBroadcast = installedInGroup;
                         }
 
-                        // broadcast the event
-                        ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(name, version, type);
-                        featureEvent.setSourceGroup(group);
-                        executionContext.execute(featureEvent, group.getNodesExcluding(groupManager.getNode()));
+                        if (needsBroadcast) {
+                            // broadcast the event
+                            ClusterFeaturesEvent featureEvent = new ClusterFeaturesEvent(featureName, featureVersion, type);
+                            featureEvent.setSourceGroup(group);
+                            executionContext.execute(featureEvent, group.getNodesExcluding(groupManager.getNode()));
+                        }
                     } else {
-                        LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", name, group.getName());
+                        LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED OUTBOUND for cluster group {}", featureName, group.getName());
                     }
                 }
             }
@@ -86,7 +91,8 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
      * @param event
      */
     @Override
-    public void repositoryEvent(RepositoryEvent event) {
+    public void repositoryEvent(RepositoryEvent event
+    ) {
 
         //TODO Re-enable this functionaity,
         if (executionContext.getSwitch().getStatus().equals(SwitchStatus.OFF)) {

@@ -91,5 +91,4 @@ public class Event implements Serializable {
     public String toString() {
         return "Event{" + "id=" + id + ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup + ", destination=" + destination + ", force=" + force + ", postPublish=" + postPublish + '}';
     }
-
 }

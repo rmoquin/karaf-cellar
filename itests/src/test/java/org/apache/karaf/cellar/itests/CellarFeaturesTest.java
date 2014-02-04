@@ -38,8 +38,7 @@ public class CellarFeaturesTest extends CellarTestSupport {
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
         createCellarChild("child1");
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);
+        Thread.sleep(DELAY_TIMEOUT);
 
         String eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         assertTrue(eventadminFeatureStatus.contains(UNINSTALLED));
@@ -76,6 +75,8 @@ public class CellarFeaturesTest extends CellarTestSupport {
         eventadminFeatureStatus = executeRemoteCommand("child1", "feature:list | grep eventadmin");
         assertTrue(eventadminFeatureStatus.contains(INSTALLED));
 
+        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
+        assertNotNull(clusterManager);
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
         System.err.println(executeCommand("cluster:node-list"));
@@ -86,6 +87,7 @@ public class CellarFeaturesTest extends CellarTestSupport {
     @After
     public void tearDown() {
         try {
+            System.err.println("Tearing down test.");
             destroyCellarChild("child1");
             unInstallCellar();
         } catch (Exception ex) {

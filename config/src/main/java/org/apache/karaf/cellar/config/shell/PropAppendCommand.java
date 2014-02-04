@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
+import org.osgi.service.cm.ConfigurationEvent;
 
 @Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
 public class PropAppendCommand extends ConfigCommandSupport {
@@ -85,6 +86,7 @@ public class PropAppendCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
+            event.setType(ConfigurationEvent.CM_UPDATED);
             executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
         } else {
             System.out.println("No configuration found in cluster group " + groupName);
