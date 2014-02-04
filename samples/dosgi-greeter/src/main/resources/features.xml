@@ -13,7 +13,9 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<features name="dosgi-greeter" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name="dosgi-greeter" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
     <feature name='greeter-client' description='Greeter Service Client' version='${project.version}' resolver='(obr)'>
         <bundle>mvn:org.apache.karaf.cellar.samples.dosgi.greeter/org.apache.karaf.cellar.samples.dosgi.greeter.api/${project.version}</bundle>

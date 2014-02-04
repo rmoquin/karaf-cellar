@@ -22,8 +22,8 @@ import org.apache.karaf.features.RepositoryEvent.EventType;
 public class ClusterRepositoryEvent extends Command<RespositoryEventResponse> {
 
     private final EventType type;
-    private Boolean install;
-    private Boolean uninstall;
+    private boolean install;
+    private boolean uninstall;
 
     public ClusterRepositoryEvent(String id, EventType type) {
         super(id);
@@ -34,19 +34,19 @@ public class ClusterRepositoryEvent extends Command<RespositoryEventResponse> {
         return type;
     }
 
-    public Boolean getInstall() {
+    public boolean getInstall() {
         return install;
     }
 
-    public void setInstall(Boolean install) {
+    public void setInstall(boolean install) {
         this.install = install;
     }
 
-    public Boolean getUninstall() {
+    public boolean getUninstall() {
         return uninstall;
     }
 
-    public void setUninstall(Boolean uninstall) {
+    public void setUninstall(boolean uninstall) {
         this.uninstall = uninstall;
     }
 

@@ -119,6 +119,7 @@ public class UrlRemoveCommand extends FeatureCommandSupport {
                 // broadcast a cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryRemoved);
                 event.setUninstall(uninstall);
+                event.setInstall(!uninstall);
                 event.setSourceGroup(group);
                 Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodes());
                 printTaskResults(responses);

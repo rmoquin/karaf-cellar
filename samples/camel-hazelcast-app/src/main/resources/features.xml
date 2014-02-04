@@ -13,11 +13,13 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<features name="dosgi-greeter" xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
+<features name="dosgi-greeter-camel" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
     <repository>mvn:org.apache.camel.karaf/apache-camel/${camel.version}/xml/features</repository>
 
-    <feature name='cellar-sample-camel-producer' description='Cellar Camel Sample Application - Producer' version='${project.version}' resolver='(obr)'>
+    <feature name='sample-camel-producer' description='Cellar Camel Sample Application - Producer' version='${project.version}' resolver='(obr)'>
         <feature version="${project.version}">cellar</feature>
         <feature version="${camel.version}">camel</feature>
         <feature version="${camel.version}">camel-blueprint</feature>
@@ -25,7 +27,7 @@
         <bundle>mvn:org.apache.karaf.cellar.samples.camel.hazelcast/producer/${project.version}</bundle>
     </feature>
 
-    <feature name='cellar-sample-camel-consumer' description='Cellar Camel Sample Application - Consumer' version='${project.version}' resolver='(obr)'>
+    <feature name='sample-camel-consumer' description='Cellar Camel Sample Application - Consumer' version='${project.version}' resolver='(obr)'>
         <feature version="${project.version}">cellar</feature>
         <feature version="${camel.version}">camel</feature>
         <feature version="${camel.version}">camel-blueprint</feature>

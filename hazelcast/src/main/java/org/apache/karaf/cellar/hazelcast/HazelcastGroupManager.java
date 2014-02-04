@@ -218,7 +218,8 @@ public class HazelcastGroupManager implements GroupManager {
             this.saveNodeConfiguration();
         }
         if (nodeAdded) {
-            //TODO fix this this.masterCluster.synchronizeNodes(group);
+            LOGGER.info("Node was added to distributed group store, invoking synchronization.");
+            this.masterCluster.synchronizeNodes(group);
         }
     }
 
@@ -237,7 +238,7 @@ public class HazelcastGroupManager implements GroupManager {
 
     }
 
-    private void removeNodeFromAllGroups(boolean save) throws IOException {
+    protected void removeNodeFromAllGroups(boolean save) throws IOException {
         IMap<String, Group> map = getGroupMapStore();
         for (String groupName : map.keySet()) {
             if (save && this.isDefaultGroup(groupName)) {

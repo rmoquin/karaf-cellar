@@ -16,7 +16,7 @@ package org.apache.karaf.cellar.hazelcast;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
-import org.apache.karaf.cellar.core.GroupManager;
+import java.io.IOException;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +33,12 @@ public class CellarMembershipListener implements MembershipListener {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(CellarMembershipListener.class);
     private HazelcastCluster masterCluster;
-    private GroupManager groupManager;
+    private HazelcastGroupManager groupManager;
     private List<? extends Synchronizer> synchronizers;
 
     public void init() {
         //If a member was just added to the cluster, I don't think it shouldn't be bombarded by every node in each group with synchronizations.
-//        this.masterCluster.addMembershipListener(this);
+        this.masterCluster.addMembershipListener(this);
     }
 
     @Override
@@ -70,14 +70,19 @@ public class CellarMembershipListener implements MembershipListener {
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        // nothing to do
+        //Try to prevent other nodes from thinking this node is available in it's groups sooner.
+        try {
+            this.groupManager.removeNodeFromAllGroups(false);
+        } catch (IOException ex) {
+            LOGGER.warn("Error attempting to remove shutting down cluster member from group enrollment.", ex);
+        }
     }
 
-    public GroupManager getGroupManager() {
+    public HazelcastGroupManager getGroupManager() {
         return groupManager;
     }
 
-    public void setGroupManager(GroupManager groupManager) {
+    public void setGroupManager(HazelcastGroupManager groupManager) {
         this.groupManager = groupManager;
     }
 

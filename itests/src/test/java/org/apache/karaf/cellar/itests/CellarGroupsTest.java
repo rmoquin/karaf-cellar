@@ -25,7 +25,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import org.junit.Ignore;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.PerMethod;
 import org.ops4j.pax.exam.junit.PaxExam;
@@ -63,10 +62,8 @@ public class CellarGroupsTest extends CellarTestSupport {
         createCellarChild("child1");
         System.err.println(executeCommand("cluster:group-list"));
         System.err.println(executeCommand("cluster:group-create testgroup"));
-        Thread.sleep(DELAY_TIMEOUT);
 
         GroupManager groupManager = getOsgiService(GroupManager.class);
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         String child11 = this.getNodeIdOfChild("child1");
         System.err.println(executeCommand("cluster:group-set testgroup " + child11));
         Thread.sleep(DELAY_TIMEOUT);

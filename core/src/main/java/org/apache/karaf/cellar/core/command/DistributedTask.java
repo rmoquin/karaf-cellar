@@ -50,6 +50,9 @@ public class DistributedTask<T extends DistributedResult> implements Callable<T>
         try {
             bundleContext = FrameworkUtil.getBundle(this.getClass()).getBundleContext();
             EventHandlerRegistry handlerRegistry = this.getService(EventHandlerRegistry.class);
+            if (handlerRegistry == null) {
+                throw new ServiceException(MessageFormat.format("The handler registry isn't available, either system isn't fully started or is shuttig down {0}", event));
+            }
             EventHandler<Event, T> handler = handlerRegistry.getHandler(event);
             if (handler != null) {
                 return handler.execute(event);

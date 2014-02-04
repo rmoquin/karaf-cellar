@@ -36,27 +36,26 @@ public class CellarSampleCamelHazelcastTest extends CellarTestSupport {
         installCellar();
         createCellarChild("node1", "node2");
 
-        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/camel-hazelcast-app/" + CELLAR_VERSION + "/xml/features"));
+        System.err.println(executeCommand("feature:repo-add mvn:org.apache.karaf.cellar.samples/sample-hazelcast-app/" + CELLAR_VERSION + "/xml/features"));
         System.err.println(executeCommand("instance:list"));
         System.err.println(executeCommand("cluster:node-list"));
-        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
-        assertNotNull(clusterManager);
-        Node localNode = clusterManager.getMasterCluster().getLocalNode();
-        Set<Node> nodes = clusterManager.listNodes();
-        assertTrue("There should be at least 3 Cellar nodes running", nodes.size() >= 3);
 
         String node1 = this.getNodeIdOfChild("node1");
         String node2 = this.getNodeIdOfChild("node2");
-
         executeCommand("cluster:group-create producer-grp");
         executeCommand("cluster:group-create consumer-grp");
+
+        ClusterManager clusterManager = getOsgiService(ClusterManager.class);
+        Node localNode = clusterManager.getMasterCluster().getLocalNode();
         System.err.println(executeCommand("cluster:group-set producer-grp " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-set consumer-grp " + node1));
         System.err.println(executeCommand("cluster:group-set consumer-grp " + node2));
         System.err.println(executeCommand("cluster:group-list"));
 
-        System.err.println(executeCommand("cluster:feature-install consumer-grp cellar-sample-camel-consumer"));
-        System.err.println(executeCommand("cluster:feature-install producer-grp cellar-sample-camel-producer"));
+        System.err.println(executeCommand("cluster:feature-install consumer-grp sample-camel-consumer"));
+        System.err.println(executeCommand("cluster:feature-install producer-grp sample-camel-producer"));
+        Thread.sleep(DELAY_TIMEOUT);
+        Thread.sleep(DELAY_TIMEOUT);
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("feature:list"));
         System.err.println(executeCommand("bundle:list"));

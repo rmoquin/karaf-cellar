@@ -32,8 +32,7 @@ public class CellarConfigurationTest extends CellarTestSupport {
     @Test
     public void testCellarFeaturesModule() throws Exception {
         installCellar();
-        createCellarChild("child1");
-        createCellarChild("child2");
+        createCellarChild("child1", "child2");
 
         String node1 = this.getNodeIdOfChild("child1");
         String node2 = this.getNodeIdOfChild("child2");

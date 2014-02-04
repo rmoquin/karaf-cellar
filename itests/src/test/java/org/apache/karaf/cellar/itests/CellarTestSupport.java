@@ -33,6 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 import javax.security.auth.Subject;
@@ -353,9 +354,17 @@ public class CellarTestSupport {
         try {
             executor.submit(commandFuture);
             response = commandFuture.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            System.err.println("The shell command timed out for: " + command);
+            response = "The shell command timed out.";
         } catch (Exception e) {
-            e.printStackTrace(System.err);
-            response = "SHELL COMMAND TIMED OUT: ";
+            response = "Shell command failed due to an unexpected exception.";
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                cause.printStackTrace(System.err);
+            } else {
+                e.printStackTrace(System.err);
+            }
         }
         return response;
     }

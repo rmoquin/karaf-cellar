@@ -118,6 +118,7 @@ public class UrlAddCommand extends FeatureCommandSupport {
                 // broadcast the cluster event
                 ClusterRepositoryEvent event = new ClusterRepositoryEvent(url, RepositoryEvent.EventType.RepositoryAdded);
                 event.setInstall(install);
+                event.setUninstall(!install);
                 event.setSourceGroup(group);
                 Map<Node, Result> responses = executionContext.executeAndWait(event, group.getNodes());
                 printTaskResults(responses);

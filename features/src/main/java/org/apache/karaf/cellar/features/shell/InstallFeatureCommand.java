@@ -59,11 +59,11 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
         }
 
         // check if the feature exists in the map
-        if (!featureExists(groupName, feature, version)) {
+        if (featureExists(groupName, feature, version)) {
             if (version != null) {
-                System.err.println("Feature " + feature + "/" + version + " doesn't exist in the cluster group " + groupName);
+                System.err.println("Feature " + feature + "/" + version + " already exists in cluster group " + groupName);
             } else {
-                System.err.println("Feature " + feature + " doesn't exist in the cluster group " + groupName);
+                System.err.println("Feature " + feature + " already exists in cluster group " + groupName);
             }
             return null;
         }

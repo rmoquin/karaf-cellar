@@ -58,13 +58,14 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
         Set<Group> groups = groupManager.listLocalGroups();
         if (groups != null && !groups.isEmpty()) {
             for (Group group : groups) {
-                GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-                Set<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
-                Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
-                // check if the pid is allowed for outbound.
-                if (this.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
-                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
-                    try {
+                try {
+                    LOGGER.info("In LocalConfiguration listener process event {} for group: {}", event, group);
+                    GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
+                    Set<String> bundleWhitelist = groupConfig.getOutboundConfigurationWhitelist();
+                    Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
+                    // check if the pid is allowed for outbound.
+                    if (this.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
+                        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
                         Configuration conf = configAdmin.getConfiguration(pid, null);
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
                             if (clusterConfigurations.containsKey(pid)) {
@@ -92,11 +93,11 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 executionContext.execute(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()));
                             }
                         }
-                    } catch (Exception e) {
-                        LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} in the cluster group {} {}", pid, group.getName(), e);
+                    } else {
+                        LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {} {}", pid, group.getName());
                     }
-                } else {
-                    LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {} {}", pid, group.getName());
+                } catch (Exception e) {
+                    LOGGER.error("CELLAR CONFIG: failed to update configuration with PID {} on node {} of cluster group {} {}", pid, groupManager.getNode(), group.getName(), e);
                 }
             }
         }

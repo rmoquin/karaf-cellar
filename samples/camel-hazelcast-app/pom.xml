@@ -29,7 +29,7 @@
     </parent>
 
     <groupId>org.apache.karaf.cellar.samples</groupId>
-    <artifactId>camel-hazelcast-app</artifactId>
+    <artifactId>sample-hazelcast-app</artifactId>
     <name>Apache Karaf :: Cellar :: Samples :: Camel Hazelcast Application</name>
     <packaging>pom</packaging>
 
