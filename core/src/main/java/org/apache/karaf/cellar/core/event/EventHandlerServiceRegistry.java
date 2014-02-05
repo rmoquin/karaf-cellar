@@ -38,6 +38,8 @@ public class EventHandlerServiceRegistry<E extends Event, R extends DistributedR
         if (event != null) {
             Class clazz = event.getClass();
             return eventHandlerMap.get(clazz.getCanonicalName());
+        } else {
+            LOGGER.warn("Couldn't lookup handler for event: {}", eventHandlerMap);
         }
         return null;
     }

@@ -21,9 +21,12 @@ import org.apache.karaf.features.RepositoryEvent.EventType;
  */
 public class ClusterRepositoryEvent extends Command<RespositoryEventResponse> {
 
-    private final EventType type;
+    private EventType type;
     private boolean install;
     private boolean uninstall;
+
+    public ClusterRepositoryEvent() {
+    }
 
     public ClusterRepositoryEvent(String id, EventType type) {
         super(id);
@@ -56,6 +59,13 @@ public class ClusterRepositoryEvent extends Command<RespositoryEventResponse> {
                 + ", sourceNode=" + sourceNode + ", sourceGroup=" + sourceGroup
                 + ", destination=" + destination + ", force=" + force
                 + ", postPublish=" + postPublish + "]";
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(EventType type) {
+        this.type = type;
     }
 
 }

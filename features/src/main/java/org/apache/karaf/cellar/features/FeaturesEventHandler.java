@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.Set;
+import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
@@ -69,7 +70,9 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
         }
 
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+            Group group = event.getSourceGroup();
+            String groupName = group.getName();
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
             Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
             Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
             if (cellarSupport.isAllowed(event.getName(), whitelist, blacklist)) {

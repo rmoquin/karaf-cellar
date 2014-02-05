@@ -23,7 +23,6 @@ import java.io.Serializable;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;

@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.text.MessageFormat;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;

@@ -23,11 +23,14 @@ public class ClusterFeaturesEvent extends Command<FeatureEventResponse> {
 
     private static final String separator = "/";
 
-    private final String name;
-    private final String version;
-    private final Boolean noClean;
-    private final Boolean noRefresh;
-    private final EventType type;
+    private String name;
+    private String version;
+    private Boolean noClean;
+    private Boolean noRefresh;
+    private EventType type;
+
+    public ClusterFeaturesEvent() {
+    }
 
     public ClusterFeaturesEvent(String name, String version, EventType type) {
         super(name + separator + version);
@@ -70,6 +73,41 @@ public class ClusterFeaturesEvent extends Command<FeatureEventResponse> {
 
     public EventType getType() {
         return type;
+    }
+
+    /**
+     * @param name the name to set
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * @param version the version to set
+     */
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    /**
+     * @param noClean the noClean to set
+     */
+    public void setNoClean(Boolean noClean) {
+        this.noClean = noClean;
+    }
+
+    /**
+     * @param noRefresh the noRefresh to set
+     */
+    public void setNoRefresh(Boolean noRefresh) {
+        this.noRefresh = noRefresh;
+    }
+
+    /**
+     * @param type the type to set
+     */
+    public void setType(EventType type) {
+        this.type = type;
     }
 
 }
