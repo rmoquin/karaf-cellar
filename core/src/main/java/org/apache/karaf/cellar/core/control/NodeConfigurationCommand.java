@@ -39,6 +39,11 @@ public class NodeConfigurationCommand extends Command<NodeConfigurationResult> {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "NodeConfigurationCommand{" + "status=" + status + ", type=" + type + '}';
+    }
+
     /**
      * @return the status
      */

@@ -64,17 +64,17 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
             if (configurationSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
-                Configuration conf = configAdmin.getConfiguration(pid, null);
                 if (command.getType() == ConfigurationEvent.CM_DELETED) {
-                    if (conf.getProperties() != null) {
-                        // delete the properties
-                        conf.delete();
-//TODO are these necessary?                        configurationSupport.deleteStorage(pid);
+                    // delete the configuration
+                    Configuration[] localConfigurations = configAdmin.listConfigurations("(service.pid=" + pid + ")");
+                    if (localConfigurations != null && localConfigurations.length > 0) {
+                        localConfigurations[0].delete();
                     }
                 } else {
                     Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
                     Properties clusterDictionary = clusterConfigurations.get(pid);
                     if (clusterDictionary != null) {
+                        Configuration conf = configAdmin.getConfiguration(pid, "?");
                         Dictionary localDictionary = conf.getProperties();
                         if (localDictionary == null) {
                             localDictionary = new Properties();

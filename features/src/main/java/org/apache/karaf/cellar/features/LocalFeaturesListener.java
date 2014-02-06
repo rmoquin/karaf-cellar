@@ -56,7 +56,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
                     Feature feature = event.getFeature();
                     String featureName = feature.getName();
                     String featureVersion = feature.getVersion();
-                    LOGGER.info("In LocalConfiguration listener process event {} for group: {}", event, group);
                     GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
                     Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();
                     Set<String> blacklist = groupConfig.getOutboundFeatureBlacklist();

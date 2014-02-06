@@ -33,6 +33,11 @@ public class ManageGroupResult extends Result {
         super(id);
     }
 
+    @Override
+    public String toString() {
+        return "ManageGroupResult{" + "groups=" + groups + '}';
+    }
+
     public Set<Group> getGroups() {
         return groups;
     }

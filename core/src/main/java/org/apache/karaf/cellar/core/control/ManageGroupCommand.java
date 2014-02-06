@@ -30,6 +30,11 @@ public class ManageGroupCommand extends Command<ManageGroupResult> {
         super(id);
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "ManageGroupCommand{" + "action=" + action + ", destinationGroup=" + destinationGroup + '}';
+    }
+
     /**
      * @return the action
      */

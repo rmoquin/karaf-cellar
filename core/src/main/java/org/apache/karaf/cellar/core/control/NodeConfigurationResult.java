@@ -33,6 +33,11 @@ public class NodeConfigurationResult extends Result {
         super(id);
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "NodeConfigurationResult{" + "switchType=" + switchType + ", switchStatus=" + switchStatus + '}';
+    }
+
     /**
      * @return the switchType
      */

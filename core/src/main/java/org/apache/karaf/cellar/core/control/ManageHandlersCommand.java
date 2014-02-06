@@ -30,6 +30,11 @@ public class ManageHandlersCommand extends Command<ManageHandlersResult> {
         super(id);
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "ManageHandlersCommand{" + "handlerName=" + handlerName + ", status=" + status + '}';
+    }
+
     public String getHandlerName() {
         return handlerName;
     }

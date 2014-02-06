@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.config;
 
+import com.hazelcast.core.IMap;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -65,12 +66,14 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     Set<String> bundleBlacklist = groupConfig.getOutboundConfigurationBlacklist();
                     // check if the pid is allowed for outbound.
                     if (this.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
-                        Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
+                        IMap<String, Properties> clusterConfigurations = (IMap<String, Properties>) clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
                         Configuration conf = configAdmin.getConfiguration(pid, null);
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
                             if (clusterConfigurations.containsKey(pid)) {
                                 // update the configurations in the cluster group
-                                clusterConfigurations.remove(pid);
+                                clusterConfigurations.lock(pid);
+                                clusterConfigurations.delete(pid);
+                                clusterConfigurations.unlock(pid);
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                                 clusterConfigurationEvent.setType(event.getType());
@@ -81,10 +84,16 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                         } else {
                             Dictionary<String, Object> localDictionary = conf.getProperties();
                             localDictionary = filter(localDictionary);
+                            clusterConfigurations.lock(pid);
                             Properties distributedDictionary = clusterConfigurations.get(pid);
+                            boolean propsUpdated = false;
                             if (!equals(localDictionary, distributedDictionary)) {
                                 // update the configurations in the cluster group
                                 clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
+                                propsUpdated = true;
+                            }
+                            clusterConfigurations.unlock(pid);
+                            if (propsUpdated) {
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
                                 clusterConfigurationEvent.setType(event.getType());

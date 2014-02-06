@@ -31,6 +31,11 @@ public class ManageHandlersResult extends Result {
         super(id);
     }
 
+    @Override
+    public String toString() {
+        return super.toString() + "ManageHandlersResult{" + "handlers=" + handlers + '}';
+    }
+
     public Map<String, String> getHandlers() {
         return handlers;
     }

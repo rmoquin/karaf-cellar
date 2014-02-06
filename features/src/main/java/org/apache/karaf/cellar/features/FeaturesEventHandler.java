@@ -72,7 +72,9 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
         try {
             Group group = event.getSourceGroup();
             String groupName = group.getName();
+            LOGGER.error("Group name in event handler: {}", groupName);
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            LOGGER.error("Group configuration retrieved for group name {}", groupConfig, groupName);
             Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
             Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
             if (cellarSupport.isAllowed(event.getName(), whitelist, blacklist)) {

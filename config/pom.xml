@@ -62,6 +62,10 @@
             <artifactId>org.apache.karaf.cellar.core</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.apache.karaf.cellar</groupId>
+            <artifactId>org.apache.karaf.cellar.hazelcast</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.utils</artifactId>
             <scope>provided</scope>

@@ -43,29 +43,29 @@ public class CellarMembershipListener implements MembershipListener {
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
-        Member member = membershipEvent.getMember();
-        try {
-            Node localNode = this.masterCluster.getLocalNode();
-            if (localNode.getId().equals(member.getUuid()) && synchronizers != null && !synchronizers.isEmpty()) {
-                Set<Group> groups = groupManager.listLocalGroups();
-                for (Group group : groups) {
-                    for (Synchronizer synchronizer : synchronizers) {
-                        if (synchronizer.isSyncEnabled(group)) {
-                            if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Synchronizing local node via pull from group: " + group.getName());
-                            }
-                            synchronizer.pull(group);
-                            if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Synchronizing local node via push to group: " + group.getName());
-                            }
-                            synchronizer.push(group);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Error while calling memberAdded", e);
-        }
+//        Member member = membershipEvent.getMember();
+//        try {
+//            Node localNode = this.masterCluster.getLocalNode();
+//            if (localNode.getId().equals(member.getUuid()) && synchronizers != null && !synchronizers.isEmpty()) {
+//                Set<Group> groups = groupManager.listLocalGroups();
+//                for (Group group : groups) {
+//                    for (Synchronizer synchronizer : synchronizers) {
+//                        if (synchronizer.isSyncEnabled(group)) {
+//                            if (LOGGER.isInfoEnabled()) {
+//                                LOGGER.info("Synchronizing local node via pull from group: " + group.getName());
+//                            }
+//                            synchronizer.pull(group);
+//                            if (LOGGER.isInfoEnabled()) {
+//                                LOGGER.info("Synchronizing local node via push to group: " + group.getName());
+//                            }
+//                            synchronizer.push(group);
+//                        }
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            LOGGER.warn("Error while calling memberAdded", e);
+//        }
     }
 
     @Override
