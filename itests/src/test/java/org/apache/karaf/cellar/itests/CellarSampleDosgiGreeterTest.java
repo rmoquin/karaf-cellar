@@ -41,17 +41,15 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         assertNotNull(clusterManager);
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
-        assertTrue("There should be at least 3 cellar nodes running", 3 <= nodes.size());
+        assertTrue("There should be at least 3 cellar nodes running", 3 == nodes.size());
         String node1 = this.getNodeIdOfChild("node1");
         String node2 = this.getNodeIdOfChild("node2");
 
         executeCommand("cluster:group-create client-grp");
         executeCommand("cluster:group-create service-grp");
-        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
         System.err.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-set service-grp " + node1));
-        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:feature-url-add client-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/" + CELLAR_VERSION + "/xml/features"));
         System.err.println(executeCommand("cluster:feature-url-add service-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/" + CELLAR_VERSION + "/xml/features"));
         Thread.sleep(DELAY_TIMEOUT);
@@ -66,7 +64,7 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:group-set service-grp " + node2));
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
-        System.err.println(executeCommand("cluster:list-services"));
+        System.err.println(executeCommand("cluster:service-list"));
         greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
         System.err.println(greetOutput);
         assertEquals("Expected 5 greets", 5, countGreetsFromNode(greetOutput, node1));

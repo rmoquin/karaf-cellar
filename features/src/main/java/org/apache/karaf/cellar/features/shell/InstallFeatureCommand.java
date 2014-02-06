@@ -58,16 +58,6 @@ public class InstallFeatureCommand extends FeatureCommandSupport {
             return null;
         }
 
-        // check if the feature exists in the map
-        if (featureExists(groupName, feature, version)) {
-            if (version != null) {
-                System.err.println("Feature " + feature + "/" + version + " already exists in cluster group " + groupName);
-            } else {
-                System.err.println("Feature " + feature + " already exists in cluster group " + groupName);
-            }
-            return null;
-        }
-
         // check if the outbound event is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
         Set<String> whitelist = groupConfig.getOutboundFeatureWhitelist();

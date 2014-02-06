@@ -47,7 +47,6 @@ public class LocalFeaturesListener extends FeaturesSupport implements FeaturesLi
             LOGGER.debug("CELLAR FEATURES: cluster event producer is OFF");
             return;
         }
-        LOGGER.error("Feature installed: {}/{}", event.getFeature().getName(), event.getFeature().getVersion());
         if (event != null) {
             Set<Group> groups = groupManager.listLocalGroups();
 
