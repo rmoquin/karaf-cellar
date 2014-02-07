@@ -28,12 +28,6 @@
 
     <ext:property-placeholder />
 
-    <cm:property-placeholder persistent-id="org.apache.karaf.shell.config">
-        <cm:default-properties>
-            <cm:property name="storage" value="${karaf.base}/etc/"/>
-        </cm:default-properties>
-    </cm:property-placeholder>
-
     <!-- Local Configuration Listener -->
     <bean id="localListener" class="org.apache.karaf.cellar.config.LocalConfigurationListener" init-method="init"
           destroy-method="destroy">
@@ -53,7 +47,7 @@
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="executionContext" ref="executionContext"/>
-        <property name="storage" value="${storage}"/>
+        <property name="storage" value="${karaf.base}/etc/"/>
     </bean>
 
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
@@ -69,7 +63,7 @@
     </bean>
 
     <bean id="configurationSupport" class="org.apache.karaf.cellar.config.ConfigurationSupport">
-        <property name="storage" value="$[storage]"/>
+        <property name="storage" value="${karaf.base}/etc/"/>
     </bean>
 
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">
