@@ -34,7 +34,7 @@ import org.apache.karaf.cellar.core.exception.CommandExecutionException;
  */
 public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, FeatureEventResponse> {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesSynchronizer.class);
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(FeaturesEventHandler.class);
 
     public static final String SWITCH_ID = "org.apache.karaf.cellar.event.features.handler";
 
@@ -72,9 +72,7 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
         try {
             Group group = event.getSourceGroup();
             String groupName = group.getName();
-            LOGGER.error("Group name in event handler: {}", groupName);
             GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
-            LOGGER.error("Group configuration retrieved for group name {}", groupConfig, groupName);
             Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
             Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
             if (cellarSupport.isAllowed(event.getName(), whitelist, blacklist)) {
@@ -107,12 +105,12 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
                 }
                 result.setSuccessful(true);
             } else {
-                LOGGER.error("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group", event.getName(), event.getSourceGroup().getName());
+                LOGGER.debug("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group", event.getName(), event.getSourceGroup().getName());
                 result.setSuccessful(false);
                 result.setThrowable(new IllegalStateException("CELLAR FEATURES: feature {} is marked BLOCKED INBOUND for cluster group " + event.getName()));
             }
         } catch (Exception ex) {
-            LOGGER.error("CELLAR FEATURES: failed to handle configuration task event", ex);
+            LOGGER.error("CELLAR FEATURES: failed to handle feature task event", ex);
             result.setThrowable(ex);
             result.setSuccessful(false);
         }
