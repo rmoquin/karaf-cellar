@@ -83,12 +83,12 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
 
     public void shutdown() {
         instance.getCluster().removeMembershipListener(memberListenerId);
+        this.localNode.destroy();
+        instance.shutdown();
         this.memberNodesByName.clear();
         this.memberNodesById.clear();
         this.idgenerator = null;
-        this.localNode.destroy();
         this.localNode = null;
-        instance.shutdown();
         instance = null;
     }
 
