@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -67,13 +66,13 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
             Set<String> bundleWhitelist = groupConfig.getInboundBundleWhitelist();
             Set<String> bundleBlacklist = groupConfig.getInboundBundleBlacklist();
 
-            Set<String> featuresWhitelist = groupConfig.getInboundFeatureWhitelist();
-            Set<String> featuresBlacklist = groupConfig.getInboundFeatureBlacklist();
-            if (cellarSupport.isAllowed(command.getLocation(), bundleWhitelist, bundleBlacklist)) {
+            if (bundleSupport.isAllowed(command.getLocation(), bundleWhitelist, bundleBlacklist)) {
                 // check the features first
+                Set<String> featuresWhitelist = groupConfig.getInboundFeatureWhitelist();
+                Set<String> featuresBlacklist = groupConfig.getInboundFeatureBlacklist();
                 List<Feature> matchingFeatures = bundleSupport.retrieveFeature(command.getLocation());
                 for (Feature feature : matchingFeatures) {
-                    if (!cellarSupport.isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
+                    if (!bundleSupport.isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
                         LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", command.getLocation(), command.getSymbolicName(), command.getSourceGroup().getName());
                         result.setSuccessful(false);
                         result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + command.getLocation() + " is contained in feature " + command.getSymbolicName() + " marked BLOCKED INBOUND for cluster group " + command.getSourceGroup().getName()));
