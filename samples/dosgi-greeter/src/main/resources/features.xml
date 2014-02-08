@@ -18,11 +18,13 @@
           xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
 
     <feature name='greeter-client' description='Greeter Service Client' version='${project.version}' resolver='(obr)'>
+        <feature version="${project.version}">cellar-dosgi</feature>
         <bundle>mvn:org.apache.karaf.cellar.samples.dosgi.greeter/org.apache.karaf.cellar.samples.dosgi.greeter.api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cellar.samples.dosgi.greeter/org.apache.karaf.cellar.samples.dosgi.greeter.client/${project.version}</bundle>
     </feature>
 
     <feature name='greeter-service' description='Greeter Service Service' version='${project.version}' resolver='(obr)'>
+        <feature version="${project.version}">cellar-dosgi</feature>
         <bundle>mvn:org.apache.karaf.cellar.samples.dosgi.greeter/org.apache.karaf.cellar.samples.dosgi.greeter.api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cellar.samples.dosgi.greeter/org.apache.karaf.cellar.samples.dosgi.greeter.service/${project.version}</bundle>
     </feature>
