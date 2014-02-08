@@ -20,6 +20,8 @@ public interface Greeter {
 
     /**
      * Returns a greet message.
+     *
+     * @param greet
      * @return
      */
     public GreetResponse greet(Greet greet);
