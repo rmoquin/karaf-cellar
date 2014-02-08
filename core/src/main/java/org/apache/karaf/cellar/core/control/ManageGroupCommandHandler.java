@@ -24,13 +24,13 @@ import org.slf4j.LoggerFactory;
  */
 public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand, ManageGroupResult> {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(ManageGroupCommandHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ManageGroupCommandHandler.class);
     public static final String SWITCH_ID = "org.apache.karaf.cellar.command.managegroup.switch";
     private final Switch commandSwitch = new BasicSwitch(SWITCH_ID);
 
     @Override
     public ManageGroupResult execute(ManageGroupCommand command) {
-        ManageGroupResult result = new ManageGroupResult();
+        ManageGroupResult result = new ManageGroupResult(command.getId());
         ManageGroupAction action = command.getAction();
         String destinationGroup = command.getDestinationGroup();
 
