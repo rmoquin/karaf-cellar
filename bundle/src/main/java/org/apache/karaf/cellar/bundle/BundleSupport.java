@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BundleSupport extends CellarSupport {
 
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BundleSupport.class);
     protected BundleContext bundleContext;
     protected FeaturesService featuresService;
 
