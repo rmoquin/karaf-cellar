@@ -39,7 +39,7 @@ public class NodeEventConfigurationCommandHandler extends CommandHandler<NodeCon
 
     @Override
     public NodeConfigurationResult execute(NodeConfigurationCommand command) {
-        NodeConfigurationResult result = new NodeConfigurationResult();
+        NodeConfigurationResult result = new NodeConfigurationResult(command.getId());
         try {
             SwitchType type = command.getType();
             SwitchStatus status = command.getStatus();

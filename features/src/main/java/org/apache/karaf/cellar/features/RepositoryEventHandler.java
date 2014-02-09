@@ -67,6 +67,16 @@ public class RepositoryEventHandler extends CommandHandler<ClusterRepositoryEven
             return result;
         }
 
+        final String sourceGroupName = event.getSourceGroup().getName();
+
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
+        }
+
         String uri = event.getId();
         RepositoryEvent.EventType type = event.getType();
         try {

@@ -61,45 +61,57 @@ public class BundleEventHandler extends CommandHandler<ClusterBundleEvent, Bundl
             return result;
         }
 
+        String sourceGroupName = command.getSourceGroup().getName();
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
+        }
+        String location = command.getLocation();
+        String symbolicName = command.getSymbolicName();
+
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(command.getSourceGroup().getName());
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroupName);
             Set<String> bundleWhitelist = groupConfig.getInboundBundleWhitelist();
             Set<String> bundleBlacklist = groupConfig.getInboundBundleBlacklist();
 
-            if (bundleSupport.isAllowed(command.getLocation(), bundleWhitelist, bundleBlacklist)) {
+            if (bundleSupport.isAllowed(location, bundleWhitelist, bundleBlacklist)) {
                 // check the features first
                 Set<String> featuresWhitelist = groupConfig.getInboundFeatureWhitelist();
                 Set<String> featuresBlacklist = groupConfig.getInboundFeatureBlacklist();
-                List<Feature> matchingFeatures = bundleSupport.retrieveFeature(command.getLocation());
+                List<Feature> matchingFeatures = bundleSupport.retrieveFeature(location);
                 for (Feature feature : matchingFeatures) {
                     if (!bundleSupport.isAllowed(feature.getName(), featuresWhitelist, featuresBlacklist)) {
-                        LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", command.getLocation(), command.getSymbolicName(), command.getSourceGroup().getName());
+                        LOGGER.warn("CELLAR BUNDLE: bundle {} is contained in feature {} marked BLOCKED INBOUND for cluster group {}", location, symbolicName, sourceGroupName);
                         result.setSuccessful(false);
-                        result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + command.getLocation() + " is contained in feature " + command.getSymbolicName() + " marked BLOCKED INBOUND for cluster group " + command.getSourceGroup().getName()));
+                        result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + location + " is contained in feature " + symbolicName + " marked BLOCKED INBOUND for cluster group " + sourceGroupName));
                         return result;
                     }
                 }
-                int type = command.getType();
+                final int type = command.getType();
+                final String version = command.getVersion();
                 if (type == BundleEvent.INSTALLED) {
                     LOGGER.debug("CELLAR BUNDLE: installing bundle {}", command);
-                    bundleSupport.installBundleFromLocation(command.getLocation());
+                    bundleSupport.installBundleFromLocation(location);
                 } else if (type == BundleEvent.UNINSTALLED) {
                     LOGGER.debug("CELLAR BUNDLE: un-installing bundle {}", command);
-                    bundleSupport.uninstallBundle(command.getSymbolicName(), command.getVersion());
+                    bundleSupport.uninstallBundle(symbolicName, version);
                 } else if (type == BundleEvent.STARTED) {
                     LOGGER.debug("CELLAR BUNDLE: starting bundle {}", command);
-                    bundleSupport.startBundle(command.getSymbolicName(), command.getVersion());
+                    bundleSupport.startBundle(symbolicName, version);
                 } else if (type == BundleEvent.STOPPED) {
                     LOGGER.debug("CELLAR BUNDLE: stopping bundle {}", command);
-                    bundleSupport.stopBundle(command.getSymbolicName(), command.getVersion());
+                    bundleSupport.stopBundle(symbolicName, version);
                 } else if (type == BundleEvent.UPDATED) {
                     LOGGER.debug("CELLAR BUNDLE: updating bundle {}", command);
-                    bundleSupport.updateBundle(command.getSymbolicName(), command.getVersion());
+                    bundleSupport.updateBundle(symbolicName, version);
                 }
             } else {
-                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", command.getLocation(), command.getSourceGroup().getName());
+                LOGGER.warn("CELLAR BUNDLE: bundle {} is marked BLOCKED INBOUND in cluster group {}", location, sourceGroupName);
                 result.setSuccessful(false);
-                result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + command.getLocation() + " is marked BLOCKED INBOUND in cluster group " + command.getSourceGroup().getName()));
+                result.setThrowable(new IllegalStateException("CELLAR BUNDLE: bundle " + location + " is marked BLOCKED INBOUND in cluster group " + sourceGroupName));
             }
         } catch (Exception ex) {
             LOGGER.error("CELLAR BUNDLE: failed to handle bundle event", ex);

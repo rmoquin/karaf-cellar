@@ -57,24 +57,25 @@ public class CellarConfigurationTest extends CellarTestSupport {
 
         //Test configuration sync - add property - join later
         System.err.println(executeCommand("cluster:group-create new-grp"));
+        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set new-grp " + node1));
         Thread.sleep(DELAY_TIMEOUT);
         executeRemoteCommand("child1", "cluster:config-propset new-grp " + TESTPID + " myKey2 myValue2");
-
+        Thread.sleep(DELAY_TIMEOUT);
         properties = executeRemoteCommand("child1", "cluster:config-proplist new-grp " + TESTPID);
         System.err.println(properties);
-
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set new-grp " + node2));
         properties = executeRemoteCommand("child2", "cluster:config-proplist new-grp " + TESTPID);
+        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(properties);
         assertTrue(properties.contains("myKey2") && properties.contains("myValue2"));
     }
 
     @After
     public void tearDown() {
-        destroyCellarChild("child1");
         destroyCellarChild("child2");
+        destroyCellarChild("child1");
         unInstallCellar();
     }
 

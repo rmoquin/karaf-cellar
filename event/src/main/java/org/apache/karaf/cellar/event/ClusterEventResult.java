@@ -31,6 +31,10 @@ public class ClusterEventResult extends Result {
     public ClusterEventResult() {
     }
 
+    public ClusterEventResult(String id) {
+        super(id);
+    }
+
     public ClusterEventResult(String topicName, Map<String, Serializable> properties) {
         super(topicName);
         this.topicName = topicName;

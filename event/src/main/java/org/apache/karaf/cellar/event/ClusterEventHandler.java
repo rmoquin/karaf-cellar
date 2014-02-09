@@ -41,17 +41,24 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
 
     @Override
     public ClusterEventResult execute(ClusterEvent event) {
-        ClusterEventResult clusterEventResult = new ClusterEventResult();
-        clusterEventResult.setId(event.getId());
+        ClusterEventResult result = new ClusterEventResult(event.getId());
+        result.setId(event.getId());
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.warn("CELLAR EVENT: {} is OFF, cluster event not handled", SWITCH_ID);
-            clusterEventResult.setSuccessful(false);
-            clusterEventResult.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR EVENT: {0} is OFF, cluster event not handled", SWITCH_ID)));
-            return clusterEventResult;
+            result.setSuccessful(false);
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR EVENT: {0} is OFF, cluster event not handled", SWITCH_ID)));
+            return result;
         }
-
+        final String sourceGroupName = event.getSourceGroup().getName();
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
+        }
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroupName);
             Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
             if (eventSupport.isAllowed(event.getTopicName(), whitelist, blacklist)) {
@@ -59,15 +66,15 @@ public class ClusterEventHandler extends CommandHandler<ClusterEvent, ClusterEve
                 properties.put(Constants.EVENT_PROCESSED_KEY, Constants.EVENT_PROCESSED_VALUE);
                 properties.put(Constants.EVENT_SOURCE_GROUP_KEY, event.getSourceGroup());
                 properties.put(Constants.EVENT_SOURCE_NODE_KEY, event.getSourceNode());
-                clusterEventResult.setProperties(properties);
-                clusterEventResult.setTopicName(event.getTopicName());
+                result.setProperties(properties);
+                result.setTopicName(event.getTopicName());
             } else {
-                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), event.getSourceGroup().getName());
+                LOGGER.warn("CELLAR EVENT: event {} is marked BLOCKED INBOUND for cluster group {}", event.getTopicName(), sourceGroupName);
             }
         } catch (Exception e) {
             LOGGER.error("CELLAR EVENT: failed to handle event", e);
         }
-        return clusterEventResult;
+        return result;
     }
 
     public void init() {

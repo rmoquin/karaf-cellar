@@ -13,18 +13,13 @@
  */
 package org.apache.karaf.cellar.hazelcast;
 
-import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
-import java.io.IOException;
 import org.apache.karaf.cellar.core.Synchronizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Set;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.Node;
 
 /**
  * Cellar membership listener.
@@ -71,11 +66,7 @@ public class CellarMembershipListener implements MembershipListener {
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         //Try to prevent other nodes from thinking this node is available in it's groups sooner.
-        try {
-            this.groupManager.removeNodeFromAllGroups(false);
-        } catch (IOException ex) {
-            LOGGER.warn("Error attempting to remove shutting down cluster member from group enrollment.", ex);
-        }
+        this.groupManager.removeNodeFromAllGroups();
     }
 
     public HazelcastGroupManager getGroupManager() {

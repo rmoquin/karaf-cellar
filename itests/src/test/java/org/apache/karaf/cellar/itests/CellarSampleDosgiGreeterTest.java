@@ -40,8 +40,6 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
-        Set<Node> nodes = clusterManager.listNodes();
-        assertTrue("There should be at least 3 cellar nodes running", 3 == nodes.size());
         String node1 = this.getNodeIdOfChild("node1");
         String node2 = this.getNodeIdOfChild("node2");
 
@@ -55,9 +53,8 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:feature-install client-grp greeter-client"));
         System.err.println(executeCommand("cluster:feature-install service-grp greeter-service"));
-        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:service-list"));
-
+        System.err.println("Node1 id " + node1);
         String greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
         System.err.println(greetOutput);
         assertEquals("Expected 10 greets", 10, countGreetsFromNode(greetOutput, node1));

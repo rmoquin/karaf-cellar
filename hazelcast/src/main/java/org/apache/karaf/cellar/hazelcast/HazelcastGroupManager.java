@@ -91,7 +91,7 @@ public class HazelcastGroupManager implements GroupManager {
         LOGGER.warn("Node membership was removed for node configuration: {}.", nodeConfiguration);
         if (this.nodeConfiguration != null) {
             try {
-                removeNodeFromAllGroups(false);
+                removeNodeFromAllGroups();
             } finally {
                 this.nodeConfiguration = null;
             }
@@ -162,9 +162,6 @@ public class HazelcastGroupManager implements GroupManager {
 
     @Override
     public void deleteGroup(String groupName) throws ServiceException {
-        if (this.isDefaultGroup(groupName)) {
-            throw new IllegalArgumentException("Can't delete the default group.");
-        }
         this.groupMemberships.remove(groupName);
         removeGroupFromStore(groupName);
         this.deleteGroupConfiguration(groupName);
@@ -186,6 +183,22 @@ public class HazelcastGroupManager implements GroupManager {
     }
 
     /**
+     * Joins a new group by configuring the node to the group which triggers the actual joining of the node to occur.
+     *
+     * @param groupName
+     */
+    @Override
+    public void setGroup(String groupName) {
+        try {
+            this.removeNodeFromAllGroups();
+            this.createOrUpdateGroupConfiguration(groupName);
+            this.addNodeToGroupStore(groupName);
+        } catch (IOException e) {
+            LOGGER.error("CELLAR HAZELCAST: failed to join local node to group, " + groupName, e);
+        }
+    }
+
+    /**
      * Removes the specified node as a member of the specified group.
      *
      * @param groupName
@@ -193,10 +206,11 @@ public class HazelcastGroupManager implements GroupManager {
      */
     @Override
     public void deregisterNodeFromGroup(String groupName) throws IOException {
-        if (this.isDefaultGroup(groupName)) {
-            throw new IllegalArgumentException("Can't remove a node from the default group.");
+        if (this.groupMemberships.size() > 1) {
+            this.removeNodeFromGroupStore(groupName);
+        } else {
+            throw new IllegalArgumentException("Cannot remove group " + groupName + " because a node must belong to at least 1 group.");
         }
-        this.removeNodeFromGroupStore(groupName);
     }
 
     /**
@@ -207,7 +221,7 @@ public class HazelcastGroupManager implements GroupManager {
      */
     @Override
     public void deregisterNodeFromAllGroups() throws IOException {
-        this.removeNodeFromAllGroups(true);
+        this.removeNodeFromAllGroups();
     }
 
     @Override
@@ -265,23 +279,19 @@ public class HazelcastGroupManager implements GroupManager {
 
     }
 
-    protected void removeNodeFromAllGroups(boolean save) throws IOException {
+    /**
+     * De registers the node from all it's groups but does not persist those changes since a node must belong to at
+     * least one group.
+     */
+    protected void removeNodeFromAllGroups() {
         IMap<String, Group> map = getGroupMembershipStore();
         for (String groupName : map.keySet()) {
-            if (save && this.isDefaultGroup(groupName)) {
-                LOGGER.warn("Can't remove a node from the default group, even if removing node from al groups, when the node config will be saved.");
-                continue;
-            }
             map.lock(groupName);
             Group group = map.get(groupName);
             group.removeNode(getNode());
             map.set(groupName, group);
             map.unlock(groupName);
             nodeConfiguration.getGroups().remove(groupName);
-        }
-        if (save) {
-            this.saveNodeConfiguration();
-
         }
     }
 

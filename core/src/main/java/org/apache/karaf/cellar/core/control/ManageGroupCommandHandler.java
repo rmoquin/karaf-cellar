@@ -42,7 +42,7 @@ public class ManageGroupCommandHandler extends CommandHandler<ManageGroupCommand
             } else if (ManageGroupAction.PURGE.equals(action)) {
                 groupManager.deregisterNodeFromAllGroups();
             } else if (ManageGroupAction.SET.equals(action)) {
-                groupManager.joinGroup(destinationGroup);
+                groupManager.setGroup(destinationGroup);
             }
             Set<Group> groups = groupManager.listAllGroups();
             for (Group g : groups) {

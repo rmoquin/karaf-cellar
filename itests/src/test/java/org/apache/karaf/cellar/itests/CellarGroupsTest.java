@@ -66,11 +66,11 @@ public class CellarGroupsTest extends CellarTestSupport {
         GroupManager groupManager = getOsgiService(GroupManager.class);
         String child11 = this.getNodeIdOfChild("child1");
         System.err.println(executeCommand("cluster:group-set testgroup " + child11));
-        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
         Set<Group> groups = groupManager.listAllGroups();
         assertEquals("There should be 2 cellar groups", 2, groups.size());
 
+        System.err.println(executeCommand("cluster:group-set default " + child11));
         System.err.println(executeCommand("cluster:group-delete testgroup"));
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));

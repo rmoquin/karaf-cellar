@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.Set;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
@@ -69,10 +68,18 @@ public class FeaturesEventHandler extends CommandHandler<ClusterFeaturesEvent, F
             return result;
         }
 
+        final String sourceGroupName = event.getSourceGroup().getName();
+
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
+        }
+
         try {
-            Group group = event.getSourceGroup();
-            String groupName = group.getName();
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroupName);
             Set<String> whitelist = groupConfig.getInboundFeatureWhitelist();
             Set<String> blacklist = groupConfig.getInboundFeatureBlacklist();
             if (cellarSupport.isAllowed(event.getName(), whitelist, blacklist)) {

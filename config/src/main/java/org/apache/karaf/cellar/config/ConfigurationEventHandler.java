@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.config;
 
+import java.text.MessageFormat;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -27,6 +28,7 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
+import org.apache.karaf.cellar.core.exception.CommandExecutionException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationEvent;
@@ -56,11 +58,19 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
         }
 
         Group group = command.getSourceGroup();
-        String groupName = group.getName();
+        String sourceGroupName = group.getName();
         String pid = command.getId();
 
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
+        }
+
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(groupName);
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroupName);
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
             if (configurationSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
@@ -71,7 +81,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                         localConfigurations[0].delete();
                     }
                 } else {
-                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + groupName);
+                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + sourceGroupName);
                     Properties clusterDictionary = clusterConfigurations.get(pid);
                     if (clusterDictionary != null) {
                         Configuration conf = configAdmin.getConfiguration(pid, "?");
@@ -82,12 +92,11 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
                         localDictionary = configurationSupport.filter(localDictionary);
                         if (!configurationSupport.equals(clusterDictionary, localDictionary)) {
                             conf.update((Dictionary) clusterDictionary);
-                            configurationSupport.persistConfiguration(configAdmin, pid, clusterDictionary);
                         }
                     }
                 }
             } else {
-                LOGGER.warn("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, groupName);
+                LOGGER.debug("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, sourceGroupName);
                 result.setSuccessful(false);
                 result.setThrowable(new IllegalStateException("CELLAR CONFIG: configuration PID " + pid + " is marked BLOCKED INBOUND for cluster group " + group.getName()));
             }

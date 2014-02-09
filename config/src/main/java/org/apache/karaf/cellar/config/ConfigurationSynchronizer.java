@@ -87,7 +87,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                     Dictionary clusterDictionary = clusterConfigurations.get(pid);
                     try {
                         // update the local configuration if needed
-                        Configuration localConfiguration = configAdmin.getConfiguration(pid, null);
+                        Configuration localConfiguration = configAdmin.getConfiguration(pid, "?");
                         Dictionary localDictionary = localConfiguration.getProperties();
                         if (localDictionary == null) {
                             localDictionary = new Properties();
@@ -145,7 +145,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         event.setSourceGroup(group);
                         event.setSourceNode(groupManager.getNode());
                         event.setType(event.getType());
-                        executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+                        executionContext.execute(event, group.getNodes());
                     } else {
                         LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
                     }
