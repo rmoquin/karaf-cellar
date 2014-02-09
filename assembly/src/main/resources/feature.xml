@@ -20,6 +20,9 @@
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
 
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
+	<config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
+            name=default
+        </config>
         <bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
@@ -39,12 +42,9 @@
     </feature>
 
     <feature name="cellar-hazelcast" description="Cellar implementation based on Hazelcast" version="${project.version}" resolver="(obr)">
-        <config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
-            name=default
-        </config>
         <!--<feature version="${jackson.version}">jackson</feature>-->
+	<feature version="${hazelcast.version}">hazelcast</feature>
         <feature version="${project.version}">cellar-core</feature>
-        <feature version="${hazelcast.version}">hazelcast</feature>
         <bundle start-level="33">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
     </feature>
     <feature name="cellar-config" description="ConfigAdmin cluster support" version="${project.version}" resolver="(obr)">
@@ -61,7 +61,7 @@
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.bundle/${project.version}</bundle>
     </feature>
 
-    <feature name="cellar-shell" description="Cellar shell support" version="${project.version}" resolver="(obr)">
+    <feature name="cellar-shell" description="Cellar shell commands" version="${project.version}" resolver="(obr)">
         <feature version="${project.version}">cellar-core</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.shell/${project.version}</bundle>
     </feature>
@@ -87,13 +87,13 @@
     </feature>
 
     <feature name="cellar-obr" description="OBR cluster support" version="${project.version}" resolver="(obr)">
-        <feature version="${karaf.version}">obr</feature>
+        <feature>obr</feature>
         <feature version="${project.version}">cellar-core</feature>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.obr/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-eventadmin" description="OSGi events broadcasting in clusters" version="${project.version}" resolver="(obr)">
-        <feature version="${karaf.version}">eventadmin</feature>
+        <feature>eventadmin</feature>
         <feature version="${project.version}">cellar-core</feature>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.event/${project.version}</bundle>
     </feature>
@@ -109,7 +109,7 @@
 
     <feature name="cellar-webconsole" description="Cellar plugin for Karaf WebConsole" version="${project.version}" resolver="(obr)">
         <feature version="${project.version}">cellar</feature>
-        <feature version="${karaf.version}">webconsole</feature>
+        <feature>webconsole</feature>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.webconsole/${project.version}</bundle>
     </feature>
 
