@@ -19,7 +19,6 @@ import org.apache.felix.bundlerepository.Reason;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resolver;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
@@ -115,19 +114,29 @@ public class ObrBundleEventHandler extends CommandHandler<ClusterObrBundleEvent,
      */
     @Override
     public ClusterObrEventResponse execute(ClusterObrBundleEvent event) {
-        ClusterObrEventResponse response = new ClusterObrEventResponse();
+        ClusterObrEventResponse result = new ClusterObrEventResponse();
 
         // check if the handler is ON
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR OBR: {} switch is OFF", SWITCH_ID);
-            response.setSuccessful(false);
-            response.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR OBR: {0} switch is OFF", SWITCH_ID)));
-            return response;
+            result.setSuccessful(false);
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR OBR: {0} switch is OFF", SWITCH_ID)));
+            return result;
+        }
+
+        final String sourceGroupName = event.getSourceGroup().getName();
+
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
         }
 
         String bundleId = event.getBundleId();
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroupName);
             Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
             Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
             if (cellarSupport.isAllowed(bundleId, whitelist, blacklist)) {
@@ -161,14 +170,14 @@ public class ObrBundleEventHandler extends CommandHandler<ClusterObrBundleEvent,
                     }
                 }
             } else {
-                LOGGER.info("CELLAR OBR: bundle {} is marked as BLOCKED INBOUND for cluster group {}", bundleId, event.getSourceGroup().getName());
+                LOGGER.info("CELLAR OBR: bundle {} is marked as BLOCKED INBOUND for cluster group {}", bundleId, sourceGroupName);
             }
         } catch (Exception e) {
             LOGGER.error("CELLAR OBR: failed to handle bundle event {}", bundleId, e);
-            response.setThrowable(e);
-            response.setSuccessful(false);
+            result.setThrowable(e);
+            result.setSuccessful(false);
         }
-        return response;
+        return result;
     }
 
     @Override

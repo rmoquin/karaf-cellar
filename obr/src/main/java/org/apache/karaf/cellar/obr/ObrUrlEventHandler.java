@@ -49,18 +49,27 @@ public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, Clust
      */
     @Override
     public ClusterObrEventResponse execute(ClusterObrUrlEvent event) {
-        ClusterObrEventResponse response = new ClusterObrEventResponse(event.getId());
+        ClusterObrEventResponse result = new ClusterObrEventResponse(event.getId());
         // check if the handler is ON
         if (this.getSwitch().getStatus().equals(SwitchStatus.OFF)) {
             LOGGER.debug("CELLAR OBR: {} switch is OFF", SWITCH_ID);
-            response.setSuccessful(false);
-            response.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {0} switch is OFF, cluster event is not handled", SWITCH_ID)));
-            return response;
+            result.setSuccessful(false);
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("CELLAR FEATURES: {0} switch is OFF, cluster event is not handled", SWITCH_ID)));
+            return result;
+        }
+
+        final String sourceGroupName = event.getSourceGroup().getName();
+        // check if the node is local
+        if (!groupManager.isLocalGroup(sourceGroupName)) {
+            result.setThrowable(new CommandExecutionException(MessageFormat.format("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName)));
+            LOGGER.warn("Node is not part of thiscluster group {}, commend will be ignored.", sourceGroupName);
+            result.setSuccessful(false);
+            return result;
         }
 
         String url = event.getUrl();
         try {
-            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(event.getSourceGroup().getName());
+            GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(sourceGroupName);
             Set<String> whitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> blacklist = groupConfig.getInboundConfigurationBlacklist();
             if (cellarSupport.isAllowed(url, whitelist, blacklist) || event.getForce()) {
@@ -78,10 +87,10 @@ public class ObrUrlEventHandler extends CommandHandler<ClusterObrUrlEvent, Clust
             }
         } catch (Exception e) {
             LOGGER.error("CELLAR OBR: failed to register repository URL {}", url, e);
-            response.setThrowable(e);
-            response.setSuccessful(false);
+            result.setThrowable(e);
+            result.setSuccessful(false);
         }
-        return response;
+        return result;
     }
 
     @Override

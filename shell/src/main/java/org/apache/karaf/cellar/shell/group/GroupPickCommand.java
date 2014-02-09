@@ -61,7 +61,7 @@ public class GroupPickCommand extends GroupSupport {
                 break;
             }
             List<String> recipients = new LinkedList<String>();
-            recipients.add(node.getName());
+            recipients.add(node.getId());
             doExecute(ManageGroupAction.SET, targetGroupName, sourceGroup, recipients);
             i++;
         }

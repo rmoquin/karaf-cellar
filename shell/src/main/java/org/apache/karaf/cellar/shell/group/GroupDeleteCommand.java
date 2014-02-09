@@ -32,6 +32,12 @@ public class GroupDeleteCommand extends GroupSupport {
             System.err.println("Cluster group " + groupName + " doesn't exist");
             return null;
         }
+
+		// check if the group doesn't contain nodes
+        if (group.getNodes() != null && !group.getNodes().isEmpty()) {
+            System.err.println("Cluster group " + groupName  + " is not empty");
+            return null;
+        }
         try {
             groupManager.deleteGroup(groupName);
         } catch (IOException e) {
