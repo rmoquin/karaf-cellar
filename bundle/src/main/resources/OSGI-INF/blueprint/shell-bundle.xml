@@ -21,7 +21,6 @@
             <action class="org.apache.karaf.cellar.bundle.shell.ListBundleCommand">
                 <property name="clusterManager" ref="clusterManager"/>
                 <property name="groupManager" ref="groupManager"/>
-                <property name="executionContext" ref="executionContext"/>
             </action>
             <completers>
                 <ref component-id="allGroupCompleter"/>
