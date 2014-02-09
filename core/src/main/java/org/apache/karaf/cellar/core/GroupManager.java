@@ -123,4 +123,11 @@ public interface GroupManager {
     void joinGroup(String groupName) throws ConfigurationException;
 
     NodeConfiguration getNodeConfiguration();
+
+    /**
+     * Joins a new group by configuring the node to the group which triggers the actual joining of the node to occur.
+     *
+     * @param groupName
+     */
+    void setGroup(String groupName);
 }
