@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.config;
 
 import java.text.MessageFormat;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
@@ -98,7 +97,7 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             } else {
                 LOGGER.debug("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, sourceGroupName);
                 result.setSuccessful(false);
-                result.setThrowable(new IllegalStateException("CELLAR CONFIG: configuration PID " + pid + " is marked BLOCKED INBOUND for cluster group " + group.getName()));
+                result.setThrowable(new IllegalStateException("CELLAR CONFIG: configuration PID " + pid + " is marked BLOCKED INBOUND for cluster group " + sourceGroupName));
             }
         } catch (Exception ex) {
             LOGGER.error("CELLAR CONFIG: failed to execute cluster configuration command event", ex);
