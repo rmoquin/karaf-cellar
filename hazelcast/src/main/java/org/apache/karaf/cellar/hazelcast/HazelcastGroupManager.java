@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.*;
 
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.MembershipEvent;
+import com.hazelcast.core.MembershipListener;
 import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.Group;
@@ -46,7 +48,7 @@ import org.slf4j.Logger;
  * A group manager implementation powered by Hazelcast. The role of this class is to provide means of creating groups,
  * setting nodes to groups etc. Keep in sync the distributed group configuration with the locally persisted.
  */
-public class HazelcastGroupManager implements GroupManager {
+public class HazelcastGroupManager implements GroupManager, MembershipListener {
 
     private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastGroupManager.class);
     private NodeConfiguration nodeConfiguration;
@@ -54,11 +56,14 @@ public class HazelcastGroupManager implements GroupManager {
     private HazelcastCluster masterCluster;
     private ConfigurationAdmin configAdmin;
     private final Map<String, String> groupConfigListenerIds = new HashMap<String, String>();
+    private String membershipId;
 
     public void init() {
+        membershipId = this.masterCluster.addMembershipListener(this);
     }
 
     public void destroy() {
+        this.masterCluster.removeMembershipListener(this.membershipId);
     }
 
     /**
@@ -152,6 +157,21 @@ public class HazelcastGroupManager implements GroupManager {
             LOGGER.warn("Group service was removed: {}", groupName);
         } else {
             LOGGER.info("Group to remove was null so it was already de-registered, skipping.");
+        }
+    }
+
+    @Override
+    public void memberAdded(MembershipEvent membershipEvent) {
+        //Don't really care about this...
+    }
+
+    @Override
+    public void memberRemoved(MembershipEvent membershipEvent) {
+        String uuid = membershipEvent.getMember().getUuid();
+        LOGGER.warn("Id member was removed {} ", uuid, this.getNode().getId());
+        if (uuid.equals(this.getNode().getId())) {
+            this.removeNodeFromAllGroups();
+            LOGGER.info("Removed shutting down node from all group memberships {}" + this.getNode().getName());
         }
     }
 

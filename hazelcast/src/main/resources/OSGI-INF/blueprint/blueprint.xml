@@ -223,13 +223,6 @@
 
     <service ref="clusterManager" interface="org.apache.karaf.cellar.core.ClusterManager"/>
 
-    <!-- Members Listener -->
-    <bean id="membershipListener" class="org.apache.karaf.cellar.hazelcast.CellarMembershipListener" init-method="init">
-        <property name="synchronizers" ref="synchronizers"/>
-        <property name="groupManager" ref="groupManager"/>
-        <property name="masterCluster" ref="masterCluster"/>
-    </bean>
-
     <bean id="executionContext" class="org.apache.karaf.cellar.hazelcast.internal.DistributedExecutionContextImpl"
           init-method="init" destroy-method="destroy">
         <property name="name" value="commandExecution"/>

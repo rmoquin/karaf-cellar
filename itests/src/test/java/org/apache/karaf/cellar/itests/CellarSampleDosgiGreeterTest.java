@@ -42,12 +42,14 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         String node1 = this.getNodeIdOfChild("node1");
         String node2 = this.getNodeIdOfChild("node2");
+        Thread.sleep(DELAY_TIMEOUT);
 
         executeCommand("cluster:group-create client-grp");
         executeCommand("cluster:group-create service-grp");
         System.err.println(executeCommand("cluster:group-list"));
         System.err.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-set service-grp " + node1));
+        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:feature-url-add client-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/" + CELLAR_VERSION + "/xml/features"));
         System.err.println(executeCommand("cluster:feature-url-add service-grp mvn:org.apache.karaf.cellar.samples/dosgi-greeter/" + CELLAR_VERSION + "/xml/features"));
         Thread.sleep(DELAY_TIMEOUT);
