@@ -58,12 +58,12 @@ public interface CellarCluster {
     public Set<Node> listNodes();
 
     /**
-     * Get the nodes with a given ID.
+     * Get the nodes with a given Name.
      *
-     * @param ids the collection of ID to look for.
+     * @param nodeNames the collection of names to look for.
      * @return the set of nodes.
      */
-    public Set<Node> listNodes(Collection<String> ids);
+    public Set<Node> listNodes(Collection<String> nodeNames);
 
     /**
      * Get a node identified by a given ID.
