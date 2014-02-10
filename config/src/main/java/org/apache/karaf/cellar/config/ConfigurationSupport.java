@@ -22,6 +22,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import org.apache.karaf.cellar.core.CellarSupport;
+import org.osgi.framework.ServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,6 +133,18 @@ public class ConfigurationSupport extends CellarSupport {
             }
         }
         return false;
+    }
+
+    protected Configuration findConfiguration(ConfigurationAdmin configAdmin, String pid) throws ServiceException {
+        try {
+            Configuration[] configurations = configAdmin.listConfigurations("(service.pid=" + pid + ")");
+            if ((configurations == null) || configurations.length == 0) {
+                return null;
+            }
+            return configurations[0];
+        } catch (Exception ex) {
+            throw new ServiceException("Error occurred while attempting to retrieve the local configuration for group + " + pid, ex);
+        }
     }
 
     /**
