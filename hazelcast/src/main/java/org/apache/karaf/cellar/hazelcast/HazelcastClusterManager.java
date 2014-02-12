@@ -26,14 +26,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.slf4j.Logger;
 
 /**
  * Cluster manager implementation powered by Hazelcast.
  */
 public class HazelcastClusterManager implements ClusterManager {
 
-    private static final transient Logger LOGGER = org.slf4j.LoggerFactory.getLogger(HazelcastClusterManager.class);
     private CellarCluster masterCluster;
     private final Map<String, CellarCluster> clusterMap = new ConcurrentHashMap<String, CellarCluster>();
     private DistributedExecutionContext executionContext;

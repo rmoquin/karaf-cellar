@@ -17,7 +17,6 @@ package org.apache.karaf.cellar.hazelcast;
 
 import com.hazelcast.core.ClientService;
 import com.hazelcast.core.DistributedObjectListener;
-import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.ICountDownLatch;
 import com.hazelcast.core.IExecutorService;
@@ -32,7 +31,6 @@ import com.hazelcast.core.IdGenerator;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
-import java.io.FileNotFoundException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -43,7 +41,8 @@ import org.apache.karaf.cellar.core.CellarCluster;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.Node;
 import org.apache.karaf.cellar.core.Synchronizer;
-import org.apache.karaf.cellar.hazelcast.factory.HazelcastConfigurationManager;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
+import org.apache.karaf.cellar.hazelcast.internal.DistributedExecutionContextImpl;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
@@ -61,7 +60,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private BundleContext bundleContext;
     private IdGenerator idgenerator;
     private HazelcastInstance instance;
-    private HazelcastConfigurationManager configManager;
     private String name;
     private String nodeName;
     private String memberListenerId;
@@ -70,26 +68,34 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     private final Map<String, HazelcastNode> memberNodesById = new ConcurrentHashMap<String, HazelcastNode>();
 
     public void init() {
-        try {
-            this.instance = Hazelcast.newHazelcastInstance(configManager.createHazelcastConfig(name, nodeName));
-            this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
-            this.memberNodesByName.put(this.localNode.getName(), this.localNode);
-            this.memberNodesById.put(this.localNode.getId(), this.localNode);
-            this.memberListenerId = instance.getCluster().addMembershipListener(this);
-        } catch (FileNotFoundException ex) {
-            throw new RuntimeException("An error occurred creating instance: " + this.nodeName, ex);
-        }
+        this.name = this.instance.getName();
+        this.localNode = new HazelcastNode(instance.getCluster().getLocalMember());
+        this.memberNodesByName.put(this.localNode.getName(), this.localNode);
+        this.memberNodesById.put(this.localNode.getId(), this.localNode);
+        this.memberListenerId = instance.getCluster().addMembershipListener(this);
     }
 
     public void shutdown() {
         instance.getCluster().removeMembershipListener(memberListenerId);
         this.localNode.destroy();
-        instance.shutdown();
         this.memberNodesByName.clear();
         this.memberNodesById.clear();
         this.idgenerator = null;
         this.localNode = null;
         instance = null;
+    }
+
+    /**
+     * Get a map in the cluster.
+     *
+     * @param executorName the executor name.
+     * @return a new DistributedExecutorContext.
+     */
+    @Override
+    public DistributedExecutionContext getDistributedExecutionContext(String executorName) {
+        DistributedExecutionContextImpl executionContext = new DistributedExecutionContextImpl(executorName);
+        executionContext.init();
+        return executionContext;
     }
 
     public void synchronizeNodes(Group group) {
@@ -158,16 +164,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
             }
         }
         return nodes;
-    }
-
-    public Member findMemberById(String id) {
-        Set<Member> members = instance.getCluster().getMembers();
-        for (Member member : members) {
-            if (member.getUuid().equals(id)) {
-                return member;
-            }
-        }
-        return null;
     }
 
     /**
@@ -398,20 +394,6 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
      */
     public void setLocalNode(HazelcastNode localNode) {
         this.localNode = localNode;
-    }
-
-    /**
-     * @return the configManager
-     */
-    public HazelcastConfigurationManager getConfigManager() {
-        return configManager;
-    }
-
-    /**
-     * @param configManager the configManager to set
-     */
-    public void setConfigManager(HazelcastConfigurationManager configManager) {
-        this.configManager = configManager;
     }
 
     /**

@@ -43,7 +43,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object o, Method method, Object[] arguments) throws Throwable {
-        RemoteServiceCall remoteServiceCall = new RemoteServiceCall();
+        RemoteServiceCall remoteServiceCall = new RemoteServiceCall(clusterManager.generateId());
         remoteServiceCall.setEndpointId(endpointId);
         remoteServiceCall.setMethod(method.getName());
         remoteServiceCall.setServiceClass(serviceClass);

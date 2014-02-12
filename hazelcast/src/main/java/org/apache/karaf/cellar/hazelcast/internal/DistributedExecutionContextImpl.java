@@ -18,6 +18,7 @@ package org.apache.karaf.cellar.hazelcast.internal;
 import org.apache.karaf.cellar.core.command.DistributedCallback;
 import org.apache.karaf.cellar.core.command.DistributedMultiCallback;
 import com.hazelcast.core.ExecutionCallback;
+import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiExecutionCallback;
@@ -35,7 +36,6 @@ import org.apache.karaf.cellar.core.command.DistributedResult;
 import org.apache.karaf.cellar.core.command.DistributedTask;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
-import org.apache.karaf.cellar.hazelcast.HazelcastCluster;
 import org.apache.karaf.cellar.hazelcast.HazelcastNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +48,29 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistributedExecutionContextImpl.class);
     private String name;
-    private HazelcastCluster cluster;
+    private HazelcastInstance instance;
     private NodeConfiguration nodeConfiguration;
     private IExecutorService executorService;
     private int timeoutSeconds = 60;
-    public static final String SWITCH_ID = "org.apache.karaf.cellar.topic.producer";
+    public String SWITCH_ID = "org.apache.karaf.cellar.executor.";
+
+    public DistributedExecutionContextImpl() {
+        this("default");
+    }
+
+    public DistributedExecutionContextImpl(String name) {
+        this.name = name;
+    }
 
     private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
 
     public void init() {
-        executorService = this.cluster.getExecutorService(name);
+        SWITCH_ID = SWITCH_ID + name;
+        executorService = this.instance.getExecutorService(name);
     }
 
-    public void destroy() {
+    @Override
+    public void shutdown() {
         executorService.shutdown();
     }
 
@@ -80,7 +90,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         }
         Set<Member> members = new HashSet<Member>();
         for (Node node : destinations) {
-            Member member = cluster.findMemberById(node.getId());
+            Member member = findMemberById(node.getId());
             members.add(member);
         }
         DistributedTask task = new DistributedTask(command);
@@ -113,7 +123,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         if (destination == null) {
             throw new IllegalArgumentException("Destination node cannot be null, cannot execute command, " + command);
         }
-        Member member = cluster.findMemberById(destination.getId());
+        Member member = findMemberById(destination.getId());
         DistributedTask task = new DistributedTask(command);
         Future<R> future = this.executorService.submitToMember(task, member);
         Map<Node, R> finishedResults = new HashMap<Node, R>();
@@ -162,7 +172,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      *
      * @param command the task to execute
      * @param destination the destin
-     * @param callbackation to send to.
+     * @param callback
      */
     @Override
     public void executeAsync(C command, Node destination, DistributedCallback<R> callback) {
@@ -173,7 +183,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
             throw new IllegalArgumentException("Callback cannot be null.");
         }
         ExecutionCallback<R> distributedCallback = new DistributedCallbackImpl<R>(callback);
-        Member member = cluster.findMemberById(destination.getId());
+        Member member = findMemberById(destination.getId());
         DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMember(task, member, distributedCallback);
     }
@@ -190,7 +200,7 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         MultiExecutionCallback distributedCallback = new DistributedMultiCallbackImpl(callback);
         Set<Member> members = new HashSet<Member>();
         for (Node node : destinations) {
-            Member member = cluster.findMemberById(node.getId());
+            Member member = findMemberById(node.getId());
             members.add(member);
         }
         DistributedTask task = new DistributedTask(command);
@@ -221,6 +231,16 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         }
     }
 
+    private Member findMemberById(String id) {
+        Set<Member> members = instance.getCluster().getMembers();
+        for (Member member : members) {
+            if (member.getUuid().equals(id)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
     @Override
     public String getTopic() {
         return name;
@@ -239,20 +259,6 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      */
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * @return the cluster
-     */
-    public HazelcastCluster getCluster() {
-        return cluster;
-    }
-
-    /**
-     * @param cluster the cluster to set
-     */
-    public void setCluster(HazelcastCluster cluster) {
-        this.cluster = cluster;
     }
 
     /**
@@ -283,5 +289,19 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
      */
     public void setNodeConfiguration(NodeConfiguration nodeConfiguration) {
         this.nodeConfiguration = nodeConfiguration;
+    }
+
+    /**
+     * @return the instance
+     */
+    public HazelcastInstance getInstance() {
+        return instance;
+    }
+
+    /**
+     * @param instance the instance to set
+     */
+    public void setInstance(HazelcastInstance instance) {
+        this.instance = instance;
     }
 }

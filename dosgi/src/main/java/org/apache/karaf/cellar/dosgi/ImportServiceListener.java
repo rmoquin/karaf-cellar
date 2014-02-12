@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
-import org.osgi.framework.ServiceReference;
 
 /**
  * Listener for the service import.
@@ -43,8 +42,8 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private Map<String, EndpointDescription> remoteEndpoints;
     private final Set<ListenerInfo> pendingListeners = new LinkedHashSet<ListenerInfo>();
     private final Map<EndpointDescription, ServiceRegistration> registrations = new HashMap<EndpointDescription, ServiceRegistration>();
-    private final Map<String, String> producers = new HashMap<String, String>();
-    private final Map<String, String> consumers = new HashMap<String, String>();
+    private final Map<String, DistributedExecutionContext> producers = new HashMap<String, DistributedExecutionContext>();
+
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
@@ -58,7 +57,10 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             ServiceRegistration registration = entry.getValue();
             registration.unregister();
         }
-        consumers.clear();
+        for (Map.Entry<String, DistributedExecutionContext> entry : producers.entrySet()) {
+            DistributedExecutionContext distributedExecutionContext = entry.getValue();
+            distributedExecutionContext.shutdown();
+        }
         producers.clear();
     }
 
@@ -138,34 +140,19 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private void importService(EndpointDescription endpoint, ListenerInfo listenerInfo) {
         LOGGER.debug("CELLAR DOSGI: importing remote service: " + endpoint.getId());
 
-        String requestProducer = producers.get(endpoint.getId());
-        if (requestProducer == null) {
-            requestProducer = Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId();
-            producers.put(endpoint.getId(), requestProducer);
+        DistributedExecutionContext executionContext = producers.get(endpoint.getId());
+        if (executionContext == null) {
+            executionContext = clusterManager.getMasterCluster().getDistributedExecutionContext(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId());
+            producers.put(endpoint.getId(), executionContext);
         }
 
-        String resultConsumer = consumers.get(endpoint.getId());
-        if (resultConsumer == null) {
-            resultConsumer = Constants.RESULT_PREFIX + Constants.SEPARATOR + clusterManager.getMasterCluster().getLocalNode().getId() + endpoint.getId();
-            consumers.put(endpoint.getId(), resultConsumer);
-        }
+        producers.put(endpoint.getId(), executionContext);
 
-        producers.put(endpoint.getId(), requestProducer);
-        consumers.put(endpoint.getId(), resultConsumer);
-
-        ServiceReference<DistributedExecutionContext> sr = null;
-        try {
-            sr = this.bundleContext.getServiceReference(DistributedExecutionContext.class);
-            DistributedExecutionContext executionContext = this.bundleContext.getService(sr);
-            RemoteServiceFactory remoteServiceFactory = new RemoteServiceFactory(endpoint, clusterManager, executionContext);
-            ServiceRegistration registration = listenerInfo.getBundleContext().registerService(endpoint.getServiceClass(),
-                    remoteServiceFactory,
-                    new Hashtable<String, Object>(endpoint.getProperties()));
-            registrations.put(endpoint, registration);
-            pendingListeners.remove(listenerInfo);
-        } finally {
-            this.bundleContext.ungetService(sr);
-        }
+        RemoteServiceFactory remoteServiceFactory = new RemoteServiceFactory(endpoint, clusterManager, executionContext);
+        ServiceRegistration registration = listenerInfo.getBundleContext().registerService(endpoint.getServiceClass(),
+                remoteServiceFactory, new Hashtable<String, Object>(endpoint.getProperties()));
+        registrations.put(endpoint, registration);
+        pendingListeners.remove(listenerInfo);
     }
 
     /**
@@ -177,8 +164,10 @@ public class ImportServiceListener implements ListenerHook, Runnable {
         ServiceRegistration registration = registrations.get(endpoint);
         registration.unregister();
 
-        producers.remove(endpoint.getId());
-        consumers.remove(endpoint.getId());
+        DistributedExecutionContext executionContext = producers.get(endpoint.getId());
+        if (executionContext != null) {
+            executionContext.shutdown();
+        }
     }
 
     public BundleContext getBundleContext() {

@@ -35,7 +35,7 @@
     </bean>
 
     <!-- Remote Service Call Event Handler -->
-    <bean id="remoteServiceCallHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler">
+    <bean id="remoteServiceCallHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceCallHandler" init-method="init">
         <property name="nodeConfiguration" ref="nodeConfiguration"/>
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
@@ -47,6 +47,12 @@
             <entry key="managed" value="true"/>
         </service-properties>
     </service>
+
+
+    <bean id="remoteServiceResultHandler" class="org.apache.karaf.cellar.dosgi.RemoteServiceResultHandler">
+        <property name="commandStore" ref="commandStore"/>
+    </bean>
+    <service ref="remoteServiceResultHandler" interface="org.apache.karaf.cellar.core.event.EventHandler"/>
 
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional"/>

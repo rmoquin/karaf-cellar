@@ -15,7 +15,6 @@ package org.apache.karaf.cellar.hazelcast.factory;
 
 import com.hazelcast.config.Config;
 import com.hazelcast.config.FileSystemXmlConfig;
-import com.hazelcast.config.SerializerConfig;
 import com.hazelcast.config.TcpIpConfig;
 import java.io.FileNotFoundException;
 import org.apache.karaf.cellar.core.discovery.Discovery;
@@ -26,9 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
-import org.apache.karaf.cellar.core.Group;
-import org.apache.karaf.cellar.core.Node;
-import org.apache.karaf.cellar.hazelcast.serialization.GenericCellarSerializer;
 import org.apache.karaf.cellar.hazelcast.internal.BundleClassLoader;
 
 /**
@@ -40,25 +36,10 @@ public class HazelcastConfigurationManager {
     private Set<String> discoveredMemberSet = new LinkedHashSet<String>();
     private String xmlConfig;
     private BundleClassLoader hzClassLoader;
+    private String clusterName;
+    private String nodeName;
 
-    /**
-     * Update configuration of a Hazelcast instance.
-     *
-     * @param properties the updated configuration properties.
-     */
-    public void update(Map<String, Object> properties) {
-        if (properties != null) {
-            if (properties.containsKey(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME)) {
-                Set<String> newDiscoveredMemberSet = CellarUtils.createSetFromString((String) properties.get(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME));
-                if (!CellarUtils.collectionEquals(discoveredMemberSet, newDiscoveredMemberSet)) {
-                    LOGGER.info("Hazelcast discoveredMemberSet has been changed from {0} to {1}", discoveredMemberSet, newDiscoveredMemberSet);
-                    discoveredMemberSet = newDiscoveredMemberSet;
-                }
-            }
-        }
-    }
-
-    public Config createHazelcastConfig(String clusterName, String nodeName) throws FileNotFoundException {
+    public Config createHazelcastConfig() throws FileNotFoundException {
         Config cfg = new FileSystemXmlConfig(xmlConfig);
         cfg.setInstanceName(nodeName);
         cfg.getGroupConfig().setName(clusterName);
@@ -83,6 +64,30 @@ public class HazelcastConfigurationManager {
             tcpIpConfig.getMembers().addAll(discoveredMemberSet);
         }
         return cfg;
+    }
+
+    /**
+     * Update configuration of a Hazelcast instance.
+     *
+     * @param properties the updated configuration properties.
+     * @return
+     */
+    public boolean isUpdated(Map properties) {
+        if (properties != null) {
+            if (properties.containsKey(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME)) {
+                Set<String> newDiscoveredMemberSet = CellarUtils.createSetFromString((String) properties.get(Discovery.DISCOVERED_MEMBERS_PROPERTY_NAME));
+                if (!CellarUtils.collectionEquals(discoveredMemberSet, newDiscoveredMemberSet)) {
+                    LOGGER.debug("CELLAR HAZELCAST: Hazelcast discoveredMemberSet has been changed from {} to {}", discoveredMemberSet, newDiscoveredMemberSet);
+                    discoveredMemberSet = newDiscoveredMemberSet;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public Set<String> getDiscoveredMemberSet() {
+        return discoveredMemberSet;
     }
 
     /**
@@ -111,5 +116,33 @@ public class HazelcastConfigurationManager {
      */
     public void setXmlConfig(String xmlConfig) {
         this.xmlConfig = xmlConfig;
+    }
+
+    /**
+     * @return the clusterName
+     */
+    public String getClusterName() {
+        return clusterName;
+    }
+
+    /**
+     * @param clusterName the clusterName to set
+     */
+    public void setClusterName(String clusterName) {
+        this.clusterName = clusterName;
+    }
+
+    /**
+     * @return the nodeName
+     */
+    public String getNodeName() {
+        return nodeName;
+    }
+
+    /**
+     * @param nodeName the nodeName to set
+     */
+    public void setNodeName(String nodeName) {
+        this.nodeName = nodeName;
     }
 }

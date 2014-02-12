@@ -17,25 +17,45 @@ import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.Greet;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.GreetResponse;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.Greeter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the Greeter servicce.
  */
 public class GreeterImpl implements Greeter {
 
-    private int counter=0;
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(GreeterImpl.class);
+
+    private ClusterManager clusterManager;
+    private int counter = 0;
     private String id;
 
-    public GreeterImpl(ClusterManager clusterManager) {
-        this.id = clusterManager.getMasterCluster().getLocalNode().getId();
+    public void init() {
+        this.id = this.clusterManager.getMasterCluster().getLocalNode().getId();
     }
 
     @Override
     public GreetResponse greet(Greet greet) {
+        LOGGER.error("Hello from node %s count %s.", id, counter++);
         String message = greet.getMessage();
-        String response = message+"." +String.format("Hello from node %s count %s.",id,counter++);
-        GreetResponse greetResponse = new GreetResponse(greet,response);
+        String response = message + "." + String.format("Hello from node %s count %s.", id, counter++);
+        GreetResponse greetResponse = new GreetResponse(greet, response);
         return greetResponse;
+    }
+
+    /**
+     * @return the clusterManager
+     */
+    public ClusterManager getClusterManager() {
+        return clusterManager;
+    }
+
+    /**
+     * @param clusterManager the clusterManager to set
+     */
+    public void setClusterManager(ClusterManager clusterManager) {
+        this.clusterManager = clusterManager;
     }
 
 }

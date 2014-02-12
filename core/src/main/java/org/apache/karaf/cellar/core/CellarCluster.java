@@ -19,12 +19,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  *
  * @author rmoquin
  */
 public interface CellarCluster {
+
+    /**
+     * Get a map in the cluster.
+     *
+     * @param executorName the executor name.
+     * @return a new DistributedExecutorContext.
+     */
+    public DistributedExecutionContext getDistributedExecutionContext(String executorName);
 
     /**
      * Get a map in the cluster.

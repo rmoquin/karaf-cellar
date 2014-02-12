@@ -144,7 +144,7 @@ public class CellarTestSupport {
         }
 
         //Wait till the node is listed as Started.
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 10; i++) {
             //Wait till the node is listed as Started.
             for (Iterator<String> it = startingNodes.iterator(); it.hasNext();) {
                 String name = it.next();
@@ -171,7 +171,7 @@ public class CellarTestSupport {
                     connectingNodes.add(nodeId);
                 } else {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(500);
                     } catch (InterruptedException e) {
                         //Ignore
                     }

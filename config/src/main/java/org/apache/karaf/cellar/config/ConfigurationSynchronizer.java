@@ -147,7 +147,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                         event.setType(event.getType());
                         executionContext.execute(event, group.getNodes());
                     } else {
-                        LOGGER.warn("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
+                        LOGGER.debug("CELLAR CONFIG: configuration with PID {} is marked BLOCKED OUTBOUND for cluster group {}", pid, groupName);
                     }
                 }
             } catch (IOException ex) {

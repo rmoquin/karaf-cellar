@@ -31,6 +31,8 @@ public interface DistributedExecutionContext<T, R> {
      */
     String getName();
 
+    public void shutdown();
+
     public Map<Node, R> execute(T command, Set<Node> destinations);
 
     public Map<Node, R> execute(T command, Node destination);
