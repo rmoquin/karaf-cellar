@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import org.apache.karaf.cellar.config.shell.ConfigurationAction;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.GroupManager;
@@ -67,7 +68,6 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                     // check if the pid is allowed for outbound.
                     if (this.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                         IMap<String, Properties> clusterConfigurations = (IMap<String, Properties>) clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
-                        Configuration conf = configAdmin.getConfiguration(pid, null);
                         if (event.getType() == ConfigurationEvent.CM_DELETED) {
                             if (clusterConfigurations.containsKey(pid)) {
                                 // update the configurations in the cluster group
@@ -76,27 +76,37 @@ public class LocalConfigurationListener extends ConfigurationSupport implements 
                                 clusterConfigurations.unlock(pid);
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                                clusterConfigurationEvent.setType(event.getType());
+                                clusterConfigurationEvent.setType(ConfigurationAction.DELETE);
                                 clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                                 clusterConfigurationEvent.setSourceGroup(group);
                                 executionContext.execute(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()));
                             }
                         } else {
+                            Configuration conf = configAdmin.getConfiguration(pid, "?");
                             Dictionary<String, Object> localDictionary = conf.getProperties();
-                            localDictionary = filter(localDictionary);
-                            clusterConfigurations.lock(pid);
-                            Properties distributedDictionary = clusterConfigurations.get(pid);
-                            boolean propsUpdated = false;
-                            if (!equals(localDictionary, distributedDictionary)) {
-                                // update the configurations in the cluster group
-                                clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
-                                propsUpdated = true;
+							localDictionary = filter(localDictionary);
+                            boolean sendEvent = true;
+                            boolean contains = clusterConfigurations.containsKey(pid);
+                            if (contains) {
+                                clusterConfigurations.lock(pid);
                             }
-                            clusterConfigurations.unlock(pid);
-                            if (propsUpdated) {
+                            try {
+                                Properties distributedDictionary = clusterConfigurations.get(pid);
+                                if (!equals(localDictionary, distributedDictionary)) {
+                                    clusterConfigurations.set(pid, dictionaryToProperties(localDictionary));
+                                } else {
+                                    sendEvent = false;
+                                }
+                            } finally {
+                                if (contains) {
+                                    clusterConfigurations.unlock(pid);
+                                }
+                            }
+
+                            if (sendEvent) {
                                 // broadcast the cluster event
                                 ClusterConfigurationEvent clusterConfigurationEvent = new ClusterConfigurationEvent(pid);
-                                clusterConfigurationEvent.setType(event.getType());
+                                clusterConfigurationEvent.setType(ConfigurationAction.SYNC);
                                 clusterConfigurationEvent.setSourceGroup(group);
                                 clusterConfigurationEvent.setSourceNode(clusterManager.getMasterCluster().getLocalNode());
                                 executionContext.execute(clusterConfigurationEvent, group.getNodesExcluding(groupManager.getNode()));

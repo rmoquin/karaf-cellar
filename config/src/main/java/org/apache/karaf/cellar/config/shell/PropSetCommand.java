@@ -78,7 +78,9 @@ public class PropSetCommand extends ConfigCommandSupport {
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
-            event.setType(ConfigurationEvent.CM_UPDATED);
+            event.setType(ConfigurationAction.PROP_SET);
+            event.setPropertyName(key);
+            event.setPropertyValue(value);
             executionContext.execute(event, group.getNodes());
         } else {
             System.out.println("No configuration found in cluster group " + groupName);

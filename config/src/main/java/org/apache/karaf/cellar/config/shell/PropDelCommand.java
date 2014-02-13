@@ -74,8 +74,9 @@ public class PropDelCommand extends ConfigCommandSupport {
                 // broadcast the cluster event
                 ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
                 event.setSourceGroup(group);
-                event.setType(ConfigurationEvent.CM_DELETED);
-                executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+                event.setType(ConfigurationAction.PROP_DELETE);
+                event.setPropertyName(key);
+                executionContext.execute(event, group.getNodes());
             }
         } else {
             System.out.println("No configuration found in cluster group " + groupName);

@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.net.URI;
+import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +54,7 @@ import org.apache.karaf.features.BootFinished;
 import org.apache.karaf.features.FeaturesService;
 import org.apache.karaf.instance.core.Instance;
 import org.apache.karaf.instance.core.InstanceService;
+import org.junit.Before;
 import org.ops4j.pax.exam.Configuration;
 import org.ops4j.pax.exam.Option;
 import org.ops4j.pax.exam.ProbeBuilder;
@@ -90,6 +92,13 @@ public class CellarTestSupport {
     public TestProbeBuilder probeConfiguration(TestProbeBuilder probe) {
         probe.setHeader(Constants.DYNAMICIMPORT_PACKAGE, "*,org.apache.felix.service.*;status=provisional");
         return probe;
+    }
+
+    @Before
+    public void setup() {
+        String userHome = System.getProperty("user.home");
+        File file = new File(userHome + "/.sshkaraf/known_hosts");
+        file.delete();
     }
 
     public File getConfigFile(String path) {
@@ -212,7 +221,8 @@ public class CellarTestSupport {
             ex.printStackTrace(System.err);
         }
         try {
-            System.err.println(executeCommand("instance:stop " + name));
+            Instance instance = instanceService.getInstance(name);
+            instance.stop();
         } catch (Exception ex) {
             ex.printStackTrace(System.err);
         }
@@ -241,10 +251,6 @@ public class CellarTestSupport {
 
     @Configuration
     public Option[] config() {
-        String userHome = System.getProperty("user.home");
-        File file = new File(userHome + "/.sshkaraf/known_hosts");
-        System.out.println(file);
-        file.delete();
         MavenArtifactUrlReference karafUrl = maven().groupId("org.apache.karaf").artifactId("apache-karaf").version(KARAF_VERSION).type("tar.gz");
         Option[] options = new Option[]{
             karafDistributionConfiguration().frameworkUrl(karafUrl).name("Apache Karaf").unpackDirectory(new File("target/exam")),
@@ -272,11 +278,16 @@ public class CellarTestSupport {
         String instanceCmd = "instance:connect -u karaf -p karaf " + instanceName + " ";
         return executeCommand(instanceCmd + command);
     }
+
+    protected void executeRemoteCommandNR(String instanceName, String command) {
+        String instanceCmd = "instance:connect -u karaf -p karaf " + instanceName + " ";
+        executeCommandNR(instanceCmd + command, COMMAND_TIMEOUT, false, null);
+    }
+
 //    public String executeRemoteCommand(String instanceName, String command) throws IOException, Exception {
 //        int port = instanceService.getInstance(instanceName).getSshPort();
 //        return "ssh:ssh -q -l karaf -P karaf -p " + port + " localhost '" + command.replaceAll("'", "\\'") + "'";
 //    }
-
     /**
      * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
      *
@@ -367,6 +378,78 @@ public class CellarTestSupport {
             }
         }
         return response;
+    }
+
+    /**
+     * Executes a shell command and returns output as a String. Commands have a default timeout of 10 seconds.
+     *
+     * @param command The command to execute.
+     * @param timeout The amount of time in millis to wait for the command to execute.
+     * @param silent Specifies if the command should be displayed in the screen.
+     * @param subject The principals (e.g. RolePrincipal objects) to run the command under
+     * @return
+     */
+    protected void executeCommandNR(final String command, final Long timeout, final Boolean silent, Subject subject) {
+        waitForCommandService(command);
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        final PrintStream printStream = new PrintStream(byteArrayOutputStream);
+        final CommandProcessor commandProcessor = getOsgiService(CommandProcessor.class);
+        final CommandSession commandSession = commandProcessor.createSession(System.in, printStream, System.err);
+
+        final Runnable commandCallable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (!silent) {
+                        System.err.println(command);
+                    }
+                    commandSession.execute(command);
+                } catch (Exception e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                } finally {
+                    printStream.flush();
+                }
+            }
+        };
+
+        FutureTask commandFuture;
+        final Subject auth = (subject == null) ? authSubject : subject;
+        if (auth == null) {
+            commandFuture = new FutureTask(commandCallable, Boolean.TRUE);
+        } else {
+            // If principals are defined, run the command callable via Subject.doAs()
+            commandFuture = new FutureTask(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Subject.doAs(auth, new PrivilegedExceptionAction() {
+                            @Override
+                            public Object run() throws Exception {
+                                commandCallable.run();
+                                return Boolean.TRUE;
+                            }
+                        });
+                    } catch (PrivilegedActionException ex) {
+                        throw new RuntimeException("Some sort of error occurred running a shell command.", ex);
+                    }
+                }
+            }, Boolean.TRUE);
+        }
+
+        try {
+            executor.submit(commandFuture);
+            commandFuture.get(timeout, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            System.err.println("The Runnable shell command timed out for: " + command);
+        } catch (Exception e) {
+            System.err.println("Shell command failed due to an unexpected exception.");
+            Throwable cause = e.getCause();
+            if (cause != null) {
+                cause.printStackTrace(System.err);
+            } else {
+                e.printStackTrace(System.err);
+            }
+        }
     }
 
     protected Bundle getInstalledBundle(String symbolicName) {

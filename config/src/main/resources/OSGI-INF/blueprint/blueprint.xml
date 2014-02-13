@@ -47,7 +47,6 @@
         <property name="groupManager" ref="groupManager"/>
         <property name="clusterManager" ref="clusterManager"/>
         <property name="executionContext" ref="executionContext"/>
-        <property name="storage" value="${karaf.base}/etc/"/>
     </bean>
 
     <service ref="synchronizer" interface="org.apache.karaf.cellar.core.Synchronizer"/>
@@ -63,7 +62,6 @@
     </bean>
 
     <bean id="configurationSupport" class="org.apache.karaf.cellar.config.ConfigurationSupport">
-        <property name="storage" value="${karaf.base}/etc/"/>
     </bean>
 
     <service ref="eventHandler" interface="org.apache.karaf.cellar.core.event.EventHandler">

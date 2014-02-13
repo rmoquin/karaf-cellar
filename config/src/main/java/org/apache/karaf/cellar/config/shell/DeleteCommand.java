@@ -51,8 +51,8 @@ public class DeleteCommand extends ConfigCommandSupport {
         }
         // check if the config pid is allowed
         GroupConfiguration groupConfig = groupManager.findGroupConfigurationByName(group.getName());
-        Set<String> whitelist = groupConfig.getOutboundBundleWhitelist();
-        Set<String> blacklist = groupConfig.getOutboundBundleBlacklist();
+        Set<String> whitelist = groupConfig.getOutboundConfigurationWhitelist();
+        Set<String> blacklist = groupConfig.getOutboundConfigurationBlacklist();
         if (!isAllowed(pid, whitelist, blacklist)) {
             System.err.println("Configuration PID " + pid + " is blocked outbound for cluster group " + groupName);
             return null;
@@ -66,7 +66,7 @@ public class DeleteCommand extends ConfigCommandSupport {
             // broadcast a cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
-            event.setType(ConfigurationEvent.CM_DELETED);
+            event.setType(ConfigurationAction.DELETE);
             executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
 
         } else {

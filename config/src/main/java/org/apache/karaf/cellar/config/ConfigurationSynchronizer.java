@@ -93,10 +93,8 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
                             localDictionary = new Properties();
                         }
 
-                        localDictionary = filter(localDictionary);
                         if (!equals(localDictionary, clusterDictionary)) {
                             localConfiguration.update(localDictionary);
-                            persistConfiguration(configAdmin, pid, localDictionary);
                         }
                     } catch (IOException ex) {
                         LOGGER.error("CELLAR CONFIG: failed to read local configuration", ex);
@@ -137,7 +135,7 @@ public class ConfigurationSynchronizer extends ConfigurationSupport implements S
 
                     if (cellarSupport.isAllowed(pid, bundleWhitelist, bundleBlacklist)) {
                         Dictionary localDictionary = localConfiguration.getProperties();
-                        localDictionary = filter(localDictionary);
+						localDictionary = filter(localDictionary);
                         // update the configurations in the cluster group
                         clusterConfigurations.put(pid, dictionaryToProperties(localDictionary));
                         // broadcast the cluster event

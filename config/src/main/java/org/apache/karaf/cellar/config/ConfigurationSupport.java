@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 public class ConfigurationSupport extends CellarSupport {
 
     private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigurationSupport.class);
-    private static final String[] EXCLUDED_PROPERTIES = {"service.factoryPid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories"};
+    private static final String[] EXCLUDED_PROPERTIES = {"service.factoryPid", "service.pid", "felix.fileinstall.filename", "felix.fileinstall.dir", "felix.fileinstall.tmpdir", "org.ops4j.pax.url.mvn.defaultRepositories"};
     private static final String FELIX_FILEINSTALL_FILENAME = "felix.fileinstall.filename";
     protected File storage;
 
@@ -54,6 +54,26 @@ public class ConfigurationSupport extends CellarSupport {
             }
         }
         return properties;
+    }
+
+    /**
+     * Read a {@code Dictionary} and create a corresponding {@code Properties}.
+     *
+     * @param properties the source properties.
+     * @return the corresponding dictionary.
+     */
+    public Dictionary propertiesToDictionary(Properties properties) {
+        Dictionary dictionary = new Hashtable();
+        if (properties != null) {
+            Enumeration keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                Object key = keys.nextElement();
+                if (key != null && properties.get(key) != null) {
+                    dictionary.put(key, properties.get(key));
+                }
+            }
+        }
+        return dictionary;
     }
 
     /**
@@ -119,7 +139,6 @@ public class ConfigurationSupport extends CellarSupport {
         }
         return result;
     }
-
     /**
      * Check if a property is in the default excluded list.
      *
@@ -128,23 +147,15 @@ public class ConfigurationSupport extends CellarSupport {
      */
     public boolean isExcludedProperty(String propertyName) {
         for (int i = 0; i < EXCLUDED_PROPERTIES.length; i++) {
-            if (EXCLUDED_PROPERTIES[i].equals(propertyName)) {
+            if (EXCLUDED_PROPERTIES[i].equals(propertyName))
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
                 return true;
             }
-        }
         return false;
-    }
-
-    protected Configuration findConfiguration(ConfigurationAdmin configAdmin, String pid) throws ServiceException {
-        try {
-            Configuration[] configurations = configAdmin.listConfigurations("(service.pid=" + pid + ")");
-            if ((configurations == null) || configurations.length == 0) {
-                return null;
-            }
-            return configurations[0];
-        } catch (Exception ex) {
-            throw new ServiceException("Error occurred while attempting to retrieve the local configuration for group + " + pid, ex);
-        }
     }
 
     /**
@@ -154,32 +165,36 @@ public class ConfigurationSupport extends CellarSupport {
      * @param pid the configuration PID to store.
      * @param props the properties to store, linked to the configuration PID.
      */
-    protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) throws IOException {
+    protected void persistConfiguration(ConfigurationAdmin admin, String pid, Dictionary props) {
         try {
             if (pid.matches(".*-.*-.*-.*-.*")) {
-                LOGGER.warn("PID matches regex filter, config won't be persisted for pid {}", pid);
-                // it's UUID
+//                LOGGER.warn("PID matches regex filter, config won't be persisted for pid {}", pid);
+//                // it's UUID
                 return;
             }
             File storageFile = new File(storage, pid + ".cfg");
             Configuration cfg = admin.getConfiguration(pid, null);
             if (cfg != null && cfg.getProperties() != null) {
                 Object val = cfg.getProperties().get(FELIX_FILEINSTALL_FILENAME);
-                if (val instanceof URL) {
-                    storageFile = new File(((URL) val).toURI());
-                }
-                if (val instanceof URI) {
-                    storageFile = new File((URI) val);
-                }
-                if (val instanceof String) {
-                    storageFile = new File(new URL((String) val).toURI());
+                try {
+                    if (val instanceof URL) {
+                        storageFile = new File(((URL) val).toURI());
+                    }
+                    if (val instanceof URI) {
+                        storageFile = new File((URI) val);
+                    }
+                    if (val instanceof String) {
+                        storageFile = new File(new URL((String) val).toURI());
+                    }
+                } catch (Exception e) {
+                    throw new IOException(e.getMessage(), e);
                 }
             }
-
+//
             org.apache.felix.utils.properties.Properties p = new org.apache.felix.utils.properties.Properties(storageFile);
             List<String> propertiesToRemove = new ArrayList<String>();
             Set<String> set = p.keySet();
-
+//            LOGGER.error("Checking for keys to ");
             for (String key : set) {
                 if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
@@ -187,12 +202,12 @@ public class ConfigurationSupport extends CellarSupport {
                     propertiesToRemove.add(key);
                 }
             }
-
+//
             for (String key : propertiesToRemove) {
                 p.remove(key);
             }
-
-            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements();) {
+//
+            for (Enumeration<String> keys = props.keys(); keys.hasMoreElements(); ) {
                 String key = keys.nextElement();
                 if (!org.osgi.framework.Constants.SERVICE_PID.equals(key)
                         && !ConfigurationAdmin.SERVICE_FACTORYPID.equals(key)
@@ -200,17 +215,16 @@ public class ConfigurationSupport extends CellarSupport {
                     p.put(key, (String) props.get(key));
                 }
             }
-
-            // save the cfg file
-            if (!storage.exists()) {
-                storage.mkdirs();
-            }
+//
+//            // save the cfg file
+//            if (!storage.exists()) {
+            storage.mkdirs();
+//            }
             p.save();
         } catch (Exception e) {
-            throw new IOException(e.getMessage(), e);
+//            throw new IOException(e.getMessage(), e);
         }
     }
-
     /**
      * Delete the storage of a configuration.
      *
@@ -220,7 +234,6 @@ public class ConfigurationSupport extends CellarSupport {
         File cfgFile = new File(storage, pid + ".cfg");
         cfgFile.delete();
     }
-
     public File getStorage() {
         return storage;
     }

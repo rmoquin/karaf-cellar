@@ -13,6 +13,8 @@
  */
 package org.apache.karaf.cellar.config.shell;
 
+import java.util.Collection;
+import java.util.HashSet;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.Configurations;
@@ -25,7 +27,6 @@ import java.util.Properties;
 import java.util.Set;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
-import org.osgi.service.cm.ConfigurationEvent;
 
 @Command(scope = "cluster", name = "config-propappend", description = "Append to the property value for a configuration PID in a cluster group")
 public class PropAppendCommand extends ConfigCommandSupport {
@@ -71,26 +72,36 @@ public class PropAppendCommand extends ConfigCommandSupport {
             Properties properties = clusterConfigurations.get(pid);
             if (properties == null) {
                 properties = new Properties();
-            }
-            Object currentValue = properties.get(key);
-            if (currentValue == null) {
                 properties.put(key, value);
-            } else if (currentValue instanceof String) {
-                properties.put(key, currentValue + value);
             } else {
-                System.err.println("Append failed: current value is not a String");
-                return null;
+                Object currentValue = properties.get(key);
+                if (currentValue == null) {
+                    properties.put(key, value);
+                } else if (currentValue instanceof Collection) {
+                    Set values = new HashSet();
+                    values.addAll((Collection) currentValue);
+                    values.add(value);
+                    properties.put(key, values);
+                } else {
+                    Set values = new HashSet();
+                    values.add(currentValue);
+                    values.add(value);
+                    properties.put(key, values);
+                }
             }
             clusterConfigurations.put(pid, properties);
 
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
-            event.setType(ConfigurationEvent.CM_UPDATED);
-            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+            event.setType(ConfigurationAction.PROP_APPEND);
+            event.setPropertyName(key);
+            event.setPropertyValue(value);
+            executionContext.execute(event, group.getNodes());
         } else {
             System.out.println("No configuration found in cluster group " + groupName);
         }
+
         return null;
     }
 

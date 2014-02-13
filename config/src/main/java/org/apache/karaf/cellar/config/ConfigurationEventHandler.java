@@ -13,7 +13,9 @@
  */
 package org.apache.karaf.cellar.config;
 
+import com.hazelcast.core.IMap;
 import java.text.MessageFormat;
+import java.util.Collection;
 import org.apache.karaf.cellar.core.Configurations;
 import org.apache.karaf.cellar.core.control.BasicSwitch;
 import org.apache.karaf.cellar.core.control.Switch;
@@ -22,16 +24,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Dictionary;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.karaf.cellar.config.shell.ConfigurationAction;
 import org.apache.karaf.cellar.core.Group;
 import org.apache.karaf.cellar.core.GroupConfiguration;
 import org.apache.karaf.cellar.core.command.CommandHandler;
 import org.apache.karaf.cellar.core.exception.CommandExecutionException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationEvent;
 
 /**
  * ConfigurationEventHandler handles received configuration cluster event.
@@ -74,26 +76,50 @@ public class ConfigurationEventHandler extends CommandHandler<ClusterConfigurati
             Set<String> configWhitelist = groupConfig.getInboundConfigurationWhitelist();
             Set<String> configBlacklist = groupConfig.getInboundConfigurationBlacklist();
             if (configurationSupport.isAllowed(pid, configWhitelist, configBlacklist)) {
-                if (command.getType() == ConfigurationEvent.CM_DELETED) {
-                    // delete the configuration
+                ConfigurationAction commandType = command.getType();
+                if (ConfigurationAction.DELETE.equals(commandType)) {
                     Configuration[] localConfigurations = configAdmin.listConfigurations("(service.pid=" + pid + ")");
                     if (localConfigurations != null && localConfigurations.length > 0) {
                         localConfigurations[0].delete();
                     }
                 } else {
-                    Map<String, Properties> clusterConfigurations = clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + sourceGroupName);
-                    Properties clusterDictionary = clusterConfigurations.get(pid);
-                    if (clusterDictionary != null) {
-                        Configuration conf = configAdmin.getConfiguration(pid, "?");
-                        Dictionary localDictionary = conf.getProperties();
-                        if (localDictionary == null) {
-                            localDictionary = new Properties();
-                        }
-                        localDictionary = configurationSupport.filter(localDictionary);
-                        if (!configurationSupport.equals(clusterDictionary, localDictionary)) {
-                            conf.update((Dictionary) clusterDictionary);
-                        }
+                    Configuration conf = configAdmin.getConfiguration(pid, "?");
+                    Dictionary localDictionary = conf.getProperties();
+                    if (localDictionary == null) {
+                        localDictionary = new Properties();
                     }
+                    localDictionary = configurationSupport.filter(localDictionary);
+                    String key = command.getPropertyName();
+                    Object value = command.getPropertyValue();
+                    if (ConfigurationAction.PROP_APPEND.equals(commandType)) {
+                        Object currentValue = localDictionary.get(key);
+                        if (currentValue == null) {
+                            localDictionary.put(key, value);
+                        } else if (currentValue instanceof Collection) {
+                            Set values = new HashSet();
+                            values.addAll((Collection) currentValue);
+                            values.add(value);
+                            localDictionary.put(key, values);
+                        } else {
+                            Set values = new HashSet();
+                            values.add(currentValue);
+                            values.add(value);
+                            localDictionary.put(key, values);
+                        }
+                    } else if (ConfigurationAction.PROP_DELETE.equals(commandType)) {
+                        localDictionary.remove(key);
+                    } else if (ConfigurationAction.PROP_SET.equals(commandType)) {
+                        localDictionary.put(key, value);
+                    } else if (ConfigurationAction.SYNC.equals(commandType)) {
+                        IMap<String, Properties> clusterConfigurations = (IMap<String, Properties>) clusterManager.getMap(Constants.CONFIGURATION_MAP + Configurations.SEPARATOR + group.getName());
+                        Properties clusterProperties = clusterConfigurations.get(pid);
+                        conf.update(configurationSupport.propertiesToDictionary(clusterProperties));
+                    } else {
+                        LOGGER.debug("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, sourceGroupName);
+                        result.setSuccessful(false);
+                        result.setThrowable(new IllegalStateException("CELLAR CONFIG: Unrecognized configuration event type: " + commandType));
+                    }
+                    conf.update((Dictionary) localDictionary);
                 }
             } else {
                 LOGGER.debug("CELLAR CONFIG: configuration PID {} is marked BLOCKED INBOUND for cluster group {}", pid, sourceGroupName);

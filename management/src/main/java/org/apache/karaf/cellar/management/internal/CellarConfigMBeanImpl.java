@@ -16,13 +16,13 @@ package org.apache.karaf.cellar.management.internal;
 import org.apache.karaf.cellar.config.Constants;
 import org.apache.karaf.cellar.core.*;
 import org.apache.karaf.cellar.management.CellarConfigMBean;
-import org.osgi.service.cm.ConfigurationEvent;
 
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
 import java.util.*;
 import org.apache.karaf.cellar.config.ClusterConfigurationEvent;
+import org.apache.karaf.cellar.config.shell.ConfigurationAction;
 import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.SwitchStatus;
 
@@ -86,8 +86,8 @@ public class CellarConfigMBeanImpl extends StandardMBean implements CellarConfig
             // broadcast the cluster event
             ClusterConfigurationEvent event = new ClusterConfigurationEvent(pid);
             event.setSourceGroup(group);
-            event.setType(ConfigurationEvent.CM_DELETED);
-            executionContext.execute(event, group.getNodesExcluding(groupManager.getNode()));
+            event.setType(ConfigurationAction.DELETE);
+            executionContext.execute(event, group.getNodes());
         } else {
             throw new IllegalArgumentException("No configuration found in cluster group " + groupName);
         }

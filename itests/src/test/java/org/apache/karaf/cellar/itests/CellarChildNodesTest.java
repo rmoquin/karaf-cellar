@@ -17,8 +17,8 @@ import java.util.Set;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
 import org.junit.After;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
@@ -39,7 +39,7 @@ public class CellarChildNodesTest extends CellarTestSupport {
         Set<Node> nodes = clusterManager.listNodes();
         System.err.println(executeCommand("cluster:node-list"));
         assertNotNull(localNode);
-        assertTrue("There should be at least 2 cellar nodes running", 2 <= nodes.size());
+        assertEquals("There should be at least 2 cellar nodes running", 2, nodes.size());
     }
 
     @After
