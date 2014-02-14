@@ -64,11 +64,6 @@
             <groupId>org.apache.karaf.instance</groupId>
             <artifactId>org.apache.karaf.instance.core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.cellar.samples.dosgi.greeter</groupId>
-            <artifactId>org.apache.karaf.cellar.samples.dosgi.greeter.client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.ops4j.pax.logging</groupId>

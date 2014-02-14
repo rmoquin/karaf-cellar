@@ -43,14 +43,12 @@ public class CellarConfigurationTest extends CellarTestSupport {
 
         //Test configuration sync - add property
         System.err.println(executeCommand("cluster:config-propset default " + TESTPID + " myKey myValue"));
-        Thread.sleep(DELAY_TIMEOUT);
         properties = executeRemoteCommand("child1", "cluster:config-proplist default " + TESTPID);
         System.err.println(properties);
         assertTrue(properties.contains("myKey") && properties.contains("myValue"));
 
         //Test configuration sync - remove property
         System.err.println(executeCommand("cluster:config-propdel default " + TESTPID + " myKey"));
-        Thread.sleep(DELAY_TIMEOUT);
         properties = executeRemoteCommand("child1", "cluster:config-proplist default " + TESTPID);
         System.err.println(properties);
         assertFalse(properties.contains("myKey"));
@@ -59,12 +57,9 @@ public class CellarConfigurationTest extends CellarTestSupport {
         System.err.println(executeCommand("cluster:group-create new-grp"));
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set new-grp " + node1));
-        Thread.sleep(DELAY_TIMEOUT);
         executeRemoteCommand("child1", "cluster:config-propset new-grp " + TESTPID + " myKey2 myValue2");
-        Thread.sleep(DELAY_TIMEOUT);
         properties = executeRemoteCommand("child1", "cluster:config-proplist new-grp " + TESTPID);
         System.err.println(properties);
-        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-set new-grp " + node2));
         properties = executeRemoteCommand("child2", "cluster:config-proplist new-grp " + TESTPID);
         Thread.sleep(DELAY_TIMEOUT);

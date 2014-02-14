@@ -20,9 +20,6 @@
     <repository>mvn:org.jclouds.karaf/jclouds-karaf/${jclouds.version}/xml/features</repository>
 
     <feature name="cellar-core" description="Karaf clustering core" version="${project.version}" resolver="(obr)">
-        <config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
-            name=default
-        </config>
         <bundle start-level="30">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.core/${project.version}</bundle>
         <bundle start-level="31">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.utils/${project.version}</bundle>
     </feature>
@@ -42,9 +39,12 @@
     </feature>
 
     <feature name="cellar-hazelcast" description="Cellar implementation based on Hazelcast" version="${project.version}" resolver="(obr)">
+        <config name="org.apache.karaf.cellar.core.GroupConfiguration-1">
+            name=default
+        </config>
         <!--<feature version="${jackson.version}">jackson</feature>-->
-        <feature version="${hazelcast.version}">hazelcast</feature>
         <feature version="${project.version}">cellar-core</feature>
+        <feature version="${hazelcast.version}">hazelcast</feature>
         <bundle start-level="33">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.hazelcast/${project.version}</bundle>
     </feature>
     <feature name="cellar-config" description="ConfigAdmin cluster support" version="${project.version}" resolver="(obr)">
@@ -82,24 +82,24 @@
     </feature>
 
     <feature name="cellar-dosgi" description="DOSGi support" version="${project.version}" resolver="(obr)">
-        <feature version="${project.version}">cellar-core</feature>
+        <feature version="${project.version}">cellar</feature>
         <bundle start-level="40">mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.dosgi/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-obr" description="OBR cluster support" version="${project.version}" resolver="(obr)">
         <feature version="${karaf.version}">obr</feature>
-        <feature version="${project.version}">cellar-core</feature>
+        <feature version="${project.version}">cellar</feature>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.obr/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-eventadmin" description="OSGi events broadcasting in clusters" version="${project.version}" resolver="(obr)">
         <feature version="${karaf.version}">eventadmin</feature>
-        <feature version="${project.version}">cellar-core</feature>
+        <feature version="${project.version}">cellar</feature>
         <bundle>mvn:org.apache.karaf.cellar/org.apache.karaf.cellar.event/${project.version}</bundle>
     </feature>
 
     <feature name="cellar-cloud" description="Cloud blobstore support in clusters" version="${project.version}" resolver="(obr)">
-        <feature version="${project.version}">cellar-core</feature>
+        <feature version="${project.version}">cellar</feature>
         <feature version="${jclouds.version}">jclouds</feature>
         <!-- Adding S3 as the default Blobstore -->
         <feature version="${jclouds.version}">jclouds-aws-s3</feature>

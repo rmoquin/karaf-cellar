@@ -13,6 +13,7 @@
  */
 package org.apache.karaf.cellar.itests;
 
+import java.security.spec.PSSParameterSpec;
 import java.util.Set;
 import org.apache.karaf.cellar.core.ClusterManager;
 import org.apache.karaf.cellar.core.Node;
@@ -33,11 +34,16 @@ public class CellarChildNodesTest extends CellarTestSupport {
     public void testClusterWithChildNodes() throws Exception {
         installCellar();
         createCellarChild("child1");
+        try {
+            Thread.sleep(DELAY_TIMEOUT);
+        } catch (InterruptedException e) {
+            //Ignore
+        }
+        System.err.println(executeCommand("cluster:node-list"));
         ClusterManager clusterManager = getOsgiService(ClusterManager.class);
         assertNotNull(clusterManager);
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         Set<Node> nodes = clusterManager.listNodes();
-        System.err.println(executeCommand("cluster:node-list"));
         assertNotNull(localNode);
         assertEquals("There should be at least 2 cellar nodes running", 2, nodes.size());
     }

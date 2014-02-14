@@ -143,7 +143,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     @Override
     public Set<Node> listNodes() {
         Set<Node> nodes = new HashSet<Node>();
-        nodes.addAll(this.memberNodesByName.values());
+        nodes.addAll(this.memberNodesById.values());
         return nodes;
     }
 
@@ -411,6 +411,7 @@ public class HazelcastCluster implements CellarCluster, MembershipListener {
     }
 
     private void addNewNode(Member member) {
+        LOGGER.info("New node being registered to cluster: " + member);
         HazelcastNode newNode = new HazelcastNode(member);
         this.memberNodesByName.put(newNode.getName(), newNode);
         this.memberNodesById.put(newNode.getId(), newNode);
