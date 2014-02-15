@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
+import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Listener called when a new service is exported.
@@ -39,7 +40,7 @@ public class ExportServiceListener implements ServiceListener {
     private CellarCluster masterCluster;
     private BundleContext bundleContext;
     private Map<String, EndpointDescription> remoteEndpoints;
-    private final Map<String, String> consumers = new HashMap<String, String>();
+    private final Map<String, DistributedExecutionContext> consumers = new HashMap<String, DistributedExecutionContext>();
 
     private Node node;
 
@@ -65,6 +66,10 @@ public class ExportServiceListener implements ServiceListener {
 
     public void destroy() {
         bundleContext.removeServiceListener(this);
+        for (Map.Entry<String, DistributedExecutionContext> entry : consumers.entrySet()) {
+            DistributedExecutionContext distributedExecutionContext = entry.getValue();
+            distributedExecutionContext.shutdown();
+        }
         consumers.clear();
     }
 
@@ -122,10 +127,10 @@ public class ExportServiceListener implements ServiceListener {
                 remoteEndpoints.put(endpointId, endpoint);
 
                 // register the endpoint consumer
-                String consumerEndpointId = consumers.get(endpointId);
-                if (consumerEndpointId == null) {
-                    consumerEndpointId = Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId;
-                    consumers.put(endpointId, consumerEndpointId);
+                DistributedExecutionContext executionContext = consumers.get(endpoint.getId());
+                if (executionContext == null) {
+                    executionContext = masterCluster.getDistributedExecutionContext(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId);
+                    consumers.put(endpoint.getId(), executionContext);
                 }
             }
         }
@@ -155,8 +160,9 @@ public class ExportServiceListener implements ServiceListener {
                 // if the endpoint is used for export from other nodes too, then put it back.
                 if (endpointDescription.getNodes().size() > 0) {
                     remoteEndpoints.put(endpointId, endpointDescription);
-				}
-                consumers.remove(endpointId);
+                }
+                DistributedExecutionContext executionContext = consumers.remove(endpointId);
+                executionContext.shutdown();
             }
         }
     }

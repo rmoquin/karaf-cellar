@@ -42,10 +42,10 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         Node localNode = clusterManager.getMasterCluster().getLocalNode();
         String node1 = this.getNodeIdOfChild("node1");
         String node2 = this.getNodeIdOfChild("node2");
-        Thread.sleep(DELAY_TIMEOUT);
 
         executeCommand("cluster:group-create client-grp");
         executeCommand("cluster:group-create service-grp");
+        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:group-list"));
         System.err.println(executeCommand("cluster:group-set client-grp " + localNode.getId()));
         System.err.println(executeCommand("cluster:group-set service-grp " + node1));
@@ -55,6 +55,7 @@ public class CellarSampleDosgiGreeterTest extends CellarTestSupport {
         Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:feature-install client-grp greeter-client"));
         System.err.println(executeCommand("cluster:feature-install service-grp greeter-service"));
+        Thread.sleep(DELAY_TIMEOUT);
         System.err.println(executeCommand("cluster:service-list"));
         System.err.println("Node1 id " + node1);
         String greetOutput = executeCommand("dosgi-greeter:greet Hi 10");
