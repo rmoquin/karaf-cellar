@@ -62,10 +62,11 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         this.name = name;
     }
 
-    private final Switch eventSwitch = new BasicSwitch(SWITCH_ID);
+    private Switch eventSwitch;
 
     public void init() {
         SWITCH_ID = SWITCH_ID + name;
+        eventSwitch = new BasicSwitch(SWITCH_ID);
         executorService = this.instance.getExecutorService(name);
     }
 

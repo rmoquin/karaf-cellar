@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.Configurations;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 import org.apache.karaf.cellar.core.control.ManageGroupAction;
 import org.apache.karaf.cellar.core.control.ManageGroupCommand;
 import org.apache.karaf.cellar.core.control.ManageGroupResult;
@@ -37,7 +36,6 @@ public abstract class GroupSupport extends CellarCommandSupport {
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupSupport.class);
     protected static final String HEADER_FORMAT = "   %-20s   %s";
     protected static final String OUTPUT_FORMAT = "%1s [%-20s] [%s]";
-    private DistributedExecutionContext executionContext;
 
     protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodes) throws Exception {
         return doExecute(action, group, source, nodes, false);
@@ -47,14 +45,14 @@ public abstract class GroupSupport extends CellarCommandSupport {
      * Executes the command.
      *
      * @param action the group action to perform.
-     * @param group the cluster group name.
+     * @param destinationGroupName the cluster group name.
      * @param source
      * @param nodeNames the node IDs.
      * @param suppressOutput true to display command output, false else.
      * @return the Object resulting of the command execution.
      * @throws Exception in case of execution failure.
      */
-    protected Object doExecute(ManageGroupAction action, String group, Group source, Collection<String> nodeNames, Boolean suppressOutput) throws Exception {;
+    protected Object doExecute(ManageGroupAction action, String destinationGroupName, Group source, Collection<String> nodeNames, Boolean suppressOutput) throws Exception {;
 
         ManageGroupCommand command = new ManageGroupCommand();
         if (source == null) {
@@ -65,6 +63,7 @@ public abstract class GroupSupport extends CellarCommandSupport {
         command.setSourceNode(groupManager.getNode());
 
         // looking for nodes and check if exist
+        LOGGER.info("Recipient nodes {}", nodeNames);
         Set<Node> recipientList = new HashSet<Node>();
         if (nodeNames != null && !nodeNames.isEmpty()) {
             for (String nodeName : nodeNames) {
@@ -75,6 +74,7 @@ public abstract class GroupSupport extends CellarCommandSupport {
                 }
                 if (node == null) {
                     System.err.println("Cluster node " + nodeName + " doesn't exist and won't be included in this command execution.");
+                    clusterManager.listNodes();
                 } else {
                     recipientList.add(node);
                 }
@@ -88,8 +88,8 @@ public abstract class GroupSupport extends CellarCommandSupport {
             return null;
         }
 
-        if (group != null) {
-            command.setDestinationGroup(group);
+        if (destinationGroupName != null) {
+            command.setDestinationGroup(destinationGroupName);
         }
 
         Map<Node, ManageGroupResult> results = executionContext.execute(command, recipientList);
@@ -134,21 +134,5 @@ public abstract class GroupSupport extends CellarCommandSupport {
             }
         }
         return null;
-    }
-
-    /**
-     * @return the executionContext
-     */
-    @Override
-    public DistributedExecutionContext getExecutionContext() {
-        return executionContext;
-    }
-
-    /**
-     * @param executionContext the executionContext to set
-     */
-    @Override
-    public void setExecutionContext(DistributedExecutionContext executionContext) {
-        this.executionContext = executionContext;
     }
 }

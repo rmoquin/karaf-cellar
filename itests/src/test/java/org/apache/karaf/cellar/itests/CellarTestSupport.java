@@ -153,7 +153,7 @@ public class CellarTestSupport {
         }
 
         //Wait till the node is listed as Started.
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 30; i++) {
             //Wait till the node is listed as Started.
             for (Iterator<String> it = startingNodes.iterator(); it.hasNext();) {
                 String name = it.next();
@@ -165,7 +165,7 @@ public class CellarTestSupport {
                     startedNodes.add(name);
                 } else {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(750);
                     } catch (InterruptedException e) {
                         //Ignore
                     }
@@ -180,7 +180,7 @@ public class CellarTestSupport {
                     connectingNodes.add(nodeId);
                 } else {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(1000);
                     } catch (InterruptedException e) {
                         //Ignore
                     }
@@ -192,7 +192,7 @@ public class CellarTestSupport {
                     it.remove();
                 } else {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(750);
                     } catch (InterruptedException e) {
                         //Ignore
                     }
@@ -245,6 +245,8 @@ public class CellarTestSupport {
                 node = node.trim();
                 return node;
             }
+        } else {
+            System.err.println("Node id line wasn't returned so id cannot be retrieved for node: " + name);
         }
         return null;
     }
