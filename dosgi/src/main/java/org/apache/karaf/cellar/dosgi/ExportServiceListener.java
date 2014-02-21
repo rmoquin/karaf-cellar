@@ -23,12 +23,10 @@ import org.osgi.framework.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.karaf.cellar.core.CellarCluster;
-import org.apache.karaf.cellar.core.command.DistributedExecutionContext;
 
 /**
  * Listener called when a new service is exported.
@@ -40,7 +38,7 @@ public class ExportServiceListener implements ServiceListener {
     private CellarCluster masterCluster;
     private BundleContext bundleContext;
     private Map<String, EndpointDescription> remoteEndpoints;
-    private final Map<String, DistributedExecutionContext> consumers = new HashMap<String, DistributedExecutionContext>();
+//    private final Map<String, DistributedExecutionContext> consumers = new HashMap<String, DistributedExecutionContext>();
 
     private Node node;
 
@@ -66,11 +64,6 @@ public class ExportServiceListener implements ServiceListener {
 
     public void destroy() {
         bundleContext.removeServiceListener(this);
-        for (Map.Entry<String, DistributedExecutionContext> entry : consumers.entrySet()) {
-            DistributedExecutionContext distributedExecutionContext = entry.getValue();
-            distributedExecutionContext.shutdown();
-        }
-        consumers.clear();
     }
 
     /**
@@ -104,7 +97,7 @@ public class ExportServiceListener implements ServiceListener {
     public void exportService(ServiceReference serviceReference) {
         String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
         if (exportedServices != null && exportedServices.length() > 0) {
-            LOGGER.debug("CELLAR DOSGI: registering services {} in the cluster", exportedServices);
+            LOGGER.info("CELLAR DOSGI: registering services {} in the cluster", exportedServices);
             String[] interfaces = exportedServices.split(Constants.INTERFACE_SEPARATOR);
             Object service = bundleContext.getService(serviceReference);
 
@@ -125,13 +118,6 @@ public class ExportServiceListener implements ServiceListener {
                 }
 
                 remoteEndpoints.put(endpointId, endpoint);
-
-                // register the endpoint consumer
-                DistributedExecutionContext executionContext = consumers.get(endpoint.getId());
-                if (executionContext == null) {
-                    executionContext = masterCluster.getDistributedExecutionContext(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpointId);
-                    consumers.put(endpoint.getId(), executionContext);
-                }
             }
         }
     }
@@ -144,7 +130,7 @@ public class ExportServiceListener implements ServiceListener {
     public void unExportService(ServiceReference serviceReference) {
         String exportedServices = (String) serviceReference.getProperty(Constants.EXPORTED_INTERFACES);
         if (exportedServices != null && exportedServices.length() > 0) {
-            LOGGER.debug("CELLAR DOSGI: un-register service {} from the cluster", exportedServices);
+            LOGGER.info("CELLAR DOSGI: un-register service {} from the cluster", exportedServices);
             String[] interfaces = exportedServices.split(Constants.INTERFACE_SEPARATOR);
             Object service = bundleContext.getService(serviceReference);
 
@@ -161,8 +147,6 @@ public class ExportServiceListener implements ServiceListener {
                 if (endpointDescription.getNodes().size() > 0) {
                     remoteEndpoints.put(endpointId, endpointDescription);
                 }
-                DistributedExecutionContext executionContext = consumers.remove(endpointId);
-                executionContext.shutdown();
             }
         }
     }

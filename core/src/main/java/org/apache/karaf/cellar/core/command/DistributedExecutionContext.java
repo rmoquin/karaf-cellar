@@ -37,6 +37,8 @@ public interface DistributedExecutionContext<T, R> {
 
     public Map<Node, R> execute(T command, Node destination);
 
+    public Map<Node, R> executeOnOne(T command, Set<Node> destinations);
+
     public Map<Node, R> executeAndWait(T command, Set<Node> destinations);
 
     public Map<Node, R> executeAndWait(T command, Node destination);
@@ -44,6 +46,8 @@ public interface DistributedExecutionContext<T, R> {
     public void executeAsync(T command, Set<Node> destinations, DistributedMultiCallback callback);
 
     public void executeAsync(T command, Node destination, DistributedCallback<R> callback);
+
+    public void executeOnOneAsync(T command, Set<Node> destinations, DistributedCallback<R> callback);
 
     /**
      * @param timeoutSeconds the timeoutSeconds to set

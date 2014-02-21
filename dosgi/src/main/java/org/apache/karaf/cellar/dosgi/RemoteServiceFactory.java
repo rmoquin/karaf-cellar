@@ -22,11 +22,15 @@ import org.osgi.framework.ServiceRegistration;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Factory for remote service.
  */
 public class RemoteServiceFactory implements ServiceFactory {
+
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(RemoteServiceFactory.class);
 
     private final EndpointDescription description;
     private final ClusterManager clusterManager;
@@ -52,9 +56,9 @@ public class RemoteServiceFactory implements ServiceFactory {
         try {
             interfaces.add(classLoader.loadClass(interfaceName));
         } catch (ClassNotFoundException e) {
-            // Ignore
+            LOGGER.error("Couldn't find service class.", e);
         }
-        RemoteServiceInvocationHandler handler = new RemoteServiceInvocationHandler(description.getId(), interfaceName, clusterManager, executionContext);
+        RemoteServiceInvocationHandler handler = new RemoteServiceInvocationHandler(description, interfaceName, clusterManager, executionContext);
         return Proxy.newProxyInstance(classLoader, interfaces.toArray(new Class[interfaces.size()]), handler);
     }
 

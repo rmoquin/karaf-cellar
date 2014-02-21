@@ -63,7 +63,6 @@ public abstract class GroupSupport extends CellarCommandSupport {
         command.setSourceNode(groupManager.getNode());
 
         // looking for nodes and check if exist
-        LOGGER.info("Recipient nodes {}", nodeNames);
         Set<Node> recipientList = new HashSet<Node>();
         if (nodeNames != null && !nodeNames.isEmpty()) {
             for (String nodeName : nodeNames) {

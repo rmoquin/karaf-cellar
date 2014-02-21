@@ -142,6 +142,20 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
     }
 
     /**
+     * Executes the distributed task on one of the specified nodes randomly selected and waits for them to finish.
+     *
+     * @param command the task to execute
+     * @param destinations the destinations to sent to.
+     * @return
+     */
+    @Override
+    public Map<Node, R> executeOnOne(C command, Set<Node> destinations) {
+        Node node = destinations.iterator().next();
+        Map<Node, R> results = this.execute(command, node);
+        return results;
+    }
+
+    /**
      * Executes the distributed task on the specified nodes and waits for them to finish.
      *
      * @param command the task to execute
@@ -206,6 +220,12 @@ public class DistributedExecutionContextImpl<C extends Command, R extends Distri
         }
         DistributedTask task = new DistributedTask(command);
         this.executorService.submitToMembers(task, members, distributedCallback);
+    }
+
+    @Override
+    public void executeOnOneAsync(C command, Set<Node> destinations, DistributedCallback<R> callback) {
+        Node node = destinations.iterator().next();
+        this.executeAsync(command, node, callback);
     }
 
     @Override

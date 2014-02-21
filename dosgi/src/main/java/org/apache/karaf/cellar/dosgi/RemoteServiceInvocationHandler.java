@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Handler for cluster remote service invocation event.
@@ -33,9 +34,11 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
     private final String serviceClass;
     private final ClusterManager clusterManager;
     private final DistributedExecutionContext executionContext;
+    private final Set<Node> nodes;
 
-    public RemoteServiceInvocationHandler(String endpointId, String serviceClass, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
-        this.endpointId = endpointId;
+    public RemoteServiceInvocationHandler(EndpointDescription description, String serviceClass, ClusterManager clusterManager, DistributedExecutionContext executionContext) {
+        this.endpointId = description.getId();
+        this.nodes = description.getNodes();
         this.serviceClass = serviceClass;
         this.clusterManager = clusterManager;
         this.executionContext = executionContext;
@@ -54,7 +57,7 @@ public class RemoteServiceInvocationHandler implements InvocationHandler {
         }
 
         remoteServiceCall.setArguments(argumentList);
-        Map<Node, RemoteServiceResult> results = executionContext.execute(remoteServiceCall, this.clusterManager.getMasterCluster().getLocalNode());
+        Map<Node, RemoteServiceResult> results = executionContext.executeOnOne(remoteServiceCall, nodes);
 
         if (results != null) {
             for (Map.Entry<Node, RemoteServiceResult> entry : results.entrySet()) {

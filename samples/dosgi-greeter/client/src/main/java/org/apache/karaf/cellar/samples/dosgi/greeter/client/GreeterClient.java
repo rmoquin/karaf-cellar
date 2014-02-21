@@ -16,12 +16,15 @@ package org.apache.karaf.cellar.samples.dosgi.greeter.client;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.Greet;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.GreetResponse;
 import org.apache.karaf.cellar.samples.dosgi.greeter.api.Greeter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Call a remote Greeter service.
  */
 public class GreeterClient {
 
+    private static final transient Logger LOGGER = LoggerFactory.getLogger(GreeterClient.class);
     private Greeter greeter;
     private String greetMessage;
     private int count;

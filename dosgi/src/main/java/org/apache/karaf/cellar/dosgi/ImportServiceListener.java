@@ -42,8 +42,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
     private Map<String, EndpointDescription> remoteEndpoints;
     private final Set<ListenerInfo> pendingListeners = new LinkedHashSet<ListenerInfo>();
     private final Map<EndpointDescription, ServiceRegistration> registrations = new HashMap<EndpointDescription, ServiceRegistration>();
-    private final Map<String, DistributedExecutionContext> producers = new HashMap<String, DistributedExecutionContext>();
-
+    private DistributedExecutionContext executionContext;
     private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
     public void init() {
@@ -57,11 +56,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
             ServiceRegistration registration = entry.getValue();
             registration.unregister();
         }
-        for (Map.Entry<String, DistributedExecutionContext> entry : producers.entrySet()) {
-            DistributedExecutionContext distributedExecutionContext = entry.getValue();
-            distributedExecutionContext.shutdown();
-        }
-        producers.clear();
+        executionContext.shutdown();
     }
 
     @Override
@@ -139,15 +134,7 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      */
     private void importService(EndpointDescription endpoint, ListenerInfo listenerInfo) {
         LOGGER.debug("CELLAR DOSGI: importing remote service: " + endpoint.getId());
-
-        DistributedExecutionContext executionContext = producers.get(endpoint.getId());
-        if (executionContext == null) {
-            executionContext = clusterManager.getMasterCluster().getDistributedExecutionContext(Constants.INTERFACE_PREFIX + Constants.SEPARATOR + endpoint.getId());
-            producers.put(endpoint.getId(), executionContext);
-        }
-
-        producers.put(endpoint.getId(), executionContext);
-
+        LOGGER.error("Importing service: {}", endpoint);
         RemoteServiceFactory remoteServiceFactory = new RemoteServiceFactory(endpoint, clusterManager, executionContext);
         ServiceRegistration registration = listenerInfo.getBundleContext().registerService(endpoint.getServiceClass(),
                 remoteServiceFactory, new Hashtable<String, Object>(endpoint.getProperties()));
@@ -161,13 +148,9 @@ public class ImportServiceListener implements ListenerHook, Runnable {
      * @param endpoint the endpoint to un-register.
      */
     private void unImportService(EndpointDescription endpoint) {
+        LOGGER.error("Unimporting service: {}", endpoint);
         ServiceRegistration registration = registrations.get(endpoint);
         registration.unregister();
-
-        DistributedExecutionContext executionContext = producers.get(endpoint.getId());
-        if (executionContext != null) {
-            executionContext.shutdown();
-        }
     }
 
     public BundleContext getBundleContext() {
@@ -184,5 +167,19 @@ public class ImportServiceListener implements ListenerHook, Runnable {
 
     public void setClusterManager(ClusterManager clusterManager) {
         this.clusterManager = clusterManager;
+    }
+
+    /**
+     * @return the executionContext
+     */
+    public DistributedExecutionContext getExecutionContext() {
+        return executionContext;
+    }
+
+    /**
+     * @param executionContext the executionContext to set
+     */
+    public void setExecutionContext(DistributedExecutionContext executionContext) {
+        this.executionContext = executionContext;
     }
 }

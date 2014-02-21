@@ -24,6 +24,7 @@
     <bean id="importServiceListener" class="org.apache.karaf.cellar.dosgi.ImportServiceListener" init-method="init" destroy-method="destroy">
         <property name="clusterManager" ref="clusterManager"/>
         <property name="bundleContext" ref="blueprintBundleContext"/>
+        <property name="executionContext" ref="executionContext"/>
     </bean>
 
     <service ref="importServiceListener" interface="org.osgi.framework.hooks.service.ListenerHook"/>
@@ -48,6 +49,14 @@
         </service-properties>
     </service>
 
+    <bean id="executionContext" class="org.apache.karaf.cellar.hazelcast.internal.DistributedExecutionContextImpl"
+          init-method="init" destroy-method="shutdown">
+        <property name="name" value="dosgiExecutor"/>
+        <property name="instance" ref="hazelcast"/>
+        <property name="nodeConfiguration" ref="nodeConfiguration"/>
+    </bean>
+
+    <reference id="hazelcast" interface="com.hazelcast.core.HazelcastInstance"/>
     <reference id="masterCluster" interface="org.apache.karaf.cellar.core.CellarCluster"/>
     <reference id="nodeConfiguration" interface="org.apache.karaf.cellar.core.NodeConfiguration" availability="optional"/>
     <reference id="groupManager" interface="org.apache.karaf.cellar.core.GroupManager" availability="optional"/>

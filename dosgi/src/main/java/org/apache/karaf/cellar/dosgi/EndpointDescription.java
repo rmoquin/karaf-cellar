@@ -46,20 +46,17 @@ public class EndpointDescription implements MultiNode {
     public EndpointDescription(String id, Node node) {
         this.id = id;
         this.nodes.add(node);
-        properties.put(org.osgi.framework.Constants.OBJECTCLASS,getServiceClass());
+        properties.put(org.osgi.framework.Constants.OBJECTCLASS, getServiceClass());
     }
 
-
     /**
-     * Tests the properties of this <code>EndpointDescription</code> against
-     * the given filter using a case insensitive match.
+     * Tests the properties of this <code>EndpointDescription</code> against the given filter using a case insensitive
+     * match.
      *
      * @param filter The filter to test.
-     * @return <code>true</code> If the properties of this
-     *         <code>EndpointDescription</code> match the filter,
-     *         <code>false</code> otherwise.
-     * @throws IllegalArgumentException If <code>filter</code> contains an
-     *                                  invalid filter string that cannot be parsed.
+     * @return <code>true</code> If the properties of this <code>EndpointDescription</code> match the filter,
+     * <code>false</code> otherwise.
+     * @throws IllegalArgumentException If <code>filter</code> contains an invalid filter string that cannot be parsed.
      */
     public boolean matches(String filter) {
         Filter f;
@@ -76,9 +73,9 @@ public class EndpointDescription implements MultiNode {
             dictionary.put(key, value);
         }
         /*
-           * we can use matchCase here since properties already supports case
-           * insensitive key lookup.
-           */
+         * we can use matchCase here since properties already supports case
+         * insensitive key lookup.
+         */
         return f.matchCase(dictionary);
     }
 
@@ -92,7 +89,7 @@ public class EndpointDescription implements MultiNode {
     }
 
     @Override
-    public void addNode(Node node){
+    public void addNode(Node node) {
         this.nodes.add(node);
     }
 
@@ -100,7 +97,7 @@ public class EndpointDescription implements MultiNode {
     public boolean containsNode(Node node) {
         return this.nodes.add(node);
     }
-    
+
     @Override
     public Set<Node> getNodesExcluding(Node node) {
         Set<Node> nodesCopy = new HashSet<Node>();
@@ -109,18 +106,18 @@ public class EndpointDescription implements MultiNode {
     }
 
     @Override
-    public boolean removeNode(Node node){
+    public boolean removeNode(Node node) {
         return this.nodes.remove(node);
     }
 
     @Override
-     public void setNodes(Set<Node> nodes) {
-         if(nodes != null) {
-             for(Node node:nodes) {
-                 this.nodes.add(node);
-             }
-         }
-     }
+    public void setNodes(Set<Node> nodes) {
+        if (nodes != null) {
+            for (Node node : nodes) {
+                this.nodes.add(node);
+            }
+        }
+    }
 
     public Map<String, Object> getProperties() {
         return properties;
@@ -129,13 +126,18 @@ public class EndpointDescription implements MultiNode {
     public final String getServiceClass() {
         String result = null;
 
-        if(id != null) {
+        if (id != null) {
             String[] parts = id.split(Constants.SEPARATOR);
-            if(parts != null && parts.length > 0) {
+            if (parts != null && parts.length > 0) {
                 result = parts[0];
             }
         }
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "EndpointDescription{" + "id=" + id + ", nodes=" + nodes + ", properties=" + properties + '}';
     }
 
     @Override
